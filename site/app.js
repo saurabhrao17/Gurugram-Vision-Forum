@@ -51,7 +51,7 @@ function rerender(){renderTiles();renderWhoFilter();renderCatSelect();if(selecte
   if(reportInit){initAreas();showHint();renderRecent();if(step===4)renderSummary();if($("confirm").classList.contains("show"))paintConfirm()}
   renderDir();renderRights();renderWho();renderWards(($("wardSearch").value||"").trim());renderCivic();renderUpdates();renderJoin();renderMix();
   if(curView==="dashboard")paintDash();if(curView==="post")renderPost(decodeURIComponent(location.hash.split("/")[2]||""));
-  if(curView==="pub")paintPub();if(curView==="map")renderPubMap();if(curView==="news")renderNews();renderPopups();renderSocial();
+  if(curView==="pub")paintPub();if(curView==="map")renderPubMap();if(curView==="news")renderNews();if(curView==="pulse")renderPulse();renderPopups();renderSocial();
   if(curView)document.title=hs("Gurugram Vision Forum")+" — "+hs(TITLES[curView]);
   if($("trRef").value.trim()&&$("trOut").innerHTML)showTrack()}
 function toggleLang(){applyLang(lang==="hi"?"en":"hi");toast(lang==="hi"?"हिंदी में":"English")}
@@ -88,12 +88,12 @@ $("searchBtn").addEventListener("click",openCmd); $("searchBtn2").addEventListen
 $("cmdList").addEventListener("click",function(e){if(e.target.closest("a"))closeCmd()});
 
 /* router */
-var VIEWS={desk:"v-desk",news:"v-news",map:"v-map",pub:"v-pub",privacy:"v-privacy",home:"v-home",report:"v-report",track:"v-track",directory:"v-directory",rights:"v-rights",who:"v-who",wards:"v-wards",charter:"v-charter",dashboard:"v-dashboard",updates:"v-updates",post:"v-post",join:"v-join",about:"v-about",access:"v-access"};
-var TITLES={desk:"Volunteer desk",news:"What's new from the authorities",map:"Reports on the map",pub:"Report",privacy:"Privacy notice",home:"Who fixes my problem?",report:"Report an issue",track:"Track a report",directory:"Official channels",rights:"Your rights",who:"Who is responsible",wards:"Your ward",charter:"The civic charter",dashboard:"Accountability dashboard",updates:"Updates",post:"Updates",join:"Join the Forum",about:"About the Forum",access:"Accessibility statement"};
+var VIEWS={desk:"v-desk",pulse:"v-pulse",news:"v-news",map:"v-map",pub:"v-pub",privacy:"v-privacy",home:"v-home",report:"v-report",track:"v-track",directory:"v-directory",rights:"v-rights",who:"v-who",wards:"v-wards",charter:"v-charter",dashboard:"v-dashboard",updates:"v-updates",post:"v-post",join:"v-join",about:"v-about",access:"v-access"};
+var TITLES={desk:"Volunteer desk",pulse:"What Gurugram is talking about",news:"What's new from the authorities",map:"Reports on the map",pub:"Report",privacy:"Privacy notice",home:"Who fixes my problem?",report:"Report an issue",track:"Track a report",directory:"Official channels",rights:"Your rights",who:"Who is responsible",wards:"Your ward",charter:"The civic charter",dashboard:"Accountability dashboard",updates:"Updates",post:"Updates",join:"Join the Forum",about:"About the Forum",access:"Accessibility statement"};
 var curView=null;
 function route(){
   var h=location.hash.replace(/^#\/?/,""); var parts=h.split("/"); var name=parts[0]||"home"; var arg=parts[1]?decodeURIComponent(parts[1]):"";
-  var map={"":"home",home:"home",fix:"home",desk:"desk",news:"news",map:"map",r:"pub",privacy:"privacy",report:"report",track:"track",directory:"directory",rights:"rights",who:"who",wards:"wards",charter:"charter",dashboard:"dashboard",updates:"updates",join:"join",about:"about",accessibility:"access"};
+  var map={"":"home",home:"home",fix:"home",desk:"desk",pulse:"pulse",news:"news",map:"map",r:"pub",privacy:"privacy",report:"report",track:"track",directory:"directory",rights:"rights",who:"who",wards:"wards",charter:"charter",dashboard:"dashboard",updates:"updates",join:"join",about:"about",accessibility:"access"};
   var v=map[name]; if(!v){location.hash="#/";return}
   if(name==="updates"&&arg){renderPost(arg);v="post"}
   var changed=v!==curView;
@@ -111,6 +111,7 @@ function route(){
   if(v==="dashboard"){renderDash()}
   if(v==="map"){renderPubMap()}
   if(v==="news"){renderNews()}
+  if(v==="pulse"){renderPulse()}
   if(v==="updates"||v==="post"){loadContent()}
   if(v==="pub"){renderPub(arg.toUpperCase())}
   if(changed){window.scrollTo({top:0,behavior:"instant" in window?"instant":"auto"});curView=v}
@@ -319,6 +320,19 @@ $("popups").addEventListener("click",function(e){var b=e.target.closest("[data-d
 function renderSocial(){var so=CONTENT&&CONTENT.settings&&CONTENT.settings.social||{};var keys=[["x","X"],["facebook","Facebook"],["instagram","Instagram"],["youtube","YouTube"],["whatsapp","WhatsApp"]].filter(function(k){return so[k[0]]});
   var html=keys.length?hs("Follow the Forum")+': '+keys.map(function(k){return '<a href="'+esc(so[k[0]])+'" target="_blank" rel="noopener">'+k[1]+'</a>'}).join(" · "):'';
   ["ftSocial","socialRow"].forEach(function(id){var el=$(id);if(!el)return;el.innerHTML=html;el.hidden=!html})}
+var PULSE=null;
+function trendWord(t){return t==="up"?hs("rising"):t==="down"?hs("falling"):hs("steady")}
+function renderPulse(){var box=$("pulseBody");if(!box)return;if(!API_ON){box.innerHTML='<div class="empty">'+t("k.offline","The Forum\'s server could not be reached. Try again in a minute.")+'</div>';return}
+  var paint=function(j){var p=j&&j.pulse;if(!p||!p.topics||!p.topics.length){box.innerHTML='<div class="empty">'+hs("No pulse yet. The first scan runs tonight.")+'</div>';return}
+    var max=p.topics.reduce(function(m,x){return Math.max(m,x.count||0)},0)||1;
+    var head=(lang==="hi"&&p.headline_hi)||p.headline_en||"",sum=(lang==="hi"&&p.summary_hi)||p.summary_en||"";
+    var html=(head?'<h2 style="margin-bottom:.35rem">'+esc(head)+'</h2>':'')+(sum?'<p class="lead">'+esc(sum)+'</p>':'')+'<p class="small muted">'+fmt(hs("Week of {a} to {b}."),{a:esc(fmtDate(p.period&&p.period.from)),b:esc(fmtDate(p.period&&p.period.to))})+(j.generated_at?' '+fmt(hs("Updated {d}"),{d:esc(fmtDate(j.generated_at))})+'.':'')+'</p>';
+    html+='<div class="dash-card"><h3>'+hs("Mentions this week")+'</h3><div class="bars">'+p.topics.map(function(x){var c=catById(x.issue_type);var label=c?catLabel(c):hs(x.label||x.issue_type);return '<div class="bar"><span>'+esc(label)+'</span><div class="trk" style="width:'+Math.round((x.count||0)/max*100)+'%"><div class="seg" style="width:100%;background:var(--blue)"></div></div><span class="tot">'+(x.count||0)+'</span></div>'}).join("")+'</div></div>';
+    html+=p.topics.slice(0,8).map(function(x){var c=catById(x.issue_type);var label=c?catLabel(c):hs(x.label||x.issue_type);return '<div class="dash-card"><h3>'+esc(label)+' <span class="tag">'+(x.count||0)+' · '+trendWord(x.trend)+'</span></h3>'+(x.areas&&x.areas.length?'<p class="small muted">'+hs("Areas")+': '+x.areas.slice(0,5).map(function(a){return esc(hs(a.area))+' ('+a.n+')'}).join(", ")+'</p>':'')+(x.examples&&x.examples.length?'<ul class="linklist">'+x.examples.slice(0,4).map(function(e){return '<li>'+ic("link")+(e.url?'<a href="'+esc(e.url)+'" target="_blank" rel="noopener">'+esc(e.title)+'</a>':esc(e.title))+' <span class="small muted">· '+esc(hs(e.source==="reports"?"Forum report":e.source==="news"?"news":"Reddit"))+(e.posted_at?' · '+esc(fmtDate(e.posted_at)):'')+'</span></li>'}).join("")+'</ul>':'')+'</div>'}).join("");
+    if(p.actions&&p.actions.length)html+='<div class="dash-card"><h3>'+hs("What the Forum could do next")+'</h3>'+stepsHtml(p.actions.map(function(a){return (a.title||a.action||"")+(a.why?" — "+a.why:"")+(a.when?" ("+a.when+")":"")}))+'</div>';
+    html+='<p class="small muted">'+hs("Sources: public posts on Reddit, local news via Google News, and reports to the Forum. Counts only; no names are stored.")+'</p>';
+    box.innerHTML=html};
+  if(PULSE){paint(PULSE);return}box.innerHTML='<p class="muted">'+hs("Loading…")+'</p>';api("/pulse").then(function(j){PULSE=j;paint(j)},function(){box.innerHTML='<div class="empty">'+t("k.offline","The Forum\'s server could not be reached. Try again in a minute.")+'</div>'})}
 function renderNews(){var box=$("newsBody");if(!box)return;if(!API_ON){box.innerHTML='<div class="empty">'+t("k.offline","The Forum\'s server could not be reached. Try again in a minute.")+'</div>';return}
   var paint=function(j){var items=j&&j.items||[];if(!items.length){box.innerHTML='<div class="empty">'+hs("No news collected yet. The daily collection starts at launch.")+'</div>';return}
     var by={};items.forEach(function(it){var d=fmtDate(it.published_at||it.fetched_at);(by[d]=by[d]||[]).push(it)});
@@ -467,8 +481,11 @@ $("pwForm").addEventListener("submit",function(e){e.preventDefault();var a=$("pw
   if(a!==b){err.textContent="The two passwords differ.";err.classList.add("show");return}
   var btn=this.querySelector("button[type=submit]");btn.disabled=true;dapi("/triage/password",{method:"POST",body:{password:a}}).then(function(){btn.disabled=false;$("pwForm").reset();$("pwForm").hidden=true;toast("Password changed")},function(x){btn.disabled=false;err.textContent=(x&&x.message)||"Could not change the password. Try again.";err.classList.add("show")})});
 function isMgr(){return !!(S&&S.staff&&(S.staff.role==="owner"||S.staff.role==="coordinator"))}
+/* Which desk tabs each role gets: the owner everything; coordinators run operations and content; ward volunteers only their wards' reports; the content team only content and the pulse. */
+function tabsFor(role){return {owner:["reports","map","team","content","visitors","insights","health"],coordinator:["reports","map","team","content","insights","health"],triage:["reports","map"],content:["content","insights"]}[role]||["reports","map"]}
 function deskShow(v){$("deskLogin").hidden=v!=="login";$("deskMain").hidden=v!=="desk";
-  if(v==="desk"&&S){$("whoAmI").textContent=(S.staff.name||S.staff.email)+" · "+(S.staff.role==="triage"?"ward volunteer"+(S.staff.wards&&S.staff.wards.length?" · wards "+S.staff.wards.join(", "):""):S.staff.role);$("teamTab").hidden=!isMgr();$("contentTab").hidden=!isMgr();$("visitorsTab").hidden=!isMgr();$("healthTab").hidden=!isMgr()}
+  if(v==="desk"&&S){$("whoAmI").textContent=(S.staff.name||S.staff.email)+" · "+(S.staff.role==="triage"?"ward volunteer"+(S.staff.wards&&S.staff.wards.length?" · wards "+S.staff.wards.join(", "):""):S.staff.role);var allowed=tabsFor(S.staff.role);["reports","map","team","content","visitors","insights","health"].forEach(function(tb){var b=$(tb+"Tab");if(b)b.hidden=allowed.indexOf(tb)<0});
+    var cur=$("tTabs").querySelector('.tab[aria-selected="true"]');if(!cur||cur.hidden){var first=$("tTabs").querySelector(".tab:not([hidden])");if(first)first.click()}}
   if(v==="login"){$("lErr").classList.remove("show")}}
 function deskRoute(ref){if(S&&S.session){deskShow("desk");if(!deskLoaded){deskLoaded=true;deskBoot()}if(ref)openReport(ref.toUpperCase())}else{deskShow("login");setTimeout(function(){if(curView==="desk")$("lEmail").focus()},80)}}
 setSession(S);
@@ -480,7 +497,7 @@ $("loginForm").addEventListener("submit",function(e){e.preventDefault();var btn=
     $("lErr").textContent=err.status===403?"This account is not on the volunteer list. Ask the coordinator.":err.status===401?"Wrong email or password.":"Could not reach the server. Try again.";$("lErr").classList.add("show")}).then(function(){btn.disabled=false;btn.textContent="Sign in"})});
 $("signOut").addEventListener("click",function(){signOut(false)});
 
-$("tTabs").addEventListener("click",function(e){var b=e.target.closest("[data-tab]");if(!b)return;var tb=b.getAttribute("data-tab");$("tTabs").querySelectorAll(".tab").forEach(function(x){x.setAttribute("aria-selected",x===b)});$("tReports").hidden=tb!=="reports";$("tMap").hidden=tb!=="map";$("tTeam").hidden=tb!=="team";$("tContent").hidden=tb!=="content";$("tVisitors").hidden=tb!=="visitors";$("tHealth").hidden=tb!=="health";if(tb==="team")loadTeam();if(tb==="map")initDeskMap();if(tb==="content")loadPosts();if(tb==="visitors")loadVisitors();if(tb==="health")loadHealth()});
+$("tTabs").addEventListener("click",function(e){var b=e.target.closest("[data-tab]");if(!b)return;var tb=b.getAttribute("data-tab");$("tTabs").querySelectorAll(".tab").forEach(function(x){x.setAttribute("aria-selected",x===b)});$("tReports").hidden=tb!=="reports";$("tMap").hidden=tb!=="map";$("tTeam").hidden=tb!=="team";$("tContent").hidden=tb!=="content";$("tVisitors").hidden=tb!=="visitors";$("tInsights").hidden=tb!=="insights";$("tHealth").hidden=tb!=="health";if(tb==="team")loadTeam();if(tb==="map")initDeskMap();if(tb==="content")loadPosts();if(tb==="visitors")loadVisitors();if(tb==="insights")loadInsights();if(tb==="health")loadHealth()});
 
 var F={stage:"open",issue:"",ward:"",flag:"",q:""},tOffset=0,T_LIMIT=50,tTotal=0,rowsCache={};
 var STAGE_CHIPS=[["open","All open"],["0","Received"],["1","Mapped"],["2","Filed"],["3","Escalated"],["4","Resolved"],["all","Everything"]];
@@ -608,7 +625,25 @@ function dapiRaw(path){var h={};if(S&&S.session)h.Authorization="Bearer "+S.sess
 function loadHealth(){$("healthBody").innerHTML='<p class="muted">Checking…</p>';fetch(API+"/health").then(function(r){return r.json()}).then(function(j){var c=j.checks||{};var line=function(ok,label,detail){return '<li class="row"><div>'+ic(ok?"check":"alert")+'</div><div><b>'+(ok?'<span class="tag tag-green">OK</span>':'<span class="tag tag-danger">Attention</span>')+' '+esc(label)+'</b><div class="meta">'+detail+'</div></div></li>'};
     var html='<ul class="rows">'+line(c.db&&c.db.ok,"Database",(c.db&&c.db.ms!=null?c.db.ms+" ms":""))+line(c.storage&&c.storage.ok,"Storage","report-photos and media buckets")+line(c.cron&&c.cron.ok&&(c.cron.hours_since==null||c.cron.hours_since<36),"Daily cron",c.cron&&c.cron.last_run_at?"last run "+esc(fmtT(c.cron.last_run_at)):"has not run yet")+line(!(c.outbox&&c.outbox.failed),"Email queue",(c.outbox?c.outbox.pending+" pending, "+c.outbox.failed+" failed":""))+line(!(c.links&&c.links.broken&&c.links.broken.length),"Official links",(c.links?c.links.checked+" checked"+(c.links.broken&&c.links.broken.length?'; broken: '+c.links.broken.map(function(b){return '<a href="'+esc(b.url)+'" target="_blank" rel="noopener">'+esc(b.url)+'</a> ('+esc(b.status||b.error||"")+(b.where_used?', '+esc(b.where_used):'')+')'}).join("; "):""):""))+line(!(c.news&&c.news.stale_sources&&c.news.stale_sources.length),"News sources",(c.news?c.news.sources+" sources, "+c.news.items+" items"+(c.news.stale_sources&&c.news.stale_sources.length?"; stale: "+esc(c.news.stale_sources.join(", ")):""):""))+'</ul><p class="small muted" style="margin-top:.75rem">Version '+esc((j.version||"").slice(0,7))+'. Links are also checked nightly by GitHub Actions, which opens an issue when something breaks.</p>';
     $("healthBody").innerHTML=html},function(){$("healthBody").innerHTML='<div class="empty">The health endpoint could not be reached.</div>'})}
-function deskBoot(){renderChips();loadReports(true)}
+function deskBoot(){if(tabsFor(S&&S.staff&&S.staff.role).indexOf("reports")>=0){renderChips();loadReports(true)}}
+/* desk: translation between English and Hindi fields */
+var TR_PAIRS=[["pTitle","pTitleHi","title"],["pSummary","pSummaryHi","summary"],["pBody","pBodyHi","body"]];
+var trBusy=false;
+function hasDevanagari(x){return /[\u0900-\u097F]/.test(x||"")}
+function translateFields(only,overwrite){if(trBusy)return;var msg=$("trMsg");var en={},hi={};TR_PAIRS.forEach(function(p){if(only&&only!==p[2])return;var a=$(p[0]).value.trim(),b=$(p[1]).value.trim();if(a&&(overwrite||!b))en[p[2]]=a;if(b&&(overwrite||!a))hi[p[2]]=b});
+  var from=Object.keys(en).length>=Object.keys(hi).length?"en":"hi",fields=from==="en"?en:hi;if(!Object.keys(fields).length){msg.textContent="Nothing to translate: fill a field on one side first.";return}
+  trBusy=true;msg.textContent="Translating…";dapi("/triage/translate",{method:"POST",body:{fields:fields,from:from}}).then(function(j){trBusy=false;var out=j.fields||{};TR_PAIRS.forEach(function(p){var target=from==="en"?p[1]:p[0];if(out[p[2]]!=null&&(overwrite||!$(target).value.trim()))$(target).value=out[p[2]]});msg.textContent="Translated to "+(j.to==="hi"?"Hindi":"English")+". Check it before publishing."},function(x){trBusy=false;msg.textContent=x&&x.status===503?"Not set up yet: add a free GEMINI_API_KEY or GROQ_API_KEY in Vercel.":"Translation failed. Try again."})}
+$("trBtn").addEventListener("click",function(){translateFields(null,true)});
+TR_PAIRS.forEach(function(p){[p[0],p[1]].forEach(function(id){$(id).addEventListener("change",function(){if(!$("trAuto").checked||!this.value.trim())return;var other=id===p[0]?p[1]:p[0];if($(other).value.trim())return;translateFields(p[2],false)})})});
+/* desk: pulse / insights */
+function loadInsights(){var box=$("insightsBody");box.innerHTML='<p class="muted">Loading…</p>';dapi("/triage/insights?limit=6").then(function(j){var list=j.insights||[];var latest=list[0],p=latest&&latest.data;var html="";
+    if(!p||!p.topics||!p.topics.length)html+='<div class="empty">No scan yet. The daily cron builds the first pulse tonight; it needs no key, and reads better with a free AI key for the summary.</div>';
+    else{html+='<div class="rbox"><b>'+esc(p.headline_en||"This week")+'</b><p class="note">'+esc(p.summary_en||"")+(p.summary_hi?'<br>'+esc(p.summary_hi):'')+'</p><p class="note">'+esc(fmtDate(p.period&&p.period.from))+' to '+esc(fmtDate(p.period&&p.period.to))+' · generated '+esc(fmtT(latest.generated_at))+'</p></div>';
+      html+='<table class="tbl"><thead><tr><th>Issue</th><th>Mentions</th><th>Reddit / news / reports</th><th>Trend</th><th>Areas</th></tr></thead><tbody>'+p.topics.map(function(x){var c=catById(x.issue_type),bs=x.by_source||{};return '<tr><td class="n">'+esc(c?c.label:x.label||x.issue_type)+'</td><td data-l="Mentions">'+(x.count||0)+'</td><td data-l="Sources">'+(bs.reddit||0)+' / '+(bs.news||0)+' / '+(bs.reports||0)+'</td><td data-l="Trend">'+esc(x.trend||"")+'</td><td data-l="Areas">'+esc((x.areas||[]).slice(0,4).map(function(a){return a.area+" ("+a.n+")"}).join(", "))+'</td></tr>'}).join("")+'</tbody></table>';
+      if(p.actions&&p.actions.length)html+='<h3 style="margin:1.25rem 0 .5rem">Suggested actions</h3>'+stepsHtml(p.actions.map(function(a){return (a.title||a.action||"")+(a.why?" — "+a.why:"")+(a.who?" · "+a.who:"")+(a.when?" · "+a.when:"")}))}
+    var sig=j.signals||[];if(sig.length)html+='<h3 style="margin:1.25rem 0 .5rem">Top signals this week</h3><ul class="rows">'+sig.slice(0,40).map(function(x){var c=catById(x.issue_type);return '<li class="row"><div>'+ic("news")+'</div><div><b>'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.title)+'</a>':esc(x.title))+'</b><div class="meta">'+esc(x.source)+(c?' · '+esc(c.label):'')+(x.area?' · '+esc(x.area):'')+(x.posted_at?' · '+esc(fmtT(x.posted_at)):'')+' · score '+(x.score||0)+'</div></div></li>'}).join("")+'</ul>';
+    if(list.length>1)html+='<p class="small muted" style="margin-top:1rem">Earlier scans: '+list.slice(1).map(function(i){return esc(fmtDate(i.generated_at))}).join(", ")+'</p>';
+    box.innerHTML=html},function(e){box.innerHTML='<div class="empty">Could not load the pulse. '+esc(e.error||e.status||"")+'</div>'})}
 
 /* boot */
 renderTiles(); renderWhoFilter(); renderCatSelect();

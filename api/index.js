@@ -33,6 +33,9 @@ import visitor from "../lib/handlers/visitor.js";
 import news from "../lib/handlers/news.js";
 import health from "../lib/handlers/health.js";
 import triageVisitors from "../lib/handlers/triage/visitors.js";
+import triageTranslate from "../lib/handlers/triage/translate.js";
+import pulse from "../lib/handlers/pulse.js";
+import triageInsights from "../lib/handlers/triage/insights.js";
 import { send } from "../lib/http.js";
 
 const ROUTES = {
@@ -42,7 +45,7 @@ const ROUTES = {
   "cron/daily": cron, "follow": follow, "public/report": publicReport, "public/reports": publicReports,
   "hooks/whatsapp": hooksWhatsapp, "hooks/exotel": hooksExotel,
   "content": content, "triage/content": triageContent, "triage/content/upload-url": triageContentUpload, "triage/draft": triageDraft,
-  "visitor": visitor, "news": news, "health": health, "triage/visitors": triageVisitors
+  "visitor": visitor, "news": news, "health": health, "triage/visitors": triageVisitors, "triage/translate": triageTranslate, "pulse": pulse, "triage/insights": triageInsights
 };
 
 export function resolve(parts) {

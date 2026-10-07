@@ -1,158 +1,102 @@
 [
- {
-  "id": "district-notices-a",
-  "url": "https://gurugram.gov.in/notice_category/notice/"
- },
- {
-  "id": "district-notices-b",
-  "url": "https://gurugram.gov.in/notice_category/announcement/"
- },
- {
-  "id": "district-notices-c",
-  "url": "https://gurugram.gov.in/notices/"
- },
- {
-  "id": "district-notices-d",
-  "url": "https://gurugram.gov.in/public-notices/"
- },
- {
-  "id": "district-feed-http",
-  "type": "rss",
-  "url": "http://gurugram.gov.in/feed/"
- },
- {
-  "id": "district-notice-feed",
-  "type": "rss",
-  "url": "https://gurugram.gov.in/notice/feed/"
- },
- {
-  "id": "gmda-http",
-  "url": "http://www.gmda.gov.in/"
- },
- {
-  "id": "gmda-bare",
-  "url": "https://gmda.gov.in/"
- },
- {
-  "id": "gmda-notices",
-  "url": "https://www.gmda.gov.in/public-notice"
- },
- {
-  "id": "mcg-notices",
-  "url": "https://www.mcg.gov.in/public-notice"
- },
- {
-  "id": "mcg-press",
-  "url": "https://www.mcg.gov.in/press-release"
- },
- {
-  "id": "mcg-news",
-  "url": "https://www.mcg.gov.in/news"
- },
- {
-  "id": "mcg-whatsnew",
-  "url": "https://www.mcg.gov.in/whats-new"
- },
- {
-  "id": "hspcb-org",
-  "url": "https://hspcb.org.in/"
- },
- {
-  "id": "hspcb-org-notices",
-  "url": "https://hspcb.org.in/notices"
- },
- {
-  "id": "hspcb-org-public",
-  "url": "https://hspcb.org.in/public-notice"
- },
- {
-  "id": "dtcp-http",
-  "url": "http://tcpharyana.gov.in/"
- },
- {
-  "id": "dtcp-bare",
-  "url": "https://tcpharyana.gov.in/Development/Development.htm"
- },
- {
-  "id": "prharyana-http",
-  "url": "http://prharyana.gov.in/en/press-releases"
- },
- {
-  "id": "prharyana-bare",
-  "url": "https://prharyana.gov.in/"
- },
- {
-  "id": "pib-haryana",
-  "type": "rss",
-  "url": "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3"
- },
- {
-  "id": "pib-home",
-  "url": "https://www.pib.gov.in/allRel.aspx"
- },
- {
-  "id": "mygov-feed2",
-  "type": "rss",
-  "url": "https://blog.mygov.in/feed"
- },
- {
-  "id": "eci-press-browser",
-  "url": "https://www.eci.gov.in/press-release/"
- },
- {
-  "id": "dhbvn-notices",
-  "url": "https://dhbvn.org.in/web/portal/notices"
- },
- {
-  "id": "dhbvn-press",
-  "url": "https://dhbvn.org.in/web/portal/press-release"
- },
- {
-  "id": "police-press",
-  "url": "https://haryanapolice.gov.in/press-release"
- },
- {
-  "id": "police-news",
-  "url": "https://haryanapolice.gov.in/news"
- },
- {
-  "id": "assembly-press",
-  "url": "https://haryanaassembly.gov.in/news-press-release/"
- },
- {
-  "id": "hsvp-notices",
-  "url": "https://hsvphry.org.in/Home/PublicNotices"
- },
- {
-  "id": "hsvp-press",
-  "url": "https://hsvphry.org.in/Home/PressRelease"
- },
- {
-  "id": "haryana-notices",
-  "url": "https://haryana.gov.in/notices/"
- },
- {
-  "id": "haryana-press",
-  "url": "https://haryana.gov.in/press-release/"
- },
- {
-  "id": "lokbhavan-press",
-  "url": "https://lokbhavan.haryana.gov.in/press-releases/"
- },
- {
-  "id": "cpcb-notices",
-  "url": "https://cpcb.nic.in/notices/"
- },
- {
-  "id": "cpcb-press",
-  "url": "https://cpcb.nic.in/press-release/"
- },
- {
-  "id": "hrera-notices",
-  "url": "https://haryanarera.gov.in/login/loginview/4"
- },
- {
-  "id": "hrera-whatsnew",
-  "url": "https://haryanarera.gov.in/"
- }
+  {
+    "id": "district-notice-category-feed",
+    "url": "https://gurugram.gov.in/notice_category/announcements/feed/",
+    "type": "rss"
+  },
+  {
+    "id": "district-document-category",
+    "url": "https://gurugram.gov.in/document-category/notice/",
+    "type": "html"
+  },
+  {
+    "id": "district-documents",
+    "url": "https://gurugram.gov.in/documents/",
+    "type": "html"
+  },
+  {
+    "id": "district-notice-board",
+    "url": "https://gurugram.gov.in/notice-board/",
+    "type": "html"
+  },
+  {
+    "id": "district-notice",
+    "url": "https://gurugram.gov.in/notice/",
+    "type": "html"
+  },
+  {
+    "id": "district-home",
+    "url": "https://gurugram.gov.in/",
+    "type": "html"
+  },
+  {
+    "id": "police-press-aspx",
+    "url": "https://haryanapolice.gov.in/PressRelease.aspx",
+    "type": "html",
+    "selector": "table tr td a, .marquee a"
+  },
+  {
+    "id": "pib-chandigarh-en",
+    "url": "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=3",
+    "type": "rss"
+  },
+  {
+    "id": "pib-chandigarh-lang3",
+    "url": "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=3&Regid=3",
+    "type": "rss"
+  },
+  {
+    "id": "pib-mohua-en",
+    "url": "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=2&Regid=0",
+    "type": "rss"
+  },
+  {
+    "id": "hspcb-http",
+    "url": "http://hspcb.gov.in/",
+    "type": "html"
+  },
+  {
+    "id": "haryana-events",
+    "url": "https://www.haryana.gov.in/events/",
+    "type": "html",
+    "selector": "article h2 a, .entry-title a, .gen-list li a"
+  },
+  {
+    "id": "haryana-events-feed",
+    "url": "https://www.haryana.gov.in/events/feed/",
+    "type": "rss"
+  },
+  {
+    "id": "lokbhavan-cards",
+    "url": "https://lokbhavan.haryana.gov.in/press-releases/",
+    "type": "html",
+    "selector": ".awardListing h3 a, .awardListing h2 a, .awardListing h4 a, .awardListing a"
+  },
+  {
+    "id": "lokbhavan-feed",
+    "url": "https://lokbhavan.haryana.gov.in/feed/",
+    "type": "rss"
+  },
+  {
+    "id": "assembly-feed",
+    "url": "https://haryanaassembly.gov.in/feed/",
+    "type": "rss"
+  },
+  {
+    "id": "cpcb-archive",
+    "url": "https://cpcb.nic.in/archive-important-announcements.php",
+    "type": "html",
+    "selector": ".announcement a, #content table td a, .content table td a, table td a"
+  },
+  {
+    "id": "cpcb-home",
+    "url": "https://cpcb.nic.in/index.php",
+    "type": "html"
+  },
+  {
+    "id": "dhbvn-home-cards",
+    "url": "https://dhbvn.org.in/web/portal/home",
+    "type": "html",
+    "selector": ".journal-content-article a"
+  }
 ]

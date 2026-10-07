@@ -28,7 +28,7 @@ const server = http.createServer(async (req, res) => {
 });
 await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const httpUrl = `http://127.0.0.1:${server.address().port}/`;
-const routes = ["", "report", "track", "directory", "rights", "who", "wards", "charter", "dashboard", "updates", "join", "about", "accessibility", "privacy", "map", "news"];
+const routes = ["", "report", "track", "directory", "rights", "who", "wards", "charter", "dashboard", "updates", "join", "about", "accessibility", "privacy", "map", "news", "pulse"];
 
 // Latin tokens that are allowed to remain in Hindi mode: agency acronyms, product names, codes.
 const LATIN_OK = new Set("GMDA MCG DHBVN HRERA DTCP HSVP HSPCB NHAI CAQM CPGRAMS HERC GRAP RERA RWA UPI FIR AQI PIO BPL ECI MPLADS MoSPI CPCB SDM DC OneMap GGM Daakhil Sameer myGurugram Swachhata Saral MyGov RTI NH GVF EN WCAG WhatsApp MLA MP MC Manesar ULB HSIIDC HUDA IC PDF MB NCR Lok Sabha SMS ID OTP JJP INLD AAP BJP INC CSR DLF SPR MG HSVP MCG NIT DMRC RRTS CM Window ABCDE HTML Haryana Online Form Zero GIS".split(" "));
@@ -240,6 +240,9 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     { id: "p4", kind: "testimonial", slug: "voice-ab12f", title: "Resident voice", summary: "The pothole was fixed in a week.", quote_by: "Resident, Sector 10", published: true, published_at: "2026-10-05T06:00:00Z" }
   ];
   await page.route("**/api/content**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, posts: samplePosts, settings: { social: { x: "https://x.com/gvf", facebook: "", instagram: "", youtube: "", whatsapp: "" } } }) }));
+  await page.route("**/api/pulse", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, generated_at: "2026-10-07T03:30:00Z", pulse: { period: { from: "2026-09-30T00:00:00Z", to: "2026-10-07T00:00:00Z" }, total: 42, headline_en: "Garbage and waterlogging top the week", headline_hi: "कचरा और जलभराव इस सप्ताह सबसे ऊपर", summary_en: "Residents talked most about garbage.", summary_hi: "निवासियों ने कचरे पर सबसे ज़्यादा बात की।",
+    topics: [{ issue_type: "waste", label: "Garbage", count: 18, by_source: { reddit: 10, news: 5, reports: 3 }, trend: "up", areas: [{ area: "Sector 45", n: 4 }], examples: [{ title: "Garbage piling up near Sector 45 market", url: "https://www.reddit.com/r/gurgaon/x", source: "reddit", posted_at: "2026-10-06T10:00:00Z" }] }, { issue_type: "drains", label: "Drains, flooding", count: 9, by_source: { reddit: 2, news: 7, reports: 0 }, trend: "flat", areas: [], examples: [] }],
+    actions: [{ issue_type: "waste", title: "Sector cleaning drive with MCG's sanitation wing", why: "18 mentions, rising", when: "this weekend" }] } }) }));
   await page.route("**/api/news**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, items: [{ title: "Public notice: water supply schedule", url: "https://www.gmda.gov.in/notice/1", published_at: "2026-10-07T04:00:00Z", fetched_at: "2026-10-07T05:00:00Z", source_id: "gmda", source_name: "GMDA", home: "https://www.gmda.gov.in/" }, { title: "Ward committee meetings announced", url: "https://www.mcg.gov.in/news/2", published_at: "2026-10-06T04:00:00Z", fetched_at: "2026-10-07T05:00:00Z", source_id: "mcg", source_name: "MCG", home: "https://www.mcg.gov.in/" }], sources: [{ id: "gmda" }, { id: "mcg" }] }) }));
   const follows = [];
   await page.route("**/api/follow", (route) => { follows.push(JSON.parse(route.request().postData() || "{}")); return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) }); });
@@ -392,6 +395,10 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.goto(httpUrl + "#/news");
   await page.waitForTimeout(250);
   check((await page.locator("#newsBody a[href='https://www.gmda.gov.in/notice/1']").count()) === 1 && (await page.locator("#newsBody").innerText()).includes("GMDA"), "official news page lists collected notices with their source");
+  await page.goto(httpUrl + "#/pulse");
+  await page.waitForTimeout(250);
+  const pulseTxt = await page.locator("#pulseBody").innerText();
+  check(pulseTxt.includes("Garbage and waterlogging top the week") && pulseTxt.includes("Garbage") && pulseTxt.includes("18") && pulseTxt.includes("Sector cleaning drive") && (await page.locator("#pulseBody a[href='https://www.reddit.com/r/gurgaon/x']").count()) === 1, "pulse page shows the week's topics, an example link and the suggested action");
 
   // Public anonymised report page, follow form, share, real URL
   await page.goto(httpUrl + "#/r/GVF-2026-SRV01");
@@ -491,7 +498,11 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   const json = (route, status, body) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
   await page.route("**/api/triage/login", (route) => {
     const b = JSON.parse(route.request().postData() || "{}");
-    return b.password === "secret-pass" ? json(route, 200, { ok: true, session, staff }) : json(route, 401, { ok: false, error: "bad_credentials" });
+    if (b.password !== "secret-pass") return json(route, 401, { ok: false, error: "bad_credentials" });
+    if (b.email === "content@example.org") return json(route, 200, { ok: true, session, staff: { user_id: "u3", name: "Content Person", role: "content", email: "content@example.org" } });
+    if (b.email === "vol@example.org") return json(route, 200, { ok: true, session, staff: { user_id: "u2", name: "Vol One", role: "triage", email: "vol@example.org", wards: [10] } });
+    if (b.email === "owner@example.org") return json(route, 200, { ok: true, session, staff: { user_id: "u0", name: "Owner", role: "owner", email: "owner@example.org" } });
+    return json(route, 200, { ok: true, session, staff });
   });
   await page.route("**/api/triage/reports?**", (route) => authed(route) ? json(route, 200, { ok: true, reports: [state, report({ ref: "GVF-2026-OLD02", stage: 0, created_at: "2026-09-20T10:00:00Z", unmapped_overdue: true })], total: 2, offset: 0, limit: 50,
     summary: { total: 2, received: 2, filed: 0, escalated: 0, resolved: 0, unmapped_past_due: 1, filed_past_due: 0 } }) : json(route, 401, { ok: false, error: "unauthenticated" }));
@@ -536,6 +547,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#tList .tag-danger").count()) === 1, "overdue report carries a past-due flag");
   check((await page.locator("#tSummary").innerText()).includes("past due: 1 unmapped"), "summary line shows the counts");
   check(!(await page.locator("#teamTab").isHidden()), "coordinator sees the Team tab");
+  check((await page.locator("#visitorsTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()) && !(await page.locator("#contentTab").isHidden()), "coordinator sees content and pulse but not the visitors' data");
 
   await page.click('[data-open="GVF-2026-SRV01"]');
   await page.waitForSelector("#editForm");
@@ -583,12 +595,29 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click('#postList [data-ppub="p9"]');
   await page.waitForTimeout(150);
   check(contentCalls.length === 2 && contentCalls[1].method === "PATCH" && contentCalls[1].body.id === "p9" && contentCalls[1].body.published === true, "publish toggles through a PATCH");
-  await page.click('[data-tab="visitors"]');
-  await page.waitForTimeout(200);
-  check((await page.locator("#visitorStats").innerText()).includes("12 registered visitors") && (await page.locator("#visitorList").innerText()).includes("Gate Person"), "visitors tab shows the registration count and the list");
   await page.click('[data-tab="health"]');
   await page.waitForTimeout(200);
   check((await page.locator("#healthBody .tag-green").count()) >= 3 && (await page.locator("#healthBody .tag-danger").count()) === 1 && (await page.locator("#healthBody").innerText()).includes("example.org/dead"), "health tab flags the broken link and passes the rest");
+  await page.click('[data-tab="reports"]');
+  await page.waitForTimeout(100);
+  const trCalls = [];
+  await page.route("**/api/triage/translate", (route) => { const b = JSON.parse(route.request().postData() || "{}"); trCalls.push(b); const out = {}; for (const k of Object.keys(b.fields || {})) out[k] = b.from === "hi" ? "EN:" + b.fields[k] : "हिं:" + b.fields[k]; return json(route, 200, { ok: true, from: b.from, to: b.from === "hi" ? "en" : "hi", fields: out, provider: "gemini" }); });
+  await page.route("**/api/triage/insights**", (route) => json(route, 200, { ok: true, insights: [{ id: 1, generated_at: "2026-10-07T03:30:00Z", period_start: "2026-09-30T00:00:00Z", period_end: "2026-10-07T00:00:00Z", data: { period: { from: "2026-09-30T00:00:00Z", to: "2026-10-07T00:00:00Z" }, headline_en: "Garbage tops the week", summary_en: "Mostly garbage.", topics: [{ issue_type: "waste", count: 18, by_source: { reddit: 10, news: 5, reports: 3 }, trend: "up", areas: [{ area: "Sector 45", n: 4 }] }], actions: [{ issue_type: "waste", title: "Sector cleaning drive", why: "18 mentions" }] } }], signals: [{ title: "Garbage piling up near Sector 45 market", url: "https://www.reddit.com/r/gurgaon/x", source: "reddit", issue_type: "waste", area: "Sector 45", posted_at: "2026-10-06T10:00:00Z", score: 44 }] }));
+  await page.click('[data-tab="content"]');
+  await page.waitForTimeout(100);
+  await page.fill("#pTitle", "Sewa drive cleans the park");
+  await page.locator("#pTitle").dispatchEvent("change");
+  await page.waitForTimeout(200);
+  check(trCalls.length === 1 && trCalls[0].from === "en" && trCalls[0].fields.title === "Sewa drive cleans the park" && (await page.locator("#pTitleHi").inputValue()) === "हिं:Sewa drive cleans the park", "leaving an English field fills the Hindi field automatically");
+  await page.fill("#pTitle", "");
+  await page.fill("#pSummaryHi", "चालीस स्वयंसेवक आए");
+  await page.locator("#pSummaryHi").dispatchEvent("change");
+  await page.waitForTimeout(200);
+  check(trCalls.length === 2 && trCalls[1].from === "hi" && (await page.locator("#pSummary").inputValue()) === "EN:चालीस स्वयंसेवक आए", "leaving a Hindi field fills the English field automatically");
+  await page.click("#pReset");
+  await page.click('[data-tab="insights"]');
+  await page.waitForTimeout(200);
+  check((await page.locator("#insightsBody").innerText()).includes("Garbage tops the week") && (await page.locator("#insightsBody").innerText()).includes("Sector cleaning drive") && (await page.locator("#insightsBody a[href='https://www.reddit.com/r/gurgaon/x']").count()) === 1, "pulse tab shows the latest scan, actions and top signals");
   await page.click('[data-tab="reports"]');
   await page.waitForTimeout(100);
   const pwCalls = [];
@@ -619,6 +648,35 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(100);
   check(!(await page.locator("#deskLogin").isHidden()) && (await page.locator("#deskMain").isHidden()), "sign out returns to the sign-in form");
   check((await page.evaluate(() => localStorage.getItem("gvf_staff"))) === null, "sign out clears the stored session");
+
+  // A content-team account sees only content and the pulse; a ward volunteer only reports and the map
+  await page.fill("#lEmail", "content@example.org");
+  await page.fill("#lPass", "secret-pass");
+  await page.click("#lBtn");
+  await page.waitForSelector("#deskMain:not([hidden])");
+  await page.waitForTimeout(250);
+  check((await page.locator("#reportsTab").isHidden()) && (await page.locator("#mapTab").isHidden()) && (await page.locator("#teamTab").isHidden()) && (await page.locator("#visitorsTab").isHidden()) && (await page.locator("#healthTab").isHidden()) && !(await page.locator("#contentTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()), "content team sees only the Content and Pulse tabs");
+  check(!(await page.locator("#tContent").isHidden()) && (await page.locator("#tReports").isHidden()), "content team lands on the Content tab");
+  await page.click("#signOut");
+  await page.waitForTimeout(100);
+  await page.fill("#lEmail", "vol@example.org");
+  await page.fill("#lPass", "secret-pass");
+  await page.click("#lBtn");
+  await page.waitForSelector("#deskMain:not([hidden])");
+  await page.waitForTimeout(250);
+  check(!(await page.locator("#reportsTab").isHidden()) && !(await page.locator("#mapTab").isHidden()) && (await page.locator("#contentTab").isHidden()) && (await page.locator("#teamTab").isHidden()) && (await page.locator("#insightsTab").isHidden()), "ward volunteer sees only Reports and Map");
+  check((await page.locator("#whoAmI").innerText()).includes("wards 10"), "ward volunteer's header names the allotted ward");
+  await page.click("#signOut");
+  await page.waitForTimeout(100);
+  await page.fill("#lEmail", "owner@example.org");
+  await page.fill("#lPass", "secret-pass");
+  await page.click("#lBtn");
+  await page.waitForSelector("#deskMain:not([hidden])");
+  await page.waitForTimeout(250);
+  for (const t of ["reports", "map", "team", "content", "visitors", "insights", "health"]) check(!(await page.locator("#" + t + "Tab").isHidden()), "owner sees the " + t + " tab");
+  await page.click('[data-tab="visitors"]');
+  await page.waitForTimeout(200);
+  check((await page.locator("#visitorStats").innerText()).includes("12 registered visitors") && (await page.locator("#visitorList").innerText()).includes("Gate Person"), "owner's visitors tab shows the registration count and the list");
 
   check(errors.length === 0, "zero console or page errors" + (errors.length ? ": " + errors.join(" | ") : ""));
   await ctx.close();
