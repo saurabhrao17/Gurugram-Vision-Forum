@@ -1,0 +1,17 @@
+{
+  "name": "Gurugram Vision Forum",
+  "short_name": "GVF",
+  "description": "Find the desk responsible for your civic issue in Gurugram, report it, know your rights and your ward, and track what happens.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0B2545",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["government", "utilities"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
