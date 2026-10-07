@@ -4,7 +4,7 @@ Read HANDOFF.md first; it holds the context, research, design rules and roadmap.
 
 ## Stack (decided 7 Oct 2026, see docs/decisions.md and docs/deploy.md)
 - Vercel hosts the static site from `site/` and the API functions in `api/`. Supabase holds the data (Postgres, Storage, Auth). No Cloudflare, no Freshdesk.
-- Domain: gurugramvisionforum.org (gurgaonvisionforum.org redirects to it).
+- Domain: gurugramvisionforum.org, bought on Vercel 8 Oct 2026 and attached to the project; gurgaonvisionforum.com (the Gurgaon spelling, .com) and both www hosts redirect to it with 308. `SITE_URL` in Vercel is the public origin.
 
 ## Layout
 - `site/` is the website: `index.html`, `styles.css`, `data.js`, `app.js`. Static, hash-routed, no framework, no build step unless we deliberately add one.

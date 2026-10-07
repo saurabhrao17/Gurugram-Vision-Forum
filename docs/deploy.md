@@ -24,7 +24,7 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
    - `IP_HASH_SALT`: any long random string.
    - `TURNSTILE_SECRET` (optional): turns on bot checks for both forms. Needs the matching site key in `site/index.html`.
    - `GOOGLE_MAPS_KEY` (optional): Google Geocoding for the place search; without it the API uses OpenStreetMap Nominatim.
-4. **Domain.** Vercel → Domains: add `gurugramvisionforum.org` and `www`, follow the DNS records shown at the registrar. Add `gurgaonvisionforum.org` as a redirect to the first.
+4. **Domain.** Done 8 October 2026: `gurugramvisionforum.org` and `gurgaonvisionforum.com` were registered through Vercel Domains (auto-renew, registrant Gurugram Vision Forum, +91 82852 06936) and attached to the project; `www.gurugramvisionforum.org`, `gurgaonvisionforum.com` and `www.gurgaonvisionforum.com` redirect (308) to the apex. Vercel runs the DNS, so no registrar records are needed; add any TXT record (Search Console, Resend) under the domain's DNS tab in Vercel. `SITE_URL=https://gurugramvisionforum.org` is set for production.
 5. **Volunteer desk and the first owner.** The desk is the `#/desk` route of the main site (linked from the public footer as "Volunteer sign-in"; a "Desk" item appears in the navigation once signed in; the old `triage.html` redirects). Sign-in is Supabase Auth with email and password; the API checks every request against `public.staff`. Bootstrap once: in Supabase → Authentication → Users → Add user → Create new user, enter the owner's email and a password with "Auto Confirm User" ticked. Then run in the SQL editor:
    ```sql
    insert into public.staff (user_id, name, role, email)
