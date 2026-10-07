@@ -1,0 +1,28 @@
+name: News sources check
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekly, Monday 03:00 UTC: are the official news pages still reachable and parseable?
+    - cron: "0 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Probe every source
+        run: node scripts/check-news-sources.mjs --json news-check.json --timeout=20000
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: news-check-${{ github.run_id }}
+          path: news-check.json
