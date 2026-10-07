@@ -105,7 +105,7 @@
 
 <!-- HOME -->
 <section class="view" id="v-home">
-  <div class="hero">
+  <div class="hero"><div class="wrap" id="popups" hidden></div>
     <div class="wrap">
       <div class="hero-grid">
         <div>
@@ -202,7 +202,8 @@
             <div class="field"><label for="fName" data-i18n="f.name">Your name</label><input type="text" id="fName" autocomplete="name" required></div>
             <div class="field"><label for="fPhone" data-i18n="f.phone">Mobile</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" required></div>
           </div>
-          <div class="field"><label for="fEmail" data-i18n="f.email">Email (optional)</label><input type="email" id="fEmail" autocomplete="email"></div>
+          <div class="field"><label for="fEmail" data-i18n="f.email">Email</label><input type="email" id="fEmail" autocomplete="email" required></div>
+          <div class="frow"><div class="field"><label for="fPincode" data-i18n="f.pin">PIN code</label><input type="text" id="fPincode" inputmode="numeric" maxlength="6" autocomplete="postal-code" required></div><div class="field"><label for="fCity" data-i18n="f.city">City</label><input type="text" id="fCity" value="Gurugram" autocomplete="address-level2" required></div></div>
           <div class="field"><label class="check"><input type="checkbox" id="fConsent" required><span data-i18n="f.consent">The Forum may contact me and share the issue, without my phone number, with the authority responsible.</span></label></div>
           <div class="fnav"><button class="btn btn-line" type="button" data-go="2" data-i18n="f.back">Back</button><button class="btn btn-ink" type="button" data-go="4" data-i18n="f.next">Continue</button></div>
         </div>
@@ -302,6 +303,7 @@
 <section class="view" id="v-updates">
   <div class="sec"><div class="wrap">
     <div class="head"><h1 data-i18n="u.h">Updates</h1><p data-i18n="u.p">Stories, photos, videos and press, published by the Forum's team.</p></div>
+    <p id="socialRow" hidden></p>
     <div class="tabs" id="uTabs" role="tablist"></div>
     <div id="uBody"></div>
   </div></div>
@@ -347,7 +349,7 @@
       <div class="deskbar" id="userBar"><span class="who" id="whoAmI"></span><span><button class="btn btn-line btn-sm" type="button" id="pwBtn">Change password</button> <button class="btn btn-line btn-sm" type="button" id="signOut">Sign out</button></span></div>
       <form class="form" id="pwForm" hidden style="max-width:520px;margin-bottom:1rem" novalidate><div class="frow"><div class="field"><label for="pwNew">New password</label><input type="password" id="pwNew" autocomplete="new-password" minlength="10"></div><div class="field"><label for="pwNew2">Repeat it</label><input type="password" id="pwNew2" autocomplete="new-password"></div></div><p class="hint">At least 10 characters with letters and a number.</p><p class="err" id="pwErr"></p><button class="btn btn-ink btn-sm" type="submit">Save password</button> <button class="btn btn-line btn-sm" type="button" id="pwCancel">Cancel</button></form>
       <div class="head"><h1>Reports</h1><p id="tSummary">Loading…</p></div>
-      <div class="tabs" id="tTabs" role="tablist"><button class="tab" role="tab" type="button" data-tab="reports" aria-selected="true">Reports</button><button class="tab" role="tab" type="button" data-tab="map" aria-selected="false">Map</button><button class="tab" role="tab" type="button" data-tab="team" aria-selected="false" id="teamTab" hidden>Team</button></div>
+      <div class="tabs" id="tTabs" role="tablist"><button class="tab" role="tab" type="button" data-tab="reports" aria-selected="true">Reports</button><button class="tab" role="tab" type="button" data-tab="map" aria-selected="false">Map</button><button class="tab" role="tab" type="button" data-tab="team" aria-selected="false" id="teamTab" hidden>Team</button><button class="tab" role="tab" type="button" data-tab="content" aria-selected="false" id="contentTab" hidden>Content</button><button class="tab" role="tab" type="button" data-tab="visitors" aria-selected="false" id="visitorsTab" hidden>Visitors</button><button class="tab" role="tab" type="button" data-tab="health" aria-selected="false" id="healthTab" hidden>Health</button></div>
       <div id="tReports">
         <div class="chips" id="stageChips" role="group" aria-label="Stage"></div>
         <div class="filters">
@@ -365,6 +367,73 @@
         <p class="small muted" id="mapCount">Open reports with a pinned location. Tap a pin to open the report.</p>
         <div class="mapbox mapbox-tall" id="deskMap" aria-label="Map of reports"></div>
         <div class="legend" id="mapLegend"></div>
+      </div>
+      <div id="tContent" hidden>
+        <p class="small muted">Publish stories, news, photos, videos, social posts, testimonials and pop-ups. Published items appear on the site within two minutes; nothing needs a developer.</p>
+        <div class="form" style="max-width:none;margin-bottom:1rem">
+          <h3 style="margin-bottom:.5rem" id="postFormTitle">New post</h3>
+          <form id="postForm" novalidate>
+            <input type="hidden" id="pId">
+            <div class="frow">
+              <div class="field"><label for="pKind">Kind</label><select id="pKind"><option value="news">News</option><option value="story">Story (blog post)</option><option value="photo">Photo</option><option value="video">Video</option><option value="social">Social post</option><option value="testimonial">Testimonial</option><option value="popup">Pop-up announcement</option></select></div>
+              <div class="field"><label for="pTags">Tags (comma separated)</label><input type="text" id="pTags"></div>
+            </div>
+            <div class="rbox"><b>Draft with AI</b><p class="note">Describe what happened in a few lines; the draft fills the fields below for you to edit before publishing. Needs the owner's Claude API key in Vercel.</p><textarea id="draftBrief" style="min-height:70px" placeholder="e.g. Sewa drive in Sector 45 park on Sunday: 40 volunteers, 2 tonnes of waste cleared with MCG's truck, next drive 20 October"></textarea><p style="margin:.5rem 0 0"><button class="btn btn-line btn-sm" type="button" id="draftBtn">Draft with AI</button> <span class="small muted" id="draftMsg"></span></p></div>
+            <div class="frow">
+              <div class="field"><label for="pTitle">Title</label><input type="text" id="pTitle" required maxlength="200"></div>
+              <div class="field"><label for="pTitleHi">Title (Hindi)</label><input type="text" id="pTitleHi" maxlength="200"></div>
+            </div>
+            <div class="frow">
+              <div class="field"><label for="pSummary">Summary</label><textarea id="pSummary" style="min-height:70px" maxlength="500"></textarea></div>
+              <div class="field"><label for="pSummaryHi">Summary (Hindi)</label><textarea id="pSummaryHi" style="min-height:70px" maxlength="500"></textarea></div>
+            </div>
+            <div class="frow">
+              <div class="field"><label for="pBody">Body (plain text or simple HTML: p, b, i, ul, li, h2, a)</label><textarea id="pBody" style="min-height:140px"></textarea></div>
+              <div class="field"><label for="pBodyHi">Body (Hindi)</label><textarea id="pBodyHi" style="min-height:140px"></textarea></div>
+            </div>
+            <div class="frow">
+              <div class="field"><label for="pLink">Link (news article, event page)</label><input type="url" id="pLink" placeholder="https://"></div>
+              <div class="field"><label for="pEmbed">Social post URL (x.com, facebook.com, instagram.com, youtube.com)</label><input type="url" id="pEmbed" placeholder="https://"></div>
+            </div>
+            <div class="frow">
+              <div class="field"><label for="pSource">Source or handle</label><input type="text" id="pSource" maxlength="120"></div>
+              <div class="field"><label for="pAuthor">Author / quoted by</label><input type="text" id="pAuthor" maxlength="120"></div>
+            </div>
+            <div class="frow">
+              <div class="field"><label for="pMedia">Photo, video or PDF (up to 20 MB)</label><input type="file" id="pMedia" accept="image/*,video/mp4,video/webm,application/pdf"><p class="hint" id="pMediaStatus"></p><input type="hidden" id="pMediaPath"><input type="hidden" id="pMediaType"></div>
+              <div class="field"><label for="pStarts">Pop-up shows from / until</label><div class="frow"><input type="datetime-local" id="pStarts"><input type="datetime-local" id="pEnds"></div></div>
+            </div>
+            <div class="frow">
+              <div class="field"><label class="check"><input type="checkbox" id="pPublished"><span>Published (visible on the site)</span></label></div>
+              <div class="field"><label class="check"><input type="checkbox" id="pPinned"><span>Pinned to the top</span></label></div>
+            </div>
+            <p class="err" id="pErr"></p>
+            <button class="btn btn-ink" type="submit" id="pSave">Save post</button> <button class="btn btn-line" type="button" id="pReset">Clear</button>
+          </form>
+        </div>
+        <div class="form" style="max-width:none;margin-bottom:1rem">
+          <h3 style="margin-bottom:.5rem">Social accounts</h3>
+          <p class="small muted">Links appear in the footer and on the Updates page once set.</p>
+          <form id="socialForm" novalidate>
+            <div class="frow"><div class="field"><label for="sX">X (Twitter)</label><input type="url" id="sX" placeholder="https://x.com/..."></div><div class="field"><label for="sFacebook">Facebook</label><input type="url" id="sFacebook" placeholder="https://facebook.com/..."></div></div>
+            <div class="frow"><div class="field"><label for="sInstagram">Instagram</label><input type="url" id="sInstagram" placeholder="https://instagram.com/..."></div><div class="field"><label for="sYoutube">YouTube</label><input type="url" id="sYoutube" placeholder="https://youtube.com/@..."></div></div>
+            <div class="field"><label for="sWhatsapp">WhatsApp channel or community</label><input type="url" id="sWhatsapp" placeholder="https://whatsapp.com/channel/..."></div>
+            <p class="err" id="sErr"></p>
+            <button class="btn btn-ink btn-sm" type="submit">Save links</button>
+          </form>
+        </div>
+        <div class="chips" id="postKinds"></div>
+        <ul class="rows" id="postList"></ul>
+      </div>
+      <div id="tVisitors" hidden>
+        <p class="small muted">Everyone who registered on the site or sent a report, with first-party usage counts. Export is for the Forum's own use only, as promised in the privacy notice.</p>
+        <div id="visitorStats" class="rbox"></div>
+        <p><a class="btn btn-line btn-sm" id="visitorsCsv" href="#" download="visitors.csv">Download CSV</a></p>
+        <ul class="rows" id="visitorList"></ul>
+      </div>
+      <div id="tHealth" hidden>
+        <p class="small muted">Automatic checks: database, storage, the daily cron, the email queue, every official link on the site and the news sources. Red items need a volunteer's attention.</p>
+        <div id="healthBody"></div>
       </div>
       <div id="tTeam" hidden>
         <h3 style="margin-top:0">Ward volunteers</h3>
@@ -412,6 +481,12 @@
 </section>
 
 <!-- ACCESSIBILITY -->
+<section class="view" id="v-news">
+  <div class="sec"><div class="wrap">
+    <div class="head"><h1 data-i18n="nw.h">What's new from the authorities</h1><p data-i18n="nw.p">Notices and news from the official bodies this site links to, collected every day. Each item opens the official page.</p></div>
+    <div id="newsBody"></div>
+  </div></div>
+</section>
 <section class="view" id="v-map">
   <div class="sec"><div class="wrap">
     <div class="head"><h1 data-i18n="mp.h">Reports on the map</h1><p data-i18n="mp.p">Every report with a map pin, by stage. Locations are rounded to about 100 metres; names are never shown.</p></div>
@@ -470,6 +545,26 @@
   <div class="foot"><button class="tgl" id="searchBtn2" type="button" aria-label="Search the site" data-i18n-aria="a.search"><svg class="i i-s" aria-hidden="true"><use href="#i-search"/></svg><span style="color:var(--ink)" data-i18n="m.search">Search</span></button><button class="tgl" id="langBtn2" type="button"><b>EN</b><span>|</span><span lang="hi">हिं</span></button><button class="tgl" id="themeBtn2" type="button" aria-label="Switch theme" data-i18n-aria="a.theme"><svg class="i i-s" aria-hidden="true"><use href="#i-moon"/></svg></button></div>
 </div>
 
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+  <form class="card" id="gateForm" novalidate>
+    <p class="small muted" style="margin:0 0 .25rem" data-i18n="g.kicker">Before you go on</p>
+    <h3 id="gateTitle" data-i18n="g.h">Tell us who you are</h3>
+    <p class="small" data-i18n="g.p">The Forum works for Gurugram's residents and needs to know who uses it. Your details stay with the Forum: they are never sold or shared for marketing, and they are used only to run this service and to reach you about it. <a href="#/privacy" data-i18n="g.privacy">Privacy notice</a>.</p>
+    <div class="frow">
+      <div class="field"><label for="gName" data-i18n="g.name">Your name</label><input type="text" id="gName" autocomplete="name" required></div>
+      <div class="field"><label for="gPhone" data-i18n="g.phone">Mobile</label><input type="tel" id="gPhone" inputmode="tel" autocomplete="tel" required></div>
+    </div>
+    <div class="field"><label for="gEmail" data-i18n="g.email">Email</label><input type="email" id="gEmail" autocomplete="email" required></div>
+    <div class="frow">
+      <div class="field"><label for="gArea" data-i18n="g.area">Sector, colony or society</label><input type="text" id="gArea" list="areaList" required></div>
+      <div class="field"><label for="gPin" data-i18n="g.pin">PIN code</label><input type="text" id="gPin" inputmode="numeric" maxlength="6" autocomplete="postal-code" required></div>
+    </div>
+    <div class="field"><label for="gCity" data-i18n="g.city">City</label><input type="text" id="gCity" value="Gurugram" autocomplete="address-level2" required></div>
+    <div class="field"><label class="check"><input type="checkbox" id="gConsent" required><span data-i18n="g.consent">I agree that the Forum keeps these details to run this service and contact me about it. I can ask for them to be corrected or deleted at contact@gurugramvisionforum.org.</span></label></div>
+    <p class="err" id="gErr"></p>
+    <button class="btn btn-primary" type="submit" data-i18n="g.go">Continue to the site</button>
+  </form>
+</div>
 <nav class="bbar" aria-label="Quick navigation" data-i18n-aria="a.quickNav">
   <a href="#/" data-v="home"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg><span data-i18n="b.home">Home</span></a>
   <a href="#/report" data-v="report"><svg class="i" aria-hidden="true"><use href="#i-fix"/></svg><span data-i18n="b.fix">Report</span></a>
@@ -481,10 +576,10 @@
 <footer class="ftr">
   <div class="wrap">
     <div class="fgrid">
-      <div><a class="brand" href="#/"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-mark"/></svg><span data-i18n="brand">Gurugram Vision Forum</span></a><p data-i18n="ft.tag">Citizens and governance in partnership. Collaborate, contribute, change.</p><p><a href="mailto:contact@gurugramvisionforum.org">contact@gurugramvisionforum.org</a><br><a href="tel:+919899375445">+91 98993 75445</a><br><span data-i18n="ft.addr">Sector 29, Gurugram</span></p></div>
+      <div><a class="brand" href="#/"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-mark"/></svg><span data-i18n="brand">Gurugram Vision Forum</span></a><p data-i18n="ft.tag">Citizens and governance in partnership. Collaborate, contribute, change.</p><p><a href="mailto:contact@gurugramvisionforum.org">contact@gurugramvisionforum.org</a><br><a href="tel:+919899375445">+91 98993 75445</a><br><span data-i18n="ft.addr">Sector 29, Gurugram</span></p><p id="ftSocial" hidden></p></div>
       <div><h4 data-i18n="ft.fix">Fix</h4><ul><li><a href="#/" data-i18n="ft.fix1">Who fixes it</a></li><li><a href="#/report" data-i18n="n.report">Report an issue</a></li><li><a href="#/track" data-i18n="n.track">Track a report</a></li><li><a href="#/map" data-i18n="n.map">Live map</a></li></ul></div>
       <div><h4 data-i18n="ft.know">Know</h4><ul><li><a href="#/directory" data-i18n="n.dir">Directory</a></li><li><a href="#/rights" data-i18n="n.rights">Your rights</a></li><li><a href="#/who" data-i18n="n.who">Who's who</a></li><li><a href="#/wards" data-i18n="n.wards">Wards</a></li></ul></div>
-      <div><h4 data-i18n="ft.join">Join</h4><ul><li><a href="#/join" data-i18n="n.join">Join</a></li><li><a href="#/charter" data-i18n="n.charter">Civic charter</a></li><li><a href="#/updates" data-i18n="n.updates">Updates</a></li></ul></div>
+      <div><h4 data-i18n="ft.join">Join</h4><ul><li><a href="#/join" data-i18n="n.join">Join</a></li><li><a href="#/charter" data-i18n="n.charter">Civic charter</a></li><li><a href="#/updates" data-i18n="n.updates">Updates</a></li><li><a href="#/news" data-i18n="n.news">Official news</a></li></ul></div>
       <div><h4 data-i18n="ft.about">About</h4><ul><li><a href="#/about" data-i18n="n.about">About</a></li><li><a href="#/dashboard" data-i18n="n.dash">Dashboard</a></li><li><a href="#/accessibility" data-i18n="n.access">Accessibility statement</a></li><li><a href="#/privacy" data-i18n="n.privacy">Privacy notice</a></li><li><a href="#/desk" data-i18n="n.signin">Volunteer sign-in</a></li></ul></div>
     </div>
     <div class="fnote"><span data-i18n="ft.n1">Not a government website. Emergencies: 112.</span><span data-i18n="ft.n2">Links verified 25 September 2026.</span></div>

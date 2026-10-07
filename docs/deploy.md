@@ -48,6 +48,13 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 - Real URLs: `/report`, `/track/<ref>`, `/r/<ref>`, `/map`, `/privacy` and the other views are rewritten to `index.html` and moved into the hash by the app, so links shared from the site work and unfurl (OG tags and `og.png`).
 - Volunteers change their own password from the desk header (`POST /api/triage/password`, 10+ characters with letters and a number).
 
+## Visitors, content, news and checks
+
+- **Visitor registration.** `GVF.GATE` (`site/data.js`) shows a registration form after 90 seconds or on the second page view (never on the desk). It asks name, mobile, email, sector, PIN code and city with a consent notice; registrations land in `visitors`, and the site logs first-party events (`visitor_events`) without any third-party tracker. The desk Visitors tab (managers) shows counts and the list and exports a CSV. Read `docs/visitor-data-research.md` before changing the notice: the Forum is a Data Fiduciary under the DPDP Act 2023; the notice must stay itemised, bilingual and withdrawable, and the research recommends fewer required fields than the owner chose.
+- **Content dashboard.** Desk → Content (owner, coordinator): stories, news, photos, videos (upload to the public `media` bucket, 20 MB), social posts (link to the post on X, Facebook, Instagram, YouTube; no embed scripts), testimonials and pop-ups with a time window; publish/unpublish/pin; social account links for the footer. Published items appear within two minutes (`/api/content` is cached 120 s). "Draft with AI" needs `ANTHROPIC_API_KEY` in Vercel and writes English and Hindi drafts for the team to edit; nothing publishes without a person.
+- **Official news.** The daily cron fetches `data/news-sources.json` (RSS or simple HTML pages of the official bodies) into `news_items`; `/news` shows them grouped by day with the source. See `docs/news-sources-notes.md` for which sources are verified and which need a fetch check from a machine that can reach *.gov.in.
+- **Automated checks.** Cron: 40 official links a run → `link_status`, `cron_runs`. `/api/health` and the desk Health tab: database, storage, last cron run, email queue, broken links, stale news sources. GitHub Actions: unit + smoke on every push and pull request; nightly `scripts/check-links.mjs` over every link in `site/data.js`, opening a GitHub issue "Nightly checks failed" when one breaks.
+
 ## Checks after each deploy
 
 - `GET /api/dashboard` returns `{"ok":true,"published":false,...}` before 50 reports.

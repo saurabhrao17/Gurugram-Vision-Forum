@@ -25,6 +25,14 @@ import publicReport from "../lib/handlers/public-report.js";
 import publicReports from "../lib/handlers/public-reports.js";
 import hooksWhatsapp from "../lib/handlers/hooks/whatsapp.js";
 import hooksExotel from "../lib/handlers/hooks/exotel.js";
+import content from "../lib/handlers/content.js";
+import triageContent from "../lib/handlers/triage/content.js";
+import triageContentUpload from "../lib/handlers/triage/content-upload.js";
+import triageDraft from "../lib/handlers/triage/draft.js";
+import visitor from "../lib/handlers/visitor.js";
+import news from "../lib/handlers/news.js";
+import health from "../lib/handlers/health.js";
+import triageVisitors from "../lib/handlers/triage/visitors.js";
 import { send } from "../lib/http.js";
 
 const ROUTES = {
@@ -32,7 +40,9 @@ const ROUTES = {
   "triage/login": triageLogin, "triage/refresh": triageRefresh, "triage/me": triageMe,
   "triage/staff": triageStaff, "triage/wards": triageWards, "triage/reports": triageReports, "triage/password": triagePassword,
   "cron/daily": cron, "follow": follow, "public/report": publicReport, "public/reports": publicReports,
-  "hooks/whatsapp": hooksWhatsapp, "hooks/exotel": hooksExotel
+  "hooks/whatsapp": hooksWhatsapp, "hooks/exotel": hooksExotel,
+  "content": content, "triage/content": triageContent, "triage/content/upload-url": triageContentUpload, "triage/draft": triageDraft,
+  "visitor": visitor, "news": news, "health": health, "triage/visitors": triageVisitors
 };
 
 export function resolve(parts) {
