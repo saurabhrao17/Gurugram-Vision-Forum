@@ -58,6 +58,7 @@ export function resolve(parts) {
   const path = (parts || []).join("/");
   if (ROUTES[path]) return { handler: ROUTES[path], params: {} };
   if (parts && parts.length === 3 && parts[0] === "triage" && parts[1] === "reports") return { handler: triageReport, params: { ref: parts[2] } };
+  if (parts && parts.length === 2 && parts[0] === "cron" && (parts[1] === "fetch" || parts[1] === "analyse")) return { handler: cron, params: { group: parts[1] } };
   // Server-rendered pages (/guides, /guide/:issue, /ward/:n, /blog/:slug, with a /hi prefix) are a prefix route.
   if (parts && parts.length >= 2 && parts[0] === "page") return { handler: page, params: { page: parts.slice(1).join("/") } };
   return null;

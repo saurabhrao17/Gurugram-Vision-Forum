@@ -516,8 +516,8 @@ test("runDaily records a cron_runs row, fetches news and checks links with the i
   assert.equal(r.ok, true, JSON.stringify(r.errors));
   assert.deepEqual(r.news, { sources: 2, fetched: 1, new_items: 2, failed: ["dead"] });
   assert.ok(r.links.total > 30, String(r.links.total));
-  assert.equal(r.links.checked, Math.min(40, r.links.total));
-  assert.equal(r.links.remaining, Math.max(0, r.links.total - 40));
+  assert.equal(r.links.checked, Math.min(15, r.links.total));
+  assert.equal(r.links.remaining, Math.max(0, r.links.total - 15));
   assert.ok(r.links.broken > 0);
 
   const ins = sb.calls.queries.find((q) => q.table === "news_items" && q.op === "upsert");

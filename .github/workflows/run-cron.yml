@@ -34,8 +34,12 @@ jobs:
           TOKEN="${SECRET_FROM_REPO:-$SECRET_FROM_INPUT}"
           if [ -z "$TOKEN" ]; then echo "No CRON_SECRET available"; exit 1; fi
           echo "::add-mask::$TOKEN"
-          code=$(curl -sS -m 120 -o out.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/cron/daily")
-          echo "HTTP $code"
-          if command -v jq >/dev/null; then jq . out.json; else cat out.json; fi
-          { echo "## Cron run"; echo; echo "HTTP $code"; echo; echo '```json'; cat out.json; echo; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
-          [ "$code" = "200" ]
+          ok=1
+          for group in fetch analyse; do
+            code=$(curl -sS -m 120 -o out.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/cron/$group")
+            echo "$group: HTTP $code"
+            if command -v jq >/dev/null && jq . out.json >/dev/null 2>&1; then jq . out.json; else cat out.json; echo; fi
+            { echo "## Cron $group"; echo; echo "HTTP $code"; echo; echo '```json'; cat out.json; echo; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            [ "$code" = "200" ] || ok=0
+          done
+          [ "$ok" = "1" ]
