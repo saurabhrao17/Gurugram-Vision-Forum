@@ -298,7 +298,7 @@ renderWho();
 
 /* wards */
 function renderWards(q){q=(q||"").toLowerCase();var rows=D.WARDS.filter(function(w){return !q||String(w[0])===q||(w[1]+" "+w[2]+" "+hs(w[1])+" "+hs(w[2])).toLowerCase().indexOf(q)>-1});
-  $("wardBody").innerHTML=rows.length?rows.map(function(w){return '<tr><td class="n">'+w[0]+'</td><td data-l="'+esc(hs("Councillor"))+'">'+esc(hs(w[1]))+'</td><td data-l="'+esc(hs("Party"))+'">'+esc(hs(w[2]))+'</td><td data-l="'+esc(hs("Verify"))+'"><a href="'+L.mcg+'" target="_blank" rel="noopener" class="ext">MCG</a> · <a href="'+L.voterList+'" target="_blank" rel="noopener" class="ext">'+hs("Voter list")+'</a> · <a href="/ward/'+w[0]+'" data-ward-page="'+w[0]+'">'+hs("Ward page")+'</a></td></tr>'}).join(""):'<tr><td colspan="4" class="muted">'+hs("No ward matches that.")+'</td></tr>'}
+  $("wardBody").innerHTML=rows.length?rows.map(function(w){return '<tr><td class="n">'+w[0]+'</td><td data-l="'+esc(hs("Councillor"))+'">'+esc(hs(w[1]))+'</td><td data-l="'+esc(hs("Party"))+'">'+esc(hs(w[2]))+'</td><td data-l="'+esc(hs("Verify"))+'"><a href="'+L.mcg+'" target="_blank" rel="noopener" class="ext">MCG</a> · <a href="'+L.voterList+'" target="_blank" rel="noopener" class="ext">'+hs("Voter list")+'</a> · <a href="'+srv("/ward/"+w[0])+'" data-ward-page="'+w[0]+'">'+hs("Ward page")+'</a></td></tr>'}).join(""):'<tr><td colspan="4" class="muted">'+hs("No ward matches that.")+'</td></tr>'}
 $("wardSearch").addEventListener("input",function(){renderWards(this.value.trim())}); renderWards("");
 
 /* charter */
@@ -365,7 +365,7 @@ function renderPulse(){var box=$("pulseBody");if(!box)return;if(!API_ON){box.inn
     html+='<div class="dash-card"><h3>'+hs("Mentions this week")+'</h3><div class="bars">'+p.topics.map(function(x){var c=catById(x.issue_type);var label=c?catLabel(c):hs(x.label||x.issue_type);return '<div class="bar"><span>'+esc(label)+'</span><div class="trk" style="width:'+Math.round((x.count||0)/max*100)+'%"><div class="seg" style="width:100%;background:var(--blue)"></div></div><span class="tot">'+(x.count||0)+'</span></div>'}).join("")+'</div></div>';
     html+=p.topics.slice(0,8).map(function(x){var c=catById(x.issue_type);var label=c?catLabel(c):hs(x.label||x.issue_type);return '<div class="dash-card"><h3>'+esc(label)+' <span class="tag">'+(x.count||0)+' · '+trendWord(x.trend)+'</span></h3>'+(x.areas&&x.areas.length?'<p class="small muted">'+hs("Areas")+': '+x.areas.slice(0,5).map(function(a){return esc(hs(a.area))+' ('+a.n+')'}).join(", ")+'</p>':'')+(x.examples&&x.examples.length?'<ul class="linklist">'+x.examples.slice(0,4).map(function(e){return '<li>'+ic("link")+(e.url?'<a href="'+esc(e.url)+'" target="_blank" rel="noopener">'+esc(e.title)+'</a>':esc(e.title))+' <span class="small muted">· '+esc(hs(e.source==="reports"?"Forum report":e.source==="news"?"news":"Reddit"))+(e.posted_at?' · '+esc(fmtDate(e.posted_at)):'')+'</span></li>'}).join("")+'</ul>':'')+'</div>'}).join("");
     if(p.actions&&p.actions.length)html+='<div class="dash-card"><h3>'+hs("What the Forum could do next")+'</h3>'+stepsHtml(p.actions.map(function(a){return (a.title||a.action||"")+(a.why?" — "+a.why:"")+(a.when?" ("+a.when+")":"")}))+'</div>';
-    html+='<p class="small muted" style="margin:1rem 0 .25rem">'+hs("Share this")+'</p>'+shareRow(head||hs("What Gurugram is talking about"),siteUrl("/#/pulse"));
+    html+='<p class="small muted" style="margin:1rem 0 .25rem">'+hs("Share this")+'</p>'+shareRow(head||hs("What Gurugram is talking about"),siteUrl("/pulse"));
     html+='<p class="small muted">'+hs("Sources: public posts on Reddit, local news via Google News, and reports to the Forum. Counts only; no names are stored.")+'</p>';
     box.innerHTML=html};
   if(PULSE){paint(PULSE);return}box.innerHTML='<p class="muted">'+hs("Loading…")+'</p>';api("/pulse").then(function(j){PULSE=j;paint(j)},function(){box.innerHTML='<div class="empty">'+t("k.offline","The Forum\'s server could not be reached. Try again in a minute.")+'</div>'})}
@@ -696,7 +696,7 @@ function loadInsights(){var box=$("insightsBody");box.innerHTML='<p class="muted
 
 /* boot */
 renderTiles(); renderWhoFilter(); renderCatSelect();
-(function(){var p=location.pathname.replace(/\/+$/,"");var m=p.match(/^\/(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix)(?:\/([^\/]+))?$/);
+(function(){var p=location.pathname.replace(/\/+$/,"");var m=p.match(/^\/(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix|news|pulse)(?:\/([^\/]+))?$/);
   if(m&&history.replaceState){var target="#/"+m[1]+(m[2]?"/"+m[2]:"");history.replaceState(null,"",location.origin+"/"+(location.hash&&location.hash!=="#/"?location.hash:target));route()}})();
 renderSubscribe();
 window.__booted=true;if(lang==="hi")applyLang("hi");loadContent();
