@@ -295,7 +295,7 @@ test("narrate falls back to the rule-based brief without a provider and never to
   assert.equal(called, false);
   assert.equal(b.ai, false);
   assert.equal(b.provider, null);
-  assert.equal(b.summary_en, "This week residents talked most about garbage (2), stray animals (1) and drains, flooding (1), across 8 public posts, news items and reports.");
+  assert.equal(b.summary_en, "This week residents talked most about garbage (2), stray animals (1) and drains, flooding (1), across 8 public posts and news items.");
   assert.match(b.summary_hi, /इस हफ़्ते निवासियों ने सबसे ज़्यादा कचरा \(2\)/);
   assert.equal(b.headline_en, "Garbage top the week's civic talk");
   assert.equal(b.actions.length, 5);
