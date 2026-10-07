@@ -202,8 +202,8 @@
             <div class="field"><label for="fName" data-i18n="f.name">Your name</label><input type="text" id="fName" autocomplete="name" required></div>
             <div class="field"><label for="fPhone" data-i18n="f.phone">Mobile</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" required></div>
           </div>
-          <div class="field"><label for="fEmail" data-i18n="f.email">Email</label><input type="email" id="fEmail" autocomplete="email" required></div>
-          <div class="frow"><div class="field"><label for="fPincode" data-i18n="f.pin">PIN code</label><input type="text" id="fPincode" inputmode="numeric" maxlength="6" autocomplete="postal-code" required></div><div class="field"><label for="fCity" data-i18n="f.city">City</label><input type="text" id="fCity" value="Gurugram" autocomplete="address-level2" required></div></div>
+          <div class="field"><label for="fEmail" data-i18n="f.email">Email (optional, for updates)</label><input type="email" id="fEmail" autocomplete="email"></div>
+          <div class="frow"><div class="field"><label for="fPincode" data-i18n="f.pin">PIN code (optional)</label><input type="text" id="fPincode" inputmode="numeric" maxlength="6" autocomplete="postal-code"></div><div class="field"><label for="fCity" data-i18n="f.city">City</label><input type="text" id="fCity" value="Gurugram" autocomplete="address-level2" required></div></div>
           <div class="field"><label class="check"><input type="checkbox" id="fConsent" required><span data-i18n="f.consent">The Forum may contact me and share the issue, without my phone number, with the authority responsible.</span></label></div>
           <div class="fnav"><button class="btn btn-line" type="button" data-go="2" data-i18n="f.back">Back</button><button class="btn btn-ink" type="button" data-go="4" data-i18n="f.next">Continue</button></div>
         </div>
@@ -549,20 +549,20 @@
   <form class="card" id="gateForm" novalidate>
     <p class="small muted" style="margin:0 0 .25rem" data-i18n="g.kicker">Before you go on</p>
     <h3 id="gateTitle" data-i18n="g.h">Tell us who you are</h3>
-    <p class="small" data-i18n="g.p">The Forum works for Gurugram's residents and needs to know who uses it. Your details stay with the Forum: they are never sold or shared for marketing, and they are used only to run this service and to reach you about it. <a href="#/privacy" data-i18n="g.privacy">Privacy notice</a>.</p>
+    <p class="small" data-i18n="g.p">The Forum works for Gurugram's residents and likes to know who it serves. Your name and mobile are enough; the rest helps us route issues in your area. Your details stay with the Forum, are never sold or shared for marketing, and are used only to run this service and reach you about it.</p><p class="small"><a href="#/privacy" data-i18n="g.privacy">Privacy notice</a></p>
     <div class="frow">
       <div class="field"><label for="gName" data-i18n="g.name">Your name</label><input type="text" id="gName" autocomplete="name" required></div>
       <div class="field"><label for="gPhone" data-i18n="g.phone">Mobile</label><input type="tel" id="gPhone" inputmode="tel" autocomplete="tel" required></div>
     </div>
-    <div class="field"><label for="gEmail" data-i18n="g.email">Email</label><input type="email" id="gEmail" autocomplete="email" required></div>
+    <div class="field"><label for="gEmail" data-i18n="g.email">Email (optional)</label><input type="email" id="gEmail" autocomplete="email"></div>
     <div class="frow">
-      <div class="field"><label for="gArea" data-i18n="g.area">Sector, colony or society</label><input type="text" id="gArea" list="areaList" required></div>
-      <div class="field"><label for="gPin" data-i18n="g.pin">PIN code</label><input type="text" id="gPin" inputmode="numeric" maxlength="6" autocomplete="postal-code" required></div>
+      <div class="field"><label for="gArea" data-i18n="g.area">Sector, colony or society (optional)</label><input type="text" id="gArea" list="areaList"></div>
+      <div class="field"><label for="gPin" data-i18n="g.pin">PIN code (optional)</label><input type="text" id="gPin" inputmode="numeric" maxlength="6" autocomplete="postal-code"></div>
     </div>
-    <div class="field"><label for="gCity" data-i18n="g.city">City</label><input type="text" id="gCity" value="Gurugram" autocomplete="address-level2" required></div>
+    <div class="field"><label for="gCity" data-i18n="g.city">City</label><input type="text" id="gCity" value="Gurugram" autocomplete="address-level2"></div>
     <div class="field"><label class="check"><input type="checkbox" id="gConsent" required><span data-i18n="g.consent">I agree that the Forum keeps these details to run this service and contact me about it. I can ask for them to be corrected or deleted at contact@gurugramvisionforum.org.</span></label></div>
     <p class="err" id="gErr"></p>
-    <button class="btn btn-primary" type="submit" data-i18n="g.go">Continue to the site</button>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center"><button class="btn btn-primary" type="submit" data-i18n="g.go">Continue</button><button class="btn btn-line" type="button" id="gateSkip" data-i18n="g.skip">Not now</button></div>
   </form>
 </div>
 <nav class="bbar" aria-label="Quick navigation" data-i18n-aria="a.quickNav">

@@ -1,7 +1,9 @@
 window.GVF=(function(){
 "use strict";
-/* Visitor registration gate: shown after `after` ms on the site or after `pages` page views, whichever comes first (set both to 0 to switch it off). Bump `version` when the notice wording changes. */
-var GATE={after:90000,pages:2,version:"2026-10-08"};
+/* Visitor registration gate: shown after `after` ms on the site or after `pages` page views, whichever comes first (set both to 0 to switch it off).
+   mode "soft": name and mobile required, the rest optional, a "Not now" button that waits `snooze_days` before asking again (maximum reach).
+   mode "hard": no "Not now", the form must be completed to continue. Bump `version` when the notice wording changes. */
+var GATE={mode:"soft",after:90000,pages:2,snooze_days:7,version:"2026-10-08b"};
 var L={whatsapp:"",gmdaPortal:"https://services.gmda.gov.in/",gmda:"https://www.gmda.gov.in/",mcg:"https://www.mcg.gov.in/",district:"https://gurugram.gov.in/",districtReps:"https://gurugram.gov.in/public-representative/",districtHelp:"https://gurugram.gov.in/helpline/",voterList:"https://gurugram.gov.in/voter-list-for-mc-election-gurugram-2025/",onemap:"https://onemapggm.gmda.gov.in/",police:"https://haryanapolice.gov.in/",cmwindow:"https://cmharyanacell.nic.in/",aas:"https://aas.saralharyana.nic.in/",saral:"https://saralharyana.gov.in/",haryana:"https://haryana.gov.in/",assembly:"https://haryanaassembly.gov.in/",ulb:"https://ulbharyana.gov.in/",dtcp:"https://tcpharyana.gov.in/",hsvp:"https://hsvphry.org.in/",dhbvn:"https://dhbvn.org.in/",hspcb:"https://hspcb.gov.in/",hrera:"https://haryanarera.gov.in/",cpgrams:"https://pgportal.gov.in/",swachh:"https://swachhbharaturban.gov.in/",cpcb:"https://cpcb.nic.in/",rti:"https://rtionline.gov.in/",consumer:"https://consumerhelpline.gov.in/",edaakhil:"https://edaakhil.nic.in/",cyber:"https://cybercrime.gov.in/",nhai:"https://nhai.gov.in/",mygov:"https://www.mygov.in/",mohua:"https://mohua.gov.in/",caqm:"https://caqm.nic.in/",sansad:"https://sansad.in/ls/members",mospi:"https://mospi.gov.in/sites/default/files/profileHonMin/Minister_Profile_28062024.pdf",eci:"https://voters.eci.gov.in/",ulbtax:"https://ulbhryndc.org/",wa:"https://wa.me/917840001817"};
 var STD=[{k:"Portal",v:"GMDA integrated grievance portal",href:L.gmdaPortal,ic:"link"},{k:"Toll-free",v:"1800 180 1817",href:"tel:18001801817",ic:"phone"},{k:"WhatsApp",v:"78400 01817, with a photo",href:L.wa,ic:"chat"},{k:"App",v:"myGurugram",ic:"app"}];
 var LAD=["Ticket on the portal; keep the number. Only you can close it.","No action in time: the officer named on the ticket, then the zone Joint Commissioner or Executive Engineer.","Still pending: MCG Commissioner and Mayor, or GMDA CEO.","Final: CM Window, with every ticket number attached."];
@@ -122,7 +124,7 @@ var HI={"n.fix":"समस्या का हल","n.dir":"निर्दे�
 "g.types":"समस्या प्रकार, हर एक डेस्क से जुड़ा","g.portals":"आधिकारिक पोर्टल और हेल्पलाइन","g.charters":"अधिकार चार्टर, समय-सीमा सहित","g.wards":"वार्ड और उनके पार्षद",
 "t.dir":"निर्देशिका","t.dirp":"हर पोर्टल और हेल्पलाइन जो रिकॉर्ड बनाती है, और किस काम की है।","t.rights":"आपके अधिकार","t.rightsp":"सरकार की अपनी तय समय-सीमाएँ, और उनका उपयोग।","t.who":"कौन ज़िम्मेदार","t.whop":"संसद से वार्ड पार्षद तक: किसका क्या काम, आधिकारिक पेज सहित।","t.wards":"वार्ड","t.wardsp":"सभी 36 पार्षद, और अपना वार्ड खोजने के तीन तरीक़े।","t.charter":"नागरिक चार्टर","t.charterp":"आप शहर को क्या दें, शहर आपको क्या दे। अपना स्कोर देखें।","t.dash":"डैशबोर्ड","t.dashp":"निवासियों ने क्या रिपोर्ट किया, और हर रिपोर्ट कहाँ है।",
 "j.h":"पेशेवर, छात्र और RWA फ़ोरम चलाते हैं।","j.p":"अपने समय के हिसाब से भूमिका चुनें।","j.btn":"फ़ोरम से जुड़ें",
-"r.h":"समस्या दर्ज करें","r.p":"चार छोटे चरण। आपको संदर्भ संख्या और आधिकारिक माध्यम मिलेगा।","f.err":"आगे बढ़ने के लिए चिह्नित खाने भरें।","f.s1":"चरण 1 / 4","f.s2":"चरण 2 / 4","f.s3":"चरण 3 / 4","f.s4":"चरण 4 / 4","f.what":"समस्या क्या है?","f.cat":"समस्या प्रकार","f.scope":"किसे प्रभावित करती है?","f.choose":"एक चुनें","f.sc1":"मुझे या परिवार को","f.sc2":"सोसाइटी या RWA को","f.sc3":"सेक्टर या मोहल्ले को","f.sc4":"पूरे शहर को","f.next":"आगे","f.back":"पीछे","f.where":"कहाँ है?","f.area":"सेक्टर, कॉलोनी या सोसाइटी","f.areaPh":"सेक्टर 56, DLF फ़ेज़ 3, पालम विहार","f.ward":"नगर निगम वार्ड","f.wardHint":"पता नहीं?","f.voter":"मतदाता सूची","f.wdir":"वार्ड सूची","f.spot":"सटीक जगह","f.spotPh":"कम्युनिटी सेंटर गेट के पास, मकान 412 के सामने","f.geo":"मेरी लोकेशन लें","f.details":"विवरण","f.desc":"क्या हो रहा है?","f.descHint":"कब से, क्या किया गया, पुराना टिकट नंबर।","f.name":"आपका नाम","f.phone":"मोबाइल","f.email":"ईमेल","f.consent":"फ़ोरम मुझसे संपर्क कर सकता है और मेरे फ़ोन नंबर के बिना मामला ज़िम्मेदार प्राधिकरण से साझा कर सकता है।","f.check":"जाँचें और भेजें","f.send":"रिपोर्ट भेजें","f.recent":"इस डिवाइस से भेजी रिपोर्टें","f.err2":"भेजने के लिए चिह्नित खाने भरें।",
+"r.h":"समस्या दर्ज करें","r.p":"चार छोटे चरण। आपको संदर्भ संख्या और आधिकारिक माध्यम मिलेगा।","f.err":"आगे बढ़ने के लिए चिह्नित खाने भरें।","f.s1":"चरण 1 / 4","f.s2":"चरण 2 / 4","f.s3":"चरण 3 / 4","f.s4":"चरण 4 / 4","f.what":"समस्या क्या है?","f.cat":"समस्या प्रकार","f.scope":"किसे प्रभावित करती है?","f.choose":"एक चुनें","f.sc1":"मुझे या परिवार को","f.sc2":"सोसाइटी या RWA को","f.sc3":"सेक्टर या मोहल्ले को","f.sc4":"पूरे शहर को","f.next":"आगे","f.back":"पीछे","f.where":"कहाँ है?","f.area":"सेक्टर, कॉलोनी या सोसाइटी","f.areaPh":"सेक्टर 56, DLF फ़ेज़ 3, पालम विहार","f.ward":"नगर निगम वार्ड","f.wardHint":"पता नहीं?","f.voter":"मतदाता सूची","f.wdir":"वार्ड सूची","f.spot":"सटीक जगह","f.spotPh":"कम्युनिटी सेंटर गेट के पास, मकान 412 के सामने","f.geo":"मेरी लोकेशन लें","f.details":"विवरण","f.desc":"क्या हो रहा है?","f.descHint":"कब से, क्या किया गया, पुराना टिकट नंबर।","f.name":"आपका नाम","f.phone":"मोबाइल","f.email":"ईमेल (वैकल्पिक, अपडेट के लिए)","f.consent":"फ़ोरम मुझसे संपर्क कर सकता है और मेरे फ़ोन नंबर के बिना मामला ज़िम्मेदार प्राधिकरण से साझा कर सकता है।","f.check":"जाँचें और भेजें","f.send":"रिपोर्ट भेजें","f.recent":"इस डिवाइस से भेजी रिपोर्टें","f.err2":"भेजने के लिए चिह्नित खाने भरें।",
 "k.h":"मेरी रिपोर्ट कहाँ है?","k.p":"संदर्भ संख्या और मोबाइल के अंतिम 4 अंक दर्ज करें। पाँच चरण, हर बदलाव पर सूचना।","k.ref":"संदर्भ संख्या","k.go":"स्थिति दिखाएँ",
 "d.h":"आधिकारिक माध्यम","d.p":"24 पोर्टल और हेल्पलाइन जो रिकॉर्ड बनाती हैं। ज़रूरत के अनुसार छाँटें।",
 "ri.h":"आपके अधिकार","ri.p":"11 चार्टर, हर एक की समय-सीमा तय। चरण और स्रोत के लिए टैप करें।",
@@ -180,23 +182,24 @@ var HI={"n.fix":"समस्या का हल","n.dir":"निर्दे�
 "pv.p6":"हमारे पास रखी जानकारी देखने, सुधारने या हटाने के लिए अपना संदर्भ नंबर लिखकर",
 "pv.p6b":"पर लिखें।",
 "pv.upd":"अंतिम अपडेट 8 अक्टूबर 2026।",
-"f.pin":"पिन कोड",
+"f.pin":"पिन कोड (वैकल्पिक)",
 "f.city":"शहर",
 "g.kicker":"आगे बढ़ने से पहले",
 "g.h":"हमें बताएँ कि आप कौन हैं",
-"g.p":"फ़ोरम गुरुग्राम के निवासियों के लिए काम करता है और उसे जानना है कि इसका उपयोग कौन करता है। आपके विवरण फ़ोरम के पास ही रहते हैं: वे कभी बेचे या मार्केटिंग के लिए साझा नहीं किए जाते, और केवल इस सेवा को चलाने और इसके बारे में आपसे संपर्क करने के लिए उपयोग होते हैं।",
+"g.p":"फ़ोरम गुरुग्राम के निवासियों के लिए काम करता है और जानना चाहता है कि वह किसकी सेवा कर रहा है। आपका नाम और मोबाइल काफ़ी है; बाकी जानकारी आपके क्षेत्र की समस्याओं को सही जगह पहुँचाने में मदद करती है। आपके विवरण फ़ोरम के पास ही रहते हैं, कभी बेचे या मार्केटिंग के लिए साझा नहीं किए जाते, और केवल इस सेवा को चलाने और इसके बारे में आपसे संपर्क करने के लिए उपयोग होते हैं।",
 "g.privacy":"गोपनीयता सूचना",
 "g.name":"आपका नाम",
 "g.phone":"मोबाइल",
-"g.email":"ईमेल",
-"g.area":"सेक्टर, कॉलोनी या सोसाइटी",
-"g.pin":"पिन कोड",
+"g.email":"ईमेल (वैकल्पिक)",
+"g.area":"सेक्टर, कॉलोनी या सोसाइटी (वैकल्पिक)",
+"g.pin":"पिन कोड (वैकल्पिक)",
 "g.city":"शहर",
 "g.consent":"मैं सहमत हूँ कि फ़ोरम इस सेवा को चलाने और इसके बारे में मुझसे संपर्क करने के लिए ये विवरण रखे। मैं contact@gurugramvisionforum.org पर इन्हें सुधारने या हटाने के लिए कह सकता/सकती हूँ।",
-"g.go":"साइट पर आगे बढ़ें",
+"g.go":"आगे बढ़ें",
 "n.news":"आधिकारिक समाचार",
 "nw.h":"अधिकारियों से क्या नया है",
-"nw.p":"इस साइट से जुड़ी आधिकारिक संस्थाओं की सूचनाएँ और समाचार, हर दिन इकट्ठा किए गए। हर आइटम आधिकारिक पृष्ठ खोलता है।"};
+"nw.p":"इस साइट से जुड़ी आधिकारिक संस्थाओं की सूचनाएँ और समाचार, हर दिन इकट्ठा किए गए। हर आइटम आधिकारिक पृष्ठ खोलता है।",
+"g.skip":"अभी नहीं"};
 
 
 /* Hindi for data and interface strings, keyed by the English text (app.js hs()). Generated from the content above; regenerate when English copy changes. */
