@@ -51,6 +51,7 @@ function rerender(){renderTiles();renderWhoFilter();renderCatSelect();if(selecte
   if(reportInit){initAreas();showHint();renderRecent();if(step===4)renderSummary();if($("confirm").classList.contains("show"))paintConfirm()}
   renderDir();renderRights();renderWho();renderWards(($("wardSearch").value||"").trim());renderCivic();renderUpdates();renderJoin();renderMix();
   if(curView==="dashboard")paintDash();if(curView==="post")renderPost(decodeURIComponent(location.hash.split("/")[2]||""));
+  if(curView==="pub")paintPub();if(curView==="map")renderPubMap();
   if(curView)document.title=hs("Gurugram Vision Forum")+" — "+hs(TITLES[curView]);
   if($("trRef").value.trim()&&$("trOut").innerHTML)showTrack()}
 function toggleLang(){applyLang(lang==="hi"?"en":"hi");toast(lang==="hi"?"हिंदी में":"English")}
@@ -87,12 +88,12 @@ $("searchBtn").addEventListener("click",openCmd); $("searchBtn2").addEventListen
 $("cmdList").addEventListener("click",function(e){if(e.target.closest("a"))closeCmd()});
 
 /* router */
-var VIEWS={desk:"v-desk",home:"v-home",report:"v-report",track:"v-track",directory:"v-directory",rights:"v-rights",who:"v-who",wards:"v-wards",charter:"v-charter",dashboard:"v-dashboard",updates:"v-updates",post:"v-post",join:"v-join",about:"v-about",access:"v-access"};
-var TITLES={desk:"Volunteer desk",home:"Who fixes my problem?",report:"Report an issue",track:"Track a report",directory:"Official channels",rights:"Your rights",who:"Who is responsible",wards:"Your ward",charter:"The civic charter",dashboard:"Accountability dashboard",updates:"Updates",post:"Updates",join:"Join the Forum",about:"About the Forum",access:"Accessibility statement"};
+var VIEWS={desk:"v-desk",map:"v-map",pub:"v-pub",privacy:"v-privacy",home:"v-home",report:"v-report",track:"v-track",directory:"v-directory",rights:"v-rights",who:"v-who",wards:"v-wards",charter:"v-charter",dashboard:"v-dashboard",updates:"v-updates",post:"v-post",join:"v-join",about:"v-about",access:"v-access"};
+var TITLES={desk:"Volunteer desk",map:"Reports on the map",pub:"Report",privacy:"Privacy notice",home:"Who fixes my problem?",report:"Report an issue",track:"Track a report",directory:"Official channels",rights:"Your rights",who:"Who is responsible",wards:"Your ward",charter:"The civic charter",dashboard:"Accountability dashboard",updates:"Updates",post:"Updates",join:"Join the Forum",about:"About the Forum",access:"Accessibility statement"};
 var curView=null;
 function route(){
   var h=location.hash.replace(/^#\/?/,""); var parts=h.split("/"); var name=parts[0]||"home"; var arg=parts[1]?decodeURIComponent(parts[1]):"";
-  var map={"":"home",home:"home",fix:"home",desk:"desk",report:"report",track:"track",directory:"directory",rights:"rights",who:"who",wards:"wards",charter:"charter",dashboard:"dashboard",updates:"updates",join:"join",about:"about",accessibility:"access"};
+  var map={"":"home",home:"home",fix:"home",desk:"desk",map:"map",r:"pub",privacy:"privacy",report:"report",track:"track",directory:"directory",rights:"rights",who:"who",wards:"wards",charter:"charter",dashboard:"dashboard",updates:"updates",join:"join",about:"about",accessibility:"access"};
   var v=map[name]; if(!v){location.hash="#/";return}
   if(name==="updates"&&arg){renderPost(arg);v="post"}
   var changed=v!==curView;
@@ -108,6 +109,8 @@ function route(){
   if(v==="report"){initReport()}
   if(v==="desk"){deskRoute(arg)}
   if(v==="dashboard"){renderDash()}
+  if(v==="map"){renderPubMap()}
+  if(v==="pub"){renderPub(arg.toUpperCase())}
   if(changed){window.scrollTo({top:0,behavior:"instant" in window?"instant":"auto"});curView=v}
   closeMenu();
 }
@@ -352,6 +355,38 @@ var mapQT;$("mapQ").addEventListener("input",function(){clearTimeout(mapQT);var 
 $("mapHits").addEventListener("click",function(e){var b=e.target.closest("[data-hit]");if(!b)return;var h=$("mapHits")._hits[+b.getAttribute("data-hit")];$("mapHits").hidden=true;$("mapQ").value=h.name.split(",")[0];initSpotMap();setPin(h.lat,h.lng,true)});
 document.addEventListener("click",function(e){if(!e.target.closest(".mapsearch"))$("mapHits").hidden=true});
 
+/* ---------------- public report pages and map (#/r/REF, #/map) ---------------- */
+var PUB_STAGES=["Received","Mapped","Filed officially","Escalated","Resolved"];
+var pubData=null,pubRef="";
+function pubUrl(ref){return "https://gurugramvisionforum.org/r/"+ref}
+function renderPub(ref){var box=$("pubBody");pubRef=ref;if(!/^GVF-\d{4}-[A-Z0-9]{5}$/.test(ref)){box.innerHTML='<h1>'+hs("Report")+'</h1><div class="empty">'+hs("No report has this reference.")+'</div>';return}
+  box.innerHTML='<h1>'+fmt(hs("Report {ref}"),{ref:esc(ref)})+'</h1><p class="muted">'+hs("Loading…")+'</p>';
+  if(!API_ON){pubData=null;box.innerHTML='<h1>'+fmt(hs("Report {ref}"),{ref:esc(ref)})+'</h1><div class="empty">'+t("k.offline","The Forum\'s server could not be reached. Try again in a minute.")+'</div>';return}
+  api("/public/report?ref="+encodeURIComponent(ref)).then(function(j){pubData=j.report;paintPub()},function(err){pubData=null;box.innerHTML='<h1>'+fmt(hs("Report {ref}"),{ref:esc(ref)})+'</h1><div class="empty">'+(err.status===404?hs("No report has this reference."):t("k.offline","The Forum\'s server could not be reached. Try again in a minute."))+'</div>'})}
+function paintPub(){var r=pubData,box=$("pubBody");if(!r)return;var c=catById(r.issue_type),st=r.stage||0,ev={};(r.events||[]).forEach(function(e){if(ev[e.stage]==null)ev[e.stage]=e.created_at});
+  var w=r.ward?D.WARDS[r.ward-1]:null;
+  var tl='<ol class="tl">'+PUB_STAGES.map(function(name,i){var tag=i<st?'<span class="tag tag-green">'+ic("check")+hs("Done")+'</span>':i===st?'<span class="tag tag-saffron">'+hs("Now")+'</span>':'';var when=ev[i]!=null&&i<=st?'<span class="small muted"> · '+esc(fmtDate(ev[i]))+'</span>':'';return '<li class="'+(i<st?'done':i===st?'now':'')+'"><b>'+esc(hs(name))+' '+tag+'</b><span>'+esc(hs(STAGES[i][1]))+when+'</span></li>'}).join("")+'</ol>';
+  var share=pubUrl(r.ref),wa="https://wa.me/?text="+encodeURIComponent(fmt(hs("Report {ref}"),{ref:r.ref})+": "+(c?catLabel(c):r.issue_type)+", "+r.area+". "+share);
+  box.innerHTML='<p class="small muted" style="margin:0 0 .25rem">'+hs("Public view: issue, place and stage only. No names, no contact details.")+'</p><h1 style="margin-top:0">'+fmt(hs("Report {ref}"),{ref:esc(r.ref)})+'</h1>'+
+    '<p style="font-size:1.15rem"><b>'+esc(c?catLabel(c):hs(r.issue_label||r.issue_type))+'</b> · '+esc(hs(r.area))+(r.ward?fmt(hs(", ward {n}"),{n:r.ward})+(w?' ('+esc(hs(w[1]))+')':''):'')+'</p>'+
+    '<p class="small muted">'+fmt(hs("Received {d}"),{d:esc(fmtDate(r.created_at))})+(r.official_filed_at?' · '+fmt(hs("Filed officially {d}"),{d:esc(fmtDate(r.official_filed_at))}):'')+(r.resolved_at?' · '+fmt(hs("Resolved {d}"),{d:esc(fmtDate(r.resolved_at))}):'')+(r.desk?' · '+fmt(hs("Desk: {d}"),{d:esc(hs(r.desk))}):'')+'</p>'+tl+
+    '<div class="box" style="margin-top:1.25rem"><h4 style="margin-bottom:.35rem">'+hs("Follow by email")+'</h4><p class="small muted" style="margin:0 0 .6rem">'+hs("You will get an email at each stage change. One click stops it.")+(r.followers?' '+fmt(hs("{n} people follow this report."),{n:r.followers}):'')+'</p><form id="followForm" novalidate><div class="frow" style="align-items:end"><div class="field" style="margin:0"><label for="fwEmail">'+hs("Your email")+'</label><input type="email" id="fwEmail" autocomplete="email"></div><button class="btn btn-ink" type="submit">'+hs("Follow")+'</button></div><p class="err" id="fwErr"></p><p class="small" id="fwOk" hidden></p></form></div>'+
+    '<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem"><a class="btn btn-primary" href="#/report/'+esc(r.issue_type)+'">'+hs("Me too: report the same issue")+'</a><button class="btn btn-line" type="button" id="pubCopy">'+hs("Copy link")+'</button><a class="btn btn-line" href="'+wa+'" target="_blank" rel="noopener">'+hs("Share on WhatsApp")+'</a></div>'+
+    '<p class="small muted" style="margin-top:1rem"><a href="#/track/'+esc(r.ref)+'">'+hs("Is this your report? Track it with the last 4 digits of your mobile.")+'</a></p>';
+  $("pubCopy").addEventListener("click",function(){if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(share).then(function(){toast(hs("Link copied"))},function(){toast(hs("Could not copy"))});else toast(hs("Copy is not supported here"))});
+  $("followForm").addEventListener("submit",function(e){e.preventDefault();var em=$("fwEmail").value.trim(),err=$("fwErr"),ok=$("fwOk");err.classList.remove("show");if(!/^\S+@\S+\.\S+$/.test(em)){err.textContent=hs("Enter a valid email.");err.classList.add("show");return}
+    var btn=this.querySelector("button[type=submit]");btn.disabled=true;api("/follow",{method:"POST",body:{ref:r.ref,email:em}}).then(function(){btn.disabled=false;ok.textContent=hs("Following. We email you when the stage changes.");ok.hidden=false;$("fwEmail").value=""},function(){btn.disabled=false;err.textContent=hs("Could not save. Try again.");err.classList.add("show")})})}
+var pubMap=null,pubMarkers=[];
+function renderPubMap(){$("pubLegend").innerHTML=PUB_STAGES.map(function(name,i){return '<span><span class="sw" style="background:'+STAGE_COLOR[i]+'"></span>'+esc(hs(name))+'</span>'}).join("");
+  if(!API_ON){$("pubCount").textContent=hs("The map could not load. Check the connection and try again.");return}
+  $("pubCount").textContent=hs("Loading…");
+  loadMapLib().then(function(ml){if(!pubMap){pubMap=makeMap($("pubMap"),11.3);pubMap.addControl(new ml.NavigationControl({showCompass:false}),"top-right")}
+    return api("/public/reports").then(function(j){pubMarkers.forEach(function(m){m.remove()});pubMarkers=[];var pts=j.reports||[];
+      pts.forEach(function(r){var c=catById(r.issue_type);var m=new ml.Marker({element:pinEl(STAGE_COLOR[r.stage]||"#0B2545"),anchor:"bottom"}).setLngLat([r.lng,r.lat]).setPopup(new ml.Popup({offset:24}).setHTML('<b>'+esc(r.ref)+'</b><br>'+esc(c?catLabel(c):r.issue_type)+(r.ward?fmt(hs(", ward {n}"),{n:r.ward}):'')+'<br>'+esc(hs(PUB_STAGES[r.stage]||""))+' · <a href="#/r/'+esc(r.ref)+'">'+hs("View")+'</a>')).addTo(pubMap);pubMarkers.push(m)});
+      $("pubCount").textContent=fmt(hs("{n} reports with a map pin"),{n:pts.length})+(j.counts&&j.counts.total!=null?' · '+fmt(hs("{n} reports in all"),{n:j.counts.total}):'')+'.';
+      if(pts.length){var b=new ml.LngLatBounds();pts.forEach(function(r){b.extend([r.lng,r.lat])});pubMap.fitBounds(b,{padding:60,maxZoom:15,duration:0})}})},function(){$("pubCount").textContent=hs("The map could not load. Check the connection and try again.")})}
+if(L.whatsapp){$("waLink").href=L.whatsapp;$("waRow").hidden=false}
+
 /* ---------------- volunteer desk (#/desk) ---------------- */
 var STAGE_TAG=["tag","tag-blue","tag-blue","tag-saffron","tag-green"],STAGE_COLOR=["#94A3B8","#7FB2F0","#0A4A8C","#FF9933","#4ADE80"];
 var CHANNELS=["GMDA portal","Swachhata app","DHBVN 1912","Police or 112","HRERA","DTCP","HSPCB or Sameer","CM Window","CPGRAMS","Consumer helpline 1915","RTI","Other"];
@@ -369,6 +404,12 @@ function dapi(path,opts,retry){opts=opts||{};var h={};if(opts.body)h["Content-Ty
     if(!r.ok){var e=new Error(j.error||("http_"+r.status));e.status=r.status;e.fields=j.fields;throw e}return j})})}
 function drefresh(){return fetch(API+"/triage/refresh",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({refresh_token:S.session.refresh_token})}).then(function(r){return r.json().then(function(j){if(!r.ok||!j.session){signOut(true);throw new Error("expired")}setSession({session:j.session,staff:j.staff})})},function(){signOut(true);throw new Error("offline")})}
 function signOut(silent){setSession(null);deskLoaded=false;deskShow("login");if(!silent)toast("Signed out")}
+$("pwBtn").addEventListener("click",function(){var f=$("pwForm");f.hidden=!f.hidden;if(!f.hidden)$("pwNew").focus()});
+$("pwCancel").addEventListener("click",function(){$("pwForm").hidden=true;$("pwForm").reset();$("pwErr").classList.remove("show")});
+$("pwForm").addEventListener("submit",function(e){e.preventDefault();var a=$("pwNew").value,b=$("pwNew2").value,err=$("pwErr");err.classList.remove("show");
+  if(a.length<10||!/[a-z]/i.test(a)||!/\d/.test(a)){err.textContent="At least 10 characters with letters and a number.";err.classList.add("show");return}
+  if(a!==b){err.textContent="The two passwords differ.";err.classList.add("show");return}
+  var btn=this.querySelector("button[type=submit]");btn.disabled=true;dapi("/triage/password",{method:"POST",body:{password:a}}).then(function(){btn.disabled=false;$("pwForm").reset();$("pwForm").hidden=true;toast("Password changed")},function(x){btn.disabled=false;err.textContent=(x&&x.message)||"Could not change the password. Try again.";err.classList.add("show")})});
 function isMgr(){return !!(S&&S.staff&&(S.staff.role==="owner"||S.staff.role==="coordinator"))}
 function deskShow(v){$("deskLogin").hidden=v!=="login";$("deskMain").hidden=v!=="desk";
   if(v==="desk"&&S){$("whoAmI").textContent=(S.staff.name||S.staff.email)+" · "+(S.staff.role==="triage"?"ward volunteer"+(S.staff.wards&&S.staff.wards.length?" · wards "+S.staff.wards.join(", "):""):S.staff.role);$("teamTab").hidden=!isMgr()}
@@ -486,6 +527,8 @@ function deskBoot(){renderChips();loadReports(true)}
 
 /* boot */
 renderTiles(); renderWhoFilter(); renderCatSelect();
+(function(){var p=location.pathname.replace(/\/+$/,"");var m=p.match(/^\/(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix)(?:\/([^\/]+))?$/);
+  if(m&&history.replaceState){var target="#/"+m[1]+(m[2]?"/"+m[2]:"");history.replaceState(null,"",location.origin+"/"+(location.hash&&location.hash!=="#/"?location.hash:target));route()}})();
 window.__booted=true;if(lang==="hi")applyLang("hi");
 route();
 })();

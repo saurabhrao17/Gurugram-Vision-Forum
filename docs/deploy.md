@@ -7,7 +7,7 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 | Piece | Where | Notes |
 | --- | --- | --- |
 | Website | Vercel, static from `site/` | No build step. `vercel.json` sets `outputDirectory` to `site`. |
-| `/api/*` (report, report/upload-url, report/attach, status, join, dashboard, ward, geocode, triage/*) | One Vercel serverless function, `api/index.js`, reached through the `/api/:path*` rewrite in `vercel.json` and routing to `lib/handlers/` | Node 20+, ESM. Holds the Supabase service key. One function because the Hobby plan caps deployments at 12; a 13th file under `api/` fails the deploy with `exceeded_serverless_functions_per_deployment`. |
+| `/api/*` (report, report/upload-url, report/attach, status, join, dashboard, ward, geocode, follow, public/report, public/reports, cron/daily, hooks/whatsapp, hooks/exotel, triage/*) | One Vercel serverless function, `api/index.js`, reached through the `/api/:path*` rewrite in `vercel.json` and routing to `lib/handlers/` | Node 20+, ESM. Holds the Supabase service key. One function because the Hobby plan caps deployments at 12; a 13th file under `api/` fails the deploy with `exceeded_serverless_functions_per_deployment`. |
 | Reports, events, joins, master data | Supabase Postgres, schema in `supabase/migrations/` | Row Level Security on every table. Anon key reads master data only. |
 | Photos and documents | Supabase Storage bucket `report-photos` | Private, 10 MB per file, images and PDF, at most 8 files per report. The browser never holds a storage key: `/api/report` returns a one-hour upload token, `/api/report/upload-url` turns it into signed upload URLs, `/api/report/attach` records the files on the report. The desk reads them through short-lived signed URLs. |
 | Volunteer logins | Supabase Auth + `staff` table | Rows in `staff` grant access to reporter details. |
@@ -39,6 +39,15 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
    - Ward from an area name: `area_wards` (sector or colony to ward). Fill it from the 2023 delimitation notification (Phase 4 of the launch guide); `ward_for_area` understands "Sector 29", "Sec-29" and colony names inside longer text.
    - Every report stores the resident's ward, the detected ward and its source; the desk flags a mismatch so volunteers can correct it.
 
+## Daily cron, email and inbound channels
+
+- `vercel.json` schedules `GET /api/cron/daily` at 03:30 UTC (09:00 IST). Vercel sends `Authorization: Bearer $CRON_SECRET`; set `CRON_SECRET` in the project (any long random string). The run does three things and reports each: the SLA digest (reports unmapped past 3 working days or filed past 21 days, emailed to `COORDINATOR_EMAIL` with references and desk links only), the outbox (stage-change emails to reporters who gave an email and to followers, sent through Resend when `RESEND_API_KEY` and `MAIL_FROM` are set; without a key the rows wait in `outbox`), and the retention sweep (reports resolved more than 24 months ago are deleted with their attachments).
+- Stage changes are queued by a database trigger (`reports_notify_stage`), so every path that moves a report (desk, API, SQL) notifies the same way. Bodies carry the reference, stage, desk and ticket and a tracking link; never a name or number.
+- Public pages: `/api/public/report?ref=` and `/api/public/reports` serve the anonymised view `public_reports` (no names, contact details, description, spot, ticket or files; coordinates rounded to about 100 m). The site shows them at `/r/<ref>` and `/map`, with follow-by-email (`POST /api/follow`; one-click unsubscribe link in every mail).
+- WhatsApp: point the Meta Cloud API webhook at `https://gurugramvisionforum.org/api/hooks/whatsapp` (subscribe to `messages`) with `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`, `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` set. Texts become reports with `source = whatsapp` (issue type "Something else" until the desk maps them) and the sender gets the reference back; a message quoting a reference gets its stage. Exotel: set the passthru or status-callback URL to `https://gurugramvisionforum.org/api/hooks/exotel?token=<EXOTEL_WEBHOOK_TOKEN>`; calls become reports with `source = phone` and the recording link in the description. Both dedupe on the provider message or call id (`inbound_messages`).
+- Real URLs: `/report`, `/track/<ref>`, `/r/<ref>`, `/map`, `/privacy` and the other views are rewritten to `index.html` and moved into the hash by the app, so links shared from the site work and unfurl (OG tags and `og.png`).
+- Volunteers change their own password from the desk header (`POST /api/triage/password`, 10+ characters with letters and a number).
+
 ## Checks after each deploy
 
 - `GET /api/dashboard` returns `{"ok":true,"published":false,...}` before 50 reports.
@@ -47,6 +56,7 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 - Report form, step 3: choosing an issue shows "Needed to file with <portal>" with the portal's fields and document slots (`GVF.FILING` in `site/data.js`, mirrored in `issue_types.filing`). After submitting, the confirmation lists anything still missing and the upload status.
 - Desk, report detail: the filing checklist shows each portal field and document as present or Missing, with the files as links, and offers "Ask the reporter for the missing items" (copies a message; opens email when the reporter gave one).
 - Language toggle: every public page, panel, sheet, form and confirmation switches fully between English and Hindi (the desk stays English). The smoke test checks each route in Hindi for leftover English words.
+- `GET /api/public/reports` answers with counts and pins only; `/r/<ref>` of a real report shows stage and ward but no name; `/privacy` and `/map` open.
 - `node tests/smoke.mjs` passes locally; `npm test` runs the unit tests for the API validation.
 
 ## Privacy, as enforced
@@ -60,10 +70,6 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 
 ## Next build items on this stack
 
-1. Load the ward boundary file into `ward_boundaries` and fill `area_wards`, so wards are set automatically and checked.
-2. Daily cron (Vercel Cron) for SLA flags: unmapped past 3 working days, filed past 21 days; email to the coordinator.
-3. Stage-change notifications by email, then WhatsApp once Meta verification is done.
-4. WhatsApp and Exotel webhooks creating reports with `source` set accordingly.
-5. Public anonymised report pages with follow buttons, on the same map.
-6. 24-month retention job.
-7. Portal filing requirements: review `GVF.FILING` against each portal's live form every quarter (the GMDA portal, DHBVN, HRERA, e-Daakhil and CM Window change their forms), and add the Hindi labels for the fields.
+1. Load the ward boundary file into `ward_boundaries`; volunteers spot-check `area_wards` (seeded from `supabase/seed_area_wards.sql`, see `docs/area-wards-notes.md`).
+2. Stage-change notifications on WhatsApp once Meta verification is done (email is live through the outbox).
+3. Portal filing requirements: review `GVF.FILING` against each portal's live form every quarter (the GMDA portal, DHBVN, HRERA, e-Daakhil and CM Window change their forms), and add the Hindi labels for the fields.

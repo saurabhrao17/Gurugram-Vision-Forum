@@ -18,7 +18,8 @@ const url = pathToFileURL(resolve("site/index.html")).href;
 // Serve site/ over http so the API wiring runs (it stays off under file://).
 const MIME = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".svg": "image/svg+xml" };
 const server = http.createServer(async (req, res) => {
-  const p = req.url.split("?")[0] === "/" ? "/index.html" : req.url.split("?")[0];
+  let p = req.url.split("?")[0] === "/" ? "/index.html" : req.url.split("?")[0];
+  if (!extname(p) && !p.startsWith("/api/")) p = "/index.html"; else if (extname(p)) p = "/" + p.split("/").pop();
   try {
     const body = await readFile(resolve("site" + p));
     res.writeHead(200, { "Content-Type": MIME[extname(p)] || "application/octet-stream" });
@@ -27,7 +28,7 @@ const server = http.createServer(async (req, res) => {
 });
 await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const httpUrl = `http://127.0.0.1:${server.address().port}/`;
-const routes = ["", "report", "track", "directory", "rights", "who", "wards", "charter", "dashboard", "updates", "join", "about", "accessibility"];
+const routes = ["", "report", "track", "directory", "rights", "who", "wards", "charter", "dashboard", "updates", "join", "about", "accessibility", "privacy", "map"];
 
 // Latin tokens that are allowed to remain in Hindi mode: agency acronyms, product names, codes.
 const LATIN_OK = new Set("GMDA MCG DHBVN HRERA DTCP HSVP HSPCB NHAI CAQM CPGRAMS HERC GRAP RERA RWA UPI FIR AQI PIO BPL ECI MPLADS MoSPI CPCB SDM DC OneMap GGM Daakhil Sameer myGurugram Swachhata Saral MyGov RTI NH GVF EN WCAG WhatsApp MLA MP MC Manesar ULB HSIIDC HUDA IC PDF MB NCR Lok Sabha SMS ID OTP JJP INLD AAP BJP INC CSR DLF SPR MG HSVP MCG NIT DMRC RRTS CM Window ABCDE HTML Haryana Online Form Zero GIS".split(" "));
@@ -130,7 +131,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.keyboard.press("Escape");
 
   // Hindi mode: every public view, panel and sheet must read in Hindi (acronyms and codes aside)
-  const hiRoutes = routes.concat(["fix/waste", "rights/rts", "who/mp", "updates/complaint-that-gets-acted-on"]);
+  const hiRoutes = routes.concat(["fix/waste", "rights/rts", "who/mp", "updates/complaint-that-gets-acted-on", "r/GVF-2026-SRV01"]);
   const visibleText = () => page.evaluate(() => {
     const parts = [document.querySelector("header"), document.querySelector("section.view.on"), document.querySelector("footer"), document.querySelector("#sheet.open"), document.querySelector("#panel.show")];
     return parts.filter(Boolean).map((el) => el.innerText).join("\n");
@@ -226,6 +227,15 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
       by_ward: [] }) });
   });
   await page.route("**/api/join", (route) => route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ok: true }) }));
+  const follows = [];
+  await page.route("**/api/follow", (route) => { follows.push(JSON.parse(route.request().postData() || "{}")); return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) }); });
+  await page.route("**/api/public/report?**", (route) => {
+    const ref = new URL(route.request().url()).searchParams.get("ref");
+    if (ref !== "GVF-2026-SRV01") return route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ ok: false, error: "not_found" }) });
+    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, report: { ref, issue_type: "waste", issue_label: "Garbage", area: "Sector 29", ward: 30, stage: 2, created_at: "2026-10-07T10:00:00Z", official_filed_at: "2026-10-09T10:00:00Z", resolved_at: null, desk: "MCG sanitation wing", official_channel: "GMDA portal", lat: 28.46, lng: 77.07, source: "web",
+      events: [{ stage: 0, created_at: "2026-10-07T10:00:00Z" }, { stage: 1, created_at: "2026-10-08T10:00:00Z" }, { stage: 2, created_at: "2026-10-09T10:00:00Z" }], followers: 3 } }) });
+  });
+  await page.route("**/api/public/reports**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, reports: [{ ref: "GVF-2026-SRV01", issue_type: "waste", stage: 2, ward: 30, lat: 28.46, lng: 77.07, created_at: "2026-10-07T10:00:00Z" }], counts: { total: 5, with_location: 1 }, computed_at: "2026-10-07T10:00:00Z" }) }));
   await page.route("**/api/ward**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, ward: 30, source: "table" }) }));
   await page.route("**/api/geocode**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, results: [{ name: "Sector 29, Gurugram", lat: 28.46, lng: 77.07 }] }) }));
 
@@ -309,6 +319,32 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.evaluate(() => localStorage.setItem("gvf_lang", JSON.stringify("en")));
   await page.reload();
   await page.waitForTimeout(150);
+
+  // Public anonymised report page, follow form, share, real URL
+  await page.goto(httpUrl + "#/r/GVF-2026-SRV01");
+  await page.waitForTimeout(250);
+  const pubTxt = await page.locator("#pubBody").innerText();
+  check(pubTxt.includes("GVF-2026-SRV01") && pubTxt.includes("Garbage") && pubTxt.includes("ward 30") && pubTxt.includes("3 people follow"), "public report page shows issue, ward, stage and followers");
+  check(!pubTxt.includes("Test Reporter") && !pubTxt.includes("9899"), "public report page shows no reporter details");
+  check((await page.locator("#pubBody .tl li.done").count()) === 2 && (await page.locator("#pubBody .tl li.now").count()) === 1, "public timeline marks two stages done and one current");
+  await page.fill("#fwEmail", "nope");
+  await page.click("#followForm button[type=submit]");
+  await page.waitForTimeout(80);
+  check(await page.locator("#fwErr.show").isVisible(), "follow form rejects a bad email");
+  await page.fill("#fwEmail", "friend@example.org");
+  await page.click("#followForm button[type=submit]");
+  await page.waitForTimeout(200);
+  check(follows.length === 1 && follows[0].ref === "GVF-2026-SRV01" && follows[0].email === "friend@example.org" && !(await page.locator("#fwOk").isHidden()), "follow form posts the reference and email");
+  check((await page.locator("#pubBody a[href^='https://wa.me/']").count()) === 1 && (await page.locator("#pubBody a[href='#/report/waste']").count()) === 1, "public page offers WhatsApp share and me-too");
+  await page.goto(httpUrl + "#/r/GVF-2026-NOPE1");
+  await page.waitForTimeout(200);
+  check((await page.locator("#pubBody").innerText()).includes("No report has this reference"), "unknown reference shows a clear message");
+  await page.goto(httpUrl + "r/GVF-2026-SRV01");
+  await page.waitForTimeout(300);
+  check((await page.evaluate(() => location.hash)) === "#/r/GVF-2026-SRV01" && (await page.locator("#pubBody").innerText()).includes("Garbage"), "a real URL like /r/REF opens the public page");
+  await page.goto(httpUrl + "map");
+  await page.waitForTimeout(300);
+  check((await page.evaluate(() => location.hash)) === "#/map" && (await page.locator("#pubLegend span .sw").count()) === 5 && (await page.locator("#pubCount").innerText()).length > 0, "/map opens the public map with a stage legend");
 
   // Track: server record wins and shows dates
   await page.goto(httpUrl + "#/track");
@@ -446,6 +482,20 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#sheetBody .tl li").count()) === 3, "timeline refreshes after saving");
   check((await page.locator("#row_GVF-2026-SRV01 .tag").first().innerText()).includes("Filed officially"), "list row updates to the new stage");
   await page.click("#sheetClose");
+
+  const pwCalls = [];
+  await page.route("**/api/triage/password", (route) => { pwCalls.push(JSON.parse(route.request().postData() || "{}")); return json(route, 200, { ok: true }); });
+  await page.click("#pwBtn");
+  check(!(await page.locator("#pwForm").isHidden()), "change-password form opens");
+  await page.fill("#pwNew", "gurugram2026x");
+  await page.fill("#pwNew2", "different");
+  await page.click("#pwForm button[type=submit]");
+  await page.waitForTimeout(80);
+  check(await page.locator("#pwErr.show").isVisible() && pwCalls.length === 0, "mismatched passwords are refused locally");
+  await page.fill("#pwNew2", "gurugram2026x");
+  await page.click("#pwForm button[type=submit]");
+  await page.waitForTimeout(200);
+  check(pwCalls.length === 1 && pwCalls[0].password === "gurugram2026x" && (await page.locator("#pwForm").isHidden()), "password change posts to the API and closes the form");
 
   await page.click('[data-tab="team"]');
   await page.waitForTimeout(250);

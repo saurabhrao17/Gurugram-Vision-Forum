@@ -8,7 +8,7 @@ Read HANDOFF.md first; it holds the context, research, design rules and roadmap.
 
 ## Layout
 - `site/` is the website: `index.html`, `styles.css`, `data.js`, `app.js`. Static, hash-routed, no framework, no build step unless we deliberately add one.
-- `api/index.js` is the single Vercel function, reached through the `/api/:path*` rewrite in `vercel.json`: a router that maps every `/api/*` path to a handler in `lib/handlers/` (`report`, `report/upload-url`, `report/attach`, `status`, `join`, `dashboard`, `ward`, `geocode`, `triage/*`). Add a route by adding a handler and one line in the router. The Hobby plan allows 12 functions per deployment, so never add files under `api/`. `lib/` holds shared code. ESM, Node 20+.
+- `api/index.js` is the single Vercel function, reached through the `/api/:path*` rewrite in `vercel.json`: a router that maps every `/api/*` path to a handler in `lib/handlers/` (`report`, `report/upload-url`, `report/attach`, `status`, `join`, `dashboard`, `ward`, `geocode`, `follow`, `public/report`, `public/reports`, `cron/daily`, `hooks/whatsapp`, `hooks/exotel`, `triage/*`). Add a route by adding a handler and one line in the router. The Hobby plan allows 12 functions per deployment, so never add files under `api/`. `lib/` holds shared code. ESM, Node 20+.
 - The volunteer desk is the `#/desk` route inside `site/app.js` (English only; internal tool). It talks only to `/api/triage/*` with a Supabase Auth bearer token. `triage.html` is a redirect kept for old links.
 - Maps: MapLibre with OpenStreetMap tiles, lazy-loaded from unpkg only when a map is shown; `/api/geocode` and `/api/ward` do search and ward detection server-side (Google when `GOOGLE_MAPS_KEY` is set). Ward polygons live in `ward_boundaries` (PostGIS), sector names in `area_wards`.
 - `supabase/migrations/` is the schema; `supabase/seed.sql` is generated from `site/data.js` by `npm run seed`. Apply both to a new project in that order.
@@ -28,13 +28,14 @@ Read HANDOFF.md first; it holds the context, research, design rules and roadmap.
 - Every external link must be an official page; update `GVF.VERIFIED` when links are checked.
 - The site is fully bilingual. Static markup uses `data-i18n`, `data-i18n-ph` and `data-i18n-aria` keys with Hindi in `GVF.HI`. Everything rendered from data or from app.js goes through `hs("English text")`, which looks the English up in `GVF.HS` (English → Hindi); values sent to the API stay English (`unh()` maps a typed Hindi area back; selects keep English `value` attributes). Blog posts carry `hb` (Hindi HTML). When English copy changes, add or update the matching `HS` entry; the smoke test fails on any Latin word left in Hindi mode that is not an acronym.
 - Secrets never go in the HTML or JS; they belong in the Vercel environment (`.env.example` lists them). The browser only ever calls `/api/*`.
-- The API returns no reporter details: status gives stage and dates after a reference plus last-4 check; the dashboard gives counts and publishes nothing before 50 reports.
+- The API returns no reporter details: status gives stage and dates after a reference plus last-4 check; the dashboard gives counts and publishes nothing before 50 reports; the public feed (`public_reports` view, `/r/<ref>`, `/map`) carries no name, contact, description, spot, ticket or file and rounds coordinates to about 100 m.
+- Notifications go through the `outbox` table (filled by the `reports_notify_stage` trigger and the daily cron) and are sent by `/api/cron/daily`; never email from a request handler. Inbound WhatsApp and Exotel webhooks create reports with their `source` and dedupe on `inbound_messages`.
+- Real URLs (`/report`, `/r/<ref>`, `/map`…) are rewritten to `index.html` in `vercel.json` and moved into the hash at boot; keep the view list in `vercel.json` and in the boot regex in `app.js` in step.
 - The site must keep working when the API is unreachable: local reference, "saved on this device" notice, local track view.
 - Test before committing: `npm test` (unit) and `node tests/smoke.mjs` (Playwright on 390 px and 1366 px: every route, the 4-step report flow, track, sheets, search, theme and language toggles, the mocked API pass, zero console errors).
 
 ## Next build items (in order)
-1. Load the MCG ward boundary file (from GMDA's GIS cell) into `ward_boundaries`; fill `area_wards` from the 2023 delimitation notification.
-2. Quarterly review of `GVF.FILING` against each portal's live form.
-3. Vercel Cron for SLA flags (3 working days unmapped, 21 days filed) and stage-change emails; WhatsApp templates after Meta verification.
-4. "Report on WhatsApp" deep link and helpline number once they exist; WhatsApp and Exotel webhooks creating reports.
-5. Privacy notice page; public anonymised report pages on the map; real URLs and OG tags; 24-month retention job; password change in the desk.
+1. Load the MCG ward boundary file (from GMDA's GIS cell) into `ward_boundaries`; volunteers spot-check `area_wards`.
+2. Go-live settings the owner supplies: domain in Vercel, `CRON_SECRET`, `COORDINATOR_EMAIL`, Resend key and verified sending domain, then WhatsApp (`L.whatsapp` deep link and the Meta webhook vars) and Exotel after registration.
+3. Quarterly review of `GVF.FILING` against each portal's live form; WhatsApp stage-change templates after Meta verification.
+4. Analytics (privacy-respecting, counts only) and a public open-data export of the anonymised feed.
