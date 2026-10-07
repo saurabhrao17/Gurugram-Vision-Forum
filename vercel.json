@@ -106,8 +106,12 @@
   ],
   "crons": [
     {
-      "path": "/api/cron/daily",
+      "path": "/api/cron/fetch",
       "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron/analyse",
+      "schedule": "50 3 * * *"
     }
   ],
   "functions": {
