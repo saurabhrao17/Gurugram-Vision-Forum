@@ -470,3 +470,18 @@ input[aria-invalid="true"],select[aria-invalid="true"],textarea[aria-invalid="tr
 .rv.in{opacity:1; transform:none}
 @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *,*::before,*::after{animation:none!important; transition:none!important} .rv{opacity:1; transform:none} }
 @media print{ .hdr,.bbar,.ftr .tri,.veil,.sheet,.cmdk,.toast{display:none!important} .view{display:block!important} }
+
+/* volunteer desk (triage.html) */
+body.triage{--bbar:0px}
+.triage .hdr .util{gap:.6rem}
+.triage .hdr .brand{min-width:0}
+.who{font-family:var(--head); font-weight:600; font-size:.95rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40vw}
+.filters{display:grid; gap:.75rem; grid-template-columns:1fr; margin:0 0 1rem}
+@media (min-width:768px){ .filters{grid-template-columns:repeat(4,1fr) auto} }
+.filters .field{margin:0}
+.row .flags{display:inline-flex; gap:.35rem; flex-wrap:wrap; margin-left:.4rem; vertical-align:middle}
+.rbox{border:1px solid var(--line); border-radius:8px; padding:.9rem 1rem; margin:1rem 0; background:var(--surface-2)}
+.rbox b{font-family:var(--head)}
+.rbox .note{font-size:.9rem; color:var(--muted); margin:.4rem 0 0}
+.desc{white-space:pre-wrap}
+.login-card{max-width:460px}

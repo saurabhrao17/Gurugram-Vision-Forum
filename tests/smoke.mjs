@@ -238,6 +238,88 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await ctx.close();
 }
 
+// ---- Volunteer desk (triage.html) with mocked /api/triage ----
+{
+  console.log("\nVolunteer desk (mocked /api/triage over http, 1366x860)");
+  const ctx = await browser.newContext({ viewport: { width: 1366, height: 860 } });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
+  page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) errors.push("console: " + m.text()); });
+  const session = { access_token: "tok", refresh_token: "ref", expires_at: 9999999999 };
+  const staff = { user_id: "u1", name: "Coordinator", role: "coordinator", email: "coord@example.org" };
+  const report = (over) => Object.assign({ ref: "GVF-2026-SRV01", issue_type: "waste", issue_label: "Garbage", affects: "My society or RWA", area: "Sector 29", ward: 30, councillor: "Madhu Batra", spot: "Near the gate", lat: null, lng: null,
+    stage: 0, desk: null, official_channel: null, official_ticket: null, official_filed_at: null, escalated_to: null, resolved_at: null, resolution_note: null, source: "web",
+    reporter_name: "Test Reporter", reporter_phone: "+919899999999", reporter_email: null, consent_at: "2026-10-07T10:00:00Z", description: "Garbage not collected.",
+    created_at: "2026-10-07T10:00:00Z", updated_at: "2026-10-07T10:00:00Z", unmapped_overdue: false, filed_overdue: false, events_count: 1, last_event_at: "2026-10-07T10:00:00Z" }, over);
+  let events = [{ stage: 0, note: "Report received", actor: "system", created_at: "2026-10-07T10:00:00Z" }];
+  let state = report();
+  const patches = [];
+  const authed = (route) => (route.request().headers()["authorization"] || "") === "Bearer tok";
+  const json = (route, status, body) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
+  await page.route("**/api/triage/login", (route) => {
+    const b = JSON.parse(route.request().postData() || "{}");
+    return b.password === "secret-pass" ? json(route, 200, { ok: true, session, staff }) : json(route, 401, { ok: false, error: "bad_credentials" });
+  });
+  await page.route("**/api/triage/reports?**", (route) => authed(route) ? json(route, 200, { ok: true, reports: [state, report({ ref: "GVF-2026-OLD02", stage: 0, created_at: "2026-09-20T10:00:00Z", unmapped_overdue: true })], total: 2, offset: 0, limit: 50,
+    summary: { total: 2, received: 2, filed: 0, escalated: 0, resolved: 0, unmapped_past_due: 1, filed_past_due: 0 } }) : json(route, 401, { ok: false, error: "unauthenticated" }));
+  await page.route("**/api/triage/reports/GVF-2026-SRV01", (route) => {
+    if (!authed(route)) return json(route, 401, { ok: false, error: "unauthenticated" });
+    if (route.request().method() === "PATCH") {
+      const p = JSON.parse(route.request().postData() || "{}"); patches.push(p);
+      state = report({ stage: p.official_ticket ? 2 : (p.stage ?? state.stage), desk: p.desk ?? state.desk, official_ticket: p.official_ticket ?? state.official_ticket, official_channel: p.official_channel ?? state.official_channel, events_count: 3 });
+      events = events.concat([{ stage: 2, note: "Filed officially, ticket " + p.official_ticket, actor: "Coordinator <coord@example.org>", created_at: "2026-10-08T10:00:00Z" }, { stage: 2, note: p.note, actor: "Coordinator <coord@example.org>", created_at: "2026-10-08T10:00:01Z" }]);
+    }
+    return json(route, 200, { ok: true, report: state, events });
+  });
+  await page.route("**/api/triage/staff", (route) => json(route, 200, { ok: true, staff: [staff, { user_id: "u2", name: "Vol One", role: "triage", email: "vol@example.org" }] }));
+
+  await page.goto(httpUrl + "triage.html");
+  check(await page.locator("#v-login.on").isVisible(), "desk starts on the sign-in form");
+  await page.fill("#lEmail", "coord@example.org");
+  await page.fill("#lPass", "wrong");
+  await page.click("#lBtn");
+  await page.waitForTimeout(150);
+  check((await page.locator("#lErr").innerText()).includes("Wrong email or password"), "wrong password shows an error");
+  await page.fill("#lPass", "secret-pass");
+  await page.click("#lBtn");
+  await page.waitForSelector("#v-desk.on");
+  await page.waitForTimeout(200);
+  check((await page.locator("#whoAmI").innerText()).includes("Coordinator"), "header shows who is signed in");
+  check((await page.locator("#tList .row").count()) === 2, "list shows two reports");
+  check((await page.locator("#tList .tag-danger").count()) === 1, "overdue report carries a past-due flag");
+  check((await page.locator("#tSummary").innerText()).includes("past due: 1 unmapped"), "summary line shows the counts");
+  check(!(await page.locator("#teamTab").isHidden()), "coordinator sees the Team tab");
+
+  await page.click('[data-open="GVF-2026-SRV01"]');
+  await page.waitForSelector("#editForm");
+  check((await page.locator("#sheetBody").innerText()).includes("Test Reporter"), "detail shows the reporter to signed-in staff");
+  check((await page.locator("#sheetBody .tl li").count()) === 1, "detail shows the event timeline");
+  await page.fill("#eDesk", "MCG sanitation wing");
+  await page.selectOption("#eChan", "GMDA portal");
+  await page.fill("#eTicket", "GMDA-4471");
+  await page.fill("#eNote", "Filed on the portal.");
+  await page.click("#eSave");
+  await page.waitForTimeout(250);
+  check(patches.length === 1 && patches[0].desk === "MCG sanitation wing" && patches[0].official_ticket === "GMDA-4471" && patches[0].official_channel === "GMDA portal" && patches[0].note === "Filed on the portal." && !("stage" in patches[0]), "save sends only the changed fields");
+  check((await page.locator("#sheetBody .tl li").count()) === 3, "timeline refreshes after saving");
+  check((await page.locator("#row_GVF-2026-SRV01 .tag").first().innerText()).includes("Filed officially"), "list row updates to the new stage");
+  await page.click("#sheetClose");
+
+  await page.click('[data-tab="team"]');
+  await page.waitForTimeout(150);
+  check((await page.locator("#staffList .row").count()) === 2, "team tab lists the accounts");
+  check((await page.locator("#staffList [data-remove]").count()) === 0, "coordinator cannot remove accounts");
+
+  await page.click("#signOut");
+  await page.waitForTimeout(100);
+  check(await page.locator("#v-login.on").isVisible(), "sign out returns to the sign-in form");
+  check((await page.evaluate(() => localStorage.getItem("gvf_staff"))) === null, "sign out clears the stored session");
+
+  check(errors.length === 0, "zero console or page errors" + (errors.length ? ": " + errors.join(" | ") : ""));
+  await ctx.close();
+}
+
 await browser.close();
 server.close();
 console.log(failures ? `\n${failures} check(s) failed` : "\nAll checks passed");

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Gurugram Vision Forum — Volunteer desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wght@500;600;700&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="triage">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-mark" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="none" stroke="#FF9933" stroke-width="3" stroke-dasharray="2.6 .9" stroke-linecap="butt"/><g fill="currentColor"><rect x="15" y="24" width="4" height="10"/><rect x="21" y="17" width="4" height="17"/><rect x="27" y="20" width="4" height="14"/><rect x="13" y="34" width="22" height="1.5"/></g></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></symbol>
+<symbol id="i-track" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2zM12 10v4M12 17.5h.01"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+<symbol id="i-who" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0 1 14 0M16 4.5a3.5 3.5 0 0 1 0 7M22 20a7 7 0 0 0-5-6.7"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.5 1.5M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.5-1.5"/></symbol>
+</defs></svg>
+
+<a class="sr" href="#main">Skip to content</a>
+<header class="hdr">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Gurugram Vision Forum, public site"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-mark"/></svg><span>Gurugram Vision Forum</span></a>
+    <span class="tag tag-saffron" id="deskTag">Volunteer desk</span>
+    <div class="util" id="userBar" hidden><span class="who" id="whoAmI"></span><button class="btn btn-line btn-sm" type="button" id="signOut">Sign out</button></div>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="view on" id="v-login">
+  <div class="sec"><div class="wrap">
+    <div class="head"><h1>Volunteer sign-in</h1><p>For the Forum's triage volunteers and coordinators. Residents report issues on the <a href="./#/report">public site</a>.</p></div>
+    <form class="form login-card" id="loginForm" novalidate>
+      <div class="err" id="lErr" role="alert">Check your email and password.</div>
+      <div class="field"><label for="lEmail">Email</label><input type="email" id="lEmail" autocomplete="username" required></div>
+      <div class="field"><label for="lPass">Password</label><input type="password" id="lPass" autocomplete="current-password" required></div>
+      <button class="btn btn-primary" type="submit" id="lBtn">Sign in</button>
+      <p class="hint" style="margin-top:1rem">Accounts are created by the coordinator. Reports and reporter details stay inside this desk; share the issue and the place with an authority, never the phone number.</p>
+    </form>
+  </div></div>
+</section>
+
+<section class="view" id="v-desk">
+  <div class="sec"><div class="wrap">
+    <div class="head"><h1>Reports</h1><p id="tSummary">Loading…</p></div>
+    <div class="tabs" id="tTabs" role="tablist"><button class="tab" role="tab" type="button" data-tab="reports" aria-selected="true">Reports</button><button class="tab" role="tab" type="button" data-tab="team" aria-selected="false" id="teamTab" hidden>Team</button></div>
+
+    <div id="tReports">
+      <div class="chips" id="stageChips" role="group" aria-label="Stage"></div>
+      <div class="filters">
+        <div class="field"><label for="fIssue">Issue</label><select id="fIssue"><option value="">All issues</option></select></div>
+        <div class="field"><label for="fWard">Ward</label><select id="fWard"><option value="">All wards</option></select></div>
+        <div class="field"><label for="fFlag">Deadline</label><select id="fFlag"><option value="">All</option><option value="overdue">Past due only</option></select></div>
+        <div class="field"><label for="fQ">Search</label><input type="search" id="fQ" placeholder="Reference, area, name, ticket" autocomplete="off"></div>
+        <div class="field" style="align-self:end"><button class="btn btn-line" type="button" id="tRefresh">Refresh</button></div>
+      </div>
+      <ul class="rows" id="tList"></ul>
+      <div class="empty" id="tEmpty" hidden>No reports match these filters.</div>
+      <p style="margin-top:1rem"><button class="btn btn-line" type="button" id="tMore" hidden>Load more</button></p>
+    </div>
+
+    <div id="tTeam" hidden>
+      <ul class="rows" id="staffList"></ul>
+      <h3 style="margin-top:1.5rem">Add a volunteer</h3>
+      <form class="form" id="staffForm" novalidate>
+        <div class="err" id="sErr" role="alert">Check the highlighted fields.</div>
+        <div class="frow">
+          <div class="field"><label for="sName">Name</label><input type="text" id="sName" required></div>
+          <div class="field"><label for="sEmail">Email</label><input type="email" id="sEmail" required autocomplete="off"></div>
+          <div class="field"><label for="sPass">Temporary password (10+ characters)</label><input type="text" id="sPass" required autocomplete="off"></div>
+          <div class="field"><label for="sRole">Role</label><select id="sRole"><option value="triage">Triage volunteer</option><option value="coordinator">Coordinator</option><option value="owner">Owner</option></select></div>
+        </div>
+        <button class="btn btn-primary" type="submit">Create account</button>
+        <p class="hint" style="margin-top:.75rem">Send the password to the volunteer in person or by phone, not by email. Only owners can remove accounts.</p>
+      </form>
+    </div>
+  </div></div>
+</section>
+</main>
+
+<div class="veil" id="veil"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"><div class="sh"><h3 id="sheetTitle"></h3><button class="x" id="sheetClose" type="button" aria-label="Close"><svg class="i" aria-hidden="true"><use href="#i-close"/></svg></button></div><div class="sb" id="sheetBody"></div></aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="ftr"><div class="wrap"><div class="fnote"><span>Volunteer desk of the Gurugram Vision Forum. Not a government website. Emergencies: 112.</span><span><a href="./">Public site</a></span></div></div><div class="tri" aria-hidden="true"></div></footer>
+
+<script src="data.js"></script>
+<script src="triage.js"></script>
+</body>
+</html>
