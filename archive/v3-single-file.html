@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gurugram Vision Forum — Who fixes my problem?</title>
+<meta name="description" content="Find the desk responsible for your civic issue in Gurugram, report it, know your rights and your ward, and see what the Forum is fixing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wght@500;600;700&family=Anek+Devanagari:wght@600;700&family=Noto+Sans:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0B2545; --blue:#0A4A8C; --blue-50:#EAF2FB; --blue-100:#D4E4F7;
+  --green:#0F6B3A; --green-50:#E8F5EC; --saffron:#FF9933; --saffron-700:#B45309; --saffron-50:#FFF4E6;
+  --warn:#8A5A00; --warn-50:#FFF7E0; --danger:#B42318; --danger-50:#FCECEA;
+  --text:#1B2430; --muted:#4B5563; --line:#D9DEE5; --line-2:#EAEEF3; --paper:#FAFAF7; --surface:#FFFFFF; --surface-2:#F3F5F8;
+  --ring:0 0 0 3px var(--ink), 0 0 0 6px var(--saffron); --sel-bg:#0B2545; --sel-fg:#FFFFFF;
+  --shadow:0 18px 48px -20px rgba(11,37,69,.35);
+  --r-card:12px; --r-ctl:8px; --r-pill:999px;
+  --head:"Anek Latin","Anek Devanagari","Segoe UI",Arial,sans-serif;
+  --body:"Noto Sans","Noto Sans Devanagari","Segoe UI",Arial,sans-serif;
+  --hi-head:"Anek Devanagari","Anek Latin",sans-serif; --hi-body:"Noto Sans Devanagari","Noto Sans",sans-serif;
+  --hdr:64px; --bbar:64px;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --ink:#E6EAF0; --blue:#7FB2F0; --blue-50:#132238; --blue-100:#1B3050;
+  --green:#4ADE80; --green-50:#0F2A1C; --saffron:#FF9933; --saffron-700:#FFB35C; --saffron-50:#2E1F0E;
+  --warn:#F5C451; --warn-50:#2E2410; --danger:#F28B82; --danger-50:#3A1512;
+  --text:#E6EAF0; --muted:#A7B1BE; --line:#26303B; --line-2:#1E2731; --paper:#0F1419; --surface:#161C24; --surface-2:#1C2430;
+  --shadow:0 18px 48px -20px rgba(0,0,0,.7); --sel-bg:#7FB2F0; --sel-fg:#0B2545;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#E6EAF0; --blue:#7FB2F0; --blue-50:#132238; --blue-100:#1B3050;
+    --green:#4ADE80; --green-50:#0F2A1C; --saffron:#FF9933; --saffron-700:#FFB35C; --saffron-50:#2E1F0E;
+    --warn:#F5C451; --warn-50:#2E2410; --danger:#F28B82; --danger-50:#3A1512;
+    --text:#E6EAF0; --muted:#A7B1BE; --line:#26303B; --line-2:#1E2731; --paper:#0F1419; --surface:#161C24; --surface-2:#1C2430;
+    --shadow:0 18px 48px -20px rgba(0,0,0,.7); --sel-bg:#7FB2F0; --sel-fg:#0B2545;
+    color-scheme:dark;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:calc(var(--hdr) + 16px); -webkit-text-size-adjust:100%}
+body{margin:0; background:var(--paper); color:var(--text); font-family:var(--body); font-size:1.125rem; line-height:1.6; -webkit-font-smoothing:antialiased; padding-top:env(safe-area-inset-top,0px)}
+@media (min-width:1024px){ body{font-size:1.1875rem} }
+html[lang="hi"] body{font-family:var(--hi-body); line-height:1.75}
+html[lang="hi"] h1,html[lang="hi"] h2,html[lang="hi"] h3,html[lang="hi"] h4,html[lang="hi"] .btn,html[lang="hi"] .tile span,html[lang="hi"] .nav a{font-family:var(--hi-head)}
+h1,h2,h3,h4{font-family:var(--head); color:var(--ink); margin:0 0 .4em; font-weight:700; letter-spacing:-.012em; text-wrap:balance}
+h1{font-size:clamp(2rem,3.4vw,2.75rem); line-height:1.15}
+h2{font-size:clamp(1.625rem,2.6vw,2.125rem); line-height:1.2}
+h3{font-size:clamp(1.25rem,1.8vw,1.5rem); line-height:1.3; font-weight:600}
+h4{font-size:1.125rem; line-height:1.35; font-weight:600}
+.display{font-family:var(--head); font-weight:700; font-size:clamp(2.25rem,5vw,3.5rem); line-height:1.08; letter-spacing:-.02em; color:var(--ink); margin:0 0 .5rem; text-wrap:balance}
+p{margin:0 0 1em; max-width:66ch}
+.lead{font-size:clamp(1.25rem,1.6vw,1.375rem); line-height:1.5; max-width:58ch}
+.muted{color:var(--muted)}
+.small{font-size:1rem; line-height:1.5}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+a{color:var(--blue); text-decoration-thickness:1px; text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:none; box-shadow:var(--ring); border-radius:4px}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.wrap{width:min(1200px, 100% - 2rem); margin-inline:auto}
+@media (min-width:640px){ .wrap{width:min(1200px, 100% - 3rem)} }
+.read{max-width:720px}
+.i{width:24px; height:24px; flex:none; stroke:currentColor; fill:none; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round; vertical-align:-6px}
+.i-s{width:18px; height:18px; vertical-align:-4px}
+.i-l{width:32px; height:32px}
+.ext::after{content:""; display:inline-block; width:.7em; height:.7em; margin-left:.28em; vertical-align:-1px; background:currentColor; -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17L17 7M9 7h8v8'/%3E%3C/svg%3E") center/contain no-repeat; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17L17 7M9 7h8v8'/%3E%3C/svg%3E") center/contain no-repeat}
+
+/* buttons */
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:.5rem; min-height:44px; padding:.6rem 1.1rem; border-radius:var(--r-ctl); border:1.5px solid transparent; font-family:var(--head); font-weight:600; font-size:1.0625rem; line-height:1.1; cursor:pointer; text-decoration:none; transition:background .15s, border-color .15s, color .15s, transform .15s}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--saffron); color:#0B2545; border-color:var(--saffron)}
+.btn-primary:hover{background:#FFA64D; border-color:#FFA64D; color:#0B2545}
+.btn-ink{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+:root[data-theme="dark"] .btn-ink{background:var(--blue); color:#0B2545; border-color:var(--blue)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .btn-ink{background:var(--blue); color:#0B2545; border-color:var(--blue)} }
+.btn-ink:hover{filter:brightness(1.08)}
+.btn-line{background:transparent; color:var(--ink); border-color:var(--line)}
+.btn-line:hover{border-color:var(--ink); color:var(--ink)}
+.btn-sm{min-height:36px; padding:.35rem .75rem; font-size:.95rem; border-radius:6px}
+.btn:disabled{opacity:.55; cursor:not-allowed; transform:none}
+
+/* header */
+.hdr{position:sticky; top:env(safe-area-inset-top,0px); z-index:40; background:color-mix(in srgb, var(--paper) 90%, transparent); backdrop-filter:blur(12px) saturate(1.3); -webkit-backdrop-filter:blur(12px) saturate(1.3); border-bottom:1px solid var(--line)}
+.hdr .wrap{display:flex; align-items:center; justify-content:space-between; gap:1rem; height:var(--hdr)}
+.brand{display:flex; align-items:center; gap:.6rem; text-decoration:none; color:var(--ink); font-family:var(--head); font-weight:700; font-size:1.125rem; letter-spacing:-.01em; white-space:nowrap}
+.brand svg{width:34px; height:34px; flex:none}
+.nav{display:none; gap:.25rem; list-style:none; margin:0; padding:0}
+.nav a{display:inline-block; padding:.45rem .6rem; border-radius:6px; color:var(--text); text-decoration:none; font-family:var(--head); font-weight:600; font-size:1rem; white-space:nowrap}
+.nav a:hover{background:var(--surface-2); color:var(--ink)}
+.nav a.on{color:var(--ink); box-shadow:inset 0 -3px 0 var(--saffron); border-radius:6px 6px 0 0}
+.util{display:flex; align-items:center; gap:.4rem; flex:none}
+.tgl{white-space:nowrap; flex:none; display:inline-flex; align-items:center; gap:.3rem; min-height:40px; min-width:44px; padding:0 .55rem; border:1.5px solid var(--line); border-radius:var(--r-pill); background:transparent; color:var(--ink); font-family:var(--head); font-weight:600; font-size:.95rem; cursor:pointer}
+.tgl:hover{border-color:var(--ink)}
+.tgl b{font-weight:700}
+.tgl span{color:var(--muted); font-weight:600}
+.util .btn-primary{display:none}
+@media (min-width:1024px){ .nav{display:flex} .util .btn-primary{display:inline-flex} }
+@media (max-width:1023px){ .hdr .btn-report-m{display:inline-flex} }
+.btn-report-m{display:none}
+@media (max-width:639px){ #themeBtn,#searchBtn{display:none} }
+
+/* bottom bar */
+.bbar{position:fixed; left:0; right:0; bottom:0; z-index:40; height:calc(var(--bbar) + env(safe-area-inset-bottom,0px)); padding-bottom:env(safe-area-inset-bottom,0px); background:var(--surface); border-top:1px solid var(--line); display:grid; grid-template-columns:repeat(5,1fr)}
+.bbar a,.bbar button{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; text-decoration:none; color:var(--muted); font-family:var(--head); font-weight:600; font-size:.78rem; background:none; border:0; cursor:pointer; min-height:44px}
+.bbar a.on{color:var(--ink)}
+.bbar a.on .i{color:var(--blue)}
+.bbar .i{width:22px; height:22px}
+@media (min-width:1024px){ .bbar{display:none} body{--bbar:0px} }
+body{padding-bottom:calc(var(--bbar) + env(safe-area-inset-bottom,0px))}
+
+/* menu sheet */
+.menu{position:fixed; inset:0; z-index:60; background:var(--paper); display:none; flex-direction:column; padding:1rem; padding-top:calc(1rem + env(safe-area-inset-top,0px)); overflow:auto}
+.menu.open{display:flex}
+.menu .top{display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem}
+.menu-grid{display:grid; grid-template-columns:1fr 1fr; gap:.75rem}
+.menu-grid a{display:flex; flex-direction:column; gap:.35rem; padding:1rem; border:1px solid var(--line); border-radius:var(--r-card); background:var(--surface); text-decoration:none; color:var(--ink); font-family:var(--head); font-weight:600; min-height:88px}
+.menu-grid a .i{color:var(--blue)}
+.menu .foot{margin-top:auto; display:flex; gap:.5rem; padding-top:1rem}
+
+/* views */
+.view{display:none}
+.view.on{display:block}
+.sec{padding:clamp(3rem,6vw,5rem) 0}
+.sec-tight{padding:clamp(2rem,4vw,3rem) 0}
+.head{margin-bottom:1.5rem; max-width:64ch}
+.head h1,.head h2{margin-bottom:.35rem}
+.head p{margin:0}
+.band{background:var(--surface-2)}
+.band-ink{background:var(--ink); color:#E6EAF0}
+.band-ink h1,.band-ink h2,.band-ink h3,.band-ink h4{color:#fff}
+.band-ink a{color:#BFD7F5}
+.band-ink .muted{color:#B7C3D1}
+:root[data-theme="dark"] .band-ink{background:#0B2545; color:#E6EAF0}
+
+/* hero */
+.hero{padding:clamp(2rem,5vw,4rem) 0 0}
+.hero-grid{display:grid; grid-template-columns:1fr; gap:1.5rem 3rem; align-items:start}
+@media (min-width:1024px){ .hero-grid{grid-template-columns:.9fr 1.1fr} }
+.hero .sub{font-size:1.125rem; color:var(--muted); max-width:44ch; margin:0 0 1.1rem}
+.search{position:relative; max-width:520px}
+.search .i{position:absolute; left:.85rem; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none}
+.search input[type=search]{width:100%; min-height:52px; padding:.7rem 1rem .7rem 3.1rem; border:1.5px solid var(--line); border-radius:var(--r-pill); background:var(--surface); color:var(--text); font:inherit; font-size:1.0625rem}
+.search input[type=search]:focus{border-color:var(--ink)}
+.tiles{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.5rem; min-width:0}
+@media (min-width:480px){ .tiles{grid-template-columns:repeat(4,minmax(0,1fr))} }
+@media (min-width:768px){ .tiles{grid-template-columns:repeat(6,minmax(0,1fr)); gap:.6rem} }
+.hero-grid>*{min-width:0}
+.tile{min-width:0; display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:.6rem; min-height:92px; padding:.7rem .7rem .6rem; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); cursor:pointer; text-align:left; font:inherit; transition:border-color .15s, background .15s, transform .15s}
+.tile .i{width:26px; height:26px; color:var(--blue)}
+.tile span{font-family:var(--head); font-weight:600; font-size:.92rem; line-height:1.15; color:var(--ink); overflow-wrap:anywhere}
+.tile:hover{border-color:var(--ink)}
+.tile[aria-pressed="true"]{background:var(--sel-bg); border-color:var(--sel-bg); box-shadow:0 0 0 3px var(--saffron)}
+.tile[aria-pressed="true"] .i,.tile[aria-pressed="true"] span{color:var(--sel-fg)}
+.tile.hide{display:none}
+.tiles-empty{grid-column:1/-1; color:var(--muted); padding:1rem; border:1px dashed var(--line); border-radius:10px}
+.panel{display:none; margin-top:1.5rem; border:1.5px solid var(--ink); border-radius:var(--r-card); background:var(--surface); overflow:hidden}
+.panel.show{display:block; animation:rise .25s ease-out}
+@keyframes rise{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+.panel-grid{display:grid; grid-template-columns:1fr; gap:0}
+@media (min-width:900px){ .panel-grid{grid-template-columns:1fr 1fr 1.1fr} .pcol+.pcol{border-left:1px solid var(--line)} }
+.pcol{padding:1.25rem}
+.pcol h4{display:flex; align-items:center; gap:.5rem; margin-bottom:.6rem; color:var(--muted); font-size:1rem}
+.pcol h4 .i{width:20px; height:20px}
+@media (max-width:899px){ .pcol+.pcol{border-top:1px solid var(--line)} }
+.agency{font-family:var(--head); font-weight:700; font-size:1.35rem; line-height:1.2; color:var(--ink); margin:0 0 .4rem}
+.remit{margin:0; font-size:1rem; max-width:none}
+.ch{list-style:none; margin:0; padding:0; display:grid; gap:.4rem}
+.ch li{display:flex; align-items:flex-start; gap:.6rem; font-size:1rem; line-height:1.4}
+.ch .i{color:var(--blue); margin-top:.1rem; width:20px; height:20px}
+.ch .k{color:var(--muted); font-size:.9rem; display:block}
+.panel-foot{display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; padding:1rem 1.25rem; border-top:1px solid var(--line); background:var(--surface-2)}
+
+/* step-by-step */
+.steps{list-style:none; margin:0; padding:0; counter-reset:s}
+.steps li{position:relative; padding:0 0 1rem 2.4rem; counter-increment:s; font-size:1rem; line-height:1.45}
+.steps li::before{content:counter(s); position:absolute; left:0; top:0; width:28px; height:28px; border-radius:50%; background:var(--sel-bg); color:var(--sel-fg); font-family:var(--head); font-weight:700; font-size:.9rem; display:flex; align-items:center; justify-content:center}
+.steps li::after{content:""; position:absolute; left:13px; top:30px; bottom:-2px; width:2px; background:var(--line)}
+.steps li:last-child::after{display:none}
+.steps li b{color:var(--ink); font-weight:600}
+.steps.saffron li:first-child::before{background:var(--saffron); color:#0B2545}
+
+/* skyline */
+.sky{width:100%; display:block; margin-top:2rem; color:var(--ink)}
+.sky svg{display:block; width:100%; height:auto}
+.sky .ground{fill:var(--saffron)}
+.divider{height:22px; width:100%; overflow:hidden; color:var(--line)}
+.divider svg{display:block; width:100%; height:22px}
+
+/* glance */
+.glance{display:grid; grid-template-columns:repeat(2,1fr); border:1px solid var(--line); border-radius:var(--r-card); overflow:hidden; background:var(--surface)}
+@media (min-width:640px){ .glance{grid-template-columns:repeat(4,1fr)} }
+.glance a{display:block; padding:1.1rem 1.2rem; text-decoration:none; color:var(--text); border-right:1px solid var(--line); border-bottom:1px solid var(--line)}
+.glance a:hover{background:var(--surface-2)}
+.glance b{display:block; font-family:var(--head); font-weight:700; font-size:2.25rem; line-height:1; color:var(--ink); font-variant-numeric:tabular-nums; margin-bottom:.25rem}
+.glance span{font-size:1rem; color:var(--muted)}
+@media (min-width:640px){ .glance a{border-bottom:0} .glance a:last-child{border-right:0} }
+
+/* teasers */
+.teasers{display:grid; grid-template-columns:1fr; gap:.75rem}
+@media (min-width:640px){ .teasers{grid-template-columns:repeat(2,1fr)} }
+@media (min-width:1024px){ .teasers{grid-template-columns:repeat(3,1fr)} }
+.teaser{display:flex; gap:1rem; align-items:flex-start; padding:1.1rem 1.2rem; border:1px solid var(--line); border-radius:var(--r-card); background:var(--surface); text-decoration:none; color:var(--text); min-height:112px}
+.teaser:hover{border-color:var(--ink)}
+.teaser .i{color:var(--blue); width:28px; height:28px; margin-top:.15rem}
+.teaser b{display:block; font-family:var(--head); font-weight:700; color:var(--ink); font-size:1.15rem; margin-bottom:.15rem}
+.teaser span{font-size:1rem; color:var(--muted)}
+
+/* rows (directory) */
+.chips{display:flex; gap:.5rem; flex-wrap:wrap; margin:0 0 1rem}
+.chip{font:inherit; font-family:var(--head); font-weight:600; font-size:.95rem; min-height:40px; padding:.35rem .9rem; border-radius:var(--r-pill); border:1.5px solid var(--line); background:var(--surface); color:var(--text); cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--sel-bg); color:var(--sel-fg); border-color:var(--sel-bg)}
+.rows{list-style:none; margin:0; padding:0; border:1px solid var(--line); border-radius:var(--r-card); background:var(--surface); overflow:hidden}
+.row{display:grid; grid-template-columns:auto 1fr; gap:.9rem; align-items:start; padding:.9rem 1rem; border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+@media (min-width:768px){ .row{grid-template-columns:auto 1fr auto; align-items:center} }
+.row .i{color:var(--blue); width:26px; height:26px; margin-top:.2rem}
+.row b{display:block; font-family:var(--head); font-weight:700; color:var(--ink); font-size:1.1rem; line-height:1.25}
+.row b a{color:inherit; text-decoration:none}
+.row b a:hover{text-decoration:underline}
+.row .for{font-size:1rem; color:var(--muted); margin:0; max-width:none}
+.row .meta{font-size:.88rem; color:var(--muted); margin-top:.25rem}
+.row .acts{display:flex; gap:.5rem; flex-wrap:wrap; grid-column:2}
+@media (min-width:768px){ .row .acts{grid-column:auto} }
+.lvl{display:inline-block; font-size:.8rem; font-weight:600; padding:.1rem .5rem; border-radius:4px; background:var(--blue-50); color:var(--blue); margin-left:.4rem; vertical-align:middle; font-family:var(--head)}
+.lvl.central{background:var(--saffron-50); color:var(--saffron-700)}
+.lvl.city{background:var(--green-50); color:var(--green)}
+.empty{padding:1.25rem; color:var(--muted); border:1px dashed var(--line); border-radius:var(--r-card)}
+
+/* tags */
+.tag{display:inline-flex; align-items:center; gap:.35rem; font-family:var(--head); font-weight:600; font-size:.85rem; line-height:1.2; padding:.3rem .6rem; border-radius:6px; background:var(--surface-2); color:var(--ink)}
+.tag .i{width:14px; height:14px; stroke-width:2.2}
+.tag-blue{background:var(--blue-50); color:var(--blue)}
+.tag-green{background:var(--green-50); color:var(--green)}
+.tag-warn{background:var(--warn-50); color:var(--warn)}
+.tag-danger{background:var(--danger-50); color:var(--danger)}
+.tag-saffron{background:var(--saffron-50); color:var(--saffron-700)}
+
+/* rights cards */
+.rcards{display:grid; grid-template-columns:1fr; gap:.75rem}
+@media (min-width:640px){ .rcards{grid-template-columns:repeat(2,1fr)} }
+@media (min-width:1024px){ .rcards{grid-template-columns:repeat(3,1fr)} }
+.rcard{display:flex; flex-direction:column; gap:.5rem; padding:1.1rem 1.2rem; border:1px solid var(--line); border-radius:var(--r-card); background:var(--surface); text-align:left; font:inherit; color:var(--text); cursor:pointer; min-height:150px}
+.rcard:hover{border-color:var(--ink)}
+.rcard .top{display:flex; justify-content:space-between; align-items:center; gap:.5rem}
+.rcard .i{color:var(--blue); width:28px; height:28px}
+.rcard b{font-family:var(--head); font-weight:700; color:var(--ink); font-size:1.15rem; line-height:1.25}
+.rcard p{margin:0; font-size:1rem; max-width:none}
+.rcard .go{margin-top:auto; font-family:var(--head); font-weight:600; color:var(--blue); font-size:.95rem}
+
+/* who's who bands */
+.bands{display:grid; gap:.5rem}
+.bandrow{display:grid; grid-template-columns:1fr; gap:.5rem; padding:.9rem 1rem; border:1px solid var(--line); border-radius:var(--r-card); background:var(--surface)}
+@media (min-width:768px){ .bandrow{grid-template-columns:190px 1fr; align-items:start} }
+.bandrow .bl{font-family:var(--head); font-weight:700; color:var(--ink); font-size:1.05rem; line-height:1.2}
+.bandrow .bl small{display:block; font-family:var(--body); font-weight:400; color:var(--muted); font-size:.9rem; margin-top:.15rem}
+.roles{display:flex; flex-wrap:wrap; gap:.4rem}
+.role{font:inherit; font-family:var(--head); font-weight:600; font-size:.95rem; min-height:40px; padding:.4rem .85rem; border-radius:var(--r-pill); border:1.5px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; transition:opacity .15s, border-color .15s}
+.role:hover{border-color:var(--ink)}
+.bands.filtered .role{opacity:.32}
+.bands.filtered .role.hot{opacity:1; border-color:var(--saffron); box-shadow:0 0 0 2px var(--saffron-50)}
+.connector{height:18px; width:2px; background:var(--line); margin:0 auto}
+.who-filter{display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; margin-bottom:1rem}
+.who-filter select{min-width:260px}
+
+/* forms */
+.field{display:flex; flex-direction:column; gap:.3rem; margin-bottom:1rem}
+.field label{font-family:var(--head); font-weight:600; font-size:1rem; color:var(--ink)}
+.field .hint{font-size:.95rem; color:var(--muted); margin:0}
+input[type=text],input[type=email],input[type=tel],input[type=search],select,textarea{width:100%; font:inherit; font-size:1.0625rem; padding:.7rem .85rem; min-height:48px; border:1.5px solid var(--line); border-radius:var(--r-ctl); background:var(--surface); color:var(--text)}
+input:focus,select:focus,textarea:focus{border-color:var(--ink); box-shadow:var(--ring); outline:none}
+select{appearance:none; -webkit-appearance:none; background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%); background-position:calc(100% - 18px) 50%,calc(100% - 12px) 50%; background-size:6px 6px; background-repeat:no-repeat; padding-right:2.4rem}
+textarea{min-height:130px; resize:vertical}
+input[aria-invalid="true"],select[aria-invalid="true"],textarea[aria-invalid="true"]{border-color:var(--danger)}
+.err{display:none; margin:0 0 1rem; padding:.75rem .9rem; border-left:4px solid var(--danger); background:var(--danger-50); color:var(--text); border-radius:0 8px 8px 0; font-size:1rem}
+.err.show{display:block}
+.form{border:1px solid var(--line); border-radius:var(--r-card); background:var(--surface); padding:clamp(1.1rem,3vw,1.75rem); max-width:760px}
+.prog{display:grid; grid-template-columns:repeat(4,1fr); gap:.35rem; margin-bottom:1.25rem}
+.prog span{height:6px; border-radius:3px; background:var(--line-2)}
+.prog span.done{background:var(--green)}
+.prog span.now{background:var(--saffron)}
+.stepname{font-family:var(--head); font-weight:600; color:var(--muted); font-size:.95rem; margin-bottom:.2rem}
+.fstep{display:none}
+.fstep.on{display:block}
+.frow{display:grid; grid-template-columns:1fr; gap:0 1rem}
+@media (min-width:640px){ .frow{grid-template-columns:1fr 1fr} }
+.fnav{display:flex; gap:.6rem; flex-wrap:wrap; justify-content:space-between; margin-top:.5rem}
+.check{display:flex; gap:.6rem; align-items:flex-start; font-size:1rem}
+.check input{width:20px; height:20px; margin-top:.25rem; flex:none; accent-color:var(--green)}
+.geo{display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; font-size:.95rem; margin-top:.35rem}
+.hintbox{padding:.75rem .9rem; background:var(--blue-50); border-radius:8px; font-size:.98rem; margin:.25rem 0 1rem; display:none}
+.hintbox.show{display:block}
+.sl{margin:0 0 1rem; padding:0; border-top:1px solid var(--line)}
+.sl div{display:grid; grid-template-columns:1fr; gap:.1rem .75rem; padding:.6rem 0; border-bottom:1px solid var(--line); font-size:1rem}
+@media (min-width:640px){ .sl div{grid-template-columns:180px 1fr} }
+.sl dt{color:var(--muted); font-weight:600; font-family:var(--head)}
+.sl dd{margin:0}
+.confirm{display:none; border:1.5px solid var(--green); border-radius:var(--r-card); background:var(--green-50); padding:1.25rem; max-width:760px}
+.confirm.show{display:block; animation:rise .25s ease-out}
+.ref{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-weight:700; font-size:1.9rem; letter-spacing:.02em; color:var(--ink); line-height:1.1}
+.confirm .box{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:1rem; margin:1rem 0}
+.ticket{display:flex; gap:.5rem; align-items:end; flex-wrap:wrap}
+.ticket .field{margin:0; flex:1 1 220px}
+
+/* timeline */
+.tl{list-style:none; margin:1rem 0 0; padding:0}
+.tl li{position:relative; padding:0 0 1.1rem 2.2rem; border-left:2px solid var(--line); margin-left:.6rem}
+.tl li:last-child{border-left-color:transparent; padding-bottom:0}
+.tl li::before{content:""; position:absolute; left:-8px; top:.35rem; width:14px; height:14px; border-radius:50%; background:var(--surface); border:2px solid var(--line)}
+.tl li.done::before{background:var(--green); border-color:var(--green)}
+.tl li.now::before{background:var(--saffron); border-color:var(--saffron); box-shadow:0 0 0 4px var(--saffron-50)}
+.tl b{display:block; font-family:var(--head); font-weight:600; color:var(--ink)}
+.tl span{font-size:.95rem; color:var(--muted)}
+
+/* wards */
+.wfind{display:grid; grid-template-columns:1fr; gap:.75rem; margin-bottom:1.5rem}
+@media (min-width:768px){ .wfind{grid-template-columns:1fr 1fr 1fr} }
+.wfind .card{padding:1rem 1.1rem; border:1px solid var(--line); border-radius:var(--r-card); background:var(--surface)}
+.wfind .card b{display:block; font-family:var(--head); color:var(--ink); margin-bottom:.2rem}
+.wfind .card p{margin:0 0 .4rem; font-size:.98rem; max-width:none}
+.tbl{width:100%; border-collapse:collapse; font-size:1rem; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-card); overflow:hidden}
+.tbl th,.tbl td{text-align:left; padding:.7rem .85rem; border-bottom:1px solid var(--line); vertical-align:top}
+.tbl th{font-family:var(--head); font-weight:600; color:var(--muted); font-size:.92rem; background:var(--surface-2)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.n{font-family:var(--head); font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums}
+@media (max-width:639px){
+  .tbl thead{display:none}
+  .tbl,.tbl tbody,.tbl tr,.tbl td{display:block; width:100%}
+  .tbl tr{border-bottom:1px solid var(--line); padding:.5rem 0}
+  .tbl td{border:0; padding:.25rem .85rem}
+  .tbl td.n::before{content:"Ward "}
+  .tbl td[data-l]::before{content:attr(data-l) ": "; color:var(--muted); font-size:.9rem}
+}
+
+/* civic charter */
+.tabs{display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:1.25rem; border-bottom:1px solid var(--line)}
+.tab{font:inherit; font-family:var(--head); font-weight:600; font-size:1rem; padding:.6rem .9rem; border:0; border-bottom:3px solid transparent; background:none; color:var(--muted); cursor:pointer; min-height:44px}
+.tab[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--saffron)}
+.owe{display:grid; grid-template-columns:1fr; gap:1.5rem; align-items:start}
+@media (min-width:900px){ .owe{grid-template-columns:1fr 1fr} }
+.owe h3{display:flex; align-items:center; gap:.5rem; font-size:1.15rem}
+.owe h3 .i{width:20px; height:20px}
+.task{list-style:none; margin:0; padding:0; border:1px solid var(--line); border-radius:var(--r-card); background:var(--surface); overflow:hidden}
+.task li{border-bottom:1px solid var(--line)}
+.task li:last-child{border-bottom:0}
+.task label{display:flex; gap:.7rem; align-items:flex-start; padding:.75rem .9rem; cursor:pointer; font-size:1rem; line-height:1.45}
+.task input{width:20px; height:20px; margin-top:.2rem; flex:none; accent-color:var(--green)}
+.task li.dont label{border-left:4px solid var(--danger)}
+.ent{list-style:none; margin:0; padding:0; display:grid; gap:.5rem}
+.ent li{display:flex; justify-content:space-between; gap:.75rem; align-items:flex-start; padding:.7rem .9rem; border:1px solid var(--line); border-left:4px solid var(--blue); border-radius:0 10px 10px 0; background:var(--surface); font-size:1rem; line-height:1.4}
+.ent li a{white-space:nowrap; font-family:var(--head); font-weight:600; font-size:.95rem}
+.score{display:flex; gap:1.25rem; align-items:center; margin-top:2rem; padding:1.25rem; border:1px solid var(--line); border-radius:var(--r-card); background:var(--surface)}
+.ring{width:96px; height:96px; flex:none}
+.ring .seg{stroke:var(--line); stroke-width:6; fill:none; stroke-linecap:butt; transition:stroke .3s}
+.ring .seg.on{stroke:var(--green)}
+.ring text{font-family:var(--head); font-weight:700; font-size:22px; fill:var(--ink); font-variant-numeric:tabular-nums}
+.score p{margin:0; max-width:none}
+.score b{color:var(--ink)}
+
+/* dashboard */
+.kpis{display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; margin:1.25rem 0 2rem}
+@media (min-width:768px){ .kpis{grid-template-columns:repeat(4,1fr)} }
+.kpi{padding:1rem 1.1rem; border-radius:var(--r-card); background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14)}
+.kpi b{display:block; font-family:var(--head); font-weight:700; font-size:2.25rem; line-height:1; color:#fff; font-variant-numeric:tabular-nums; margin-bottom:.3rem}
+.kpi span{font-size:.95rem; color:#B7C3D1}
+.dash-card{background:var(--surface); color:var(--text); border-radius:var(--r-card); border:1px solid var(--line); padding:1.25rem; margin-bottom:1rem}
+.dash-card h3{color:var(--ink); font-size:1.1rem; margin-bottom:.9rem}
+.bars{display:grid; gap:.55rem}
+.bar{display:grid; grid-template-columns:150px 1fr 48px; gap:.6rem; align-items:center; font-size:.95rem}
+@media (max-width:600px){ .bar{grid-template-columns:1fr; gap:.2rem} }
+.bar .trk{height:14px; background:var(--surface-2); border-radius:7px; overflow:hidden; display:flex}
+.bar .seg{height:100%}
+.bar .tot{text-align:right; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums}
+.legend{display:flex; gap:1rem; flex-wrap:wrap; font-size:.9rem; margin-top:.9rem}
+.sw{display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:.35rem; vertical-align:-1px}
+.src{font-size:.88rem; color:var(--muted); margin-top:.75rem}
+.emptybox{display:flex; gap:1rem; align-items:center; padding:1.25rem; border:1px dashed var(--line); border-radius:10px; color:var(--muted)}
+.emptybox .ring{width:56px; height:56px}
+.emptybox p{margin:0; max-width:none}
+.commit{width:100%; border-collapse:collapse; font-size:1rem}
+.commit th,.commit td{text-align:left; padding:.6rem .5rem; border-bottom:1px solid var(--line); vertical-align:top}
+.commit th{font-family:var(--head); font-weight:600; color:var(--muted); font-size:.92rem}
+.commit td.n{font-family:var(--head); font-weight:700; color:var(--ink); white-space:nowrap}
+@media (max-width:640px){ .commit thead{display:none} .commit,.commit tbody,.commit tr,.commit td{display:block; width:100%} .commit tr{padding:.5rem 0; border-bottom:1px solid var(--line)} .commit td{border:0; padding:.1rem 0} .commit td.n{font-size:1.15rem} }
+.tag{white-space:normal}
+
+/* updates */
+.cards{display:grid; grid-template-columns:1fr; gap:.75rem}
+@media (min-width:640px){ .cards{grid-template-columns:repeat(2,1fr)} }
+@media (min-width:1024px){ .cards{grid-template-columns:repeat(3,1fr)} }
+.card{display:flex; flex-direction:column; gap:.4rem; padding:1.1rem 1.2rem; border:1px solid var(--line); border-radius:var(--r-card); background:var(--surface)}
+.card .meta{font-size:.9rem; color:var(--muted)}
+.card h3{font-size:1.15rem; margin:0}
+.card h3 a{color:var(--ink); text-decoration:none}
+.card h3 a:hover{text-decoration:underline}
+.card p{margin:0; font-size:1rem; max-width:none}
+.card .ph{display:block; width:100%; aspect-ratio:16/9; border-radius:8px; overflow:hidden; background:var(--surface-2)}
+.card .ph svg{display:block; width:100%; height:100%}
+.post{max-width:70ch}
+.post h2{font-size:1.4rem; margin-top:1.5rem}
+.post p,.post li{font-size:1.0625rem; line-height:1.65}
+
+/* about */
+.org{display:grid; gap:.5rem; max-width:640px}
+.org div{padding:.85rem 1rem; border:1px solid var(--line); border-radius:10px; background:var(--surface)}
+.org b{display:block; font-family:var(--head); color:var(--ink)}
+.org span{font-size:.98rem; color:var(--muted)}
+.mix{display:grid; gap:.5rem; max-width:640px}
+.mix div{display:grid; grid-template-columns:150px 1fr 48px; gap:.6rem; align-items:center; font-size:1rem}
+.mix .trk{height:12px; background:var(--surface-2); border-radius:6px; overflow:hidden}
+.mix .fill{height:100%; background:var(--blue); border-radius:6px}
+.trust{display:grid; grid-template-columns:1fr; gap:.75rem}
+@media (min-width:768px){ .trust{grid-template-columns:repeat(2,1fr)} }
+.trust div{padding:1rem 1.1rem; border:1px solid var(--line); border-radius:10px; background:var(--surface); font-size:1rem}
+.trust b{display:block; font-family:var(--head); color:var(--ink); margin-bottom:.2rem}
+.jroles{display:grid; grid-template-columns:1fr; gap:.75rem; margin-bottom:1.5rem}
+@media (min-width:768px){ .jroles{grid-template-columns:repeat(3,1fr)} }
+.jrole{padding:1rem 1.1rem; border:1px solid var(--line); border-radius:var(--r-card); background:var(--surface); text-align:left; font:inherit; color:var(--text); cursor:pointer}
+.jrole[aria-pressed="true"]{border-color:var(--ink); box-shadow:0 0 0 3px var(--saffron-50)}
+.jrole b{display:block; font-family:var(--head); color:var(--ink); font-size:1.1rem}
+.jrole span{font-size:.98rem; color:var(--muted)}
+
+/* sheet (drawer) */
+.veil{position:fixed; inset:0; background:rgba(11,37,69,.45); z-index:70; display:none}
+.veil.open{display:block}
+.sheet{position:fixed; z-index:71; background:var(--surface); color:var(--text); display:none; flex-direction:column; box-shadow:var(--shadow); left:0; right:0; bottom:0; max-height:88vh; border-radius:16px 16px 0 0; padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet.open{display:flex; animation:up .25s ease-out}
+@keyframes up{from{transform:translateY(24px); opacity:0} to{transform:none; opacity:1}}
+@media (min-width:900px){ .sheet{left:auto; top:0; bottom:0; width:min(560px,92vw); max-height:none; border-radius:0} .sheet.open{animation:slide .25s ease-out} }
+@keyframes slide{from{transform:translateX(24px); opacity:0} to{transform:none; opacity:1}}
+.sheet .sh{display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; padding:1.1rem 1.25rem .75rem; border-bottom:1px solid var(--line)}
+.sheet .sh h3{margin:0; font-size:1.35rem}
+.sheet .sb{padding:1rem 1.25rem 1.5rem; overflow:auto}
+.sheet .sb p{max-width:none}
+.x{width:44px; height:44px; border-radius:50%; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; flex:none}
+.x:hover{border-color:var(--ink)}
+.stabs{display:flex; gap:.25rem; margin-bottom:1rem; border-bottom:1px solid var(--line); overflow:auto}
+.stab{font:inherit; font-family:var(--head); font-weight:600; font-size:.95rem; padding:.6rem .75rem; border:0; border-bottom:3px solid transparent; background:none; color:var(--muted); cursor:pointer; white-space:nowrap; min-height:44px}
+.stab[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--saffron)}
+.spane{display:none}
+.spane.on{display:block}
+.linklist{list-style:none; margin:0; padding:0; display:grid; gap:.4rem}
+.linklist li{display:flex; align-items:center; gap:.5rem; font-size:1rem}
+.linklist .i{color:var(--blue); width:18px; height:18px}
+
+/* command search */
+.cmdk{position:fixed; z-index:72; top:8vh; left:50%; transform:translateX(-50%); width:min(640px,94vw); background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); display:none; flex-direction:column; max-height:78vh}
+.cmdk.open{display:flex}
+.cmdk input{border:0; border-bottom:1px solid var(--line); border-radius:14px 14px 0 0; min-height:56px; font-size:1.1rem}
+.cmdk input:focus{box-shadow:none; border-color:var(--line)}
+.cmdk ul{list-style:none; margin:0; padding:.5rem; overflow:auto}
+.cmdk li a{display:flex; gap:.7rem; align-items:center; padding:.6rem .7rem; border-radius:8px; text-decoration:none; color:var(--text)}
+.cmdk li a:hover,.cmdk li a:focus{background:var(--surface-2)}
+.cmdk li .i{color:var(--blue); width:20px; height:20px}
+.cmdk li small{color:var(--muted); margin-left:auto; font-size:.85rem; white-space:nowrap}
+.cmdk .none{padding:1rem; color:var(--muted)}
+
+/* footer */
+.ftr{background:var(--ink); color:#D3DCE7; padding:3rem 0 2rem}
+:root[data-theme="dark"] .ftr{background:#0B2545}
+.ftr a{color:#fff}
+.fgrid{display:grid; grid-template-columns:1fr 1fr; gap:1.5rem 2rem}
+@media (min-width:900px){ .fgrid{grid-template-columns:1.3fr repeat(4,1fr)} }
+.ftr h4{color:#fff; font-size:1rem; margin-bottom:.5rem}
+.ftr ul{list-style:none; margin:0; padding:0; display:grid; gap:.35rem; font-size:.98rem}
+.ftr .brand{color:#fff; margin-bottom:.6rem}
+.ftr p{font-size:.98rem; max-width:34ch; margin:0 0 .5rem}
+.fnote{margin-top:2rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,.18); font-size:.9rem; color:#B7C3D1; display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; justify-content:space-between}
+.tri{height:4px; background:linear-gradient(90deg,var(--saffron) 0 33.33%,#fff 33.33% 66.66%,#138808 66.66% 100%); margin-top:1.5rem}
+
+/* toast + motion */
+.toast{position:fixed; left:50%; bottom:calc(var(--bbar) + 1rem + env(safe-area-inset-bottom,0px)); transform:translateX(-50%) translateY(12px); background:var(--ink); color:#fff; padding:.7rem 1.1rem; border-radius:8px; font-size:.98rem; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:80; max-width:calc(100% - 2rem)}
+:root[data-theme="dark"] .toast{background:#E6EAF0; color:#0B2545}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.rv{opacity:0; transform:translateY(8px); transition:opacity .4s cubic-bezier(.2,.7,.2,1), transform .4s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1; transform:none}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *,*::before,*::after{animation:none!important; transition:none!important} .rv{opacity:1; transform:none} }
+@media print{ .hdr,.bbar,.ftr .tri,.veil,.sheet,.cmdk,.toast{display:none!important} .view{display:block!important} }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l4 4L19 6"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="i-next" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="i-fix" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.6 4.5L3 17l4 4 6.2-6.1a4 4 0 0 0 4.5-5.6l-2.4 2.4-2.8-.7-.7-2.8z"/></symbol>
+<symbol id="i-wards" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+<symbol id="i-track" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-dash" viewBox="0 0 24 24"><path d="M5 20v-8M11 20V5M17 20v-5M2 20h20"/></symbol>
+<symbol id="i-rights" viewBox="0 0 24 24"><path d="M12 3v18M6 21h12M5 7h14M5 7l-2 6a3 3 0 0 0 6 0L7 7M17 7l-2 6a3 3 0 0 0 6 0l-2-6"/></symbol>
+<symbol id="i-who" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0 1 14 0M16 4.5a3.5 3.5 0 0 1 0 7M22 20a7 7 0 0 0-5-6.7"/></symbol>
+<symbol id="i-charter" viewBox="0 0 24 24"><path d="M10 6h11M10 12h11M10 18h11M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></symbol>
+<symbol id="i-news" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h7M7 13h10M7 17h6"/></symbol>
+<symbol id="i-join" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1.5v4"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.5 1.5M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.5-1.5"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-13.5 7.8L3 21l1.2-4.5A9 9 0 1 1 21 12z"/></symbol>
+<symbol id="i-app" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2zM12 10v4M12 17.5h.01"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+<symbol id="i-roads" viewBox="0 0 24 24"><path d="M4 21L9 3h6l5 18M12 3v4M12 11v3M12 18v3"/></symbol>
+<symbol id="i-waste" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6"/></symbol>
+<symbol id="i-water" viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></symbol>
+<symbol id="i-drains" viewBox="0 0 24 24"><path d="M3 8c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 14c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 20c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></symbol>
+<symbol id="i-lights" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.4 1 2.5h6c0-1.1.4-1.9 1-2.5A6 6 0 0 0 12 3z"/></symbol>
+<symbol id="i-parks" viewBox="0 0 24 24"><path d="M12 21v-4M12 3l5 7h-3l4 5H6l4-5H7z"/></symbol>
+<symbol id="i-traffic" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="20" rx="3"/><circle cx="12" cy="6.5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="17.5" r="1.6"/></symbol>
+<symbol id="i-power" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+<symbol id="i-pollution" viewBox="0 0 24 24"><path d="M7 17a4 4 0 1 1 1-7.9A5 5 0 0 1 18 10a3.5 3.5 0 0 1 0 7zM3 21h6M12 21h4"/></symbol>
+<symbol id="i-animals" viewBox="0 0 24 24"><circle cx="7" cy="9" r="1.6"/><circle cx="12" cy="6.5" r="1.6"/><circle cx="17" cy="9" r="1.6"/><path d="M12 20c-3 0-5-1.5-5-3.5 0-2 2.5-4.5 5-4.5s5 2.5 5 4.5c0 2-2 3.5-5 3.5z"/></symbol>
+<symbol id="i-construction" viewBox="0 0 24 24"><path d="M14 4l6 6-2 2-6-6zM11 7l-8 8 3 3 8-8M3 21h7"/></symbol>
+<symbol id="i-property" viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6zM14 2v6h6M9 13h6M9 17h6"/></symbol>
+<symbol id="i-housing" viewBox="0 0 24 24"><path d="M4 21V6l8-3 8 3v15M9 21v-4h6v4M9 9h1M14 9h1M9 13h1M14 13h1M2 21h20"/></symbol>
+<symbol id="i-safety" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4"/></symbol>
+<symbol id="i-consumer" viewBox="0 0 24 24"><path d="M20 13l-7 7-10-10V3h7l10 10zM7.5 7.5h.01"/></symbol>
+<symbol id="i-rti" viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6zM14 2v6h6M11 17a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM13.5 16.5L16 19"/></symbol>
+<symbol id="i-other" viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4zM12 7v6M9 10h6"/></symbol>
+<symbol id="i-mark" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="none" stroke="#FF9933" stroke-width="3" stroke-dasharray="2.6 .9" stroke-linecap="butt"/><g fill="currentColor"><rect x="15" y="24" width="4" height="10"/><rect x="21" y="17" width="4" height="17"/><rect x="27" y="20" width="4" height="14"/><rect x="13" y="34" width="22" height="1.5"/></g></symbol>
+</defs></svg>
+
+<a class="sr" href="#main">Skip to content</a>
+<header class="hdr">
+  <div class="wrap">
+    <a class="brand" href="#/" aria-label="Gurugram Vision Forum, home"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-mark"/></svg><span>Gurugram Vision Forum</span></a>
+    <ul class="nav" id="nav">
+      <li><a href="#/" data-v="home" data-i18n="n.fix">Fix a problem</a></li>
+      <li><a href="#/directory" data-v="directory" data-i18n="n.dir">Directory</a></li>
+      <li><a href="#/rights" data-v="rights" data-i18n="n.rights">Your rights</a></li>
+      <li><a href="#/who" data-v="who" data-i18n="n.who">Who's who</a></li>
+      <li><a href="#/wards" data-v="wards" data-i18n="n.wards">Wards</a></li>
+      <li><a href="#/dashboard" data-v="dashboard" data-i18n="n.dash">Dashboard</a></li>
+    </ul>
+    <div class="util">
+      <button class="tgl" id="langBtn" type="button" aria-label="Switch language"><b>EN</b><span>|</span><span lang="hi">हिं</span></button>
+      <button class="tgl" id="themeBtn" type="button" aria-label="Switch theme"><svg class="i i-s" aria-hidden="true"><use href="#i-moon"/></svg></button>
+      <button class="tgl" id="searchBtn" type="button" aria-label="Search the site"><svg class="i i-s" aria-hidden="true"><use href="#i-search"/></svg></button>
+      <a class="btn btn-primary btn-sm" href="#/report" data-i18n="n.report">Report an issue</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- HOME -->
+<section class="view" id="v-home">
+  <div class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <h1 class="display" data-i18n="h.q">Who fixes my problem?</h1>
+          <p class="sub" data-i18n="h.sub">Pick the issue. We show the desk responsible, the official channel, and what to do if nobody answers.</p>
+          <div class="search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="tileSearch" data-i18n-ph="h.ph" placeholder="Search: pothole, garbage, DHBVN, RTI" autocomplete="off" aria-label="Search issues"></div>
+        </div>
+        <div class="tiles" id="tiles" role="group" aria-label="Issue types"></div>
+      </div>
+      <div class="panel" id="panel" aria-live="polite"></div>
+    </div>
+    <div class="sky" aria-hidden="true">
+      <svg viewBox="0 0 1200 110" preserveAspectRatio="none"><g fill="currentColor" opacity=".9">
+        <path d="M0 96l14-10 14 10 12-8 12 8 16-12 16 12 12-7 12 7v14H0z"/>
+        <rect x="120" y="70" width="26" height="40"/><rect x="152" y="58" width="18" height="52"/><rect x="176" y="76" width="34" height="34"/><rect x="220" y="40" width="22" height="70"/><rect x="248" y="52" width="16" height="58"/><rect x="272" y="22" width="28" height="88"/><rect x="306" y="46" width="20" height="64"/><rect x="332" y="66" width="46" height="44"/><rect x="386" y="18" width="24" height="92"/><rect x="416" y="34" width="34" height="76"/><rect x="456" y="60" width="16" height="50"/><polygon points="480,110 480,42 500,28 520,42 520,110"/><rect x="528" y="54" width="28" height="56"/><rect x="564" y="8" width="26" height="102"/><rect x="596" y="38" width="20" height="72"/><rect x="622" y="64" width="46" height="46"/><rect x="676" y="46" width="24" height="64"/><rect x="706" y="24" width="34" height="86"/><rect x="746" y="56" width="18" height="54"/><rect x="770" y="72" width="44" height="38"/><rect x="822" y="32" width="28" height="78"/><rect x="856" y="50" width="22" height="60"/><rect x="884" y="16" width="32" height="94"/><rect x="922" y="62" width="24" height="48"/><rect x="952" y="42" width="34" height="68"/><rect x="994" y="76" width="42" height="34"/><rect x="1044" y="58" width="20" height="52"/><rect x="1070" y="82" width="60" height="28"/>
+        <path d="M1130 96l12-9 12 9 12-8 12 8 10-6 10 6v14h-68z"/>
+        <path d="M120 88h1010" stroke="currentColor" stroke-width="2" fill="none"/><path d="M160 88v22M260 88v22M360 88v22M460 88v22M560 88v22M660 88v22M760 88v22M860 88v22M960 88v22M1060 88v22" stroke="currentColor" stroke-width="3" fill="none"/>
+      </g><rect class="ground" x="0" y="107" width="1200" height="3"/></svg>
+    </div>
+  </div>
+
+  <div class="sec-tight">
+    <div class="wrap">
+      <div class="glance" id="glance">
+        <a href="#/"><b data-count="17">0</b><span data-i18n="g.types">issue types, each mapped to a desk</span></a>
+        <a href="#/directory"><b data-count="24">0</b><span data-i18n="g.portals">official portals and helplines</span></a>
+        <a href="#/rights"><b data-count="11">0</b><span data-i18n="g.charters">rights charters with a deadline</span></a>
+        <a href="#/wards"><b data-count="36">0</b><span data-i18n="g.wards">wards and their councillors</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-tight">
+    <div class="wrap">
+      <div class="teasers">
+        <a class="teaser" href="#/directory"><svg class="i" aria-hidden="true"><use href="#i-link"/></svg><div><b data-i18n="t.dir">Directory</b><span data-i18n="t.dirp">Every portal and helpline that creates a record, with what it is for.</span></div></a>
+        <a class="teaser" href="#/rights"><svg class="i" aria-hidden="true"><use href="#i-rights"/></svg><div><b data-i18n="t.rights">Your rights</b><span data-i18n="t.rightsp">Deadlines the government set for itself, and how to use them.</span></div></a>
+        <a class="teaser" href="#/who"><svg class="i" aria-hidden="true"><use href="#i-who"/></svg><div><b data-i18n="t.who">Who's who</b><span data-i18n="t.whop">Parliament to your ward councillor: who owns what, with official pages.</span></div></a>
+        <a class="teaser" href="#/wards"><svg class="i" aria-hidden="true"><use href="#i-wards"/></svg><div><b data-i18n="t.wards">Wards</b><span data-i18n="t.wardsp">All 36 councillors, and three ways to find your ward.</span></div></a>
+        <a class="teaser" href="#/charter"><svg class="i" aria-hidden="true"><use href="#i-charter"/></svg><div><b data-i18n="t.charter">Civic charter</b><span data-i18n="t.charterp">What you owe the city and what it owes you. Tick your score.</span></div></a>
+        <a class="teaser" href="#/dashboard"><svg class="i" aria-hidden="true"><use href="#i-dash"/></svg><div><b data-i18n="t.dash">Dashboard</b><span data-i18n="t.dashp">What residents reported, and where each report stands.</span></div></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec band">
+    <div class="wrap">
+      <div class="head"><h2 data-i18n="j.h">Professionals, students and RWAs run the Forum.</h2><p data-i18n="j.p">Pick a role that fits the time you have.</p></div>
+      <a class="btn btn-ink" href="#/join" data-i18n="j.btn">Join the Forum</a>
+    </div>
+  </div>
+</section>
+
+<!-- REPORT -->
+<section class="view" id="v-report">
+  <div class="sec">
+    <div class="wrap">
+      <div class="head"><h1 data-i18n="r.h">Report an issue</h1><p data-i18n="r.p">Four short steps. You get a reference number and the official channel to file with.</p></div>
+      <form class="form" id="reportForm" novalidate>
+        <div class="prog" id="prog" aria-hidden="true"><span class="now"></span><span></span><span></span><span></span></div>
+        <div class="err" id="fErr" role="alert" data-i18n="f.err">Fill in the highlighted fields to continue.</div>
+        <div class="fstep on" data-step="1">
+          <div class="stepname"><span data-i18n="f.s1">Step 1 of 4</span></div><h3 data-i18n="f.what">What is the issue?</h3>
+          <div class="field"><label for="fCat" data-i18n="f.cat">Issue type</label><select id="fCat" required></select><div class="hintbox" id="fHint"></div></div>
+          <div class="field"><label for="fScope" data-i18n="f.scope">Who does it affect?</label><select id="fScope" required><option value="" data-i18n="f.choose">Choose one</option><option data-i18n="f.sc1">Me or my family</option><option data-i18n="f.sc2">My society or RWA</option><option data-i18n="f.sc3">My sector or neighbourhood</option><option data-i18n="f.sc4">The whole city</option></select></div>
+          <div class="fnav"><span></span><button class="btn btn-ink" type="button" data-go="2" data-i18n="f.next">Continue</button></div>
+        </div>
+        <div class="fstep" data-step="2">
+          <div class="stepname"><span data-i18n="f.s2">Step 2 of 4</span></div><h3 data-i18n="f.where">Where is it?</h3>
+          <div class="frow">
+            <div class="field"><label for="fWhere" data-i18n="f.area">Sector, colony or society</label><input type="text" id="fWhere" list="areaList" data-i18n-ph="f.areaPh" placeholder="Sector 56, DLF Phase 3, Palam Vihar" required autocomplete="off"><datalist id="areaList"></datalist></div>
+            <div class="field"><label for="fWard" data-i18n="f.ward">Municipal ward</label><select id="fWard"></select><p class="hint" id="wardHint"><span data-i18n="f.wardHint">Not sure?</span> <a href="https://onemapggm.gmda.gov.in/" target="_blank" rel="noopener" class="ext">OneMap</a>, <a href="https://gurugram.gov.in/voter-list-for-mc-election-gurugram-2025/" target="_blank" rel="noopener" class="ext" data-i18n="f.voter">voter lists</a>, <a href="#/wards" data-i18n="f.wdir">ward directory</a></p></div>
+          </div>
+          <div class="field"><label for="fSpot" data-i18n="f.spot">Exact spot</label><input type="text" id="fSpot" data-i18n-ph="f.spotPh" placeholder="Near the community centre gate, opposite house 412" required><div class="geo"><button type="button" class="btn btn-line btn-sm" id="geoBtn"><svg class="i i-s" aria-hidden="true"><use href="#i-pin"/></svg><span data-i18n="f.geo">Use my location</span></button><span id="geoOut" class="muted"></span></div></div>
+          <div class="fnav"><button class="btn btn-line" type="button" data-go="1" data-i18n="f.back">Back</button><button class="btn btn-ink" type="button" data-go="3" data-i18n="f.next">Continue</button></div>
+        </div>
+        <div class="fstep" data-step="3">
+          <div class="stepname"><span data-i18n="f.s3">Step 3 of 4</span></div><h3 data-i18n="f.details">Details</h3>
+          <div class="field"><label for="fDesc" data-i18n="f.desc">What is happening?</label><p class="hint" data-i18n="f.descHint">Since when, what was tried, any earlier ticket number.</p><textarea id="fDesc" required></textarea></div>
+          <div class="frow">
+            <div class="field"><label for="fName" data-i18n="f.name">Your name</label><input type="text" id="fName" autocomplete="name" required></div>
+            <div class="field"><label for="fPhone" data-i18n="f.phone">Mobile</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" required></div>
+          </div>
+          <div class="field"><label for="fEmail" data-i18n="f.email">Email (optional)</label><input type="email" id="fEmail" autocomplete="email"></div>
+          <div class="field"><label class="check"><input type="checkbox" id="fConsent" required><span data-i18n="f.consent">The Forum may contact me and share the issue, without my phone number, with the authority responsible.</span></label></div>
+          <div class="fnav"><button class="btn btn-line" type="button" data-go="2" data-i18n="f.back">Back</button><button class="btn btn-ink" type="button" data-go="4" data-i18n="f.next">Continue</button></div>
+        </div>
+        <div class="fstep" data-step="4">
+          <div class="stepname"><span data-i18n="f.s4">Step 4 of 4</span></div><h3 data-i18n="f.check">Check and send</h3>
+          <dl class="sl" id="summary"></dl>
+          <div class="fnav"><button class="btn btn-line" type="button" data-go="3" data-i18n="f.back">Back</button><button class="btn btn-primary" type="submit" data-i18n="f.send">Send report</button></div>
+        </div>
+      </form>
+      <div class="confirm" id="confirm" role="status"></div>
+      <div id="recent" hidden style="margin-top:1.5rem; max-width:760px"><h3 data-i18n="f.recent">Reports sent from this device</h3><ul class="rows" id="recentList"></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- TRACK -->
+<section class="view" id="v-track">
+  <div class="sec"><div class="wrap">
+    <div class="head"><h1 data-i18n="k.h">Where is my report?</h1><p data-i18n="k.p">Enter the reference number. Five stages, and you are told at each move.</p></div>
+    <div class="form" style="max-width:640px">
+      <div class="field"><label for="trRef" data-i18n="k.ref">Reference number</label><input type="text" id="trRef" placeholder="GVF-2026-ABCDE" autocomplete="off"></div>
+      <button class="btn btn-ink" id="trGo" type="button" data-i18n="k.go">Show status</button>
+      <div id="trOut" style="margin-top:1rem"></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- DIRECTORY -->
+<section class="view" id="v-directory">
+  <div class="sec"><div class="wrap">
+    <div class="head"><h1 data-i18n="d.h">Official channels</h1><p data-i18n="d.p">24 portals and helplines that create a record. Filter by what you need.</p></div>
+    <div class="chips" id="dChips" role="group" aria-label="Filter"></div>
+    <ul class="rows" id="dRows"></ul>
+    <p class="src" id="dVerified"></p>
+  </div></div>
+</section>
+
+<!-- RIGHTS -->
+<section class="view" id="v-rights">
+  <div class="sec"><div class="wrap">
+    <div class="head"><h1 data-i18n="ri.h">Your rights</h1><p data-i18n="ri.p">11 charters with a deadline you can quote back. Tap one for the steps and the source.</p></div>
+    <div class="rcards" id="rCards"></div>
+  </div></div>
+</section>
+
+<!-- WHO -->
+<section class="view" id="v-who">
+  <div class="sec"><div class="wrap">
+    <div class="head"><h1 data-i18n="w.h">Who is responsible</h1><p data-i18n="w.p">Parliament to your street. Tap a role for its remit and official page.</p></div>
+    <div class="who-filter"><label for="whoFilter" class="small" data-i18n="w.filter">Show who handles</label><select id="whoFilter"></select></div>
+    <div class="bands" id="bands"></div>
+  </div></div>
+</section>
+
+<!-- WARDS -->
+<section class="view" id="v-wards">
+  <div class="sec"><div class="wrap">
+    <div class="head"><h1 data-i18n="wd.h">Your ward</h1><p data-i18n="wd.p">36 councillors elected on 2 March 2025, with the official sources to verify them.</p></div>
+    <div class="wfind">
+      <div class="card"><b data-i18n="wd.f1">On the map</b><p data-i18n="wd.f1p">Search your sector on GMDA's GIS and read the ward number.</p><a class="ext" href="https://onemapggm.gmda.gov.in/" target="_blank" rel="noopener">OneMap GGM</a></div>
+      <div class="card"><b data-i18n="wd.f2">From the voter list</b><p data-i18n="wd.f2p">The district published 2025 municipal voter lists by ward and booth.</p><a class="ext" href="https://gurugram.gov.in/voter-list-for-mc-election-gurugram-2025/" target="_blank" rel="noopener" data-i18n="wd.f2a">gurugram.gov.in</a></div>
+      <div class="card"><b data-i18n="wd.f3">Then use it</b><p data-i18n="wd.f3p">Put the ward number on every complaint; it routes to the right engineer.</p><a href="#/report" data-i18n="n.report">Report an issue</a></div>
+    </div>
+    <div class="field" style="max-width:420px"><label for="wardSearch" data-i18n="wd.search">Search by ward number or councillor</label><input type="search" id="wardSearch" placeholder="12, Yadav, BJP"></div>
+    <table class="tbl" id="wardTable"><thead><tr><th data-i18n="wd.c1">Ward</th><th data-i18n="wd.c2">Councillor</th><th data-i18n="wd.c3">Party, as elected</th><th data-i18n="wd.c4">Verify</th></tr></thead><tbody id="wardBody"></tbody></table>
+    <p class="src" data-i18n="wd.src">Source: results declared 12 March 2025, as reported. Some independents have since joined parties. Office contacts are being collected.</p>
+  </div></div>
+</section>
+
+<!-- CHARTER -->
+<section class="view" id="v-charter">
+  <div class="sec"><div class="wrap">
+    <div class="head"><h1 data-i18n="c.h">The civic charter</h1><p data-i18n="c.p">What you owe the city, and what it owes you. Tick what already applies; it stays on your device.</p></div>
+    <div class="tabs" id="cvTabs" role="tablist"></div>
+    <div id="cvBody"></div>
+    <div class="score">
+      <svg class="ring" id="ring" viewBox="0 0 96 96" aria-hidden="true"></svg>
+      <div><p><b data-i18n="c.score">Your civic score</b> <span id="cvScore" class="num">0 / 0</span></p><p class="small muted" id="cvMsg"></p></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- DASHBOARD -->
+<section class="view" id="v-dashboard">
+  <div class="sec band-ink"><div class="wrap">
+    <div class="head"><h1 data-i18n="db.h">Accountability</h1><p data-i18n="db.p">Every report counted by cause and status, against the Forum's own commitments.</p></div>
+    <div class="kpis" id="kpis"></div>
+    <div id="dashBody"></div>
+  </div></div>
+</section>
+
+<!-- UPDATES -->
+<section class="view" id="v-updates">
+  <div class="sec"><div class="wrap">
+    <div class="head"><h1 data-i18n="u.h">Updates</h1><p data-i18n="u.p">Stories, photos, videos and press, published by the Forum's team.</p></div>
+    <div class="tabs" id="uTabs" role="tablist"></div>
+    <div id="uBody"></div>
+  </div></div>
+</section>
+<section class="view" id="v-post">
+  <div class="sec"><div class="wrap"><p class="small"><a href="#/updates" data-i18n="u.back">All updates</a></p><div class="post" id="postBody"></div></div></div>
+</section>
+
+<!-- JOIN -->
+<section class="view" id="v-join">
+  <div class="sec"><div class="wrap">
+    <div class="head"><h1 data-i18n="jn.h">Join the Forum</h1><p data-i18n="jn.p">Three ways in. Pick one and leave your details.</p></div>
+    <div class="jroles" id="jRoles"></div>
+    <form class="form" id="joinForm" novalidate>
+      <div class="err" id="jErr" role="alert" data-i18n="f.err2">Fill in the highlighted fields to send.</div>
+      <div class="frow">
+        <div class="field"><label for="jName" data-i18n="f.name">Your name</label><input type="text" id="jName" autocomplete="name" required></div>
+        <div class="field"><label for="jPhone" data-i18n="f.phone">Mobile</label><input type="tel" id="jPhone" inputmode="tel" autocomplete="tel" required></div>
+        <div class="field"><label for="jEmail" data-i18n="jn.email">Email</label><input type="email" id="jEmail" autocomplete="email" required></div>
+        <div class="field"><label for="jSector" data-i18n="jn.sector">Sector or area</label><input type="text" id="jSector" list="areaList" placeholder="Sector 45"></div>
+      </div>
+      <div class="field"><label for="jNote" data-i18n="jn.note">Skills or the issue you care about (optional)</label><textarea id="jNote" style="min-height:90px"></textarea></div>
+      <button class="btn btn-primary" type="submit" data-i18n="jn.send">Send my details</button>
+      <div class="confirm" id="jConfirm" role="status" style="margin-top:1rem"></div>
+    </form>
+  </div></div>
+</section>
+
+<!-- ABOUT -->
+<section class="view" id="v-about">
+  <div class="sec"><div class="wrap">
+    <div class="head"><h1 data-i18n="a.h">About the Forum</h1><p class="lead" data-i18n="a.p">A citizens' platform that gets Gurugram's problems to the right desk and follows them to closure.</p></div>
+    <h2 data-i18n="a.how">How it is run</h2>
+    <div class="org">
+      <div><b data-i18n="a.o1">Advisory board</b><span data-i18n="a.o1p">8 to 12 experts from corporate, legal, academic, planning and media backgrounds.</span></div>
+      <div><b data-i18n="a.o2">City executive committee</b><span data-i18n="a.o2p">Runs operations, government liaison and policy work.</span></div>
+      <div><b data-i18n="a.o3">Area chapters, volunteers, youth fellows</b><span data-i18n="a.o3p">Sector and ward teams, sewa drives, research support.</span></div>
+    </div>
+    <h2 style="margin-top:2rem" data-i18n="a.trust">What you can check</h2>
+    <div class="trust">
+      <div><b data-i18n="a.t1">Registration</b><span data-i18n="a.t1p">Registration as a not-for-profit is in progress. The charter and accounts will be published here.</span></div>
+      <div><b data-i18n="a.t2">Funding mix planned</b><div class="mix" id="mix"></div></div>
+      <div><b data-i18n="a.t3">Your data</b><span data-i18n="a.t3p">Reports are shared with authorities without your phone number. Public pages never show reporter names.</span></div>
+      <div><b data-i18n="a.t4">Not a government site</b><span data-i18n="a.t4p">The Forum is independent and non-partisan. Emergencies: call 112.</span></div>
+    </div>
+    <h2 style="margin-top:2rem" data-i18n="a.contact">Contact</h2>
+    <p>Sidharth Yadav, <span data-i18n="a.lead">project lead</span><br><a href="tel:+919899375445">+91 98993 75445</a><br><a href="mailto:contact@gurugramvisionforum.org">contact@gurugramvisionforum.org</a><br>Sector 29, Gurugram, Haryana</p>
+  </div></div>
+</section>
+
+<!-- ACCESSIBILITY -->
+<section class="view" id="v-access">
+  <div class="sec"><div class="wrap read">
+    <h1 data-i18n="ac.h">Accessibility statement</h1>
+    <p data-i18n="ac.p1">This site aims to meet WCAG 2.2 level AA: keyboard access, visible focus, 44px tap targets, text at 16px or larger, colour never used alone, and reduced motion respected.</p>
+    <p data-i18n="ac.p2">Known gaps: Hindi covers the interface and headings, not yet the long guides; the ward map lookup depends on an external site.</p>
+    <p data-i18n="ac.p3">Tell us what does not work for you:</p><p><a href="mailto:contact@gurugramvisionforum.org">contact@gurugramvisionforum.org</a></p>
+  </div></div>
+</section>
+</main>
+
+<div class="veil" id="veil"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"><div class="sh"><h3 id="sheetTitle"></h3><button class="x" id="sheetClose" type="button" aria-label="Close"><svg class="i" aria-hidden="true"><use href="#i-close"/></svg></button></div><div class="sb" id="sheetBody"></div></aside>
+<div class="cmdk" id="cmdk" role="dialog" aria-modal="true" aria-label="Search"><input type="search" id="cmdIn" placeholder="Search issues, portals, rights, roles, wards" autocomplete="off"><ul id="cmdList"></ul></div>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu">
+  <div class="top"><span class="brand"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-mark"/></svg><span data-i18n="m.title">Menu</span></span><button class="x" id="menuClose" type="button" aria-label="Close menu"><svg class="i" aria-hidden="true"><use href="#i-close"/></svg></button></div>
+  <div class="menu-grid">
+    <a href="#/"><svg class="i" aria-hidden="true"><use href="#i-fix"/></svg><span data-i18n="n.fix">Fix a problem</span></a>
+    <a href="#/report"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg><span data-i18n="n.report">Report an issue</span></a>
+    <a href="#/track"><svg class="i" aria-hidden="true"><use href="#i-track"/></svg><span data-i18n="n.track">Track a report</span></a>
+    <a href="#/directory"><svg class="i" aria-hidden="true"><use href="#i-link"/></svg><span data-i18n="n.dir">Directory</span></a>
+    <a href="#/rights"><svg class="i" aria-hidden="true"><use href="#i-rights"/></svg><span data-i18n="n.rights">Your rights</span></a>
+    <a href="#/who"><svg class="i" aria-hidden="true"><use href="#i-who"/></svg><span data-i18n="n.who">Who's who</span></a>
+    <a href="#/wards"><svg class="i" aria-hidden="true"><use href="#i-wards"/></svg><span data-i18n="n.wards">Wards</span></a>
+    <a href="#/charter"><svg class="i" aria-hidden="true"><use href="#i-charter"/></svg><span data-i18n="n.charter">Civic charter</span></a>
+    <a href="#/dashboard"><svg class="i" aria-hidden="true"><use href="#i-dash"/></svg><span data-i18n="n.dash">Dashboard</span></a>
+    <a href="#/updates"><svg class="i" aria-hidden="true"><use href="#i-news"/></svg><span data-i18n="n.updates">Updates</span></a>
+    <a href="#/join"><svg class="i" aria-hidden="true"><use href="#i-join"/></svg><span data-i18n="n.join">Join</span></a>
+    <a href="#/about"><svg class="i" aria-hidden="true"><use href="#i-info"/></svg><span data-i18n="n.about">About</span></a>
+  </div>
+  <div class="foot"><button class="tgl" id="searchBtn2" type="button" aria-label="Search the site"><svg class="i i-s" aria-hidden="true"><use href="#i-search"/></svg><span style="color:var(--ink)">Search</span></button><button class="tgl" id="langBtn2" type="button"><b>EN</b><span>|</span><span lang="hi">हिं</span></button><button class="tgl" id="themeBtn2" type="button" aria-label="Switch theme"><svg class="i i-s" aria-hidden="true"><use href="#i-moon"/></svg></button></div>
+</div>
+
+<nav class="bbar" aria-label="Quick navigation">
+  <a href="#/" data-v="home"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg><span data-i18n="b.home">Home</span></a>
+  <a href="#/report" data-v="report"><svg class="i" aria-hidden="true"><use href="#i-fix"/></svg><span data-i18n="b.fix">Report</span></a>
+  <a href="#/wards" data-v="wards"><svg class="i" aria-hidden="true"><use href="#i-wards"/></svg><span data-i18n="b.wards">Wards</span></a>
+  <a href="#/track" data-v="track"><svg class="i" aria-hidden="true"><use href="#i-track"/></svg><span data-i18n="b.track">Track</span></a>
+  <button type="button" id="menuBtn"><svg class="i" aria-hidden="true"><use href="#i-menu"/></svg><span data-i18n="b.menu">Menu</span></button>
+</nav>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="fgrid">
+      <div><a class="brand" href="#/"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-mark"/></svg><span>Gurugram Vision Forum</span></a><p data-i18n="ft.tag">Citizens and governance in partnership. Collaborate, contribute, change.</p><p><a href="mailto:contact@gurugramvisionforum.org">contact@gurugramvisionforum.org</a><br><a href="tel:+919899375445">+91 98993 75445</a><br>Sector 29, Gurugram</p></div>
+      <div><h4 data-i18n="ft.fix">Fix</h4><ul><li><a href="#/" data-i18n="ft.fix1">Who fixes it</a></li><li><a href="#/report" data-i18n="n.report">Report an issue</a></li><li><a href="#/track" data-i18n="n.track">Track a report</a></li></ul></div>
+      <div><h4 data-i18n="ft.know">Know</h4><ul><li><a href="#/directory" data-i18n="n.dir">Directory</a></li><li><a href="#/rights" data-i18n="n.rights">Your rights</a></li><li><a href="#/who" data-i18n="n.who">Who's who</a></li><li><a href="#/wards" data-i18n="n.wards">Wards</a></li></ul></div>
+      <div><h4 data-i18n="ft.join">Join</h4><ul><li><a href="#/join" data-i18n="n.join">Join</a></li><li><a href="#/charter" data-i18n="n.charter">Civic charter</a></li><li><a href="#/updates" data-i18n="n.updates">Updates</a></li></ul></div>
+      <div><h4 data-i18n="ft.about">About</h4><ul><li><a href="#/about" data-i18n="n.about">About</a></li><li><a href="#/dashboard" data-i18n="n.dash">Dashboard</a></li><li><a href="#/accessibility" data-i18n="n.access">Accessibility statement</a></li></ul></div>
+    </div>
+    <div class="fnote"><span data-i18n="ft.n1">Not a government website. Emergencies: 112.</span><span data-i18n="ft.n2">Links verified 25 September 2026.</span></div>
+  </div>
+  <div class="tri" aria-hidden="true"></div>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+window.GVF=(function(){
+"use strict";
+var L={gmdaPortal:"https://services.gmda.gov.in/",gmda:"https://www.gmda.gov.in/",mcg:"https://www.mcg.gov.in/",district:"https://gurugram.gov.in/",districtReps:"https://gurugram.gov.in/public-representative/",districtHelp:"https://gurugram.gov.in/helpline/",voterList:"https://gurugram.gov.in/voter-list-for-mc-election-gurugram-2025/",onemap:"https://onemapggm.gmda.gov.in/",police:"https://haryanapolice.gov.in/",cmwindow:"https://cmharyanacell.nic.in/",aas:"https://aas.saralharyana.nic.in/",saral:"https://saralharyana.gov.in/",haryana:"https://haryana.gov.in/",assembly:"https://haryanaassembly.gov.in/",ulb:"https://ulbharyana.gov.in/",dtcp:"https://tcpharyana.gov.in/",hsvp:"https://hsvphry.org.in/",dhbvn:"https://dhbvn.org.in/",hspcb:"https://hspcb.gov.in/",hrera:"https://haryanarera.gov.in/",cpgrams:"https://pgportal.gov.in/",swachh:"https://swachhbharaturban.gov.in/",cpcb:"https://cpcb.nic.in/",rti:"https://rtionline.gov.in/",consumer:"https://consumerhelpline.gov.in/",edaakhil:"https://edaakhil.nic.in/",cyber:"https://cybercrime.gov.in/",nhai:"https://nhai.gov.in/",mygov:"https://www.mygov.in/",mohua:"https://mohua.gov.in/",caqm:"https://caqm.nic.in/",sansad:"https://sansad.in/ls/members",mospi:"https://mospi.gov.in/sites/default/files/profileHonMin/Minister_Profile_28062024.pdf",eci:"https://voters.eci.gov.in/",ulbtax:"https://ulbhryndc.org/",wa:"https://wa.me/917840001817"};
+var STD=[{k:"Portal",v:"GMDA integrated grievance portal",href:L.gmdaPortal,ic:"link"},{k:"Toll-free",v:"1800 180 1817",href:"tel:18001801817",ic:"phone"},{k:"WhatsApp",v:"78400 01817, with a photo",href:L.wa,ic:"chat"},{k:"App",v:"myGurugram",ic:"app"}];
+var LAD=["Ticket on the portal; keep the number. Only you can close it.","No action in time: the officer named on the ticket, then the zone Joint Commissioner or Executive Engineer.","Still pending: MCG Commissioner and Mayor, or GMDA CEO.","Final: CM Window, with every ticket number attached."];
+var CATS=[
+{id:"roads",ic:"roads",label:"Roads, footpaths",hl:"सड़क, फ़ुटपाथ",agency:"GMDA for master roads, MCG for internal roads",owns:"GMDA owns the master roads between sectors and the major corridors. MCG owns internal roads, lanes and footpaths. HSVP keeps its own sectors until transfer; developers keep licensed colonies under DTCP. NH-48 and the expressways are NHAI.",channels:STD.concat([{k:"Highways",v:"NHAI 1033",href:"tel:1033",ic:"phone"}]),ladder:LAD,roles:["gmda","mcg","hsvp","dtcp","nhai","councillor","je"]},
+{id:"waste",ic:"waste",label:"Garbage",hl:"कचरा",agency:"MCG sanitation wing",owns:"Door-to-door collection, sweeping, collection points, bulk waste and debris. Societies producing 100 kg a day or more must process wet waste on site under the 2016 rules.",channels:STD.concat([{k:"Central record",v:"Swachhata app",href:L.swachh,ic:"app"}]),ladder:["Ticket on the portal or the Swachhata app; keep the number.","Not attended: the ward sanitary inspector, then the zone Joint Commissioner.","Still pending: MCG Commissioner and Mayor.","Final: CM Window with the ticket history."],roles:["mcg","ulb","mohua","councillor","je","rwa"]},
+{id:"water",ic:"water",label:"Water, sewer",hl:"पानी, सीवर",agency:"GMDA for bulk supply, MCG for distribution",owns:"GMDA runs the treatment plants, master water lines and master sewers. MCG owns distribution and internal sewers inside sectors; HSVP in its own sectors. Tankers during a shortage come through the same ticket.",channels:STD,ladder:LAD,roles:["gmda","mcg","hsvp","je"]},
+{id:"drains",ic:"drains",label:"Drains, flooding",hl:"नाले, जलभराव",agency:"GMDA for master drains, MCG for internal drains",owns:"GMDA owns the master storm drains and natural creeks. MCG owns internal drains, desilting and road gullies. In the monsoon the district control room coordinates emergency pumping.",channels:STD.concat([{k:"District",v:"Control room and helplines",href:L.districtHelp,ic:"phone"}]),ladder:LAD,roles:["gmda","mcg","dc","je"]},
+{id:"lights",ic:"lights",label:"Streetlights",hl:"स्ट्रीट लाइट",agency:"MCG for internal roads, GMDA for master roads",owns:"Dark stretches, faulty poles and timers on internal roads are MCG; on sector-dividing and master roads they are GMDA. Quote the pole number if it is painted on.",channels:STD,ladder:LAD,roles:["mcg","gmda","je"]},
+{id:"parks",ic:"parks",label:"Parks, trees",hl:"पार्क, पेड़",agency:"MCG horticulture; HSVP in its sectors; Forest Department for trees",owns:"Neighbourhood parks are MCG horticulture. Green belts along HSVP roads are HSVP. Felling or damaging a tree needs Forest Department permission; report illegal felling to the Forest Department and the police.",channels:STD,ladder:LAD,roles:["mcg","hsvp"]},
+{id:"traffic",ic:"traffic",label:"Traffic",hl:"ट्रैफ़िक",agency:"Gurugram Traffic Police; GMDA for signals",owns:"Enforcement, wrong-side driving and parking are the Traffic Police. Faulty signals, signage and junction design are GMDA. Vendors and structures on roads are MCG enforcement.",channels:[{k:"Emergency",v:"112",href:"tel:112",ic:"phone"},{k:"Police",v:"Haryana Police portal",href:L.police,ic:"link"},{k:"Signals",v:"GMDA integrated portal",href:L.gmdaPortal,ic:"link"},{k:"Toll-free",v:"1800 180 1817",href:"tel:18001801817",ic:"phone"}],ladder:["Traffic Police for enforcement; a GMDA ticket for signals and engineering.","Not attended: the ACP Traffic of the zone, then the DCP Traffic.","Still pending: the Commissioner of Police, Gurugram.","Final: CM Window, or a Forum policy dialogue for a recurring junction."],roles:["police","gmda","mcg"]},
+{id:"power",ic:"power",label:"Electricity",hl:"बिजली",agency:"DHBVN",owns:"Outages, tripping, broken poles, meter faults and billing disputes. Restoration and meter timelines are set by the Haryana Electricity Regulatory Commission.",channels:[{k:"Helpline",v:"1912",href:"tel:1912",ic:"phone"},{k:"Portal",v:"DHBVN consumer portal",href:L.dhbvn,ic:"link"}],ladder:["Register on 1912 or the portal; keep the complaint number.","Not resolved: the SDO (Operation), then the Executive Engineer.","Still pending: the Consumer Grievance Redressal Forum, DHBVN.","Final: the Electricity Ombudsman, Haryana."],roles:["dhbvn"]},
+{id:"pollution",ic:"pollution",label:"Air, noise",hl:"हवा, शोर",agency:"HSPCB regional office, Gurugram",owns:"Construction dust, industrial emissions, noise and waste burning. Burning on public land is also MCG. Under GRAP, the Commission for Air Quality Management sets NCR-wide restrictions.",channels:[{k:"Central app",v:"Sameer (CPCB)",href:L.cpcb,ic:"app"},{k:"State board",v:"HSPCB",href:L.hspcb,ic:"link"},{k:"Portal",v:"GMDA portal, air-monitoring cell",href:L.gmdaPortal,ic:"link"},{k:"Toll-free",v:"1800 180 1817",href:"tel:18001801817",ic:"phone"}],ladder:["Complaint on Sameer or the GMDA portal, with photo and time.","Not attended: the HSPCB Regional Officer, Gurugram.","Still pending: Member Secretary, HSPCB, and the Deputy Commissioner.","Final: CM Window, or CPGRAMS for CPCB and CAQM."],roles:["hspcb","caqm","mcg","dc"]},
+{id:"animals",ic:"animals",label:"Stray animals",hl:"आवारा पशु",agency:"MCG veterinary wing",owns:"Stray dog sterilisation and vaccination, stray cattle, carcass removal and dog-bite follow-up.",channels:STD,ladder:LAD,roles:["mcg","je"]},
+{id:"construction",ic:"construction",label:"Illegal construction",hl:"अवैध निर्माण",agency:"MCG town planning; DTCP for licensed colonies; HSVP in its sectors",owns:"Unauthorised floors, commercial use of residential plots and encroachment inside municipal limits are MCG. Licensed private colonies are the District Town Planner. HSVP sectors are the HSVP Estate Officer.",channels:STD.concat([{k:"DTCP",v:"Town and Country Planning",href:L.dtcp,ic:"link"},{k:"HSVP",v:"HSVP",href:L.hsvp,ic:"link"}]),ladder:["Written complaint with photos, plus a ticket on the portal.","Not attended: Senior Town Planner (MCG) or District Town Planner (DTCP).","Still pending: MCG Commissioner or Director, Town and Country Planning.","Final: CM Window."],roles:["mcg","dtcp","hsvp"]},
+{id:"property",ic:"property",label:"Property tax",hl:"संपत्ति कर",agency:"MCG",owns:"Property-tax assessment and correction, building plans, occupation and no-dues certificates. Most are notified services with fixed time limits under the Right to Service Act.",channels:[{k:"Portal",v:"ULB property tax and services",href:L.ulbtax,ic:"link"},{k:"Services",v:"Saral Haryana",href:L.saral,ic:"link"},{k:"MCG",v:"mcg.gov.in",href:L.mcg,ic:"link"}],ladder:["Apply online; keep the application number.","Past the notified limit: the Auto Appeal System escalates for you.","Still pending: Grievance Officer, then the Right to Service Commission.","Parallel route: CM Window."],roles:["mcg","ulb","rts"]},
+{id:"housing",ic:"housing",label:"Builders, societies",hl:"बिल्डर, सोसाइटी",agency:"HRERA Gurugram; DTCP; District Registrar",owns:"Delayed possession and defects go to HRERA. Maintenance handover and licence conditions are DTCP. Disputes inside an RWA or AOA go to the District Registrar under the 2012 Act.",channels:[{k:"HRERA",v:"HRERA Gurugram",href:L.hrera,ic:"link"},{k:"DTCP",v:"Town and Country Planning",href:L.dtcp,ic:"link"},{k:"District",v:"District Registrar, Firms and Societies",href:L.district,ic:"link"}],ladder:["File with HRERA or DTCP with the agreement and payment record.","HRERA: appeal to the Real Estate Appellate Tribunal.","DTCP: Director, Town and Country Planning, then CM Window.","Society-wide patterns go to a Forum policy dialogue."],roles:["hrera","dtcp","dc"]},
+{id:"safety",ic:"safety",label:"Police, cyber",hl:"पुलिस, साइबर",agency:"Gurugram Police",owns:"Crime, harassment, threats, domestic violence and cyber fraud. Any station must register a Zero FIR for a cognisable offence; you get a free copy of the FIR.",channels:[{k:"Emergency",v:"112",href:"tel:112",ic:"phone"},{k:"Women",v:"181",href:"tel:181",ic:"phone"},{k:"Cyber fraud",v:"1930, within the first hour",href:"tel:1930",ic:"phone"},{k:"Portal",v:"cybercrime.gov.in",href:L.cyber,ic:"link"},{k:"Police",v:"Haryana Police",href:L.police,ic:"link"}],ladder:["112 in an emergency; otherwise the station or online.","FIR refused: written complaint to the DCP of the zone.","Still refused: Commissioner of Police, or the Judicial Magistrate.","Cyber fraud: 1930 first, then the portal, then the station."],roles:["police"]},
+{id:"consumer",ic:"consumer",label:"Consumer",hl:"उपभोक्ता",agency:"National Consumer Helpline; District Commission, Gurugram",owns:"Defective goods, unfair charges, deficient services, online disputes. The District Commission hears claims up to 50 lakh rupees; the State Commission up to 2 crore.",channels:[{k:"Helpline",v:"1915",href:"tel:1915",ic:"phone"},{k:"Portal",v:"consumerhelpline.gov.in",href:L.consumer,ic:"link"},{k:"File online",v:"e-Daakhil",href:L.edaakhil,ic:"link"}],ladder:["Written complaint to the seller; keep the record.","No resolution: 1915 mediation with the company.","Still unresolved: District Commission, Gurugram, on e-Daakhil.","Appeal to the State Commission, Panchkula."],roles:["consumer"]},
+{id:"rti",ic:"rti",label:"RTI",hl:"सूचना (RTI)",agency:"The Public Information Officer of that office",owns:"Any record a public authority holds: files, tenders, inspection reports, budgets. Reply due in 30 days, 48 hours where life or liberty is at stake.",channels:[{k:"Central",v:"RTI Online",href:L.rti,ic:"link"},{k:"State",v:"PIO of MCG, GMDA, HSVP or DTCP, with a 10 rupee fee",ic:"mail"}],ladder:["Application to the PIO with the fee.","No reply in 30 days: first appeal in the same office.","Second appeal: State Information Commission (CIC for central bodies).","The Forum can help draft a precise request."],roles:[]},
+{id:"other",ic:"other",label:"Something else",hl:"कुछ और",agency:"Depends on the subject; the Forum maps it",owns:"A scheme not reaching you, a service that needs redesign, an idea for the city. The Forum reads every submission and points it to a desk or a policy dialogue.",channels:[{k:"State",v:"CM Window",href:L.cmwindow,ic:"link"},{k:"Central",v:"CPGRAMS",href:L.cpgrams,ic:"link"},{k:"Forum",v:"Report it here",href:"#/report",ic:"chat"}],ladder:["Send it through the Forum.","A volunteer maps it within three working days.","Recurring themes go to a policy dialogue."],roles:["cm","chapter"]}
+];
+var PORTALS=[
+{n:"GMDA integrated grievance portal",h:L.gmdaPortal,l:"city",f:"Civic complaints for GMDA, MCG, MC Manesar",how:"Web, WhatsApp 78400 01817, myGurugram app",ph:"18001801817",t:["civic"]},
+{n:"Municipal Corporation of Gurugram",h:L.mcg,l:"city",f:"Property tax, building plans, licences, certificates",how:"Online services and zonal offices",t:["civic","housing"]},
+{n:"District Administration, Gurugram",h:L.district,l:"city",f:"DC office, control room, representatives",how:"Helpline directory and CM Window counter",t:["civic","escalation"]},
+{n:"OneMap GGM",h:L.onemap,l:"city",f:"Ward, sector and jurisdiction maps",how:"Search a sector or drop a pin",t:["civic"]},
+{n:"Gurugram Police",h:L.police,l:"city",f:"FIR, verification, women safety, cyber",how:"Women 181, children 1098, cyber 1930",ph:"112",t:["safety"]},
+{n:"CM Window, Haryana",h:L.cmwindow,l:"state",f:"Grievance against any Haryana department",how:"Online or at any DC or SDM office",t:["escalation"]},
+{n:"Auto Appeal System, Right to Service",h:L.aas,l:"state",f:"Late notified services escalate automatically",how:"Up to the Right to Service Commission",t:["escalation","civic"]},
+{n:"Saral Haryana",h:L.saral,l:"state",f:"Notified state services with time limits",how:"Apply, track, keep the number",t:["civic"]},
+{n:"Haryana ULB services and property tax",h:L.ulbtax,l:"state",f:"Property tax and no-dues certificate",how:"Search your property ID",t:["civic","housing"]},
+{n:"HRERA Gurugram",h:L.hrera,l:"state",f:"Builder delays, defects, refunds",how:"Online complaint; hearings in Gurugram",t:["housing"]},
+{n:"Town and Country Planning (DTCP)",h:L.dtcp,l:"state",f:"Licensed colonies, handover, violations",how:"District Town Planner, Gurugram",t:["housing"]},
+{n:"HSVP",h:L.hsvp,l:"state",f:"HSVP sectors, plots, internal services",how:"Estate Officer, Gurugram",t:["civic","housing"]},
+{n:"DHBVN",h:L.dhbvn,l:"state",f:"Electricity outages, meters, bills",how:"Consumer portal for bills and complaints",ph:"1912",t:["utilities"]},
+{n:"Haryana State Pollution Control Board",h:L.hspcb,l:"state",f:"Air, water, noise, construction dust",how:"Regional office, Gurugram",t:["environment"]},
+{n:"Haryana Legislative Assembly",h:L.assembly,l:"state",f:"MLA profiles, attendance, questions",how:"Members section",t:["escalation"]},
+{n:"CPGRAMS",h:L.cpgrams,l:"central",f:"Central departments, 21-day timeline",how:"Interim reply if longer; appeal after feedback",t:["escalation"]},
+{n:"Swachhata app",h:L.swachh,l:"central",f:"Garbage, dumping, public toilets",how:"Geo-tagged photo, routed to the ward",t:["civic","environment"]},
+{n:"Sameer app (CPCB)",h:L.cpcb,l:"central",f:"Air quality readings and complaints",how:"Photo complaint to the state board",t:["environment"]},
+{n:"RTI Online",h:L.rti,l:"central",f:"Information from central bodies, 30 days",how:"10 rupee fee; first appeal online",t:["consumer"]},
+{n:"National Consumer Helpline and e-Daakhil",h:L.consumer,l:"central",f:"Sellers, services, e-commerce disputes",how:"File before the District Commission on e-Daakhil",ph:"1915",t:["consumer"]},
+{n:"National Cybercrime Reporting Portal",h:L.cyber,l:"central",f:"Online and UPI fraud, harassment",how:"Report within the first hour",ph:"1930",t:["safety"]},
+{n:"NHAI",h:L.nhai,l:"central",f:"NH-48, expressways, tolls",how:"Helpline for highway issues",ph:"1033",t:["civic"]},
+{n:"Voter registration (ECI)",h:L.eci,l:"central",f:"Register or shift your vote here",how:"Form 6 new, Form 8 shift",ph:"1950",t:["civic","escalation"]},
+{n:"MyGov",h:L.mygov,l:"central",f:"Central consultations and ideas",how:"Register and take part",t:["escalation"]}
+];
+var FILTERS=[["all","All"],["civic","Civic"],["escalation","Escalation"],["housing","Housing"],["utilities","Electricity"],["safety","Safety"],["environment","Environment"],["consumer","Consumer and RTI"]];
+var CHARTERS=[
+{id:"rts",ic:"track",t:"Right to Service, Haryana",right:"A notified service within its time limit, or an automatic appeal.",dl:"Notified limit",how:["Apply on Saral Haryana and keep the application number.","Past the limit? The Auto Appeal System escalates for you.","The Commission can fine the officer and compensate you."],why:"Covers certificates, approvals, connections and corrections. CM Window cases about notified services route into the same system.",src:[["Auto Appeal System",L.aas],["Saral Haryana",L.saral]]},
+{id:"cpgrams",ic:"mail",t:"CPGRAMS, central complaints",right:"A reply within 21 days from any central ministry or body.",dl:"21 days",how:["File at pgportal.gov.in and note the registration number.","No reply by day 21? An interim reply must give a reason and date.","Rate the resolution; a poor rating opens an appeal."],why:"Use for NHAI, CPCB, CAQM, banks, telecom, railways, EPFO and central schemes. A grievance cannot be closed as not our department; it must be transferred.",src:[["CPGRAMS",L.cpgrams]]},
+{id:"cmwindow",ic:"up",t:"CM Window and the MCG ladder",right:"A tracked escalation when a civic ticket is closed without a fix.",dl:"3 levels, then CM Window",how:["Keep the ticket number; only you can close a GMDA ticket.","Escalate to the department head, then Commissioner and Mayor.","Still pending? CM Window, with every ticket number attached."],why:"CM Window sends the case to the Directorate of Urban Local Bodies with a registration number you can track by SMS.",src:[["CM Window",L.cmwindow],["MCG",L.mcg],["GMDA portal",L.gmdaPortal]]},
+{id:"rti",ic:"rti",t:"Right to Information",right:"Any record a public authority holds, within 30 days, for 10 rupees.",dl:"30 days",how:["Ask for specific documents: work order, measurement book, inspection report.","No reply, or a poor one? First appeal in the same office.","Second appeal to the State Information Commission."],why:"48 hours where life or liberty is involved. Use RTI to prove what was sanctioned and paid before you escalate.",src:[["RTI Online, central bodies",L.rti]]},
+{id:"swm",ic:"waste",t:"Solid Waste Management Rules, 2016",right:"Segregated waste collected at your door, transported separately and processed.",dl:"Daily collection",how:["Segregate wet, dry and domestic hazardous waste.","Bulk generators, 100 kg a day, process wet waste on site.","Collector mixing your streams? Report it with a photo."],why:"Spot fines apply to littering, burning and unsegregated handover. Societies planning composting can ask the Forum for a clinic.",src:[["Swachh Bharat Mission Urban",L.swachh]]},
+{id:"rera",ic:"housing",t:"RERA and apartment ownership",right:"Interest or a refund for delay; defects fixed for five years after possession.",dl:"5-year defect liability",how:["Complain to HRERA Gurugram with the agreement and payment record.","Appeal to the Real Estate Appellate Tribunal.","Maintenance handover and licence conditions: DTCP."],why:"Common areas belong to the association of allottees once it is formed.",src:[["HRERA Gurugram",L.hrera],["DTCP Haryana",L.dtcp]]},
+{id:"consumer",ic:"consumer",t:"Consumer Protection Act, 2019",right:"Redress for defective goods and deficient services, filed from where you live.",dl:"District: up to 50 lakh",how:["Written complaint to the seller; keep the record.","Helpline 1915 mediates with the company.","File on e-Daakhil before the District Commission, Gurugram."],why:"Covers builders, hospitals, schools and online platforms. The State Commission hears claims up to 2 crore.",src:[["National Consumer Helpline",L.consumer],["e-Daakhil",L.edaakhil]]},
+{id:"police",ic:"safety",t:"Police: what you are entitled to",right:"A Zero FIR at any station for a cognisable offence, and a free copy.",dl:"Cyber fraud: 1 hour",how:["Emergency 112; women 181; children 1098; cyber 1930.","FIR refused? Written complaint to the DCP of the zone.","Still refused? Commissioner of Police, or the Magistrate."],why:"Cyber fraud reported within the first hour has the best chance of freezing the money.",src:[["Haryana Police",L.police],["Cybercrime portal",L.cyber]]},
+{id:"dhbvn",ic:"power",t:"Electricity standards of performance",right:"Supply restored and meters fixed within regulator limits, with compensation for delay.",dl:"HERC time limits",how:["Register on 1912 or the DHBVN portal; keep the number.","Escalate to the SDO, then the Executive Engineer.","Then the Consumer Grievance Redressal Forum and the Ombudsman."],why:"The Haryana Electricity Regulatory Commission sets the standards; DHBVN owes compensation for missed limits.",src:[["DHBVN",L.dhbvn]]},
+{id:"air",ic:"pollution",t:"Air quality: GRAP",right:"Enforcement against dust, burning and emissions as the AQI worsens.",dl:"GRAP stages 1 to 4",how:["Report on the Sameer app with photo and time.","Or the GMDA portal's air-monitoring cell.","Then the HSPCB Regional Officer; CPGRAMS for CAQM."],why:"The Commission for Air Quality Management runs the Graded Response Action Plan across the NCR.",src:[["CAQM",L.caqm],["CPCB and Sameer",L.cpcb]]},
+{id:"vote",ic:"check",t:"Your vote in Gurugram",right:"Register at your Gurugram address, or shift an existing registration online.",dl:"Form 6 new, Form 8 shift",how:["Apply on the ECI voter portal; the e-EPIC downloads to your phone.","Check your name on the roll before every election.","Municipal, assembly and parliamentary rolls all flow from it."],why:"Turnout in the 2025 municipal election was under 42 percent. One ward was decided by two votes.",src:[["Voter portal (ECI)",L.eci],["2025 ward voter lists",L.voterList]]}
+];
+var ROLES={
+mp:{b:"Member of Parliament, Gurgaon",who:"Rao Inderjit Singh (BJP), Union Minister of State (IC), Statistics and Planning",owns:"Represents the constituency in Lok Sabha; MPLADS funds; central schemes and agencies for the city.",links:[["Official profile (MoSPI)",L.mospi],["Lok Sabha members",L.sansad],["District list of representatives",L.districtReps]]},
+mohua:{b:"Ministry of Housing and Urban Affairs",owns:"Swachh Bharat Mission, AMRUT water and sewer funding, metro projects.",links:[["mohua.gov.in",L.mohua],["Grievance: CPGRAMS",L.cpgrams]]},
+nhai:{b:"NHAI",owns:"NH-48, the Dwarka and Sohna expressways, toll plazas.",links:[["nhai.gov.in",L.nhai],["Grievance: CPGRAMS",L.cpgrams]]},
+caqm:{b:"Commission for Air Quality Management",owns:"GRAP restrictions across the NCR.",links:[["caqm.nic.in",L.caqm],["Sameer app (CPCB)",L.cpcb]]},
+cm:{b:"Chief Minister and Council of Ministers",who:"Nayab Singh Saini, Chief Minister",owns:"State policy and budgets; CM Window is the top of every state escalation ladder.",links:[["CM Window",L.cmwindow],["haryana.gov.in",L.haryana]]},
+mla77:{b:"MLA, Gurgaon (77)",who:"Mukesh Sharma (BJP)",owns:"Old Gurugram and the central sectors; local development funds; questions in the Assembly.",links:[["Assembly members and attendance",L.assembly],["District list of representatives",L.districtReps]]},
+mla76:{b:"MLA, Badshahpur (76)",who:"Rao Narbir Singh (BJP), Cabinet Minister",owns:"Badshahpur, Sohna Road belt and the new sectors.",links:[["Assembly members and attendance",L.assembly],["District list of representatives",L.districtReps]]},
+mla78:{b:"MLA, Sohna (78)",who:"Tejpal Tanwar (BJP)",owns:"Sohna and the southern sectors.",links:[["Assembly members and attendance",L.assembly],["District list of representatives",L.districtReps]]},
+mla75:{b:"MLA, Pataudi (75)",who:"Bimla Chaudhary (BJP)",owns:"Pataudi, Manesar side and the western villages.",links:[["Assembly members and attendance",L.assembly],["District list of representatives",L.districtReps]]},
+ulb:{b:"Urban Local Bodies Department",owns:"Controls MCG and MC Manesar; property tax rules; hears CM Window cases against municipal bodies.",links:[["ulbharyana.gov.in",L.ulb],["CM Window",L.cmwindow]]},
+dtcp:{b:"Town and Country Planning (DTCP)",owns:"Licenses private colonies; enforces licence conditions and handover.",links:[["tcpharyana.gov.in",L.dtcp]]},
+rts:{b:"Right to Service Commission",owns:"Hears auto-appeals when notified services are late; can fine officers.",links:[["Auto Appeal System",L.aas]]},
+hrera:{b:"HRERA Gurugram",owns:"Promoter delays, defects, refunds, unregistered projects.",links:[["haryanarera.gov.in",L.hrera]]},
+dc:{b:"Deputy Commissioner, Gurugram",owns:"Head of the district; revenue, elections, disaster management, coordination between agencies.",links:[["gurugram.gov.in",L.district],["Helplines and control room",L.districtHelp]]},
+sdm:{b:"Sub-Divisional Magistrates",owns:"Gurugram North and South, Badshahpur, Sohna, Pataudi and Manesar; certificates, revenue land, local coordination.",links:[["District administration",L.district]]},
+police:{b:"Commissioner of Police, Gurugram",owns:"Policing, traffic and public order through the DCPs of each zone.",links:[["haryanapolice.gov.in",L.police],["Cybercrime portal",L.cyber]]},
+consumer:{b:"District Consumer Commission and District Registrar",owns:"Consumer disputes; registration and disputes of RWAs and societies.",links:[["e-Daakhil",L.edaakhil],["District administration",L.district]]},
+gmda:{b:"Gurugram Metropolitan Development Authority",who:"Chief Executive Officer",owns:"Master roads, bulk water, master sewers and storm drains, mobility, the integrated grievance portal.",links:[["gmda.gov.in",L.gmda],["Grievance portal",L.gmdaPortal],["OneMap GGM",L.onemap]]},
+mcg:{b:"Municipal Corporation of Gurugram",who:"Mayor Raj Rani Malhotra; Municipal Commissioner; 36 councillors",owns:"Sanitation, internal roads, streetlights, parks, internal water and sewer, property tax, building plans, stray animals, encroachment.",links:[["mcg.gov.in",L.mcg],["Grievance portal",L.gmdaPortal],["Ward directory","#/wards"]]},
+manesar:{b:"Municipal Corporation of Manesar",owns:"The same functions for the Manesar side of the district.",links:[["Grievance portal",L.gmdaPortal]]},
+hsvp:{b:"HSVP Estate Office",owns:"HSVP sectors and their internal services until transfer to MCG; plot allotments.",links:[["hsvphry.org.in",L.hsvp]]},
+dhbvn:{b:"DHBVN, Gurugram circles",owns:"Power distribution and billing.",links:[["dhbvn.org.in",L.dhbvn]]},
+hspcb:{b:"HSPCB regional office",owns:"Pollution enforcement.",links:[["hspcb.gov.in",L.hspcb]]},
+councillor:{b:"Ward councillor",owns:"Elected for your ward; first contact for local works; sits in the MCG House and its committees.",links:[["Ward directory, all 36","#/wards"],["mcg.gov.in",L.mcg]]},
+je:{b:"Junior engineer and sanitation supervisor",owns:"The field staff who clear a complaint in your ward; named on your ticket.",links:[["Raise a ticket",L.gmdaPortal]]},
+rwa:{b:"RWA or Apartment Owners Association",owns:"Internal roads, security, common areas, and the society's voice with the agencies.",links:[["Civic charter for societies","#/charter"]]},
+chapter:{b:"Forum area chapter",owns:"Volunteers who map issues in your sector, follow tickets, and bring recurring problems to policy dialogues.",links:[["Join","#/join"]]}
+};
+var TIERS=[
+{h:"Parliament and Union",s:"Schemes, highways, NCR air",r:["mp","mohua","nhai","caqm"]},
+{h:"Haryana Government",s:"Policy, budgets, departments",r:["cm","mla77","mla76","mla78","mla75","ulb","dtcp","rts","hrera"]},
+{h:"District administration",s:"Order, coordination, disasters",r:["dc","sdm","police","consumer"]},
+{h:"City agencies",s:"Build and run services",r:["gmda","mcg","manesar","hsvp","dhbvn","hspcb"]},
+{h:"Your ward and colony",s:"First responsible for your street",r:["councillor","je","rwa","chapter"]}
+];
+var WARDS=[[1,"Sundar Singh","BJP"],[2,"Jyotsna Yadav","BJP"],[3,"Rakesh Yadav","Independent"],[4,"Pradeep Kadam","Independent"],[5,"Ram Avtar Rana","JJP"],[6,"Satpal","Congress"],[7,"Dinesh Dahiya","Independent"],[8,"Naresh Kumar","BJP"],[9,"Avnish Raghav","Independent"],[10,"Mahabir","Independent"],[11,"Kuldeep Yadav","BJP"],[12,"Ruchi","Independent"],[13,"Pawan Kumar","BJP"],[14,"Pratham Vashistha","BJP"],[15,"Bharati Harshana","BJP"],[16,"Vikramjit Singh","BJP"],[17,"Neha Dewatwal","Independent"],[18,"Jyoti Jaildar","BJP"],[19,"Raj Singh Amit","BJP"],[20,"Narayan Bhadana","BJP"],[21,"Sonia Yadav","BJP"],[22,"Vikash Yadav","BJP, unopposed"],[23,"Kunal Yadav","Independent"],[24,"Aarti Yadav","BJP"],[25,"Anoop Singh","BJP"],[26,"Sunita Rani","BJP"],[27,"Ashish Gupta","BJP"],[28,"Dharambir Bhangrola","BJP"],[29,"Usha","BJP"],[30,"Madhu Batra","BJP"],[31,"Dalip Kumar Sahani","BJP"],[32,"Vijay","BJP"],[33,"Sarika Bhardwaj","Independent"],[34,"Surekha","BJP"],[35,"Parminder Kataria","Independent"],[36,"Rekha","BJP"]];
+var AREAS=(function(){var a=[];for(var i=1;i<=115;i++)a.push("Sector "+i);return a.concat(["DLF Phase 1","DLF Phase 2","DLF Phase 3","DLF Phase 4","DLF Phase 5","DLF Cyber City","Sushant Lok 1","Sushant Lok 2","Sushant Lok 3","South City 1","South City 2","Palam Vihar","Palam Vihar Extension","Udyog Vihar","Sohna Road","Golf Course Road","Golf Course Extension Road","MG Road","Old Gurugram","Civil Lines","Jacubpura","Sadar Bazar","Rajiv Nagar","Laxman Vihar","Surya Vihar","Ashok Vihar","Shivaji Nagar","Krishna Colony","Arjun Nagar","Madanpuri","Basai","Kadipur","Khandsa","Sikanderpur","Chakkarpur","Nathupur","Wazirabad","Ghata","Badshahpur","Ghasola","Tikri","Fazilpur Jharsa","Kanhai","Jharsa","Islampur","Naharpur Rupa","Dundahera","Sirhaul","Manesar","IMT Manesar","Dwarka Expressway","New Gurugram","Ambience Island","Nirvana Country","Uppal Southend","Vatika City","Rosewood City","Mayfield Garden","Malibu Towne","Ardee City","Greenwood City","Suncity","Central Park","Emaar Palm Drive","Vipul World","Orchid Petals","Bestech Park View"])})();
+var CIVIC=[
+{id:"home",t:"Home",owe:[{id:"h1",t:"I segregate wet, dry and hazardous waste."},{id:"h2",t:"I pay property tax on time and check the assessment."},{id:"h3",t:"My rainwater harvesting works; the pit is cleaned before monsoon."},{id:"h4",t:"The footpath and drain outside my gate stay clear."},{id:"h5",t:"I fix leaks and report street-level water leaks."},{id:"h6",t:"My tenants and staff are police-verified."},{id:"h7",dont:true,t:"No waste in drains, no burning, no debris on public land."},{id:"h8",dont:true,t:"No unauthorised floors or shops on a residential plot."}],ent:[{t:"Door-to-door collection and regular sweeping.",l:"GMDA portal",h:L.gmdaPortal},{t:"Water and sewer connection within the notified limit.",l:"Saral Haryana",h:L.saral},{t:"A road, light or drain ticket only you can close.",l:"GMDA portal",h:L.gmdaPortal},{t:"Power restored within HERC limits, with compensation.",l:"DHBVN",h:L.dhbvn},{t:"Plan approvals and OC in time, with auto appeal.",l:"Auto Appeal",h:L.aas}]},
+{id:"society",t:"Society",owe:[{id:"s1",t:"Our RWA or AOA is registered, elected and audited."},{id:"s2",t:"We process wet waste on site as a bulk generator."},{id:"s3",t:"STP, rainwater harvesting and fire NOC are current."},{id:"s4",t:"A monthly civic slot: list, file, track on the noticeboard."},{id:"s5",t:"Every resident knows the ward number, councillor and JE."},{id:"s6",dont:true,t:"No encroached green belts, gated public roads or dumped debris."}],ent:[{t:"Maintenance handover as per the colony licence.",l:"DTCP",h:L.dtcp},{t:"Action against the promoter for delay or defects.",l:"HRERA",h:L.hrera},{t:"Society registration and disputes under the 2012 Act.",l:"District Registrar",h:L.district},{t:"Fire inspection and NOC through urban local bodies.",l:"ULB Haryana",h:L.ulb},{t:"Tanker supply in a shortage, against a ticket.",l:"GMDA portal",h:L.gmdaPortal}]},
+{id:"ward",t:"Ward",owe:[{id:"w1",t:"I am registered to vote at my Gurugram address."},{id:"w2",t:"I know my ward, councillor, JE and sanitation supervisor."},{id:"w3",t:"I vote in municipal elections."},{id:"w4",t:"I attend ward committee or RWA-federation meetings."},{id:"w5",t:"I file with the ward number on official channels."},{id:"w6",dont:true,t:"No unofficial fixers; the record must exist."}],ent:[{t:"A councillor in the MCG House and its committees.",l:"Ward directory",h:"#/wards"},{t:"Ward-wise voter lists and booth details.",l:"Voter lists",h:L.voterList},{t:"Maps of who owns each road, drain and park.",l:"OneMap",h:L.onemap},{t:"Time-bound tickets, escalated to the zone Joint Commissioner.",l:"GMDA portal",h:L.gmdaPortal},{t:"The right to see works sanctioned in your ward.",l:"RTI",h:L.rti}]},
+{id:"city",t:"City",owe:[{id:"c1",t:"I follow traffic rules: lane, helmet, belt, no wrong side."},{id:"c2",t:"I use public transport, carpool or cycle when I can."},{id:"c3",t:"I report on official portals, not only social media."},{id:"c4",t:"I volunteer for one civic activity a quarter."},{id:"c5",t:"I help my staff register to vote and access schemes."},{id:"c6",dont:true,t:"No littering, spitting, dumping or burning leaves."}],ent:[{t:"A central grievance answered within 21 days.",l:"CPGRAMS",h:L.cpgrams},{t:"CM Window for any state department, with tracking.",l:"CM Window",h:L.cmwindow},{t:"Clean-air action under GRAP; a channel to report.",l:"Sameer",h:L.cpcb},{t:"Information from any public authority in 30 days.",l:"RTI Online",h:L.rti},{t:"A Zero FIR and a free copy at any station.",l:"Haryana Police",h:L.police},{t:"A say in central consultations.",l:"MyGov",h:L.mygov}]}
+];
+var BLOG=[
+{slug:"complaint-that-gets-acted-on",t:"How to file a civic complaint that gets acted on",d:"25 Sep 2026",tag:"Guide",x:"The channel that creates a record, what an engineer needs, and the three moves that turn a grievance into a case.",b:"<p>Most complaints in this city die in a WhatsApp group. The ones that get fixed were filed on a channel that creates a ticket, contained what an engineer needs, and someone kept the number.</p><h2>1. Use the channel that creates a record</h2><p>For anything civic, start with the <a href='"+L.gmdaPortal+"' target='_blank' rel='noopener'>GMDA integrated grievance portal</a>: web, toll-free 1800 180 1817, WhatsApp 78400 01817 or the myGurugram app. It routes to MCG, GMDA and MC Manesar, and only the complainant can close a ticket. Electricity is 1912; police matters 112 or the station; a builder, HRERA.</p><h2>2. Put in what an engineer needs</h2><ul><li>The exact spot: sector, street, landmark, ward number.</li><li>A dated photo.</li><li>Since when, and earlier complaint numbers.</li><li>What you want done, in one line.</li></ul><h2>3. Keep the number and use the ladder</h2><p>If the promised time passes, escalate to the officer named on the ticket, then the zone Joint Commissioner or Chief Engineer, then Commissioner and Mayor, then <a href='"+L.cmwindow+"' target='_blank' rel='noopener'>CM Window</a>. Attach the history at each step. Need proof of what was sanctioned? An RTI for the work order costs 10 rupees.</p>"},
+{slug:"what-your-councillor-can-do",t:"Your ward councillor: what they can do, and what they cannot",d:"25 Sep 2026",tag:"Explainer",x:"Gurugram elected 36 councillors in March 2025. What the office controls, and how to work with it.",b:"<p>A councillor is the only elected person whose job is your street. They sit in the MCG House, which passes the budget, and on its committees. Turnout in 2025 was under 42 percent, so a few thousand votes decided most wards.</p><h2>In their power</h2><ul><li>Internal roads, streetlights, parks, sanitation and stray-animal services run by MCG.</li><li>Ward development funds and the priority list of works.</li><li>Raising an issue in the House and its committees.</li></ul><h2>Not in their power</h2><ul><li>Master roads, master drains and bulk water: GMDA.</li><li>HSVP sectors not yet transferred; licensed colonies still with the developer.</li><li>Police, electricity, pollution enforcement.</li></ul><h2>How to work with them</h2><p>Bring a list, not a grievance: five issues with photos, locations and ticket numbers. Ask which are MCG and what the timeline is. Follow up in writing. The <a href='#/wards'>ward directory</a> lists every councillor with official sources.</p>"},
+{slug:"deadlines-government-set-for-itself",t:"The 21-day rule and other deadlines the government set for itself",d:"25 Sep 2026",tag:"Rights",x:"Statutory timelines you can quote back: CPGRAMS, Right to Service, RTI, power supply, GRAP.",b:"<p>The most useful sentence in a complaint is a deadline the department already agreed to.</p><ul><li><b>Central grievances: 21 days.</b> DARPG's August 2024 guidelines set the CPGRAMS redressal time at 21 days, with an interim reply if longer and an appeal if you rate the resolution poor. <a href='"+L.cpgrams+"' target='_blank' rel='noopener'>pgportal.gov.in</a></li><li><b>State services: the notified limit, then automatic appeal.</b> The <a href='"+L.aas+"' target='_blank' rel='noopener'>Auto Appeal System</a> escalates without you filing anything; the Commission can fine the officer.</li><li><b>Information: 30 days.</b> RTI replies are due in 30 days, 48 hours where life or liberty is involved. <a href='"+L.rti+"' target='_blank' rel='noopener'>rtionline.gov.in</a></li><li><b>Electricity: HERC standards.</b> DHBVN owes compensation for delay. Helpline 1912.</li><li><b>Air: GRAP stages.</b> Restrictions apply automatically as the AQI crosses thresholds; violations go on the Sameer app.</li></ul><p>Quote the deadline, attach the date you filed, and the conversation becomes a compliance question.</p>"},
+{slug:"segregate-at-source",t:"Segregate at source: what the 2016 rules ask of every household and society",d:"25 Sep 2026",tag:"Guide",x:"Around 1,100 tonnes a day, most of it unprocessed. Half the fix is in residents' hands.",b:"<p>Gurugram produces around 1,100 tonnes of waste a day and processes very little of it. The Solid Waste Management Rules, 2016 put duties on both the corporation and the generator.</p><h2>Every household</h2><ul><li>Three streams: wet, dry, and domestic hazardous (batteries, medicines, sanitary waste, paint).</li><li>Hand over only to the authorised collector; no dumping, no burning.</li><li>Construction debris goes to the designated point, not the roadside.</li></ul><h2>Every society over 100 kg a day</h2><p>Most gated societies and office complexes are bulk generators. They must process wet waste on site or through an authorised agency. Societies that have done it cut landfill waste by more than half.</p><h2>What the corporation owes you</h2><p>Door-to-door collection of segregated waste, separate transport, and processing rather than dumping. Collector mixing your streams? Report it on the <a href='"+L.gmdaPortal+"' target='_blank' rel='noopener'>GMDA portal</a> or the <a href='"+L.swachh+"' target='_blank' rel='noopener'>Swachhata app</a> with a photo. The Forum runs composting set-up clinics for societies.</p>"}
+];
+var MEDIA={photos:[{t:"Launch townhall",s:"Album appears after the first public townhall."},{t:"Sector sewa drive",s:"Cleanliness and greening, sector by sector."},{t:"Policy dialogue with MCG and GMDA",s:"Photos and minutes of each dialogue."}],videos:[{t:"The Forum in 90 seconds",s:"Explainer, published with the launch."},{t:"How to file a complaint that works",s:"Walkthrough of the GMDA portal and the ladder."}],news:[{t:"Registration as a not-for-profit is under way.",d:"September 2026"},{t:"Core committee: professionals, community leaders and domain experts are being assembled.",d:"September 2026"},{t:"First public townhall: date and venue to be announced.",d:"To be announced"}]};
+var STATS={statuses:[["Received, being mapped","#94A3B8"],["Filed with the authority","#7FB2F0"],["Past due, escalated","#FF9933"],["Resolved and closed","#4ADE80"]],rows:[["Garbage",[3,14,6,11]],["Roads, footpaths",[2,13,5,9]],["Water, sewer",[1,8,3,6]],["Drains, flooding",[2,7,4,3]],["Streetlights",[1,4,1,5]],["Traffic",[1,5,2,2]],["Illegal construction",[1,4,2,2]],["Parks, trees",[0,3,0,4]],["Electricity",[0,2,0,4]],["Air, noise",[1,2,0,2]],["Stray animals",[0,1,0,2]]],commit:[["3 working days","to map a report to the responsible desk and reply"],["21 days","before a filed ticket with no action is escalated"],["Monthly","publication of this dashboard and the policy-dialogue list"]]};
+var FUNDING=[["Membership",35],["CSR",30],["Event sponsorship",20],["Grants",15]];
+var HI={"n.fix":"समस्या का हल","n.dir":"निर्देशिका","n.rights":"आपके अधिकार","n.who":"कौन ज़िम्मेदार","n.wards":"वार्ड","n.dash":"डैशबोर्ड","n.charter":"नागरिक चार्टर","n.report":"समस्या दर्ज करें","n.track":"रिपोर्ट ट्रैक करें","n.updates":"अपडेट","n.join":"जुड़ें","n.about":"परिचय","n.access":"सुगम्यता वक्तव्य",
+"h.q":"मेरी समस्या कौन ठीक करेगा?","h.sub":"समस्या चुनें। हम ज़िम्मेदार डेस्क, आधिकारिक माध्यम और आगे का रास्ता दिखाते हैं।","h.ph":"खोजें: गड्ढा, कचरा, DHBVN, RTI",
+"g.types":"समस्या प्रकार, हर एक डेस्क से जुड़ा","g.portals":"आधिकारिक पोर्टल और हेल्पलाइन","g.charters":"अधिकार चार्टर, समय-सीमा सहित","g.wards":"वार्ड और उनके पार्षद",
+"t.dir":"निर्देशिका","t.dirp":"हर पोर्टल और हेल्पलाइन जो रिकॉर्ड बनाती है, और किस काम की है।","t.rights":"आपके अधिकार","t.rightsp":"सरकार की अपनी तय समय-सीमाएँ, और उनका उपयोग।","t.who":"कौन ज़िम्मेदार","t.whop":"संसद से वार्ड पार्षद तक: किसका क्या काम, आधिकारिक पेज सहित।","t.wards":"वार्ड","t.wardsp":"सभी 36 पार्षद, और अपना वार्ड खोजने के तीन तरीक़े।","t.charter":"नागरिक चार्टर","t.charterp":"आप शहर को क्या दें, शहर आपको क्या दे। अपना स्कोर देखें।","t.dash":"डैशबोर्ड","t.dashp":"निवासियों ने क्या रिपोर्ट किया, और हर रिपोर्ट कहाँ है।",
+"j.h":"पेशेवर, छात्र और RWA फ़ोरम चलाते हैं।","j.p":"अपने समय के हिसाब से भूमिका चुनें।","j.btn":"फ़ोरम से जुड़ें",
+"r.h":"समस्या दर्ज करें","r.p":"चार छोटे चरण। आपको संदर्भ संख्या और आधिकारिक माध्यम मिलेगा।","f.err":"आगे बढ़ने के लिए चिह्नित खाने भरें।","f.s1":"चरण 1 / 4","f.s2":"चरण 2 / 4","f.s3":"चरण 3 / 4","f.s4":"चरण 4 / 4","f.what":"समस्या क्या है?","f.cat":"समस्या प्रकार","f.scope":"किसे प्रभावित करती है?","f.choose":"एक चुनें","f.sc1":"मुझे या परिवार को","f.sc2":"सोसाइटी या RWA को","f.sc3":"सेक्टर या मोहल्ले को","f.sc4":"पूरे शहर को","f.next":"आगे","f.back":"पीछे","f.where":"कहाँ है?","f.area":"सेक्टर, कॉलोनी या सोसाइटी","f.areaPh":"सेक्टर 56, DLF फ़ेज़ 3, पालम विहार","f.ward":"नगर निगम वार्ड","f.wardHint":"पता नहीं?","f.voter":"मतदाता सूची","f.wdir":"वार्ड सूची","f.spot":"सटीक जगह","f.spotPh":"कम्युनिटी सेंटर गेट के पास, मकान 412 के सामने","f.geo":"मेरी लोकेशन लें","f.details":"विवरण","f.desc":"क्या हो रहा है?","f.descHint":"कब से, क्या किया गया, पुराना टिकट नंबर।","f.name":"आपका नाम","f.phone":"मोबाइल","f.email":"ईमेल (वैकल्पिक)","f.consent":"फ़ोरम मुझसे संपर्क कर सकता है और मेरे फ़ोन नंबर के बिना मामला ज़िम्मेदार प्राधिकरण से साझा कर सकता है।","f.check":"जाँचें और भेजें","f.send":"रिपोर्ट भेजें","f.recent":"इस डिवाइस से भेजी रिपोर्टें","f.err2":"भेजने के लिए चिह्नित खाने भरें।",
+"k.h":"मेरी रिपोर्ट कहाँ है?","k.p":"संदर्भ संख्या दर्ज करें। पाँच चरण, हर बदलाव पर सूचना।","k.ref":"संदर्भ संख्या","k.go":"स्थिति दिखाएँ",
+"d.h":"आधिकारिक माध्यम","d.p":"24 पोर्टल और हेल्पलाइन जो रिकॉर्ड बनाती हैं। ज़रूरत के अनुसार छाँटें।",
+"ri.h":"आपके अधिकार","ri.p":"11 चार्टर, हर एक की समय-सीमा तय। चरण और स्रोत के लिए टैप करें।",
+"w.h":"कौन ज़िम्मेदार है","w.p":"संसद से आपकी गली तक। भूमिका पर टैप करें: काम और आधिकारिक पेज।","w.filter":"दिखाएँ, किसका काम है",
+"wd.h":"आपका वार्ड","wd.p":"2 मार्च 2025 को चुने गए 36 पार्षद, सत्यापन के आधिकारिक स्रोत सहित।","wd.f1":"नक़्शे पर","wd.f1p":"GMDA के GIS पर सेक्टर खोजें और वार्ड नंबर पढ़ें।","wd.f2":"मतदाता सूची से","wd.f2p":"ज़िले ने 2025 की सूची वार्ड और बूथ के अनुसार जारी की है।","wd.f2a":"gurugram.gov.in","wd.f3":"फिर उपयोग करें","wd.f3p":"हर शिकायत पर वार्ड नंबर लिखें; वह सही इंजीनियर तक जाती है।","wd.search":"वार्ड नंबर या पार्षद से खोजें","wd.c1":"वार्ड","wd.c2":"पार्षद","wd.c3":"दल, चुनाव के समय","wd.c4":"सत्यापन","wd.src":"स्रोत: 12 मार्च 2025 को घोषित परिणाम। कुछ निर्दलीय बाद में दलों में शामिल हुए। कार्यालय संपर्क एकत्र किए जा रहे हैं।",
+"c.h":"नागरिक चार्टर","c.p":"आप शहर को क्या दें, शहर आपको क्या दे। जो लागू है उसे टिक करें; यह आपके डिवाइस पर रहता है।","c.score":"आपका नागरिक स्कोर",
+"db.h":"जवाबदेही","db.p":"हर रिपोर्ट कारण और स्थिति के अनुसार, फ़ोरम के अपने वादों के सामने।",
+"u.h":"अपडेट","u.p":"कहानियाँ, फ़ोटो, वीडियो और प्रेस, फ़ोरम की टीम द्वारा।","u.back":"सभी अपडेट",
+"jn.h":"फ़ोरम से जुड़ें","jn.p":"तीन रास्ते। एक चुनें और विवरण दें।","jn.email":"ईमेल","jn.sector":"सेक्टर या क्षेत्र","jn.note":"कौशल या वह मुद्दा जो आपको प्रिय है (वैकल्पिक)","jn.send":"मेरा विवरण भेजें",
+"a.h":"फ़ोरम के बारे में","a.p":"नागरिकों का मंच जो गुरुग्राम की समस्याएँ सही डेस्क तक पहुँचाता है और अंत तक साथ रहता है।","a.how":"संचालन","a.o1":"सलाहकार बोर्ड","a.o1p":"कॉरपोरेट, क़ानून, शिक्षा, नियोजन और मीडिया से 8 से 12 विशेषज्ञ।","a.o2":"नगर कार्यकारी समिति","a.o2p":"संचालन, सरकारी समन्वय और नीति कार्य।","a.o3":"एरिया चैप्टर, स्वयंसेवक, युवा फ़ेलो","a.o3p":"सेक्टर और वार्ड टीमें, सेवा अभियान, शोध सहयोग।","a.trust":"आप क्या जाँच सकते हैं","a.t1":"पंजीकरण","a.t1p":"ग़ैर-लाभकारी पंजीकरण प्रक्रिया में है। चार्टर और खाते यहाँ प्रकाशित होंगे।","a.t2":"नियोजित वित्त स्रोत","a.t3":"आपका डेटा","a.t3p":"रिपोर्ट आपके फ़ोन नंबर के बिना साझा होती है। सार्वजनिक पेज पर नाम नहीं दिखता।","a.t4":"सरकारी साइट नहीं","a.t4p":"फ़ोरम स्वतंत्र और ग़ैर-दलीय है। आपातकाल: 112।","a.contact":"संपर्क","a.lead":"परियोजना प्रमुख",
+"ac.h":"सुगम्यता वक्तव्य","ac.p1":"यह साइट WCAG 2.2 स्तर AA का लक्ष्य रखती है: कीबोर्ड, दृश्य फ़ोकस, 44px टैप लक्ष्य, 16px से बड़ा पाठ, रंग अकेले नहीं, कम गति का सम्मान।","ac.p2":"ज्ञात कमियाँ: हिंदी इंटरफ़ेस और शीर्षकों तक है, लंबे लेख अभी नहीं; वार्ड नक़्शा बाहरी साइट पर है।","ac.p3":"जो काम न करे, हमें बताएँ:",
+"m.title":"मेनू","b.home":"होम","b.fix":"रिपोर्ट","b.wards":"वार्ड","b.track":"ट्रैक","b.menu":"मेनू",
+"ft.tag":"नागरिक और शासन, साझेदारी में। सहयोग, योगदान, बदलाव।","ft.fix":"हल","ft.fix1":"कौन ठीक करेगा","ft.know":"जानें","ft.join":"जुड़ें","ft.about":"परिचय","ft.n1":"सरकारी वेबसाइट नहीं। आपातकाल: 112।","ft.n2":"लिंक 25 सितंबर 2026 को जाँचे गए।"};
+return {L:L,CATS:CATS,PORTALS:PORTALS,FILTERS:FILTERS,CHARTERS:CHARTERS,ROLES:ROLES,TIERS:TIERS,WARDS:WARDS,AREAS:AREAS,CIVIC:CIVIC,BLOG:BLOG,MEDIA:MEDIA,STATS:STATS,FUNDING:FUNDING,HI:HI,VERIFIED:"25 Sep 2026"};
+})();
+</script>
+<script>
+(function(){
+"use strict";
+var D=window.GVF, L=D.L;
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function ic(n,cls){return '<svg class="i'+(cls?' '+cls:'')+'" aria-hidden="true"><use href="#i-'+n+'"/></svg>'}
+function ext(h){return h&&h.indexOf("http")===0?' target="_blank" rel="noopener" class="ext"':''}
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function load(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function toast(m){var t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove("show")},2600)}
+function catById(id){for(var i=0;i<D.CATS.length;i++)if(D.CATS[i].id===id)return D.CATS[i];return null}
+var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* theme */
+function setTheme(t){document.documentElement.setAttribute("data-theme",t);store("gvf_theme",t);var dark=t==="dark";["themeBtn","themeBtn2"].forEach(function(id){var b=$(id);if(b)b.innerHTML=ic(dark?"sun":"moon","i-s")})}
+var th=load("gvf_theme",null); if(th) setTheme(th); else { var sysDark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches; ["themeBtn","themeBtn2"].forEach(function(id){var b=$(id);if(b)b.innerHTML=ic(sysDark?"sun":"moon","i-s")}) }
+function toggleTheme(){var cur=document.documentElement.getAttribute("data-theme");if(!cur){cur=(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light"}setTheme(cur==="dark"?"light":"dark")}
+$("themeBtn").addEventListener("click",toggleTheme); $("themeBtn2").addEventListener("click",toggleTheme);
+
+/* i18n */
+var EN={},ENPH={};
+document.querySelectorAll("[data-i18n]").forEach(function(el){var k=el.getAttribute("data-i18n");if(!(k in EN))EN[k]=el.textContent});
+document.querySelectorAll("[data-i18n-ph]").forEach(function(el){var k=el.getAttribute("data-i18n-ph");if(!(k in ENPH))ENPH[k]=el.getAttribute("placeholder")});
+var lang=load("gvf_lang","en");
+function applyLang(l){lang=l;var dict=l==="hi"?D.HI:EN;
+  document.querySelectorAll("[data-i18n]").forEach(function(el){var k=el.getAttribute("data-i18n");if(dict[k]!=null)el.textContent=dict[k]});
+  document.querySelectorAll("[data-i18n-ph]").forEach(function(el){var k=el.getAttribute("data-i18n-ph");var v=l==="hi"?D.HI[k]:ENPH[k];if(v!=null)el.setAttribute("placeholder",v)});
+  document.documentElement.lang=l;
+  ["langBtn","langBtn2"].forEach(function(id){var b=$(id);if(b)b.innerHTML=l==="hi"?'<span>EN</span><span>|</span><b lang="hi">हिं</b>':'<b>EN</b><span>|</span><span lang="hi">हिं</span>'});
+  store("gvf_lang",l); renderTiles(); renderWhoFilter(); renderCatSelect();
+}
+function toggleLang(){applyLang(lang==="hi"?"en":"hi");toast(lang==="hi"?"हिंदी में। लंबे लेख अभी अंग्रेज़ी में हैं।":"English")}
+$("langBtn").addEventListener("click",toggleLang); $("langBtn2").addEventListener("click",toggleLang);
+
+/* sheet */
+var lastFocus=null;
+function openSheet(title,html){lastFocus=document.activeElement;$("sheetTitle").textContent=title;$("sheetBody").innerHTML=html;$("veil").classList.add("open");$("sheet").classList.add("open");document.body.style.overflow="hidden";setTimeout(function(){$("sheetClose").focus()},30)}
+function closeSheet(){$("veil").classList.remove("open");$("sheet").classList.remove("open");document.body.style.overflow="";if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+$("sheetClose").addEventListener("click",closeSheet); $("veil").addEventListener("click",function(){closeSheet();closeCmd()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"){closeSheet();closeCmd();closeMenu()} if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openCmd()}});
+$("sheetBody").addEventListener("click",function(e){var t=e.target.closest("[data-stab]");if(t){var pane=t.getAttribute("data-stab");$("sheetBody").querySelectorAll(".stab").forEach(function(b){b.setAttribute("aria-selected",b===t?"true":"false")});$("sheetBody").querySelectorAll(".spane").forEach(function(p){p.classList.toggle("on",p.getAttribute("data-pane")===pane)});return}
+  if(e.target.closest("a[href^='#/']")) closeSheet()});
+
+/* menu */
+function openMenu(){$("menu").classList.add("open");document.body.style.overflow="hidden";$("menuClose").focus()}
+function closeMenu(){$("menu").classList.remove("open");if(!$("sheet").classList.contains("open"))document.body.style.overflow=""}
+$("menuBtn").addEventListener("click",openMenu); $("menuClose").addEventListener("click",closeMenu);
+$("menu").addEventListener("click",function(e){if(e.target.closest("a"))closeMenu()});
+
+/* command search */
+var INDEX=[];
+D.CATS.forEach(function(c){INDEX.push({t:c.label,s:c.agency,h:"#/fix/"+c.id,ic:c.ic,k:"Issue"})});
+D.PORTALS.forEach(function(p){INDEX.push({t:p.n,s:p.f,h:"#/directory",ic:"link",k:"Portal",ext:p.h})});
+D.CHARTERS.forEach(function(c){INDEX.push({t:c.t,s:c.right,h:"#/rights/"+c.id,ic:"rights",k:"Right"})});
+Object.keys(D.ROLES).forEach(function(id){var r=D.ROLES[id];INDEX.push({t:r.b,s:r.who||r.owns,h:"#/who/"+id,ic:"who",k:"Role"})});
+D.WARDS.forEach(function(w){INDEX.push({t:"Ward "+w[0]+": "+w[1],s:w[2],h:"#/wards",ic:"wards",k:"Ward"})});
+function openCmd(){$("veil").classList.add("open");$("cmdk").classList.add("open");$("cmdIn").value="";renderCmd("");$("cmdIn").focus()}
+function closeCmd(){$("cmdk").classList.remove("open");if(!$("sheet").classList.contains("open"))$("veil").classList.remove("open")}
+function renderCmd(q){q=q.trim().toLowerCase();var hits=q?INDEX.filter(function(x){return (x.t+" "+x.s).toLowerCase().indexOf(q)>-1}).slice(0,12):INDEX.slice(0,8);
+  $("cmdList").innerHTML=hits.length?hits.map(function(x){return '<li><a href="'+x.h+'">'+ic(x.ic)+'<span><b>'+esc(x.t)+'</b><br><span class="small muted">'+esc(x.s)+'</span></span><small>'+x.k+'</small></a></li>'}).join(""):'<li class="none">Nothing matches. Try another word, or use Something else on the home page.</li>'}
+$("searchBtn").addEventListener("click",openCmd); $("searchBtn2").addEventListener("click",function(){closeMenu();openCmd()}); $("cmdIn").addEventListener("input",function(){renderCmd(this.value)});
+$("cmdList").addEventListener("click",function(e){if(e.target.closest("a"))closeCmd()});
+
+/* router */
+var VIEWS={home:"v-home",report:"v-report",track:"v-track",directory:"v-directory",rights:"v-rights",who:"v-who",wards:"v-wards",charter:"v-charter",dashboard:"v-dashboard",updates:"v-updates",post:"v-post",join:"v-join",about:"v-about",access:"v-access"};
+var TITLES={home:"Who fixes my problem?",report:"Report an issue",track:"Track a report",directory:"Official channels",rights:"Your rights",who:"Who is responsible",wards:"Your ward",charter:"The civic charter",dashboard:"Accountability dashboard",updates:"Updates",post:"Updates",join:"Join the Forum",about:"About the Forum",access:"Accessibility statement"};
+var curView=null;
+function route(){
+  var h=location.hash.replace(/^#\/?/,""); var parts=h.split("/"); var name=parts[0]||"home"; var arg=parts[1]?decodeURIComponent(parts[1]):"";
+  var map={"":"home",home:"home",fix:"home",report:"report",track:"track",directory:"directory",rights:"rights",who:"who",wards:"wards",charter:"charter",dashboard:"dashboard",updates:"updates",join:"join",about:"about",accessibility:"access"};
+  var v=map[name]; if(!v){location.hash="#/";return}
+  if(name==="updates"&&arg){renderPost(arg);v="post"}
+  var changed=v!==curView;
+  document.querySelectorAll(".view").forEach(function(s){s.classList.toggle("on",s.id===VIEWS[v])});
+  document.querySelectorAll("#nav a,.bbar a").forEach(function(a){a.classList.toggle("on",a.getAttribute("data-v")===v||(v==="post"&&a.getAttribute("data-v")==="updates"))});
+  document.title="Gurugram Vision Forum — "+TITLES[v];
+  if(name==="fix"&&arg){selectTile(arg,false)}
+  if(name==="fix"&&!arg&&curView==="home"){clearTile()}
+  if(name==="rights"&&arg){openRight(arg)}
+  if(name==="who"&&arg){openRole(arg)}
+  if(name==="track"&&arg){$("trRef").value=arg;showTrack()}
+  if(name==="report"&&arg){pendingCat=arg}
+  if(v==="report"){initReport()}
+  if(v==="dashboard"){renderDash()}
+  if(changed){window.scrollTo({top:0,behavior:"instant" in window?"instant":"auto"});curView=v}
+  closeMenu();
+}
+window.addEventListener("hashchange",route);
+
+/* tiles + panel */
+var selected=null;
+function renderTiles(){var q=($("tileSearch").value||"").trim().toLowerCase();var html="";var n=0;
+  D.CATS.forEach(function(c){var lab=lang==="hi"?c.hl:c.label;var hit=!q||(c.label+" "+c.hl+" "+c.agency+" "+c.owns).toLowerCase().indexOf(q)>-1;if(hit)n++;
+    html+='<button class="tile'+(hit?'':' hide')+'" type="button" data-cat="'+c.id+'" aria-pressed="'+(selected===c.id)+'">'+ic(c.ic)+'<span>'+esc(lab)+'</span></button>'});
+  if(!n)html+='<div class="tiles-empty">Nothing matches. Pick Something else and describe it.</div>';
+  $("tiles").innerHTML=html}
+$("tileSearch").addEventListener("input",renderTiles);
+$("tiles").addEventListener("click",function(e){var b=e.target.closest("[data-cat]");if(!b)return;var id=b.getAttribute("data-cat");if(selected===id){location.hash="#/fix";return}location.hash="#/fix/"+id});
+function clearTile(){selected=null;$("panel").classList.remove("show");$("panel").innerHTML="";renderTiles()}
+function chanRows(c){return '<ul class="ch">'+c.channels.map(function(ch){return '<li>'+ic(ch.ic||"link")+'<span><span class="k">'+esc(ch.k)+'</span>'+(ch.href?'<a href="'+ch.href+'"'+ext(ch.href)+'>'+esc(ch.v)+'</a>':esc(ch.v))+'</span></li>'}).join("")+'</ul>'}
+function stepsHtml(arr,cls){return '<ol class="steps'+(cls?' '+cls:'')+'">'+arr.map(function(s){return '<li>'+esc(s)+'</li>'}).join("")+'</ol>'}
+function selectTile(id,scroll){var c=catById(id);if(!c){clearTile();return}selected=id;renderTiles();
+  var first=null;for(var i=0;i<c.channels.length;i++){if(c.channels[i].href&&c.channels[i].href.indexOf("http")===0){first=c.channels[i];break}}
+  $("panel").innerHTML='<div class="panel-grid"><div class="pcol"><h4>'+ic("who")+'Responsible desk</h4><p class="agency">'+esc(c.agency)+'</p><p class="remit">'+esc(c.owns)+'</p></div><div class="pcol"><h4>'+ic("link")+'Official channels</h4>'+chanRows(c)+'</div><div class="pcol"><h4>'+ic("up")+'If nobody answers</h4>'+stepsHtml(c.ladder,"saffron")+'</div></div><div class="panel-foot"><a class="btn btn-primary" href="#/report/'+c.id+'">Report it here too</a>'+(first?'<a class="btn btn-line" href="'+first.href+'" target="_blank" rel="noopener">Open '+esc(first.k.toLowerCase()==="portal"?"the portal":first.v)+'</a>':'')+'<span class="small muted">Both matter: the official ticket creates the record; the Forum tracks it.</span></div>';
+  $("panel").classList.add("show");
+  if(scroll!==false&&window.innerWidth<1024){setTimeout(function(){$("panel").scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})},50)}
+}
+
+/* count-up */
+(function(){var els=document.querySelectorAll("[data-count]");function run(el){var n=+el.getAttribute("data-count");if(reduce){el.textContent=n;return}var t0=null;function step(ts){if(!t0)t0=ts;var p=Math.min(1,(ts-t0)/800);el.textContent=Math.round(n*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
+  if("IntersectionObserver" in window){var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){run(x.target);io.unobserve(x.target)}})},{threshold:.5});els.forEach(function(el){io.observe(el)})}else els.forEach(run)})();
+
+/* report */
+var pendingCat=null, geo=null, step=1, reportInit=false;
+function renderCatSelect(){var sel=$("fCat");var cur=sel.value;sel.innerHTML='<option value="">'+(lang==="hi"?"निकटतम प्रकार चुनें":"Choose the closest match")+'</option>'+D.CATS.map(function(c){return '<option value="'+c.id+'">'+esc(lang==="hi"?c.hl:c.label)+'</option>'}).join("");if(cur)sel.value=cur}
+function initReport(){if(!reportInit){reportInit=true;$("areaList").innerHTML=D.AREAS.map(function(a){return '<option value="'+esc(a)+'">'}).join("");$("fWard").innerHTML='<option value="">Not sure yet</option>'+D.WARDS.map(function(w){return '<option value="'+w[0]+'">Ward '+w[0]+', '+esc(w[1])+'</option>'}).join("");renderRecent()}
+  if(pendingCat){$("fCat").value=pendingCat;pendingCat=null;showHint();goStep(1)}}
+function showHint(){var c=catById($("fCat").value),h=$("fHint");if(!c){h.classList.remove("show");h.innerHTML="";return}var first=null;for(var i=0;i<c.channels.length;i++){if(c.channels[i].href&&c.channels[i].href.indexOf("http")===0){first=c.channels[i];break}}
+  h.innerHTML='<b>'+esc(c.agency)+'</b> handles this. Also file it officially: '+(first?'<a href="'+first.href+'"'+ext(first.href)+'>'+esc(first.v)+'</a>':esc(c.channels[0].v))+'.';h.classList.add("show")}
+$("fCat").addEventListener("change",showHint);
+$("fWard").addEventListener("change",function(){var n=+this.value;var p=$("wardHint");if(n){var w=D.WARDS[n-1];p.innerHTML='<b>Ward '+n+'.</b> Councillor '+esc(w[1])+' ('+esc(w[2])+'). The report is copied to the councillor once the office contact is verified.'}else{p.innerHTML='<span data-i18n="f.wardHint">'+(lang==="hi"?"पता नहीं?":"Not sure?")+'</span> <a href="'+L.onemap+'" target="_blank" rel="noopener" class="ext">OneMap</a>, <a href="'+L.voterList+'" target="_blank" rel="noopener" class="ext">voter lists</a>, <a href="#/wards">ward directory</a>'}});
+$("geoBtn").addEventListener("click",function(){var o=$("geoOut");if(!navigator.geolocation){o.textContent="Location is not available here. Type the spot instead.";return}o.textContent="Finding you…";navigator.geolocation.getCurrentPosition(function(p){geo={lat:p.coords.latitude.toFixed(5),lng:p.coords.longitude.toFixed(5)};o.innerHTML='Pinned '+geo.lat+', '+geo.lng+'. <a href="https://www.google.com/maps?q='+geo.lat+','+geo.lng+'" target="_blank" rel="noopener">Check on a map</a>'},function(){o.textContent="Could not get a location. Type the spot instead."},{enableHighAccuracy:true,timeout:10000})});
+function valid(ids){var ok=true;ids.forEach(function(id){var el=$(id);var v=el.type==="checkbox"?el.checked:el.value.trim();var bad=!v||(el.type==="tel"&&!/^\+?[0-9\s-]{10,14}$/.test(el.value.trim()))||(el.type==="email"&&el.required&&!/^\S+@\S+\.\S+$/.test(v));if(bad){ok=false;el.setAttribute("aria-invalid","true")}else el.removeAttribute("aria-invalid")});return ok}
+var STEP_FIELDS={1:["fCat","fScope"],2:["fWhere","fSpot"],3:["fDesc","fName","fPhone","fConsent"]};
+function goStep(n){step=n;document.querySelectorAll(".fstep").forEach(function(s){s.classList.toggle("on",+s.getAttribute("data-step")===n)});var segs=$("prog").children;for(var i=0;i<4;i++){segs[i].className=i+1<n?"done":i+1===n?"now":""}if(n===4)renderSummary();$("fErr").classList.remove("show");var f=$("reportForm");f.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})}
+$("reportForm").addEventListener("click",function(e){var b=e.target.closest("[data-go]");if(!b)return;var to=+b.getAttribute("data-go");if(to>step){var ok=true;for(var s=step;s<to;s++){if(!valid(STEP_FIELDS[s])){ok=false;break}}if(!ok){$("fErr").classList.add("show");var bad=$("reportForm").querySelector('[aria-invalid="true"]');if(bad)bad.focus();return}}goStep(to)});
+function renderSummary(){var c=catById($("fCat").value);var rows=[["Issue",c?c.label:""],["Affects",$("fScope").value],["Area",$("fWhere").value],["Ward",$("fWard").value?"Ward "+$("fWard").value:"Not sure"],["Spot",$("fSpot").value+(geo?" ("+geo.lat+", "+geo.lng+")":"")],["Details",$("fDesc").value],["Name",$("fName").value],["Mobile",$("fPhone").value]];if($("fEmail").value)rows.push(["Email",$("fEmail").value]);
+  $("summary").innerHTML=rows.map(function(r){return '<div><dt>'+esc(r[0])+'</dt><dd>'+esc(r[1])+'</dd></div>'}).join("")}
+function makeRef(){var a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",s="";for(var i=0;i<5;i++)s+=a[Math.floor(Math.random()*a.length)];return "GVF-"+new Date().getFullYear()+"-"+s}
+function recents(){return load("gvf_reports",[])}
+function renderRecent(){var list=recents(),box=$("recent");if(!list.length){box.hidden=true;return}$("recentList").innerHTML=list.map(function(r){return '<li class="row">'+ic("track")+'<div><b><a href="#/track/'+r.ref+'">'+esc(r.ref)+'</a></b><p class="for">'+esc(r.cat)+', '+esc(r.where)+(r.ward?', ward '+r.ward:'')+'</p><div class="meta">'+esc(r.date)+(r.ticket?' · ticket '+esc(r.ticket):'')+'</div></div></li>'}).join("");box.hidden=false}
+$("reportForm").addEventListener("submit",function(e){e.preventDefault();if(!valid(STEP_FIELDS[1].concat(STEP_FIELDS[2],STEP_FIELDS[3]))){$("fErr").classList.add("show");return}
+  var c=catById($("fCat").value),ref=makeRef(),ward=$("fWard").value,date=new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+  var rec={ref:ref,catId:c.id,cat:c.label,where:$("fWhere").value.trim(),ward:ward,date:date,stage:0,ticket:""};var list=recents();list.unshift(rec);store("gvf_reports",list.slice(0,20));renderRecent();
+  var body="Reference: "+ref+"\nIssue: "+c.label+"\nAffects: "+$("fScope").value+"\nArea: "+rec.where+(ward?"\nWard: "+ward:"")+"\nSpot: "+$("fSpot").value.trim()+(geo?"\nCoordinates: "+geo.lat+", "+geo.lng:"")+"\n\n"+$("fDesc").value.trim()+"\n\nName: "+$("fName").value.trim()+"\nMobile: "+$("fPhone").value.trim()+($("fEmail").value.trim()?"\nEmail: "+$("fEmail").value.trim():"")+"\n\nResponsible desk: "+c.agency;
+  var mail="mailto:contact@gurugramvisionforum.org?subject="+encodeURIComponent("Issue report "+ref+": "+c.label)+"&body="+encodeURIComponent(body);
+  var official=c.channels.filter(function(ch){return ch.href&&ch.href.indexOf("tel:")!==0&&ch.href.indexOf("#")!==0}).map(function(ch){return esc(ch.k)+": <a href=\""+ch.href+"\""+ext(ch.href)+">"+esc(ch.v)+"</a>"});
+  var box=$("confirm");box.innerHTML='<p class="small muted" style="margin:0 0 .25rem">Report received</p><div class="ref">'+ref+'</div><p style="margin:.5rem 0 0">A volunteer maps it to <b>'+esc(c.agency)+'</b> within three working days. <a href="#/track/'+ref+'">Track it</a>.</p><div class="box"><h4 style="margin-bottom:.5rem">Now file it officially</h4>'+stepsHtml([official.length?"Open the official channel: "+official[0].replace(/<[^>]+>/g,""):"Use the channel shown for your issue.","Note the ticket or complaint number.","Save it here so the Forum can escalate."])+'<div class="ch" style="margin:.5rem 0 1rem">'+official.map(function(o){return '<div style="font-size:1rem">'+o+'</div>'}).join("")+'</div><div class="ticket"><div class="field"><label for="tk_'+ref+'">Official ticket number</label><input type="text" id="tk_'+ref+'" placeholder="e.g. GMDA ticket number"></div><button class="btn btn-line" type="button" data-ticket="'+ref+'">Save</button></div></div><div style="display:flex;gap:.6rem;flex-wrap:wrap"><a class="btn btn-ink" href="'+mail+'">Email a copy to the Forum</a><button class="btn btn-line" type="button" id="copyBtn">Copy the report</button></div>';
+  box.classList.add("show");$("copyBtn").addEventListener("click",function(){if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(body).then(function(){toast("Report copied")},function(){toast("Could not copy")});else toast("Copy is not supported here")});
+  this.reset();geo=null;$("geoOut").textContent="";showHint();goStep(1);box.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})});
+document.addEventListener("click",function(e){var b=e.target.closest("[data-ticket]");if(!b)return;var ref=b.getAttribute("data-ticket"),v=$("tk_"+ref).value.trim();if(!v){toast("Enter the ticket number first");return}var list=recents();list.forEach(function(r){if(r.ref===ref){r.ticket=v;r.stage=Math.max(r.stage,2)}});store("gvf_reports",list);renderRecent();toast("Ticket "+v+" saved with "+ref)});
+
+/* track */
+var STAGES=[["Received","With the Forum, being read."],["Mapped","Agency, officer level and ward councillor identified."],["Filed officially","An official ticket exists; its number is on the report."],["Escalated","No action in time; moved one level up the ladder."],["Resolved","You confirmed the fix, or the case closed with a reason."]];
+function showTrack(){var ref=$("trRef").value.trim().toUpperCase(),out=$("trOut");if(!ref){out.innerHTML='<p class="muted">Enter a reference number.</p>';return}var r=null;recents().forEach(function(x){if(x.ref===ref)r=x});
+  if(!r){out.innerHTML='<div class="empty"><b>'+esc(ref)+'</b> is not on this device. Once the case system is live, any reference works from any device. Until then, reply to your confirmation email.</div>';return}
+  var st=r.stage||0;out.innerHTML='<p><b>'+esc(r.ref)+'</b> '+esc(r.cat)+', '+esc(r.where)+(r.ward?', ward '+r.ward:'')+'. Sent '+esc(r.date)+(r.ticket?'. Ticket '+esc(r.ticket):'')+'</p><ol class="tl">'+STAGES.map(function(s,i){var tag=i<st?'<span class="tag tag-green">'+ic("check")+'Done</span>':i===st?'<span class="tag tag-saffron">Now</span>':'';return '<li class="'+(i<st?'done':i===st?'now':'')+'"><b>'+esc(s[0])+' '+tag+'</b><span>'+esc(s[1])+'</span></li>'}).join("")+'</ol>'}
+$("trGo").addEventListener("click",showTrack); $("trRef").addEventListener("keydown",function(e){if(e.key==="Enter")showTrack()});
+
+/* directory */
+var dFilter="all";
+function renderDir(){var lv={city:"Gurugram",state:"Haryana",central:"India"};
+  $("dChips").innerHTML=D.FILTERS.map(function(f){return '<button class="chip" type="button" data-f="'+f[0]+'" aria-pressed="'+(f[0]===dFilter)+'">'+f[1]+'</button>'}).join("");
+  var items=D.PORTALS.filter(function(p){return dFilter==="all"||p.t.indexOf(dFilter)>-1});
+  $("dRows").innerHTML=items.map(function(p){return '<li class="row">'+ic("link")+'<div><b><a href="'+p.h+'" target="_blank" rel="noopener">'+esc(p.n)+'</a><span class="lvl '+p.l+'">'+lv[p.l]+'</span></b><p class="for">'+esc(p.f)+'</p><div class="meta">'+esc(p.how)+'</div></div><div class="acts">'+(p.ph?'<a class="btn btn-line btn-sm" href="tel:'+p.ph+'">'+ic("phone","i-s")+esc(p.ph.replace(/^(\d{4})(\d{3})(\d{4})$/,"$1 $2 $3"))+'</a>':'')+'<a class="btn btn-ink btn-sm" href="'+p.h+'" target="_blank" rel="noopener">Open</a></div></li>'}).join("");
+  $("dVerified").textContent="Links and numbers verified "+D.VERIFIED+". Tell us if one changed."}
+$("dChips").addEventListener("click",function(e){var b=e.target.closest("[data-f]");if(!b)return;dFilter=b.getAttribute("data-f");renderDir()});
+renderDir();
+
+/* rights */
+function renderRights(){$("rCards").innerHTML=D.CHARTERS.map(function(c){return '<button class="rcard" type="button" data-right="'+c.id+'"><div class="top">'+ic(c.ic)+'<span class="tag tag-saffron">'+esc(c.dl)+'</span></div><b>'+esc(c.t)+'</b><p>'+esc(c.right)+'</p><span class="go">Steps and source</span></button>'}).join("")}
+function openRight(id){var c=null;D.CHARTERS.forEach(function(x){if(x.id===id)c=x});if(!c)return;
+  openSheet(c.t,'<div class="stabs" role="tablist"><button class="stab" data-stab="r" aria-selected="true">Your right</button><button class="stab" data-stab="h" aria-selected="false">How to claim</button><button class="stab" data-stab="s" aria-selected="false">Source</button></div><div class="spane on" data-pane="r"><p><span class="tag tag-saffron">'+esc(c.dl)+'</span></p><p style="font-size:1.15rem;color:var(--ink)"><b>'+esc(c.right)+'</b></p><p>'+esc(c.why)+'</p></div><div class="spane" data-pane="h">'+stepsHtml(c.how)+'<p><a class="btn btn-primary" href="#/report">Report it to the Forum</a></p></div><div class="spane" data-pane="s"><ul class="linklist">'+c.src.map(function(s){return '<li>'+ic("link")+'<a href="'+s[1]+'"'+ext(s[1])+'>'+esc(s[0])+'</a></li>'}).join("")+'</ul><p class="small muted" style="margin-top:1rem">Plain-language summary for orientation, not legal advice. Verified '+D.VERIFIED+'.</p></div>')}
+$("rCards").addEventListener("click",function(e){var b=e.target.closest("[data-right]");if(!b)return;location.hash="#/rights/"+b.getAttribute("data-right")});
+renderRights();
+
+/* who */
+function renderWhoFilter(){var s=$("whoFilter");var cur=s.value;s.innerHTML='<option value="">'+(lang==="hi"?"सभी भूमिकाएँ":"All roles")+'</option>'+D.CATS.map(function(c){return c.roles.length?'<option value="'+c.id+'">'+esc(lang==="hi"?c.hl:c.label)+'</option>':''}).join("");if(cur)s.value=cur}
+function renderWho(){$("bands").innerHTML=D.TIERS.map(function(t,i){return (i?'<div class="connector" aria-hidden="true"></div>':'')+'<div class="bandrow"><div class="bl">'+esc(t.h)+'<small>'+esc(t.s)+'</small></div><div class="roles">'+t.r.map(function(id){return '<button class="role" type="button" data-role="'+id+'">'+esc(D.ROLES[id].b)+'</button>'}).join("")+'</div></div>'}).join("")}
+$("whoFilter").addEventListener("change",function(){var c=catById(this.value);var bands=$("bands");bands.classList.toggle("filtered",!!c);bands.querySelectorAll(".role").forEach(function(b){b.classList.toggle("hot",!!c&&c.roles.indexOf(b.getAttribute("data-role"))>-1)})});
+function openRole(id){var r=D.ROLES[id];if(!r)return;openSheet(r.b,(r.who?'<p><span class="tag tag-blue">'+esc(r.who)+'</span></p>':'')+'<p style="font-size:1.1rem">'+esc(r.owns)+'</p><h4>Official pages</h4><ul class="linklist">'+r.links.map(function(l){return '<li>'+ic("link")+'<a href="'+l[1]+'"'+ext(l[1])+'>'+esc(l[0])+'</a></li>'}).join("")+'</ul>')}
+$("bands").addEventListener("click",function(e){var b=e.target.closest("[data-role]");if(!b)return;location.hash="#/who/"+b.getAttribute("data-role")});
+renderWho();
+
+/* wards */
+function renderWards(q){q=(q||"").toLowerCase();var rows=D.WARDS.filter(function(w){return !q||String(w[0])===q||(w[1]+" "+w[2]).toLowerCase().indexOf(q)>-1});
+  $("wardBody").innerHTML=rows.length?rows.map(function(w){return '<tr><td class="n">'+w[0]+'</td><td data-l="Councillor">'+esc(w[1])+'</td><td data-l="Party">'+esc(w[2])+'</td><td data-l="Verify"><a href="'+L.mcg+'" target="_blank" rel="noopener" class="ext">MCG</a> · <a href="'+L.voterList+'" target="_blank" rel="noopener" class="ext">Voter list</a></td></tr>'}).join(""):'<tr><td colspan="4" class="muted">No ward matches that.</td></tr>'}
+$("wardSearch").addEventListener("input",function(){renderWards(this.value.trim())}); renderWards("");
+
+/* charter */
+var cvTab=load("gvf_cvtab","home"),cvChecks=load("gvf_civic",{});
+(function(){var s="";for(var i=0;i<36;i++){s+='<circle class="seg" data-i="'+i+'" cx="48" cy="48" r="40" stroke-dasharray="5.6 245.7" transform="rotate('+(i*10-90)+' 48 48)"/>'}$("ring").innerHTML=s+'<text x="48" y="55" text-anchor="middle" id="ringTxt">0%</text>'})();
+function renderCivic(){$("cvTabs").innerHTML=D.CIVIC.map(function(s){return '<button class="tab" role="tab" type="button" data-tab="'+s.id+'" aria-selected="'+(s.id===cvTab)+'">'+esc(s.t)+'</button>'}).join("");var s=null;D.CIVIC.forEach(function(x){if(x.id===cvTab)s=x});
+  $("cvBody").innerHTML='<div class="owe"><div><h3>'+ic("check")+'What I owe the city</h3><ul class="task">'+s.owe.map(function(o){return '<li'+(o.dont?' class="dont"':'')+'><label><input type="checkbox" data-cv="'+o.id+'"'+(cvChecks[o.id]?' checked':'')+'><span>'+esc(o.t)+'</span></label></li>'}).join("")+'</ul></div><div><h3>'+ic("rights")+'What the city owes me</h3><ul class="ent">'+s.ent.map(function(x){return '<li><span>'+esc(x.t)+'</span><a href="'+x.h+'"'+ext(x.h)+'>'+esc(x.l)+'</a></li>'}).join("")+'</ul></div></div>';renderScore()}
+function renderScore(){var total=0,done=0;D.CIVIC.forEach(function(s){s.owe.forEach(function(o){total++;if(cvChecks[o.id])done++})});var pct=total?done/total:0;$("cvScore").textContent=done+" / "+total;$("ringTxt").textContent=Math.round(pct*100)+"%";var lit=Math.round(pct*36);$("ring").querySelectorAll(".seg").forEach(function(c){c.classList.toggle("on",+c.getAttribute("data-i")<lit)});
+  $("cvMsg").textContent=pct===0?"Tick what already applies. Nobody sees this but you.":pct<.4?"A start. The ward items are the fastest wins.":pct<.8?"Better than most of the city.":"The resident every ward needs."}
+$("cvTabs").addEventListener("click",function(e){var b=e.target.closest("[data-tab]");if(!b)return;cvTab=b.getAttribute("data-tab");store("gvf_cvtab",cvTab);renderCivic()});
+$("cvBody").addEventListener("change",function(e){var c=e.target.closest("[data-cv]");if(!c)return;cvChecks[c.getAttribute("data-cv")]=c.checked;store("gvf_civic",cvChecks);renderScore()});
+renderCivic();
+
+/* dashboard */
+var sample=false;
+function renderDash(){var S=D.STATS;var local=recents().length;
+  var tot=[0,0,0,0],all=0;if(sample){S.rows.forEach(function(r){r[1].forEach(function(v,i){tot[i]+=v;all+=v})})}
+  $("kpis").innerHTML='<div class="kpi"><b>'+(sample?all:"—")+'</b><span>reports received</span></div><div class="kpi"><b>'+(sample?tot[1]:"—")+'</b><span>filed with the authority</span></div><div class="kpi"><b>'+(sample?tot[2]:"—")+'</b><span>past due, escalated</span></div><div class="kpi"><b>'+(sample?tot[3]:"—")+'</b><span>resolved and closed</span></div>';
+  var h='<div class="dash-card"><h3>Commitments</h3><table class="commit"><thead><tr><th>Promise</th><th>What it means</th><th>Actual</th></tr></thead><tbody>'+S.commit.map(function(c){return '<tr><td class="n">'+esc(c[0])+'</td><td>'+esc(c[1])+'</td><td>'+(sample?'<span class="tag tag-green">'+ic("check")+'On target</span>':'<span class="tag">Reporting starts at launch</span>')+'</td></tr>'}).join("")+'</tbody></table></div>';
+  if(!sample){h+='<div class="dash-card"><h3>Reports by cause and status</h3><div class="emptybox"><svg class="ring" viewBox="0 0 96 96" aria-hidden="true"><circle cx="48" cy="48" r="40" fill="none" stroke="var(--line)" stroke-width="6" stroke-dasharray="5.6 1.4"/></svg><p>We publish from the first 50 reports. Be one of them: <a href="#/report">report an issue</a>.'+(local?' This device has sent '+local+'.':'')+'</p></div><p class="src">Live figures come from the case system after launch. <button class="btn btn-line btn-sm" type="button" id="sampleBtn" style="margin-left:.5rem">Preview the layout with sample data</button></p></div>'}
+  else{var max=0;S.rows.forEach(function(r){var s=r[1].reduce(function(a,b){return a+b},0);if(s>max)max=s});
+    h+='<div class="dash-card"><h3>Reports by cause and status <span class="tag tag-saffron">Sample data</span></h3><div class="bars">'+S.rows.map(function(r){var s=r[1].reduce(function(a,b){return a+b},0);return '<div class="bar"><span>'+esc(r[0])+'</span><div class="trk" style="width:'+(s/max*100)+'%">'+r[1].map(function(v,i){return v?'<div class="seg" style="width:'+(v/s*100)+'%;background:'+S.statuses[i][1]+'" title="'+esc(S.statuses[i][0])+': '+v+'"></div>':''}).join("")+'</div><span class="tot">'+s+'</span></div>'}).join("")+'</div><div class="legend">'+S.statuses.map(function(s){return '<span><span class="sw" style="background:'+s[1]+'"></span>'+esc(s[0])+'</span>'}).join("")+'</div><p class="src">Sample figures for layout only. Source: the Forum case system, updated monthly. <button class="btn btn-line btn-sm" type="button" id="sampleBtn" style="margin-left:.5rem">Hide sample data</button></p></div>'}
+  $("dashBody").innerHTML=h;$("sampleBtn").addEventListener("click",function(){sample=!sample;renderDash()})}
+
+/* updates */
+var uTab="stories";
+function ph(t,video){return '<span class="ph"><svg viewBox="0 0 400 225" role="img" aria-label="'+esc(t)+'"><rect width="400" height="225" fill="var(--surface-2)"/><g fill="var(--line)"><rect x="30" y="150" width="34" height="60"/><rect x="74" y="120" width="26" height="90"/><rect x="110" y="135" width="44" height="75"/><rect x="164" y="95" width="30" height="115"/><rect x="204" y="125" width="22" height="85"/><rect x="236" y="110" width="42" height="100"/><rect x="288" y="140" width="48" height="70"/><rect x="346" y="160" width="30" height="50"/></g><rect x="0" y="210" width="400" height="3" fill="var(--saffron)"/>'+(video?'<circle cx="200" cy="100" r="28" fill="var(--ink)"/><polygon points="192,86 192,114 216,100" fill="#fff"/>':'')+'</svg></span>'}
+function renderUpdates(){var tabs=[["stories","Stories"],["photos","Photos"],["videos","Videos"],["news","In the news"]];$("uTabs").innerHTML=tabs.map(function(t){return '<button class="tab" role="tab" type="button" data-utab="'+t[0]+'" aria-selected="'+(t[0]===uTab)+'">'+t[1]+'</button>'}).join("");var h="";
+  if(uTab==="stories")h='<div class="cards">'+D.BLOG.map(function(p){return '<article class="card"><div class="meta">'+esc(p.tag)+', '+esc(p.d)+'</div><h3><a href="#/updates/'+p.slug+'">'+esc(p.t)+'</a></h3><p>'+esc(p.x)+'</p></article>'}).join("")+'</div>';
+  else if(uTab==="photos")h='<div class="cards">'+D.MEDIA.photos.map(function(m){return '<article class="card">'+ph(m.t,false)+'<h3>'+esc(m.t)+'</h3><p>'+esc(m.s)+'</p><div class="meta">Placeholder until the team publishes</div></article>'}).join("")+'</div>';
+  else if(uTab==="videos")h='<div class="cards">'+D.MEDIA.videos.map(function(m){return '<article class="card">'+ph(m.t,true)+'<h3>'+esc(m.t)+'</h3><p>'+esc(m.s)+'</p><div class="meta">Loads on tap; no autoplay</div></article>'}).join("")+'</div>';
+  else h='<ul class="rows">'+D.MEDIA.news.map(function(n){return '<li class="row">'+ic("news")+'<div><b>'+esc(n.t)+'</b><div class="meta">'+esc(n.d)+'</div></div></li>'}).join("")+'</ul>';
+  $("uBody").innerHTML=h}
+$("uTabs").addEventListener("click",function(e){var b=e.target.closest("[data-utab]");if(!b)return;uTab=b.getAttribute("data-utab");renderUpdates()});
+renderUpdates();
+function renderPost(slug){var p=null;D.BLOG.forEach(function(x){if(x.slug===slug)p=x});$("postBody").innerHTML=p?'<p class="small muted">'+esc(p.tag)+', '+esc(p.d)+'</p><h1>'+esc(p.t)+'</h1>'+p.b:'<p>That post does not exist. <a href="#/updates">All updates</a></p>'}
+
+/* join */
+var jRole="Volunteer";var JR=[["Volunteer","Sewa drives, events and issue follow-ups in your sector."],["Area chapter lead","Map your sector's issues and run its monthly civic slot."],["Youth fellow","Research and innovation support; one ward is yours."]];
+function renderJoin(){$("jRoles").innerHTML=JR.map(function(r){return '<button class="jrole" type="button" data-jr="'+esc(r[0])+'" aria-pressed="'+(r[0]===jRole)+'"><b>'+esc(r[0])+'</b><span>'+esc(r[1])+'</span></button>'}).join("")}
+$("jRoles").addEventListener("click",function(e){var b=e.target.closest("[data-jr]");if(!b)return;jRole=b.getAttribute("data-jr");renderJoin()});renderJoin();
+$("joinForm").addEventListener("submit",function(e){e.preventDefault();if(!valid(["jName","jPhone","jEmail"])){$("jErr").classList.add("show");return}$("jErr").classList.remove("show");
+  var body="Name: "+$("jName").value.trim()+"\nMobile: "+$("jPhone").value.trim()+"\nEmail: "+$("jEmail").value.trim()+"\nRole: "+jRole+"\nArea: "+$("jSector").value.trim()+"\n\n"+$("jNote").value.trim();
+  var mail="mailto:contact@gurugramvisionforum.org?subject="+encodeURIComponent("Joining as "+jRole)+"&body="+encodeURIComponent(body);
+  var box=$("jConfirm");box.innerHTML='<p style="margin:0 0 .6rem"><b>Thank you, '+esc($("jName").value.trim().split(" ")[0])+'.</b> The Forum writes to you within a week about the '+esc(jRole.toLowerCase())+' role.</p><a class="btn btn-ink btn-sm" href="'+mail+'">Email a copy to the Forum</a>';box.classList.add("show");this.reset()});
+
+/* about */
+$("mix").innerHTML=D.FUNDING.map(function(f){return '<div><span>'+esc(f[0])+'</span><div class="trk"><div class="fill" style="width:'+f[1]+'%"></div></div><span class="num" style="text-align:right">'+f[1]+'%</span></div>'}).join("");
+
+/* boot */
+renderTiles(); renderWhoFilter(); renderCatSelect();
+if(lang==="hi")applyLang("hi");
+route();
+})();
+</script>
+</body>
+</html>
