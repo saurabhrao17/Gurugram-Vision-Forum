@@ -26,7 +26,7 @@ Read HANDOFF.md first; it holds the context, research, design rules and roadmap.
 - Never display or transmit a reporter's phone number publicly; public pages and dashboards show counts, never names.
 - Dashboard shows commitments vs actuals with a date and source; never present the deck's targets as results.
 - Every external link must be an official page; update `GVF.VERIFIED` when links are checked.
-- Keep Hindi strings in `GVF.HI` in step with new UI text (`data-i18n` keys).
+- The site is fully bilingual. Static markup uses `data-i18n`, `data-i18n-ph` and `data-i18n-aria` keys with Hindi in `GVF.HI`. Everything rendered from data or from app.js goes through `hs("English text")`, which looks the English up in `GVF.HS` (English → Hindi); values sent to the API stay English (`unh()` maps a typed Hindi area back; selects keep English `value` attributes). Blog posts carry `hb` (Hindi HTML). When English copy changes, add or update the matching `HS` entry; the smoke test fails on any Latin word left in Hindi mode that is not an acronym.
 - Secrets never go in the HTML or JS; they belong in the Vercel environment (`.env.example` lists them). The browser only ever calls `/api/*`.
 - The API returns no reporter details: status gives stage and dates after a reference plus last-4 check; the dashboard gives counts and publishes nothing before 50 reports.
 - The site must keep working when the API is unreachable: local reference, "saved on this device" notice, local track view.
@@ -34,7 +34,7 @@ Read HANDOFF.md first; it holds the context, research, design rules and roadmap.
 
 ## Next build items (in order)
 1. Load the MCG ward boundary file (from GMDA's GIS cell) into `ward_boundaries`; fill `area_wards` from the 2023 delimitation notification.
-2. Hindi labels for the filing fields (`GVF.FILING`), and a quarterly review of the requirements against each portal's live form.
+2. Quarterly review of `GVF.FILING` against each portal's live form.
 3. Vercel Cron for SLA flags (3 working days unmapped, 21 days filed) and stage-change emails; WhatsApp templates after Meta verification.
 4. "Report on WhatsApp" deep link and helpline number once they exist; WhatsApp and Exotel webhooks creating reports.
 5. Privacy notice page; public anonymised report pages on the map; real URLs and OG tags; 24-month retention job; password change in the desk.
