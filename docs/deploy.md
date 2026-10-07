@@ -14,7 +14,8 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 
 ## One-time setup
 
-1. **Supabase project.** Create a project named "Gurugram Vision Forum" in the Catalyse X SR17 organisation, region Mumbai (ap-south-1). Then apply, in order: `supabase/migrations/20261007120000_init.sql` and `supabase/seed.sql`. Either paste them into the SQL editor or run them through the Supabase MCP tool from Claude Code. Regenerate `seed.sql` with `npm run seed` whenever `site/data.js` changes.
+1. **Supabase project.** Done 7 Oct 2026: project `Gurugram-Vision-Forum`, ref `xiirhismxuahujdcxsuw`, organisation Catalyse X SR17, region Mumbai (ap-south-1), API URL `https://xiirhismxuahujdcxsuw.supabase.co`. Both migrations in `supabase/migrations/` and `supabase/seed.sql` are applied (17 issue types, 36 wards). For a fresh project, apply them in file order. Regenerate `seed.sql` with `npm run seed` whenever `site/data.js` changes.
+   Note for Claude Code: the Supabase connector holds any `drop ... if exists` statement for a confirmation that never arrives in a non-interactive session and then times out, and it times out on large scripts. Apply in chunks of one object group each, sequentially, without `drop` statements on a new project.
 2. **Vercel project.** Import the GitHub repository `saurabhrao17/Gurugram-Vision-Forum`. Framework preset: Other. Leave build command empty. Production branch: `main`.
 3. **Environment variables** (Vercel → Settings → Environment Variables, all environments):
    - `SUPABASE_URL`: the project's API URL.
