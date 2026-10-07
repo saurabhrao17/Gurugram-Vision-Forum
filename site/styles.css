@@ -489,7 +489,7 @@ body.triage{--bbar:0px}
 .login-card{max-width:460px}
 body.triage .ftr{padding:1.25rem 0 .75rem}
 body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
-.util[hidden],.tab[hidden]{display:none}
+[hidden]{display:none!important}
 
 /* maps */
 .mapbox{height:300px; border:1.5px solid var(--line); border-radius:var(--r-ctl); overflow:hidden; background:var(--surface-2); position:relative}
