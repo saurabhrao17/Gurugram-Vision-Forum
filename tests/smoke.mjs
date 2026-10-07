@@ -571,7 +571,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.fill("#draftBrief", "Sewa drive in Sector 45 park with forty volunteers on Sunday");
   await page.click("#draftBtn");
   await page.waitForTimeout(150);
-  check((await page.locator("#draftMsg").innerText()).includes("ANTHROPIC_API_KEY"), "draft helper explains when the API key is missing");
+  check((await page.locator("#draftMsg").innerText()).includes("GEMINI_API_KEY"), "draft helper explains which free key to add");
   await page.selectOption("#pKind", "story");
   await page.fill("#pTitle", "Sewa drive cleans Sector 45 park");
   await page.fill("#pSummary", "Forty volunteers, two tonnes of waste.");
