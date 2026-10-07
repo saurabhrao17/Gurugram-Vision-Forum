@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  KEYWORDS, classify, extractArea, fetchReddit, fetchGoogleNews, signalsFromReports, computePulse, suggestActions,
+  KEYWORDS, classify, extractArea, fetchReddit, fetchGoogleNews, computePulse, suggestActions,
   narrate, fallbackBrief, insightData, taxonomy, trendOf, newsSearchUrl, REDDIT_URLS, NEWS_QUERIES, sha1
 } from "../../lib/signals.js";
 import pulse from "../../lib/handlers/pulse.js";
@@ -208,22 +208,6 @@ test("fetchGoogleNews queries each search feed and dedupes by url", async () => 
 });
 
 // ---------------------------------------------------------------------------
-// signalsFromReports
-// ---------------------------------------------------------------------------
-test("signalsFromReports keeps reference, type, area, ward and date only", () => {
-  const out = signalsFromReports([
-    { ref: "GVF-2026-ABC23", issue_type: "drains", area: "Sector 29", ward: 12, created_at: "2026-10-05T10:00:00Z", reporter_name: "x", reporter_phone: "+919999999999" },
-    { ref: "GVF-2026-DEF45", issue_type: "waste", area: null, ward: null, created_at: "2026-10-04T10:00:00Z" },
-    { ref: null }
-  ]);
-  assert.equal(out.length, 2);
-  assert.deepEqual(out[0], { source: "reports", external_id: "GVF-2026-ABC23", title: "Drains, flooding, Sector 29", snippet: null, url: "https://gurugramvisionforum.org/r/GVF-2026-ABC23", posted_at: "2026-10-05T10:00:00.000Z", issue_type: "drains", area: "Sector 29", ward: 12, score: 10, lang: "en" });
-  assert.equal(out[1].title, "Garbage");
-  assert.equal(out[1].ward, null);
-  assert.ok(!JSON.stringify(out).includes("9999999999"));
-});
-
-// ---------------------------------------------------------------------------
 // computePulse
 // ---------------------------------------------------------------------------
 const NOW = Date.parse("2026-10-07T06:00:00Z");
@@ -233,7 +217,7 @@ test("computePulse groups the week's signals into sorted topics with areas, exam
   const rows = [
     sig({ issue_type: "waste", posted_at: hoursAgo(5, NOW), area: "Sector 45", score: 30, title: "Garbage A", source: "reddit" }),
     sig({ issue_type: "waste", posted_at: hoursAgo(30, NOW), area: "Sector 45", score: 5, title: "Garbage B", source: "news", url: "https://news.example/b" }),
-    sig({ issue_type: "waste", posted_at: hoursAgo(50, NOW), area: "DLF Phase 2", score: 10, title: "Waste, DLF Phase 2", source: "reports", url: null }),
+    sig({ issue_type: "waste", posted_at: hoursAgo(50, NOW), area: "DLF Phase 2", score: 10, title: "Waste, DLF Phase 2", source: "news", url: "https://news.example/dlf" }),
     sig({ issue_type: "waste", posted_at: hoursAgo(70, NOW), area: null, score: 2, title: "Garbage D" }),
     sig({ issue_type: "waste", posted_at: hoursAgo(90, NOW), area: null, score: 8, title: "Garbage E" }),
     sig({ issue_type: "waste", posted_at: hoursAgo(100, NOW), area: null, score: 1, title: "Garbage F" }),
@@ -254,17 +238,17 @@ test("computePulse groups the week's signals into sorted topics with areas, exam
   assert.deepEqual(p.period, { from: "2026-09-30T06:00:00.000Z", to: "2026-10-07T06:00:00.000Z" });
   assert.equal(p.total, 9);
   assert.equal(p.previous_total, 6);
-  assert.deepEqual(p.sources_checked, ["reddit", "news", "reports"]);
+  assert.deepEqual(p.sources_checked, ["reddit", "news"]);
   assert.deepEqual(p.topics.map((t) => [t.issue_type, t.count, t.trend]), [["waste", 6, "up"], ["drains", 2, "flat"], ["roads", 1, "down"]]);
   const w = p.topics[0];
   assert.equal(w.label, "Garbage");
   assert.equal(w.label_hi, "कचरा");
-  assert.deepEqual(w.by_source, { reddit: 4, news: 1, reports: 1 });
+  assert.deepEqual(w.by_source, { reddit: 4, news: 2 });
   assert.deepEqual(w.areas, [{ area: "Sector 45", n: 2 }, { area: "DLF Phase 2", n: 1 }]);
   assert.equal(w.examples.length, 5);
   assert.deepEqual(w.examples[0], { title: "Garbage A", url: "https://www.reddit.com/x", source: "reddit", posted_at: hoursAgo(5, NOW) });
   assert.deepEqual(w.examples.map((e) => e.title), ["Garbage A", "Waste, DLF Phase 2", "Garbage E", "Garbage B", "Garbage D"]);
-  assert.equal(w.examples[1].url, null);
+  assert.equal(w.examples[1].url, "https://news.example/dlf");
   assert.equal(w.previous, 1);
 });
 
@@ -438,7 +422,7 @@ test("runDaily skips the signals and insights steps without a fetch client", asy
   const sb = fakeSb({ rpc: { sla_digest: { unmapped: [], filed_overdue: [] }, retention_sweep: { deleted: 0, refs: [] } } });
   const r = await runDaily(sb, {});
   assert.equal(r.ok, true, JSON.stringify(r.errors));
-  assert.deepEqual(r.signals, { reddit: 0, news: 0, reports: 0, new: 0, skipped: true });
+  assert.deepEqual(r.signals, { reddit: 0, news: 0, new: 0, skipped: true });
   assert.deepEqual(r.insights, { topics: 0, ai: false, stored: false, skipped: true });
   assert.ok(!sb.calls.queries.some((q) => q.table === "signals" || q.table === "insights"));
 });
@@ -465,18 +449,15 @@ test("runDaily scans reddit, news and reports into signals, cleans up and stores
   const origThen = sb.from;
   const r = await runDaily(sb, {}, { fetch: fetchImpl });
   assert.equal(r.ok, true, JSON.stringify(r.errors));
-  assert.deepEqual(r.signals, { reddit: 1, news: 1, reports: 1, new: 3 });
+  assert.deepEqual(r.signals, { reddit: 1, news: 1, new: 2 });
   const up = sb.calls.queries.find((q) => q.table === "signals" && q.op === "upsert");
   assert.deepEqual(up.opts, { onConflict: "source,external_id", ignoreDuplicates: true });
-  assert.deepEqual(up.row.map((s) => s.source), ["reddit", "news", "reports"]);
+  assert.deepEqual(up.row.map((s) => s.source), ["reddit", "news"]);
   assert.ok(up.row.every((s) => !("author" in s)));
-  assert.equal(up.row[2].external_id, "GVF-2026-ABC23");
   const del = sb.calls.queries.find((q) => q.table === "signals" && q.op === "delete");
   assert.equal(del.filters[0][0], "lt");
   assert.equal(del.filters[0][1], "fetched_at");
-  const rep = sb.calls.queries.find((q) => q.table === "reports");
-  assert.equal(rep.cols, "ref, issue_type, area, ward, created_at");
-  assert.equal(rep.filters[0][0], "gte");
+  assert.ok(!sb.calls.queries.some((q) => q.table === "reports"), "the pulse never reads the Forum's reports");
   // The empty signals table gives no insight to store.
   assert.deepEqual(r.insights, { topics: 0, ai: false, stored: false });
   assert.ok(!sb.calls.queries.some((q) => q.table === "insights"));
