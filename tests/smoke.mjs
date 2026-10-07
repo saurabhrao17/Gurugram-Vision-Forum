@@ -141,6 +141,16 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.goto(url + "#/wards");
   await page.waitForTimeout(60);
   check((await page.locator("#wardBody tr").count()) === 36, "36 ward rows");
+  check((await page.locator("#wardCountsTh").getAttribute("hidden")) !== null && (await page.locator("#wardCounts").isHidden()) && (await page.locator("#wardBody td[data-l='Reports']").count()) === 0, "wards show no counts and no error without the API");
+
+  // Reports are private: the old public links #/r/REF and #/map show the notice and never a reference
+  for (const r of ["r/GVF-2026-T4DG5", "map"]) {
+    await page.goto(url + "#/" + r);
+    await page.waitForTimeout(80);
+    const txt = await page.locator("#v-private").innerText();
+    check((await page.locator("#v-private.on").isVisible()) && txt.includes("Reports are private") && !txt.includes("GVF-2026") && (await page.locator("#v-private a[href='#/track']").count()) === 1 && (await page.locator("#v-private a[href='#/wards']").count()) === 1, `#/${r} shows the private notice with track and wards links`);
+  }
+  check((await page.locator("a[href='#/map'], a[href^='#/r/'], [data-copy*='/r/GVF']").count()) === 0, "nothing links to a public map or a public report page");
 
   // Search
   await page.keyboard.press("Control+k");
@@ -162,7 +172,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.keyboard.press("Escape");
 
   // Hindi mode: every public view, panel and sheet must read in Hindi (acronyms and codes aside)
-  const hiRoutes = routes.concat(["fix/waste", "rights/rts", "who/mp", "updates/complaint-that-gets-acted-on", "r/GVF-2026-SRV01"]);
+  const hiRoutes = routes.concat(["fix/waste", "rights/rts", "who/mp", "updates/complaint-that-gets-acted-on", "r/GVF-2026-T4DG5"]);
   const visibleText = () => page.evaluate(() => {
     const parts = [document.querySelector("header"), document.querySelector("section.view.on"), document.querySelector("footer"), document.querySelector("#sheet.open"), document.querySelector("#panel.show")];
     return parts.filter(Boolean).map((el) => el.innerText).join("\n");
@@ -175,6 +185,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     if (r === "report") { await page.click('.fstep.on [data-go="2"]'); await page.click('.fstep.on [data-go="1"]'); await page.waitForTimeout(40); }
     const latin = latinWords(txt);
     check(DEVANAGARI.test(txt) && latin.length === 0, `#/${r || ""} reads in Hindi` + (latin.length ? " (English left: " + [...new Set(latin)].slice(0, 12).join(", ") + ")" : ""));
+    if (r === "map" || r.startsWith("r/")) check(txt.includes("रिपोर्टें निजी हैं") && !txt.includes("GVF-2026"), `#/${r} shows the private notice in Hindi without a reference`);
   }
   check(await page.evaluate(() => document.title.includes("गुरुग्राम")), "document title is in Hindi");
   check((await page.locator("footer a[href='/hi/guides']").count()) === 1 && (await page.locator("footer a[href='/hi/blog']").count()) === 1 && (await page.locator("footer a[href='/hi/ward/1']").count()) === 1 && (await page.locator("#dGuides a[href='/hi/guide/waste']").count()) === 1 && (await page.locator("#wardBody a[href='/hi/ward/36']").count()) === 1, "Hindi mode points the guide, blog and ward links at /hi/…");
@@ -252,14 +263,16 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     }
     return route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ ok: false, error: "not_found" }) });
   });
-  let dashMode = "unpublished";
+  // Counts only, always published: the API has no 50-report threshold any more
   await page.route("**/api/dashboard", async (route) => {
-    if (dashMode === "unpublished") return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, published: false, publish_at: 50, total: 12, updated_at: "2026-10-07T10:00:00Z" }) });
-    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, published: true, publish_at: 50, total: 61, updated_at: "2026-11-01T10:00:00Z", source: "Gurugram Vision Forum case system",
+    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, published: true, total: 61, updated_at: "2026-11-01T10:00:00Z", source: "Gurugram Vision Forum case system",
       summary: { total: 61, received: 10, filed: 30, escalated: 6, resolved: 15, mapped_in_3_days_pct: 92, acted_in_21_days_pct: 71, computed_at: "2026-11-01T10:00:00Z" },
       by_issue: [{ issue_type: "waste", label: "Garbage", received: 4, filed: 12, escalated: 3, resolved: 8, total: 27 }, { issue_type: "roads", label: "Roads, footpaths", received: 6, filed: 18, escalated: 3, resolved: 7, total: 34 }],
-      by_ward: [] }) });
+      by_ward: [{ ward: 30, councillor: "Madhu Batra", received: 4, filed: 12, escalated: 3, resolved: 8, total: 27, median_days_to_resolve: 9 }, { ward: 10, councillor: "Mahabir", received: 6, filed: 18, escalated: 3, resolved: 7, total: 34, median_days_to_resolve: null }] }) });
   });
+  // The public report, public feed and follow endpoints no longer exist; the site must never call them
+  const gone = [];
+  await page.route(/\/api\/(public|follow)/, (route) => { gone.push(route.request().url()); return route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ ok: false, error: "not_found" }) }); });
   await page.route("**/api/join", (route) => route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ok: true }) }));
   const visitorCalls = [];
   await page.route("**/api/visitor", (route) => { try { visitorCalls.push(JSON.parse(route.request().postData() || "{}")); } catch { visitorCalls.push({ raw: true }); } return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) }); });
@@ -274,15 +287,6 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     topics: [{ issue_type: "waste", label: "Garbage", count: 18, by_source: { reddit: 10, news: 5, reports: 3 }, trend: "up", areas: [{ area: "Sector 45", n: 4 }], examples: [{ title: "Garbage piling up near Sector 45 market", url: "https://www.reddit.com/r/gurgaon/x", source: "reddit", posted_at: "2026-10-06T10:00:00Z" }] }, { issue_type: "drains", label: "Drains, flooding", count: 9, by_source: { reddit: 2, news: 7, reports: 0 }, trend: "flat", areas: [], examples: [] }],
     actions: [{ issue_type: "waste", title: "Sector cleaning drive with MCG's sanitation wing", why: "18 mentions, rising", when: "this weekend" }] } }) }));
   await page.route("**/api/news**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, items: [{ title: "Public notice: water supply schedule", url: "https://www.gmda.gov.in/notice/1", published_at: "2026-10-07T04:00:00Z", fetched_at: "2026-10-07T05:00:00Z", source_id: "gmda", source_name: "GMDA", home: "https://www.gmda.gov.in/" }, { title: "Ward committee meetings announced", url: "https://www.mcg.gov.in/news/2", published_at: "2026-10-06T04:00:00Z", fetched_at: "2026-10-07T05:00:00Z", source_id: "mcg", source_name: "MCG", home: "https://www.mcg.gov.in/" }], sources: [{ id: "gmda" }, { id: "mcg" }] }) }));
-  const follows = [];
-  await page.route("**/api/follow", (route) => { follows.push(JSON.parse(route.request().postData() || "{}")); return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) }); });
-  await page.route("**/api/public/report?**", (route) => {
-    const ref = new URL(route.request().url()).searchParams.get("ref");
-    if (ref !== "GVF-2026-SRV01") return route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ ok: false, error: "not_found" }) });
-    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, report: { ref, issue_type: "waste", issue_label: "Garbage", area: "Sector 29", ward: 30, stage: 2, created_at: "2026-10-07T10:00:00Z", official_filed_at: "2026-10-09T10:00:00Z", resolved_at: null, desk: "MCG sanitation wing", official_channel: "GMDA portal", lat: 28.46, lng: 77.07, source: "web",
-      events: [{ stage: 0, created_at: "2026-10-07T10:00:00Z" }, { stage: 1, created_at: "2026-10-08T10:00:00Z" }, { stage: 2, created_at: "2026-10-09T10:00:00Z" }], followers: 3 } }) });
-  });
-  await page.route("**/api/public/reports**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, reports: [{ ref: "GVF-2026-SRV01", issue_type: "waste", stage: 2, ward: 30, lat: 28.46, lng: 77.07, created_at: "2026-10-07T10:00:00Z" }], counts: { total: 5, with_location: 1 }, computed_at: "2026-10-07T10:00:00Z" }) }));
   await page.route("**/api/ward**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, ward: 30, source: "table" }) }));
   const subs = [];
   let subMode = "ok";
@@ -429,6 +433,13 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.goto(httpUrl + "#/wards");
   await page.waitForTimeout(120);
   check(!(await page.locator("#gate.open").isVisible()), "a registered device is not asked again");
+  // Wards: per-ward counts from /api/dashboard (by_ward), counts only
+  await page.waitForTimeout(150);
+  const ward30 = await page.locator("#wardBody tr").nth(29).innerText(), ward10 = await page.locator("#wardBody tr").nth(9).innerText(), ward1 = await page.locator("#wardBody tr").nth(0).innerText();
+  check((await page.locator("#wardCountsTh").getAttribute("hidden")) === null && (await page.locator("#wardBody td[data-l='Reports']").count()) === 36, "wards table gains a Reports column when the API answers");
+  check(ward30.includes("27 reports") && ward30.includes("19 open") && ward30.includes("8 resolved") && ward30.includes("9 days to resolve"), "ward 30 shows total, open, resolved and median days");
+  check(ward10.includes("34 reports") && !ward10.includes("days to resolve") && ward1.includes("0 reports") && ward1.includes("0 open"), "a ward without a median omits it and a ward without reports shows zero");
+  check((await page.locator("#wardCounts").innerText()).includes("Counts only") && !(await page.locator("#v-wards").innerText()).includes("GVF-2026"), "wards page explains the counts and names no report");
 
   // Team-published content: pop-up, social links, updates feed, story page, official news
   await page.goto(httpUrl + "#/");
@@ -473,42 +484,30 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   const pulseTxt = await page.locator("#pulseBody").innerText();
   check(pulseTxt.includes("Garbage and waterlogging top the week") && pulseTxt.includes("Garbage") && pulseTxt.includes("18") && pulseTxt.includes("Sector cleaning drive") && (await page.locator("#pulseBody a[href='https://www.reddit.com/r/gurgaon/x']").count()) === 1, "pulse page shows the week's topics, an example link and the suggested action");
   check((await page.locator("#pulseBody .share a[href^='https://wa.me/']").count()) === 1 && (await page.locator("#pulseBody .share [data-copy='https://gurugramvisionforum.org/pulse']").count()) === 1, "pulse page carries a share row");
-
-  // Public anonymised report page, follow form, share, real URL
-  await page.goto(httpUrl + "#/r/GVF-2026-SRV01");
-  await page.waitForTimeout(250);
-  const pubTxt = await page.locator("#pubBody").innerText();
-  check(pubTxt.includes("GVF-2026-SRV01") && pubTxt.includes("Garbage") && pubTxt.includes("ward 30") && pubTxt.includes("3 people follow"), "public report page shows issue, ward, stage and followers");
-  check(!pubTxt.includes("Test Reporter") && !pubTxt.includes("9899"), "public report page shows no reporter details");
-  check((await page.locator("#pubBody .tl li.done").count()) === 2 && (await page.locator("#pubBody .tl li.now").count()) === 1, "public timeline marks two stages done and one current");
-  await page.fill("#fwEmail", "nope");
-  await page.click("#followForm button[type=submit]");
-  await page.waitForTimeout(80);
-  check(await page.locator("#fwErr.show").isVisible(), "follow form rejects a bad email");
-  await page.fill("#fwEmail", "friend@example.org");
-  await page.click("#followForm button[type=submit]");
-  await page.waitForTimeout(200);
-  check(follows.length === 1 && follows[0].ref === "GVF-2026-SRV01" && follows[0].email === "friend@example.org" && !(await page.locator("#fwOk").isHidden()), "follow form posts the reference and email");
-  check((await page.locator("#pubBody a[href^='https://wa.me/']").count()) === 1 && (await page.locator("#pubBody a[href='#/report/waste']").count()) === 1, "public page offers WhatsApp share and me-too");
-  check((await page.locator("#pubBody .share [data-copy='https://gurugramvisionforum.org/r/GVF-2026-SRV01']").count()) === 1, "public page share row carries the public URL");
   // Copy link: stub the clipboard, click, and watch the label flip to Copied and back
   await page.evaluate(() => { window.__copied = ""; const stub = { writeText: (t) => { window.__copied = t; return Promise.resolve(); } }; try { Object.defineProperty(navigator, "clipboard", { value: stub, configurable: true }); } catch { navigator.clipboard.writeText = stub.writeText; } });
   const shareEvents = visitorCalls.filter((c) => c.event === "share").length;
-  await page.click("#pubBody .share [data-copy]");
+  await page.click("#pulseBody .share [data-copy]");
   await page.waitForTimeout(100);
-  check((await page.evaluate(() => window.__copied)) === "https://gurugramvisionforum.org/r/GVF-2026-SRV01" && (await page.locator("#pubBody .share [data-copy]").innerText()).includes("Copied"), "Copy link writes the URL and shows Copied");
+  check((await page.evaluate(() => window.__copied)) === "https://gurugramvisionforum.org/pulse" && (await page.locator("#pulseBody .share [data-copy]").innerText()).includes("Copied"), "Copy link writes the URL and shows Copied");
   check(visitorCalls.filter((c) => c.event === "share").length === shareEvents + 1, "sharing logs a first-party share event");
   await page.waitForTimeout(2200);
-  check((await page.locator("#pubBody .share [data-copy]").innerText()).includes("Copy link"), "Copied label returns to Copy link after two seconds");
-  await page.goto(httpUrl + "#/r/GVF-2026-NOPE1");
-  await page.waitForTimeout(200);
-  check((await page.locator("#pubBody").innerText()).includes("No report has this reference"), "unknown reference shows a clear message");
-  await page.goto(httpUrl + "r/GVF-2026-SRV01");
+  check((await page.locator("#pulseBody .share [data-copy]").innerText()).includes("Copy link"), "Copied label returns to Copy link after two seconds");
+
+  // Reports are private: #/r/REF and #/map show the notice, name no report and call no public endpoint
+  await page.goto(httpUrl + "#/r/GVF-2026-T4DG5");
+  await page.waitForTimeout(250);
+  const privTxt = await page.locator("#v-private").innerText();
+  check((await page.locator("#v-private.on").isVisible()) && privTxt.includes("Reports are private") && !privTxt.includes("GVF-2026") && !privTxt.includes("Garbage"), "#/r/REF shows the private notice and nothing about the report");
+  check((await page.locator("#v-private a[href='#/track']").count()) === 1 && (await page.locator("#v-private a[href='#/wards']").count()) === 1, "private notice offers Track and the ward counts");
+  await page.goto(httpUrl + "r/GVF-2026-T4DG5");
   await page.waitForTimeout(300);
-  check((await page.evaluate(() => location.hash)) === "#/r/GVF-2026-SRV01" && (await page.locator("#pubBody").innerText()).includes("Garbage"), "a real URL like /r/REF opens the public page");
+  check((await page.evaluate(() => location.hash)) === "#/r/GVF-2026-T4DG5" && (await page.locator("#v-private.on").isVisible()), "a real URL like /r/REF still opens, on the private notice");
   await page.goto(httpUrl + "map");
   await page.waitForTimeout(300);
-  check((await page.evaluate(() => location.hash)) === "#/map" && (await page.locator("#pubLegend span .sw").count()) === 5 && (await page.locator("#pubCount").innerText()).length > 0, "/map opens the public map with a stage legend");
+  check((await page.evaluate(() => location.hash)) === "#/map" && (await page.locator("#v-private.on").isVisible()) && (await page.locator("#v-private .mapbox").count()) === 0, "/map opens the private notice, not a map");
+  check(gone.length === 0, "no request goes to /api/public/* or /api/follow" + (gone.length ? ": " + gone.join(", ") : ""));
+
 
   // Track: server record wins and shows dates
   await page.goto(httpUrl + "#/track");
@@ -528,22 +527,16 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(100);
   check((await page.locator("#trOut").innerText()).includes("last 4 digits"), "track asks for the last 4 when missing");
 
-  // Dashboard: unpublished shows the running total only; published renders live rows
+  // Dashboard: counts render whenever the API answers (no 50-report threshold)
   await page.goto(httpUrl + "#/dashboard");
-  await page.waitForTimeout(200);
-  check((await page.locator("#kpis").innerText()).includes("—"), "dashboard hides KPIs before 50 reports");
-  check((await page.locator("#dashBody").innerText()).includes("received 12 so far"), "dashboard shows the running total before publishing");
-  dashMode = "published";
-  await page.goto(httpUrl + "#/");
-  await page.evaluate(() => { location.hash = "#/dashboard"; });
-  await page.reload();
   await page.waitForTimeout(250);
-  check((await page.locator("#kpis .kpi b").first().innerText()) === "61", "published dashboard shows live KPIs");
-  check((await page.locator("#dashBody").innerText()).includes("92% on time"), "published dashboard shows commitment actuals");
-  check((await page.locator("#dashBody .bar").count()) === 2, "published dashboard draws one bar per cause");
-  check((await page.locator("#sampleBtn").count()) === 0, "published dashboard has no sample toggle");
+  check((await page.locator("#kpis .kpi b").first().innerText()) === "61", "dashboard shows live KPIs");
+  check((await page.locator("#dashBody").innerText()).includes("92% on time"), "dashboard shows commitment actuals");
+  check((await page.locator("#dashBody .bar").count()) === 2, "dashboard draws one bar per cause");
+  check((await page.locator("#sampleBtn").count()) === 0 && !(await page.locator("#dashBody").innerText()).includes("50 reports"), "dashboard has no sample toggle and no 50-report placeholder");
+  check(!(await page.locator("#v-dashboard").innerText()).includes("GVF-2026"), "dashboard names no report");
 
-  // Embed widget on a host page (served from the same test server; the dashboard mock is in its published state)
+  // Embed widget on a host page (served from the same test server)
   await page.goto(httpUrl + "embed-test.html");
   await page.waitForTimeout(400);
   check((await page.locator(".gvf-embed").count()) === 2, "embed.js renders one card per script tag");
@@ -572,6 +565,15 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
 {
   console.log("\nVolunteer desk at #/desk (mocked /api/triage over http, 1366x860)");
   const ctx = await browser.newContext({ viewport: { width: 1366, height: 860 } });
+  // A MapLibre stand-in, so the desk Map tab runs without fetching unpkg: loadMapLib() uses window.maplibregl when it exists.
+  await ctx.addInitScript(() => {
+    const chain = function () { return this; };
+    function Map() {} Map.prototype.addControl = chain; Map.prototype.fitBounds = chain; Map.prototype.on = chain;
+    function Marker() {} Marker.prototype.setLngLat = chain; Marker.prototype.setPopup = chain; Marker.prototype.addTo = chain; Marker.prototype.remove = chain;
+    function Popup() {} Popup.prototype.setHTML = chain;
+    function LngLatBounds() {} LngLatBounds.prototype.extend = chain;
+    window.maplibregl = { Map, NavigationControl: function () {}, Marker, Popup, LngLatBounds };
+  });
   await ctx.addInitScript(() => { try { if (!localStorage.getItem("gvf_visitor")) localStorage.setItem("gvf_visitor", JSON.stringify({ token: "smoke_visitor_token_0001", done: true, views: 9 })); } catch {} });
   const page = await ctx.newPage();
   const errors = [];
@@ -599,8 +601,11 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     if (b.email === "owner@example.org") return json(route, 200, { ok: true, session, staff: { user_id: "u0", name: "Owner", role: "owner", email: "owner@example.org" } });
     return json(route, 200, { ok: true, session, staff });
   });
-  await page.route("**/api/triage/reports?**", (route) => authed(route) ? json(route, 200, { ok: true, reports: [state, report({ ref: "GVF-2026-OLD02", stage: 0, created_at: "2026-09-20T10:00:00Z", unmapped_overdue: true })], total: 2, offset: 0, limit: 50,
-    summary: { total: 2, received: 2, filed: 0, escalated: 0, resolved: 0, unmapped_past_due: 1, filed_past_due: 0 } }) : json(route, 401, { ok: false, error: "unauthenticated" }));
+  const reportListCalls = [];
+  await page.route("**/api/triage/reports?**", (route) => { reportListCalls.push(route.request().url()); if (!authed(route)) return json(route, 401, { ok: false, error: "unauthenticated" });
+    if (route.request().url().includes("fields=map")) return json(route, 200, { ok: true, reports: [{ ref: "GVF-2026-OLD02", issue_type: "waste", issue_label: "Garbage", area: "Sector 29", ward: 30, stage: 0, lat: 28.4595, lng: 77.0266 }], total: 1 });
+    return json(route, 200, { ok: true, reports: [state, report({ ref: "GVF-2026-OLD02", stage: 0, created_at: "2026-09-20T10:00:00Z", unmapped_overdue: true })], total: 2, offset: 0, limit: 50,
+    summary: { total: 2, received: 2, filed: 0, escalated: 0, resolved: 0, unmapped_past_due: 1, filed_past_due: 0 } }); });
   await page.route("**/api/triage/reports/GVF-2026-SRV01", (route) => {
     if (!authed(route)) return json(route, 401, { ok: false, error: "unauthenticated" });
     if (route.request().method() === "PATCH") {
@@ -643,6 +648,15 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#tSummary").innerText()).includes("past due: 1 unmapped"), "summary line shows the counts");
   check(!(await page.locator("#teamTab").isHidden()), "coordinator sees the Team tab");
   check((await page.locator("#visitorsTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()) && !(await page.locator("#contentTab").isHidden()), "coordinator sees content and pulse but not the visitors' data");
+
+  // Desk map: the list has loaded two rows, so its offset is 2; the map query must carry the filters only, never offset or limit
+  await page.click('[data-tab="map"]');
+  await page.waitForTimeout(250);
+  const mapCall = reportListCalls.find((u) => u.includes("fields=map")) || "";
+  check(mapCall.includes("stage=open") && !/[?&]offset=/.test(mapCall) && !/[?&]limit=/.test(mapCall), "map request carries the filters only, no offset or limit" + (mapCall ? " (" + mapCall.split("?")[1] + ")" : " (no map request)"));
+  check((await page.locator("#mapCount").innerText()).includes("1 report with a pinned location"), "map counts the pinned report");
+  await page.click('[data-tab="reports"]');
+  await page.waitForTimeout(60);
 
   await page.click('[data-open="GVF-2026-SRV01"]');
   await page.waitForSelector("#editForm");
