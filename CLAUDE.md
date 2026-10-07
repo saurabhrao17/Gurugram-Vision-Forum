@@ -9,7 +9,8 @@ Read HANDOFF.md first; it holds the context, research, design rules and roadmap.
 ## Layout
 - `site/` is the website: `index.html`, `styles.css`, `data.js`, `app.js`. Static, hash-routed, no framework, no build step unless we deliberately add one.
 - `api/` holds the Vercel serverless functions (`report`, `status`, `join`, `dashboard`, and `triage/*` for the volunteer desk); `lib/` holds their shared code. ESM, Node 20+.
-- `site/triage.html` + `site/triage.js` is the volunteer desk (English only; internal tool). It shares `styles.css` and `data.js` with the public site and talks only to `/api/triage/*` with a Supabase Auth bearer token.
+- The volunteer desk is the `#/desk` route inside `site/app.js` (English only; internal tool). It talks only to `/api/triage/*` with a Supabase Auth bearer token. `triage.html` is a redirect kept for old links.
+- Maps: MapLibre with OpenStreetMap tiles, lazy-loaded from unpkg only when a map is shown; `/api/geocode` and `/api/ward` do search and ward detection server-side (Google when `GOOGLE_MAPS_KEY` is set). Ward polygons live in `ward_boundaries` (PostGIS), sector names in `area_wards`.
 - `supabase/migrations/` is the schema; `supabase/seed.sql` is generated from `site/data.js` by `npm run seed`. Apply both to a new project in that order.
 - `archive/` holds the single-file v3 build (what was published as the Claude artifact) and the older v2. Reference only; do not edit.
 - `data/` holds the content exports (JSON and CSVs) that seed the master-data sheet. `site/data.js` is the source of truth until the sheet exists; regenerate the exports from it, not the other way round.
@@ -31,8 +32,8 @@ Read HANDOFF.md first; it holds the context, research, design rules and roadmap.
 - Test before committing: `npm test` (unit) and `node tests/smoke.mjs` (Playwright on 390 px and 1366 px: every route, the 4-step report flow, track, sheets, search, theme and language toggles, the mocked API pass, zero console errors).
 
 ## Next build items (in order)
-1. Photo upload from the report form to the `report-photos` bucket (images, 10 MB) through an API function.
-2. Vercel Cron for SLA flags (3 working days unmapped, 21 days filed) and stage-change emails; WhatsApp templates after Meta verification.
-3. "Report on WhatsApp" deep link and helpline number once they exist; WhatsApp and Exotel webhooks creating reports.
-4. Privacy notice page; sector-to-ward lookup from `area_wards`; public anonymised report pages; real URLs and OG tags; 24-month retention job.
-5. Clearer geolocation message in the report form (permission denied vs unavailable).
+1. Load the MCG ward boundary file (from GMDA's GIS cell) into `ward_boundaries`; fill `area_wards` from the 2023 delimitation notification.
+2. Photo upload from the report form to the `report-photos` bucket (images, 10 MB) through an API function.
+3. Vercel Cron for SLA flags (3 working days unmapped, 21 days filed) and stage-change emails; WhatsApp templates after Meta verification.
+4. "Report on WhatsApp" deep link and helpline number once they exist; WhatsApp and Exotel webhooks creating reports.
+5. Privacy notice page; public anonymised report pages on the map; real URLs and OG tags; 24-month retention job; password change in the desk.

@@ -489,4 +489,24 @@ body.triage{--bbar:0px}
 .login-card{max-width:460px}
 body.triage .ftr{padding:1.25rem 0 .75rem}
 body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
-.util[hidden],.tab[hidden]{display:none}
+[hidden]{display:none!important}
+
+/* maps */
+.mapbox{height:300px; border:1.5px solid var(--line); border-radius:var(--r-ctl); overflow:hidden; background:var(--surface-2); position:relative}
+.mapbox-tall{height:min(70vh, 560px)}
+.mapbox:empty::after{content:"Map loads when you are online."; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:.95rem; padding:1rem; text-align:center}
+.mapsearch{position:relative; margin-bottom:.5rem}
+.maphits{list-style:none; margin:0; padding:0; position:absolute; left:0; right:0; top:100%; z-index:5; background:var(--surface); border:1.5px solid var(--line); border-radius:var(--r-ctl); box-shadow:var(--shadow); max-height:240px; overflow:auto}
+.maphits button{display:block; width:100%; text-align:left; font:inherit; font-size:.98rem; padding:.6rem .85rem; border:0; border-bottom:1px solid var(--line); background:none; color:var(--text); cursor:pointer; min-height:44px}
+.maphits button:hover,.maphits button:focus{background:var(--surface-2); outline:none}
+.maphits li:last-child button{border-bottom:0}
+.pin{width:22px; height:22px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.35); cursor:pointer}
+.maplibregl-popup-content{font-family:var(--body); color:#1B2430; border-radius:8px; padding:.6rem .75rem; font-size:.95rem}
+.maplibregl-popup-content b{font-family:var(--head)}
+.maplibregl-popup-content a{color:#0A4A8C}
+/* desk */
+.deskbar{display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:.6rem .9rem; margin-bottom:1.25rem; border:1px solid var(--line); border-radius:var(--r-card); background:var(--surface)}
+.deskbar .who{max-width:70%}
+.wardgrid select{min-height:40px; padding:.35rem .6rem; font-size:.95rem}
+.wardgrid td{vertical-align:middle}
+.notice{padding:.75rem .9rem; border-left:4px solid var(--saffron); background:var(--saffron-50); border-radius:0 8px 8px 0; margin:0 0 1rem; font-size:.98rem}

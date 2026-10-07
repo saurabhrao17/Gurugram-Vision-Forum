@@ -9,3 +9,7 @@
 | 7 Oct 2026 | Dashboard publishes nothing until 50 reports | HANDOFF.md section 1, rule 4. The endpoint returns the running total only. |
 | 7 Oct 2026 | Volunteer desk signs in with email and password, accounts created by the coordinator | No email sending needed at launch, so no SMTP or redirect-URL setup; Supabase's built-in mailer is rate-limited. Magic links can come later with custom SMTP. |
 | 7 Oct 2026 | The desk is a separate static page (`triage.html`), not a route in the public app | Keeps the public bundle and its Hindi dictionary unchanged, and keeps reporter details out of the public app's code paths. |
+| 7 Oct 2026 | The desk lives inside the main site at `#/desk` | Owner's ask: move freely between public pages and the desk. The earlier separate page was a privacy convenience, not a requirement. |
+| 7 Oct 2026 | Ward volunteers: one lead and one support per ward, scoped to their wards; coordinators and owners see all | Owner's operating model. Assignments are data (`ward_volunteers`), changed from the Team tab. |
+| 7 Oct 2026 | Maps start on OpenStreetMap tiles and Nominatim; Google Geocoding switches in when a key is provided | Works today without a billing account. Google is better for Indian addresses and is a one-line environment change. |
+| 7 Oct 2026 | Ward boundaries come from GMDA's GIS file, not an API | No public API exists for MCG wards. The database and form are ready for the file; until then wards come from the resident, the sector table and the desk. |

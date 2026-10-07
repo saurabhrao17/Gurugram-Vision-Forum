@@ -14,9 +14,14 @@ export default async function handler(req, res) {
     const sb = supabase();
 
     if (req.method === "GET") {
-      const { data, error } = await sb.from("staff").select("user_id, name, role, email, created_at").order("created_at");
+      const [{ data, error }, { data: wv }] = await Promise.all([
+        sb.from("staff").select("user_id, name, role, email, created_at").order("created_at"),
+        sb.from("ward_volunteers").select("user_id, ward, role")
+      ]);
       if (error) throw error;
-      return send(res, 200, { ok: true, staff: data });
+      const byUser = {};
+      (wv || []).forEach((x) => { (byUser[x.user_id] = byUser[x.user_id] || []).push({ ward: x.ward, role: x.role }); });
+      return send(res, 200, { ok: true, staff: data.map((x) => ({ ...x, wards: (byUser[x.user_id] || []).sort((a, b) => a.ward - b.ward) })) });
     }
 
     if (req.method === "POST") {
