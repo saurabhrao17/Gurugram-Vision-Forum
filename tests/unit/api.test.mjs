@@ -31,7 +31,7 @@ test("isEmail", () => {
 const good = {
   issue_type: "waste", affects: "My society or RWA", area: "Sector 29", ward: "30",
   spot: "Near the gate", lat: "28.46", lng: "77.07", description: "Garbage not collected",
-  name: "Test", phone: "9999999999", email: "", consent: true
+  name: "Test", phone: "9999999999", email: "test@example.org", pincode: "122001", city: "", visitor_token: "abcdefghijklmnopqrstuvwx", consent: true
 };
 
 test("validate accepts a complete report and normalises fields", () => {
@@ -39,13 +39,18 @@ test("validate accepts a complete report and normalises fields", () => {
   assert.deepEqual(errors, []);
   assert.equal(out.ward, 30);
   assert.equal(out.reporter_phone, "+919999999999");
-  assert.equal(out.reporter_email, null);
+  assert.equal(out.reporter_email, "test@example.org");
+  assert.equal(out.pincode, "122001");
+  assert.equal(out.city, "Gurugram");
+  assert.equal(out.visitor_token, "abcdefghijklmnopqrstuvwx");
   assert.equal(out.lat, 28.46);
 });
 
 test("validate names each missing or bad field", () => {
-  const { errors } = validate({ ...good, issue_type: "", phone: "123", consent: false, email: "bad" });
-  assert.deepEqual(errors.sort(), ["consent", "email", "issue_type", "phone"]);
+  const { errors } = validate({ ...good, issue_type: "", phone: "123", consent: false, email: "bad", pincode: "12" });
+  assert.deepEqual(errors.sort(), ["consent", "email", "issue_type", "phone", "pincode"]);
+  assert.deepEqual(validate({ ...good, email: "" }).errors, ["email"]);
+  assert.equal(validate({ ...good, visitor_token: "short" }).out.visitor_token, null);
 });
 
 test("validate drops out-of-range ward and unknown affects instead of failing", () => {

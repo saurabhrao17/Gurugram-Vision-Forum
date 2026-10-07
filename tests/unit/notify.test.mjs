@@ -142,12 +142,12 @@ test("runDaily enqueues the digest only when something is overdue and a coordina
   sb = fakeSb({ rpc: { sla_digest: digest, retention_sweep: emptySweep } });
   r = await runDaily(sb, {});
   assert.equal(r.sla.digest_sent, false);
-  assert.ok(!sb.calls.queries.some((q) => q.op === "insert"));
+  assert.ok(!sb.calls.queries.some((q) => q.table === "outbox" && q.op === "insert"));
 
   sb = fakeSb({ rpc: { sla_digest: emptyDigest, retention_sweep: emptySweep } });
   r = await runDaily(sb, { COORDINATOR_EMAIL: "coord@example.org" });
   assert.deepEqual(r.sla, { unmapped: 0, filed_overdue: 0, digest_sent: false });
-  assert.ok(!sb.calls.queries.some((q) => q.op === "insert"));
+  assert.ok(!sb.calls.queries.some((q) => q.table === "outbox" && q.op === "insert"));
 });
 
 // ---------------------------------------------------------------------------

@@ -8,9 +8,13 @@
   "scripts": {
     "test": "node --test \"tests/unit/**/*.test.mjs\"",
     "smoke": "node tests/smoke.mjs",
-    "seed": "node scripts/export-seed.mjs"
+    "seed": "node scripts/export-seed.mjs",
+    "check-links": "node scripts/check-links.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
   }
 }

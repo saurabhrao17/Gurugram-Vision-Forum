@@ -28,7 +28,7 @@ const server = http.createServer(async (req, res) => {
 });
 await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const httpUrl = `http://127.0.0.1:${server.address().port}/`;
-const routes = ["", "report", "track", "directory", "rights", "who", "wards", "charter", "dashboard", "updates", "join", "about", "accessibility", "privacy", "map"];
+const routes = ["", "report", "track", "directory", "rights", "who", "wards", "charter", "dashboard", "updates", "join", "about", "accessibility", "privacy", "map", "news"];
 
 // Latin tokens that are allowed to remain in Hindi mode: agency acronyms, product names, codes.
 const LATIN_OK = new Set("GMDA MCG DHBVN HRERA DTCP HSVP HSPCB NHAI CAQM CPGRAMS HERC GRAP RERA RWA UPI FIR AQI PIO BPL ECI MPLADS MoSPI CPCB SDM DC OneMap GGM Daakhil Sameer myGurugram Swachhata Saral MyGov RTI NH GVF EN WCAG WhatsApp MLA MP MC Manesar ULB HSIIDC HUDA IC PDF MB NCR Lok Sabha SMS ID OTP JJP INLD AAP BJP INC CSR DLF SPR MG HSVP MCG NIT DMRC RRTS CM Window ABCDE HTML Haryana Online Form Zero GIS".split(" "));
@@ -44,6 +44,7 @@ const browser = await chromium.launch();
 for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   console.log(`\nViewport ${vp.w}x${vp.h}`);
   const ctx = await browser.newContext({ viewport: { width: vp.w, height: vp.h } });
+  await ctx.addInitScript(() => { try { if (!localStorage.getItem("gvf_visitor")) localStorage.setItem("gvf_visitor", JSON.stringify({ token: "smoke_visitor_token_0001", done: true, views: 9 })); } catch {} });
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
@@ -82,6 +83,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.fill("#fDesc", "Garbage not collected for four days.");
   await page.fill("#fName", "Test Reporter");
   await page.fill("#fPhone", "9999999999");
+  await page.fill("#fEmail", "test@example.org");
+  await page.fill("#fPincode", "122001");
   await page.check("#fConsent");
   await page.click('[data-go="4"]');
   check((await page.locator("#summary .sl").count()) > 0 || (await page.locator("#summary").innerText()).includes("Sector 29"), "step 4 shows the summary");
@@ -182,6 +185,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
 {
   console.log("\nAPI wiring (mocked /api over http, 390x844)");
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.addInitScript(() => { try { if (!localStorage.getItem("gvf_visitor")) localStorage.setItem("gvf_visitor", JSON.stringify({ token: "smoke_visitor_token_0001", done: true, views: 9 })); } catch {} });
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
@@ -227,6 +231,16 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
       by_ward: [] }) });
   });
   await page.route("**/api/join", (route) => route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ok: true }) }));
+  const visitorCalls = [];
+  await page.route("**/api/visitor", (route) => { try { visitorCalls.push(JSON.parse(route.request().postData() || "{}")); } catch { visitorCalls.push({ raw: true }); } return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) }); });
+  const samplePosts = [
+    { id: "p1", kind: "story", slug: "sewa-drive-sector-45-ab12c", title: "Sewa drive cleans Sector 45 park", title_hi: "सेक्टर 45 पार्क की सफ़ाई", summary: "Forty volunteers, two tonnes of waste.", body: "<p>Forty volunteers joined on Sunday.</p>", source: "Forum team", published: true, published_at: "2026-10-07T06:00:00Z", pinned: false, tags: ["sewa"] },
+    { id: "p2", kind: "popup", slug: "townhall-ab12d", title: "First townhall on 20 October", summary: "Sector 29 community centre, 6 pm.", link_url: "https://example.org/townhall", published: true, published_at: "2026-10-07T06:00:00Z", pinned: true, starts_at: null, ends_at: null },
+    { id: "p3", kind: "social", slug: "x-post-ab12e", title: "Our first post on X", summary: "Follow along.", embed_url: "https://x.com/gvf/status/1", published: true, published_at: "2026-10-06T06:00:00Z" },
+    { id: "p4", kind: "testimonial", slug: "voice-ab12f", title: "Resident voice", summary: "The pothole was fixed in a week.", quote_by: "Resident, Sector 10", published: true, published_at: "2026-10-05T06:00:00Z" }
+  ];
+  await page.route("**/api/content**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, posts: samplePosts, settings: { social: { x: "https://x.com/gvf", facebook: "", instagram: "", youtube: "", whatsapp: "" } } }) }));
+  await page.route("**/api/news**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, items: [{ title: "Public notice: water supply schedule", url: "https://www.gmda.gov.in/notice/1", published_at: "2026-10-07T04:00:00Z", fetched_at: "2026-10-07T05:00:00Z", source_id: "gmda", source_name: "GMDA", home: "https://www.gmda.gov.in/" }, { title: "Ward committee meetings announced", url: "https://www.mcg.gov.in/news/2", published_at: "2026-10-06T04:00:00Z", fetched_at: "2026-10-07T05:00:00Z", source_id: "mcg", source_name: "MCG", home: "https://www.mcg.gov.in/" }], sources: [{ id: "gmda" }, { id: "mcg" }] }) }));
   const follows = [];
   await page.route("**/api/follow", (route) => { follows.push(JSON.parse(route.request().postData() || "{}")); return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) }); });
   await page.route("**/api/public/report?**", (route) => {
@@ -255,6 +269,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     await page.fill("#fDesc", "Garbage not collected for four days.");
     await page.fill("#fName", "Test Reporter");
     await page.fill("#fPhone", "9899 999999");
+    await page.fill("#fEmail", "test@example.org");
+    await page.fill("#fPincode", "122001");
     await page.check("#fConsent");
     await page.click('[data-go="4"]');
     // Hide the previous confirmation so the wait below sees the new one.
@@ -272,7 +288,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#upStatus").innerText()).includes("1 files attached"), "confirmation reports the attached file");
   check((await page.locator("#confirm .notice").count()) === 0, "nothing listed as missing when the portal's needs are met");
   check(calls[0] && calls[0].ward === "30", "ward suggested from the sector table is sent with the report");
-  check(calls[0] && calls[0].issue_type === "waste" && calls[0].ward === "30" && calls[0].consent === true && calls[0].phone === "9899 999999", "report posts the expected payload");
+  check(calls[0] && calls[0].issue_type === "waste" && calls[0].ward === "30" && calls[0].consent === true && calls[0].phone === "9899 999999" && calls[0].email === "test@example.org" && calls[0].pincode === "122001" && calls[0].city === "Gurugram" && /^[A-Za-z0-9_-]{20,64}$/.test(calls[0].visitor_token), "report posts the expected payload including email, PIN code, city and the visitor token");
   check((await page.locator("#confirm .err").count()) === 0, "no offline notice when the server answered");
 
   reportMode = "down";
@@ -305,6 +321,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.fill("#fDesc", "चार दिन से कचरा नहीं उठा।");
   await page.fill("#fName", "Test Reporter");
   await page.fill("#fPhone", "9899 999999");
+  await page.fill("#fEmail", "test@example.org");
+  await page.fill("#fPincode", "122001");
   await page.check("#fConsent");
   await page.click('[data-go="4"]');
   check(DEVANAGARI.test(await page.locator("#summary").innerText()) && latinWords(await page.locator("#summary dt").allInnerTexts().then((a) => a.join(" "))).length === 0, "step 4 summary labels are in Hindi");
@@ -319,6 +337,56 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.evaluate(() => localStorage.setItem("gvf_lang", JSON.stringify("en")));
   await page.reload();
   await page.waitForTimeout(150);
+
+  // Visitor gate: a fresh device sees the registration form on its second page view, and the report registers the reporter
+  check(visitorCalls.some((c) => c.event === "report_submit") && visitorCalls.some((c) => c.name === "Test Reporter" && c.email === "test@example.org" && c.pincode === "122001" && c.consent === true), "a submitted report registers the visitor and logs the event");
+  await page.evaluate(() => localStorage.setItem("gvf_visitor", JSON.stringify({ token: "smoke_fresh_device_00001", done: false, views: 0 })));
+  await page.goto(httpUrl + "#/rights");
+  await page.reload();
+  await page.waitForTimeout(200);
+  check(!(await page.locator("#gate.open").isVisible()), "first page view shows no gate");
+  await page.goto(httpUrl + "#/directory");
+  await page.waitForTimeout(150);
+  check(await page.locator("#gate.open").isVisible(), "second page view opens the visitor gate");
+  await page.keyboard.press("Escape");
+  check(await page.locator("#gate.open").isVisible(), "the gate does not close on Escape");
+  await page.click("#gateForm button[type=submit]");
+  await page.waitForTimeout(80);
+  check(await page.locator("#gErr.show").isVisible() && !visitorCalls.some((c) => c.name === "Gate Person"), "the gate refuses an empty form");
+  await page.fill("#gName", "Gate Person");
+  await page.fill("#gPhone", "9811111111");
+  await page.fill("#gEmail", "gate@example.org");
+  await page.fill("#gArea", "Sector 45");
+  await page.fill("#gPin", "122003");
+  await page.check("#gConsent");
+  await page.click("#gateForm button[type=submit]");
+  await page.waitForTimeout(250);
+  const gateCall = visitorCalls.find((c) => c.name === "Gate Person");
+  check(!(await page.locator("#gate.open").isVisible()) && gateCall && gateCall.email === "gate@example.org" && gateCall.pincode === "122003" && gateCall.city === "Gurugram" && gateCall.consent === true && gateCall.notice_version, "a completed gate registers the visitor and lets them continue");
+  await page.goto(httpUrl + "#/wards");
+  await page.waitForTimeout(120);
+  check(!(await page.locator("#gate.open").isVisible()), "a registered device is not asked again");
+
+  // Team-published content: pop-up, social links, updates feed, story page, official news
+  await page.goto(httpUrl + "#/");
+  await page.waitForTimeout(300);
+  check(!(await page.locator("#popups").isHidden()) && (await page.locator("#popups").innerText()).includes("First townhall"), "a published pop-up shows on the home page");
+  await page.click("#popups [data-dismiss]");
+  await page.waitForTimeout(60);
+  check(await page.locator("#popups").isHidden(), "a dismissed pop-up stays hidden");
+  check(!(await page.locator("#ftSocial").isHidden()) && (await page.locator("#ftSocial a[href='https://x.com/gvf']").count()) === 1, "footer shows the social links set from the desk");
+  await page.goto(httpUrl + "#/updates");
+  await page.waitForTimeout(250);
+  check((await page.locator("#uBody").innerText()).includes("Sewa drive cleans Sector 45 park") && (await page.locator("#uBody").innerText()).includes("The pothole was fixed in a week."), "updates show the team's story and a testimonial");
+  await page.click('[data-utab="social"]');
+  await page.waitForTimeout(80);
+  check((await page.locator("#uBody a[href='https://x.com/gvf/status/1']").count()) === 1, "social tab links to the post");
+  await page.goto(httpUrl + "#/updates/sewa-drive-sector-45-ab12c");
+  await page.waitForTimeout(150);
+  check((await page.locator("#postBody").innerText()).includes("Forty volunteers joined on Sunday."), "a story page renders the published body");
+  await page.goto(httpUrl + "#/news");
+  await page.waitForTimeout(250);
+  check((await page.locator("#newsBody a[href='https://www.gmda.gov.in/notice/1']").count()) === 1 && (await page.locator("#newsBody").innerText()).includes("GMDA"), "official news page lists collected notices with their source");
 
   // Public anonymised report page, follow form, share, real URL
   await page.goto(httpUrl + "#/r/GVF-2026-SRV01");
@@ -397,6 +465,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
 {
   console.log("\nVolunteer desk at #/desk (mocked /api/triage over http, 1366x860)");
   const ctx = await browser.newContext({ viewport: { width: 1366, height: 860 } });
+  await ctx.addInitScript(() => { try { if (!localStorage.getItem("gvf_visitor")) localStorage.setItem("gvf_visitor", JSON.stringify({ token: "smoke_visitor_token_0001", done: true, views: 9 })); } catch {} });
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
@@ -483,6 +552,40 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#row_GVF-2026-SRV01 .tag").first().innerText()).includes("Filed officially"), "list row updates to the new stage");
   await page.click("#sheetClose");
 
+  const contentCalls = [];
+  const deskPosts = [{ id: "p9", kind: "news", slug: "x", title: "Existing draft", published: false, pinned: false, created_at: "2026-10-07T10:00:00Z", created_by: "Coordinator" }];
+  await page.route("**/api/triage/content", (route) => { const mth = route.request().method(); if (mth === "GET") return json(route, 200, { ok: true, posts: deskPosts, settings: { social: { x: "https://x.com/gvf" } } }); const b = JSON.parse(route.request().postData() || "{}"); contentCalls.push({ method: mth, body: b }); return json(route, mth === "POST" ? 201 : 200, { ok: true, post: { id: "p10", ...b } }); });
+  await page.route("**/api/triage/draft", (route) => json(route, 503, { ok: false, error: "draft_unavailable" }));
+  await page.route("**/api/triage/visitors**", (route) => json(route, 200, { ok: true, stats: { visitors_total: 12, visitors_new: 5, events_by_type: { page_view: 340, report_start: 9, report_submit: 4, gate_shown: 20, gate_done: 12 }, top_paths: [{ path: "#/", n: 120 }] }, visitors: [{ name: "Gate Person", phone: "+919811111111", email: "gate@example.org", area: "Sector 45", pincode: "122003", city: "Gurugram", created_at: "2026-10-07T10:00:00Z", visits: 2 }], total: 12 }));
+  await page.route("**/api/health", (route) => json(route, 200, { ok: false, checks: { db: { ok: true, ms: 12 }, storage: { ok: true }, cron: { ok: true, last_run_at: "2026-10-07T03:30:00Z", hours_since: 5 }, outbox: { pending: 2, failed: 0 }, links: { checked: 61, broken: [{ url: "https://example.org/dead", status: 404, where_used: "PORTALS" }] }, news: { sources: 20, items: 150, stale_sources: [] } }, version: "0ab1cd3" }));
+  await page.click('[data-tab="content"]');
+  await page.waitForTimeout(250);
+  check((await page.locator("#postList").innerText()).includes("Existing draft") && (await page.locator("#sX").inputValue()) === "https://x.com/gvf", "content tab lists posts and loads the social links");
+  await page.click("#draftBtn");
+  await page.waitForTimeout(60);
+  await page.fill("#draftBrief", "Sewa drive in Sector 45 park with forty volunteers on Sunday");
+  await page.click("#draftBtn");
+  await page.waitForTimeout(150);
+  check((await page.locator("#draftMsg").innerText()).includes("ANTHROPIC_API_KEY"), "draft helper explains when the API key is missing");
+  await page.selectOption("#pKind", "story");
+  await page.fill("#pTitle", "Sewa drive cleans Sector 45 park");
+  await page.fill("#pSummary", "Forty volunteers, two tonnes of waste.");
+  await page.fill("#pBody", "<p>Forty volunteers joined on Sunday.</p>");
+  await page.check("#pPublished");
+  await page.click("#pSave");
+  await page.waitForTimeout(250);
+  check(contentCalls.length === 1 && contentCalls[0].method === "POST" && contentCalls[0].body.kind === "story" && contentCalls[0].body.title === "Sewa drive cleans Sector 45 park" && contentCalls[0].body.published === true, "saving a post sends it to the content API");
+  await page.click('#postList [data-ppub="p9"]');
+  await page.waitForTimeout(150);
+  check(contentCalls.length === 2 && contentCalls[1].method === "PATCH" && contentCalls[1].body.id === "p9" && contentCalls[1].body.published === true, "publish toggles through a PATCH");
+  await page.click('[data-tab="visitors"]');
+  await page.waitForTimeout(200);
+  check((await page.locator("#visitorStats").innerText()).includes("12 registered visitors") && (await page.locator("#visitorList").innerText()).includes("Gate Person"), "visitors tab shows the registration count and the list");
+  await page.click('[data-tab="health"]');
+  await page.waitForTimeout(200);
+  check((await page.locator("#healthBody .tag-green").count()) >= 3 && (await page.locator("#healthBody .tag-danger").count()) === 1 && (await page.locator("#healthBody").innerText()).includes("example.org/dead"), "health tab flags the broken link and passes the rest");
+  await page.click('[data-tab="reports"]');
+  await page.waitForTimeout(100);
   const pwCalls = [];
   await page.route("**/api/triage/password", (route) => { pwCalls.push(JSON.parse(route.request().postData() || "{}")); return json(route, 200, { ok: true }); });
   await page.click("#pwBtn");

@@ -521,3 +521,10 @@ body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
 .chk li:last-child{border-bottom:0}
 .chk .k{min-width:40%; color:var(--muted)}
 .chk .v{flex:1}
+
+/* visitor gate */
+.gate{position:fixed; inset:0; z-index:75; background:rgba(11,37,69,.6); display:none; align-items:center; justify-content:center; padding:1rem; overflow:auto}
+.gate.open{display:flex}
+.gate .card{background:var(--surface); color:var(--text); border-radius:14px; width:100%; max-width:560px; max-height:94vh; overflow:auto; padding:1.25rem 1.25rem 1.5rem; box-shadow:var(--shadow); animation:rise .25s ease-out}
+.gate .card .field{margin-bottom:.8rem}
+.gate h3{margin-bottom:.35rem}
