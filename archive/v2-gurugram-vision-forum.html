@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gurugram Vision Forum — Citizens and Governance in Partnership</title>
+<meta name="description" content="A citizens' civic-policy platform for Gurugram. Find who is responsible for your civic issue, report it, know your ward, your rights and your duties, and help shape the city.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=Hind:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#12304E; --text:#26333F; --muted:#5A6A79;
+  --paper:#FFFFFF; --paper-2:#F3F6FA; --line:#D7DFE8; --line-strong:#B9C6D3;
+  --saffron:#E8651A; --saffron-deep:#BF4F0E; --saffron-tint:#FFF1E6;
+  --green:#0F7A46; --green-deep:#0A5C34; --green-tint:#E7F4EC;
+  --blue:#1E5DA8; --blue-deep:#154680; --blue-tint:#E8F0FA;
+  --red:#B3261E;
+  --shadow:0 1px 2px rgba(18,48,78,.08), 0 8px 24px -12px rgba(18,48,78,.18);
+  --r:8px; --r-lg:14px;
+  --display:"Bricolage Grotesque", "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+  --body:"Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+  --hindi:"Hind", "Noto Sans Devanagari", "Mangal", sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#E9F0F7; --text:#D5DEE8; --muted:#9AA9B8;
+    --paper:#0E1822; --paper-2:#152232; --line:#26364A; --line-strong:#3A4E66;
+    --saffron:#F0803A; --saffron-deep:#F5A06B; --saffron-tint:#2E1A0E;
+    --green:#3DB578; --green-deep:#7FD3A5; --green-tint:#0E2A1C;
+    --blue:#5B9BE6; --blue-deep:#8FBCF0; --blue-tint:#10243A;
+    --red:#F28B82;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E9F0F7; --text:#D5DEE8; --muted:#9AA9B8;
+  --paper:#0E1822; --paper-2:#152232; --line:#26364A; --line-strong:#3A4E66;
+  --saffron:#F0803A; --saffron-deep:#F5A06B; --saffron-tint:#2E1A0E;
+  --green:#3DB578; --green-deep:#7FD3A5; --green-tint:#0E2A1C;
+  --blue:#5B9BE6; --blue-deep:#8FBCF0; --blue-tint:#10243A;
+  --red:#F28B82;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-behavior:smooth; scroll-padding-top:calc(110px + env(safe-area-inset-top,0px)); -webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *{transition:none!important; animation:none!important} }
+body{margin:0; background:var(--paper); color:var(--text); font-family:var(--body); font-size:17px; line-height:1.55; -webkit-font-smoothing:antialiased}
+html[lang="hi"] body, html[lang="hi"] h1, html[lang="hi"] h2, html[lang="hi"] h3, html[lang="hi"] h4, html[lang="hi"] .btn, html[lang="hi"] .nav-links a{font-family:var(--hindi)}
+img,svg{max-width:100%; height:auto}
+a{color:var(--blue); text-decoration-thickness:1px; text-underline-offset:2px}
+a:hover{color:var(--blue-deep)}
+a.ext::after{content:"\2197"; font-size:.75em; margin-left:.2em; vertical-align:super}
+:focus-visible{outline:3px solid var(--saffron); outline-offset:2px; border-radius:3px}
+h1,h2,h3,h4{font-family:var(--display); color:var(--ink); margin:0 0 .5em; letter-spacing:-.01em; font-weight:600; text-wrap:balance}
+h1{font-size:clamp(2.1rem,4.6vw,3.7rem); line-height:1.02; font-weight:800; letter-spacing:-.025em}
+h2{font-size:clamp(1.65rem,3vw,2.4rem); line-height:1.1; font-weight:700; letter-spacing:-.02em}
+h3{font-size:1.22rem; line-height:1.25}
+h4{font-size:1.05rem; line-height:1.3}
+p{margin:0 0 1em; max-width:66ch}
+.lede{font-size:1.18rem; line-height:1.5; color:var(--text); max-width:58ch}
+.muted{color:var(--muted)}
+.hindi{font-family:var(--hindi)}
+.wrap{width:min(1120px, 100% - 2.5rem); margin-inline:auto}
+section{padding:clamp(3.2rem,7vw,6rem) 0}
+.band-2{background:var(--paper-2)}
+.band-blue{background:var(--blue-tint)}
+.band-green{background:var(--green-tint)}
+.band-saffron{background:var(--saffron-tint)}
+.section-head{max-width:64ch; margin-bottom:2.2rem}
+.kicker{font-family:var(--display); font-weight:600; color:var(--green); font-size:1rem; margin-bottom:.5rem}
+.grid{display:grid; gap:1.25rem}
+.grid-2{grid-template-columns:repeat(auto-fit, minmax(min(100%,300px),1fr))}
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.small{font-size:.92rem}
+.badge{display:inline-block; font-size:.8rem; font-weight:600; padding:.2rem .55rem; border-radius:4px; background:var(--saffron-tint); color:var(--saffron-deep); vertical-align:middle}
+.badge.green{background:var(--green-tint); color:var(--green-deep)}
+.badge.blue{background:var(--blue-tint); color:var(--blue-deep)}
+
+/* buttons */
+.btn{display:inline-flex; align-items:center; gap:.5rem; font-family:var(--display); font-weight:600; font-size:1rem; padding:.78rem 1.25rem; border-radius:var(--r); border:1.5px solid transparent; cursor:pointer; text-decoration:none; line-height:1.15; transition:background .15s, color .15s, border-color .15s}
+.btn-primary{background:var(--saffron); color:#fff; border-color:var(--saffron)}
+.btn-primary:hover{background:var(--saffron-deep); border-color:var(--saffron-deep); color:#fff}
+.btn-ghost{background:transparent; color:var(--ink); border-color:var(--line-strong)}
+.btn-ghost:hover{border-color:var(--ink); color:var(--ink)}
+.btn-green{background:var(--green); color:#fff; border-color:var(--green)}
+.btn-green:hover{background:var(--green-deep); border-color:var(--green-deep); color:#fff}
+.btn-sm{font-size:.92rem; padding:.55rem .9rem}
+.btn:disabled{opacity:.6; cursor:not-allowed}
+
+/* top bar + header */
+.topbar{background:#12304E; color:#D9E3EE; font-size:.86rem}
+.topbar .wrap{display:flex; justify-content:space-between; align-items:center; min-height:36px; gap:1rem}
+.topbar a{color:#fff}
+.topbar .left{display:flex; gap:1.2rem; flex-wrap:wrap}
+.topbar .right{display:flex; gap:.9rem; align-items:center}
+.lang-btn{background:transparent; border:1px solid rgba(255,255,255,.4); color:#fff; border-radius:4px; padding:.15rem .55rem; font:inherit; font-size:.85rem; cursor:pointer}
+.lang-btn:hover{background:rgba(255,255,255,.12)}
+@media (max-width:640px){ .topbar .left span:nth-child(2){display:none} }
+.site-header{position:sticky; top:env(safe-area-inset-top,0px); z-index:50; background:color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter:saturate(1.4) blur(10px); -webkit-backdrop-filter:saturate(1.4) blur(10px); border-bottom:1px solid var(--line)}
+.nav{display:flex; align-items:center; justify-content:space-between; gap:1rem; height:68px}
+.brand{display:flex; align-items:center; gap:.65rem; text-decoration:none; color:var(--ink); font-family:var(--display); font-weight:800; font-size:1.05rem; letter-spacing:-.01em; line-height:1; white-space:nowrap}
+@media (max-width:1439px){ .site-header .brand small{display:none} }
+.brand small{display:block; font-family:var(--body); font-weight:400; font-size:.78rem; color:var(--muted); letter-spacing:0; margin-top:.2rem}
+.brand-mark{width:38px; height:38px; flex:none}
+.nav-links{display:flex; gap:1rem; list-style:none; margin:0; padding:0}
+.nav-links a{color:var(--text); text-decoration:none; font-weight:600; font-size:.9rem; white-space:nowrap}
+.nav-links a:hover, .nav-links a.on{color:var(--saffron-deep)}
+.nav-links .only-mobile{display:none}
+.nav-cta{display:flex; align-items:center; gap:.6rem}
+.nav-cta .btn{white-space:nowrap}
+.menu-btn{display:none; background:none; border:1.5px solid var(--line-strong); border-radius:var(--r); width:42px; height:42px; align-items:center; justify-content:center; cursor:pointer; color:var(--ink)}
+@media (max-width: 1279px){
+  .nav-links{display:none; position:absolute; left:0; right:0; top:100%; background:var(--paper); border-bottom:1px solid var(--line); flex-direction:column; gap:0; padding:.5rem 0 .75rem; box-shadow:var(--shadow); max-height:calc(100vh - 120px); overflow:auto}
+  .nav-links.open{display:flex}
+  .nav-links .only-mobile{display:block}
+  .nav-links li a{display:block; padding:.7rem 1.25rem; font-size:1rem}
+  .menu-btn{display:inline-flex}
+  .brand small{display:none}
+}
+@media (max-width: 520px){ .nav-cta .btn{display:none} }
+
+/* hero */
+.hero{position:relative; overflow:hidden; padding:clamp(2.5rem,6vw,5rem) 0 0; background:linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%)}
+.hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:3rem; align-items:start}
+@media (max-width: 900px){ .hero-grid{grid-template-columns:1fr; gap:2rem} }
+.hero .tagline{font-family:var(--display); font-weight:600; color:var(--green); font-size:1.02rem; margin-bottom:1rem}
+.hero .hindi-line{font-size:1.1rem; color:var(--muted); margin-top:.4rem}
+.hero-actions{display:flex; flex-wrap:wrap; gap:.75rem; margin:1.6rem 0 0}
+.skyline{display:block; width:100%; margin-top:2.5rem; color:var(--ink); opacity:.16}
+.skyline-wrap{position:relative; margin-top:1rem}
+.skyline-wrap::after{content:""; position:absolute; left:0; right:0; bottom:0; height:4px; background:linear-gradient(90deg, var(--saffron) 0 33.3%, var(--paper) 33.3% 66.6%, var(--green) 66.6% 100%)}
+
+/* router + forms */
+.router{background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow); padding:1.35rem}
+.router h2{font-size:1.28rem; margin-bottom:1rem; font-weight:700}
+.router-row{display:grid; grid-template-columns:1fr; gap:.7rem}
+.field{display:flex; flex-direction:column; gap:.3rem}
+.field label{font-weight:600; font-size:.92rem; color:var(--ink)}
+.field .hint{font-size:.86rem; color:var(--muted)}
+input[type=text],input[type=email],input[type=tel],input[type=search],select,textarea{width:100%; font:inherit; font-size:1rem; padding:.7rem .8rem; border:1.5px solid var(--line-strong); border-radius:var(--r); background:var(--paper); color:var(--text); min-height:46px}
+select{appearance:none; -webkit-appearance:none; background-image:linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position:calc(100% - 18px) 50%, calc(100% - 12px) 50%; background-size:6px 6px; background-repeat:no-repeat; padding-right:2.2rem}
+textarea{min-height:130px; resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--blue); outline:3px solid color-mix(in srgb, var(--blue) 25%, transparent); outline-offset:0}
+.result{margin-top:1.1rem; border-top:1px solid var(--line); padding-top:1.1rem; display:none}
+.result.show{display:block; animation:rise .25s ease-out}
+@keyframes rise{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+.result .agency{font-family:var(--display); font-weight:700; font-size:1.2rem; color:var(--ink); margin:0 0 .2rem}
+.result .owns{color:var(--muted); margin-bottom:.8rem}
+.chan{display:grid; gap:.5rem; margin:0 0 .9rem; padding:0; list-style:none}
+.chan li{display:flex; gap:.55rem; align-items:flex-start; font-size:.98rem}
+.chan li .k{font-weight:600; min-width:6rem; color:var(--ink)}
+.chan a{word-break:break-word}
+.ladder{background:var(--blue-tint); border-radius:var(--r); padding:.8rem .95rem; font-size:.95rem; margin-bottom:.9rem}
+.ladder strong{color:var(--ink)}
+.ladder ol{margin:.35rem 0 0 1.1rem; padding:0}
+.ladder li{margin:.15rem 0}
+.result-actions{display:flex; flex-wrap:wrap; gap:.6rem}
+.form-card{background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow); padding:clamp(1.25rem,3vw,2rem)}
+.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:1rem}
+.form-grid .span{grid-column:1 / -1}
+@media (max-width: 680px){ .form-grid{grid-template-columns:1fr} }
+.route-hint{background:var(--blue-tint); border-radius:var(--r); padding:.8rem .95rem; font-size:.95rem; margin:.25rem 0 .5rem; display:none}
+.route-hint.show{display:block}
+.ward-hint{background:var(--green-tint); border-radius:var(--r); padding:.7rem .95rem; font-size:.93rem; margin-top:.35rem; display:none}
+.ward-hint.show{display:block}
+.geo{display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; font-size:.92rem; margin-top:.35rem}
+.check{display:flex; gap:.6rem; align-items:flex-start; font-size:.95rem}
+.check input{margin-top:.3rem; width:18px; height:18px; flex:none}
+.err{color:var(--red); font-size:.9rem; margin-top:.3rem; display:none}
+.err.show{display:block}
+.form-foot{display:flex; flex-wrap:wrap; gap:.75rem; align-items:center; margin-top:.5rem}
+.form-foot .note{font-size:.9rem; color:var(--muted)}
+.confirm{display:none; background:var(--green-tint); border:1px solid color-mix(in srgb, var(--green) 35%, transparent); border-radius:var(--r-lg); padding:1.4rem}
+.confirm.show{display:block; animation:rise .25s ease-out}
+.confirm .ref{font-family:var(--display); font-weight:800; font-size:1.6rem; color:var(--ink); letter-spacing:.01em}
+.confirm p{max-width:none}
+.next-steps{background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:.9rem 1rem; margin:.9rem 0}
+.next-steps ol{margin:.4rem 0 0 1.1rem; padding:0}
+.next-steps li{margin:.3rem 0}
+.recent{margin-top:1.5rem}
+.recent h3{font-size:1.05rem}
+.recent ul{list-style:none; margin:0; padding:0; display:grid; gap:.5rem}
+.recent li{border:1px solid var(--line); border-radius:var(--r); padding:.65rem .85rem; font-size:.95rem; display:flex; justify-content:space-between; gap:.75rem; flex-wrap:wrap; background:var(--paper)}
+.recent .m{color:var(--muted)}
+.side{display:grid; gap:1rem; align-content:start}
+.side .tip{border:1px solid var(--line); border-radius:var(--r); padding:1rem 1.1rem; background:var(--paper)}
+.side .tip h4{margin-bottom:.35rem}
+.side .tip p{margin:0; font-size:.95rem}
+.report-layout{display:grid; grid-template-columns:1.4fr .8fr; gap:2rem; align-items:start}
+@media (max-width: 900px){ .report-layout{grid-template-columns:1fr} }
+
+/* facts */
+.facts{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%,210px),1fr)); border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; background:var(--paper)}
+.fact{padding:1.15rem 1.25rem; border-right:1px solid var(--line); border-bottom:1px solid var(--line)}
+.fact:last-child{border-right:0}
+.fact b{display:block; font-family:var(--display); font-size:1.75rem; font-weight:800; color:var(--ink); letter-spacing:-.02em; line-height:1.05}
+.fact span{font-size:.93rem; color:var(--muted)}
+.fact a{font-size:.85rem}
+@media (min-width: 900px){ .fact{border-bottom:0} }
+
+/* two-col, objectives, programmes, roadmap */
+.two{display:grid; grid-template-columns:1fr 1fr; gap:2.5rem}
+@media (max-width: 800px){ .two{grid-template-columns:1fr; gap:1.75rem} }
+.col h3{display:flex; align-items:center; gap:.6rem}
+.col h3 .dot{width:12px; height:12px; border-radius:50%; flex:none}
+.col ul{margin:0; padding-left:1.15rem}
+.col li{margin:.4rem 0}
+.quote{font-family:var(--display); font-size:clamp(1.25rem,2.2vw,1.6rem); line-height:1.3; color:var(--ink); border-left:4px solid var(--saffron); padding-left:1rem; margin:2rem 0 0; max-width:40ch}
+.objectives{counter-reset:obj; list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%,300px),1fr)); gap:1rem}
+.objectives li{counter-increment:obj; background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:1rem 1.1rem 1rem 3.3rem; position:relative}
+.objectives li::before{content:counter(obj); position:absolute; left:1rem; top:.95rem; width:1.6rem; height:1.6rem; border-radius:50%; background:var(--green); color:#fff; font-family:var(--display); font-weight:700; font-size:.9rem; display:flex; align-items:center; justify-content:center}
+.objectives b{color:var(--ink); display:block; margin-bottom:.15rem}
+.prog{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%,300px),1fr)); gap:1.5rem 2rem}
+.prog article{border-top:3px solid var(--green); padding-top:.9rem}
+.prog h3{margin-bottom:.35rem}
+.prog p{margin:0}
+.roadmap{margin-top:3rem; display:grid; grid-template-columns:repeat(4,1fr); gap:1rem}
+@media (max-width: 900px){ .roadmap{grid-template-columns:repeat(2,1fr)} }
+@media (max-width: 520px){ .roadmap{grid-template-columns:1fr} }
+.q{background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:1rem}
+.q .qh{display:flex; align-items:baseline; gap:.6rem; margin-bottom:.5rem}
+.q .qn{font-family:var(--display); font-weight:800; font-size:1.5rem; color:var(--saffron)}
+.q .qt{font-family:var(--display); font-weight:700; color:var(--ink)}
+.q .qm{font-size:.85rem; color:var(--muted); margin-left:auto}
+.q ul{margin:0; padding-left:1.1rem; font-size:.95rem}
+.q li{margin:.25rem 0}
+
+/* portals */
+.filters{display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:1.25rem}
+.chip{font:inherit; font-size:.92rem; font-weight:600; padding:.45rem .85rem; border-radius:999px; border:1.5px solid var(--line-strong); background:var(--paper); color:var(--text); cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--paper); border-color:var(--ink)}
+.portal-list{list-style:none; margin:0; padding:0; border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; background:var(--paper)}
+.portal{display:grid; grid-template-columns:1.2fr 1.6fr 1fr; gap:1rem; padding:1rem 1.15rem; border-bottom:1px solid var(--line); align-items:start}
+.portal:last-child{border-bottom:0}
+@media (max-width: 800px){ .portal{grid-template-columns:1fr; gap:.4rem} }
+.portal .name{font-family:var(--display); font-weight:700; color:var(--ink); font-size:1.05rem; line-height:1.2}
+.portal .name a{color:inherit}
+.portal .lvl{display:inline-block; margin-top:.35rem; font-size:.78rem; font-weight:600; padding:.15rem .5rem; border-radius:4px; background:var(--blue-tint); color:var(--blue-deep)}
+.portal .lvl.central{background:var(--saffron-tint); color:var(--saffron-deep)}
+.portal .lvl.city{background:var(--green-tint); color:var(--green-deep)}
+.portal .for{font-size:.97rem; margin:0}
+.portal .how{font-size:.93rem; margin:0}
+.portal .how b{color:var(--ink); font-weight:600}
+.empty{padding:1.25rem; color:var(--muted)}
+
+/* accordion */
+.acc{border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; background:var(--paper)}
+.acc details{border-bottom:1px solid var(--line)}
+.acc details:last-child{border-bottom:0}
+.acc summary{list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem 1.15rem; font-family:var(--display); font-weight:700; color:var(--ink); font-size:1.05rem}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary .plus{width:26px; height:26px; flex:none; border-radius:50%; border:1.5px solid var(--line-strong); display:grid; place-items:center; font-weight:400; transition:transform .2s}
+.acc details[open] summary .plus{transform:rotate(45deg); border-color:var(--saffron); color:var(--saffron)}
+.acc .body{padding:0 1.15rem 1.15rem; font-size:.98rem}
+.acc .body p{margin:0 0 .6rem}
+.acc .body ul{margin:0 0 .6rem; padding-left:1.15rem}
+.acc .body li{margin:.25rem 0}
+.acc .body .use{background:var(--saffron-tint); border-radius:var(--r); padding:.65rem .85rem; margin-top:.5rem}
+.acc .body .use b{color:var(--saffron-deep)}
+.acc .src{font-size:.88rem; margin-top:.5rem}
+
+/* stakeholders */
+.tier{display:grid; grid-template-columns:200px 1fr; gap:1.25rem; padding:1.4rem 0; border-top:1px solid var(--line)}
+.tier:last-child{border-bottom:1px solid var(--line)}
+@media (max-width: 800px){ .tier{grid-template-columns:1fr; gap:.6rem} }
+.tier .th{font-family:var(--display); font-weight:800; color:var(--ink); font-size:1.15rem; line-height:1.15}
+.tier .th small{display:block; font-family:var(--body); font-weight:400; color:var(--muted); font-size:.9rem; margin-top:.3rem}
+.roles{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%,250px),1fr)); gap:.75rem}
+.role{background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:.85rem .95rem; font-size:.95rem; display:flex; flex-direction:column}
+.role b{display:block; color:var(--ink); font-size:1rem}
+.role .who{color:var(--saffron-deep); font-weight:600; font-size:.92rem}
+.role .owns{margin:.3rem 0 .45rem}
+.role .links{margin-top:auto; display:flex; flex-wrap:wrap; gap:.35rem .8rem; font-size:.9rem}
+.ward-box{margin-top:2rem; background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:1.4rem; display:grid; grid-template-columns:1fr auto; gap:1rem; align-items:center}
+@media (max-width: 700px){ .ward-box{grid-template-columns:1fr} }
+.ward-box p{margin:0; max-width:none}
+
+/* civic charter page */
+.tabs{display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:1.25rem}
+.tab{font:inherit; font-family:var(--display); font-weight:600; font-size:.95rem; padding:.55rem 1rem; border-radius:var(--r); border:1.5px solid var(--line-strong); background:var(--paper); color:var(--text); cursor:pointer}
+.tab[aria-selected="true"]{background:var(--green); color:#fff; border-color:var(--green)}
+.owe{display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start}
+@media (max-width: 860px){ .owe{grid-template-columns:1fr} }
+.owe h3{display:flex; align-items:center; gap:.5rem; margin-bottom:.8rem}
+.cl{list-style:none; margin:0; padding:0; display:grid; gap:.5rem}
+.cl label{display:flex; gap:.65rem; align-items:flex-start; padding:.65rem .8rem; border:1px solid var(--line); border-radius:var(--r); background:var(--paper); cursor:pointer; font-size:.96rem}
+.cl input{margin-top:.25rem; width:18px; height:18px; flex:none; accent-color:var(--green)}
+.cl .dont{border-left:3px solid var(--red)}
+.cl .dont input{accent-color:var(--red)}
+.ent{list-style:none; margin:0; padding:0; display:grid; gap:.5rem}
+.ent li{border-left:3px solid var(--blue); padding:.6rem .85rem; background:var(--paper); border-radius:0 var(--r) var(--r) 0; font-size:.96rem}
+.ent li b{color:var(--ink)}
+.ent li a{font-size:.9rem; margin-left:.3rem}
+.score{margin-top:2rem; background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:1.25rem; display:grid; grid-template-columns:1fr auto; gap:1rem; align-items:center}
+@media (max-width: 700px){ .score{grid-template-columns:1fr} }
+.score .n{font-family:var(--display); font-weight:800; font-size:2rem; color:var(--ink); line-height:1}
+.bar-track{height:12px; background:var(--paper-2); border-radius:6px; overflow:hidden; margin:.5rem 0}
+.bar-fill{height:100%; background:linear-gradient(90deg, var(--saffron), var(--green)); width:0; transition:width .3s}
+
+/* wards */
+.table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-lg); background:var(--paper)}
+table.wards{width:100%; border-collapse:collapse; font-size:.95rem; min-width:560px}
+.wards th,.wards td{text-align:left; padding:.65rem .75rem; border-bottom:1px solid var(--line); vertical-align:top}
+.wards th{font-family:var(--display); color:var(--ink); background:var(--paper-2); position:sticky; top:0}
+.wards tr:last-child td{border-bottom:0}
+.wards td.n{font-family:var(--display); font-weight:700; color:var(--ink)}
+.find-ward{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%,260px),1fr)); gap:1rem; margin:1.5rem 0}
+.find-ward .step{background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:1rem}
+.find-ward .step b{display:block; color:var(--ink); margin-bottom:.25rem}
+
+/* dashboard */
+.kpis{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%,170px),1fr)); gap:1rem; margin-bottom:2rem}
+.kpi{background:var(--paper); border:1px solid var(--line); border-radius:var(--r); padding:1rem 1.1rem}
+.kpi b{display:block; font-family:var(--display); font-size:2rem; font-weight:800; color:var(--ink); line-height:1; letter-spacing:-.02em}
+.kpi span{font-size:.9rem; color:var(--muted)}
+.kpi .sw{margin-right:.4rem}
+.bars{display:grid; gap:.65rem}
+.bar{display:grid; grid-template-columns:190px 1fr 56px; gap:.75rem; align-items:center; font-size:.95rem}
+@media (max-width:600px){ .bar{grid-template-columns:1fr; gap:.25rem} .bar .tot{text-align:left} }
+.bar .track{height:16px; background:var(--paper-2); border-radius:8px; overflow:hidden; display:flex}
+.bar .seg{height:100%}
+.bar .tot{text-align:right; font-weight:600; color:var(--ink)}
+.legend{display:flex; gap:1rem; flex-wrap:wrap; font-size:.88rem; margin:1rem 0 0}
+.sw{display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:.35rem; vertical-align:-1px}
+.commit{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%,240px),1fr)); gap:1rem; margin-top:2rem}
+.commit .c{border-top:3px solid var(--saffron); padding-top:.75rem}
+.commit .c b{display:block; font-family:var(--display); font-size:1.4rem; color:var(--ink)}
+
+/* blog + media */
+.posts{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%,280px),1fr)); gap:1.25rem}
+.post-card{background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:1.25rem; display:flex; flex-direction:column; gap:.5rem}
+.post-card h3{margin:0}
+.post-card h3 a{color:var(--ink); text-decoration:none}
+.post-card h3 a:hover{color:var(--saffron-deep)}
+.post-card .meta{font-size:.85rem; color:var(--muted)}
+.post-card p{margin:0; font-size:.96rem}
+.post-body{max-width:70ch}
+.post-body h2{margin-top:1.6rem; font-size:1.4rem}
+.post-body p, .post-body li{font-size:1.05rem; line-height:1.6}
+.post-body ul, .post-body ol{padding-left:1.2rem}
+.breadcrumb{font-size:.9rem; margin-bottom:1rem}
+.tiles{display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%,240px),1fr)); gap:1rem}
+.tile{border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden; background:var(--paper)}
+.tile svg{display:block; width:100%; aspect-ratio:4/3}
+.tile .cap{padding:.75rem .9rem; font-size:.92rem}
+.tile .cap b{display:block; color:var(--ink)}
+.howto{background:var(--paper); border:1px solid var(--line); border-radius:var(--r-lg); padding:1.25rem; margin-top:2rem}
+.howto ol{margin:.5rem 0 0 1.1rem; padding:0}
+.howto li{margin:.3rem 0}
+
+/* track */
+.timeline{list-style:none; margin:1rem 0 0; padding:0}
+.timeline li{position:relative; padding:.3rem 0 1rem 1.8rem; border-left:2px solid var(--line); margin-left:.5rem}
+.timeline li:last-child{border-left-color:transparent}
+.timeline li::before{content:""; position:absolute; left:-7px; top:.55rem; width:12px; height:12px; border-radius:50%; background:var(--line-strong)}
+.timeline li.done::before{background:var(--green)}
+.timeline li.now::before{background:var(--saffron); box-shadow:0 0 0 4px var(--saffron-tint)}
+.timeline b{display:block; color:var(--ink)}
+.timeline span{font-size:.92rem; color:var(--muted)}
+
+/* pages */
+.page{display:none}
+.page.active{display:block}
+#home.hidden{display:none}
+.page-head{padding:clamp(2.5rem,6vw,4rem) 0 1.5rem; background:linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%)}
+
+/* join, footer */
+.join-grid{display:grid; grid-template-columns:.9fr 1.1fr; gap:2rem; align-items:start}
+@media (max-width: 900px){ .join-grid{grid-template-columns:1fr} }
+.ways{list-style:none; margin:0; padding:0; display:grid; gap:.6rem}
+.ways li{padding:.75rem .9rem; border-left:3px solid var(--green); background:var(--paper); border-radius:0 var(--r) var(--r) 0}
+.ways b{color:var(--ink)}
+footer{background:#12304E; color:#D9E3EE; padding:3rem 0 2rem}
+footer a{color:#fff}
+.foot-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:2rem}
+@media (max-width: 800px){ .foot-grid{grid-template-columns:1fr} }
+footer h4{color:#fff; margin-bottom:.5rem}
+footer p{margin:0 0 .5rem; max-width:none; font-size:.97rem}
+footer .brand{color:#fff}
+footer .brand small{color:#B8C7D8}
+.foot-note{margin-top:2rem; border-top:1px solid rgba(255,255,255,.18); padding-top:1rem; font-size:.88rem; color:#B8C7D8; display:flex; flex-wrap:wrap; justify-content:space-between; gap:.5rem}
+.tricolour{height:4px; background:linear-gradient(90deg, var(--saffron) 0 33.3%, #fff 33.3% 66.6%, var(--green) 66.6% 100%)}
+.toast{position:fixed; left:50%; bottom:calc(1.25rem + env(safe-area-inset-bottom,0px)); transform:translateX(-50%) translateY(20px); background:#12304E; color:#fff; padding:.7rem 1.1rem; border-radius:var(--r); font-size:.95rem; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:60; max-width:calc(100% - 2rem)}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<a class="sr-only" href="#main">Skip to content</a>
+<div class="topbar">
+  <div class="wrap">
+    <div class="left"><span><span data-i18n="tb.emergency">Emergency</span> <a href="tel:112">112</a></span><span><span data-i18n="tb.helpline">Civic helpline</span> <a href="tel:18001801817">1800 180 1817</a></span></div>
+    <div class="right"><a href="#/track" data-i18n="nav.track">Track a report</a><button class="lang-btn" id="langBtn" type="button" aria-label="Switch language">हिंदी</button></div>
+  </div>
+</div>
+<header class="site-header">
+  <div class="wrap nav">
+    <a class="brand" href="#top" aria-label="Gurugram Vision Forum home">
+      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="22" fill="none" stroke="var(--saffron)" stroke-width="2.5"/>
+        <circle cx="24" cy="24" r="17" fill="none" stroke="var(--green)" stroke-width="2"/>
+        <g fill="var(--blue)"><rect x="15" y="22" width="5" height="11"/><rect x="21.5" y="16" width="5" height="17"/><rect x="28" y="19" width="5" height="14"/><rect x="13" y="33" width="22" height="1.6"/></g>
+      </svg>
+      <span>Gurugram Vision Forum<small data-i18n="brand.tag">Citizens and Governance in Partnership</small></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#about" data-i18n="nav.about">About</a></li>
+        <li class="only-mobile"><a href="#report" data-i18n="nav.report">Report an issue</a></li>
+        <li><a href="#portals" data-i18n="nav.channels">Channels</a></li>
+        <li><a href="#charters" data-i18n="nav.rights">Rights</a></li>
+        <li><a href="#stakeholders" data-i18n="nav.who">Who is responsible</a></li>
+        <li><a href="#/charter" data-i18n="nav.charter">Civic charter</a></li>
+        <li><a href="#/wards" data-i18n="nav.wards">Wards</a></li>
+        <li><a href="#/blog" data-i18n="nav.blog">Blog</a></li>
+        <li><a href="#/media" data-i18n="nav.media">Updates</a></li>
+        <li><a href="#/dashboard" data-i18n="nav.dash">Dashboard</a></li>
+        <li><a href="#join" data-i18n="nav.join">Join</a></li>
+      </ul>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-primary btn-sm" href="#report" data-i18n="nav.report">Report an issue</a>
+      <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<div id="home">
+<section class="hero" id="top">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="tagline" data-i18n="hero.tag">Citizens and Governance in Partnership</div>
+        <h1 data-i18n="hero.h1">Gurugram grew faster than the systems meant to run it. We are here to close that gap.</h1>
+        <p class="lede" data-i18n="hero.lede">The Forum is a citizens' civic-policy platform. We help residents find the right desk for a problem, follow it through, and turn recurring problems into policy asks that the administration and elected representatives can act on.</p>
+        <p class="hindi hindi-line" id="heroHindi">नागरिक और शासन — साझेदारी में। सहयोग करें, योगदान दें, बदलाव लाएँ।</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#report" data-i18n="nav.report">Report an issue</a>
+          <a class="btn btn-ghost" href="#/charter" data-i18n="hero.charterBtn">What you owe the city, what it owes you</a>
+        </div>
+      </div>
+      <div class="router" id="router" aria-labelledby="routerTitle">
+        <h2 id="routerTitle" data-i18n="router.title">Who is responsible for my problem?</h2>
+        <div class="router-row">
+          <div class="field"><label for="rCat" data-i18n="router.issue">The issue</label><select id="rCat"></select></div>
+          <div class="field"><label for="rWhere" data-i18n="router.where">Where in Gurugram</label><input type="text" id="rWhere" list="areaList" data-i18n-ph="router.wherePh" placeholder="Sector, colony or society (optional)" autocomplete="off"></div>
+          <div><button class="btn btn-green" id="rGo" type="button" data-i18n="router.go">Show me who owns this</button></div>
+        </div>
+        <div class="result" id="rResult" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="skyline-wrap">
+      <svg class="skyline" viewBox="0 0 1200 150" preserveAspectRatio="none" aria-hidden="true"><g fill="currentColor">
+        <rect x="0" y="118" width="46" height="32"/><rect x="52" y="96" width="30" height="54"/><rect x="88" y="108" width="60" height="42"/><rect x="156" y="70" width="34" height="80"/><rect x="196" y="84" width="22" height="66"/><rect x="226" y="40" width="40" height="110"/><rect x="272" y="62" width="26" height="88"/><rect x="306" y="98" width="70" height="52"/><rect x="384" y="30" width="30" height="120"/><rect x="420" y="52" width="48" height="98"/><rect x="476" y="88" width="20" height="62"/><polygon points="504,150 504,60 528,44 552,60 552,150"/><rect x="560" y="76" width="36" height="74"/><rect x="604" y="18" width="34" height="132"/><rect x="644" y="56" width="26" height="94"/><rect x="678" y="94" width="60" height="56"/><rect x="746" y="66" width="30" height="84"/><rect x="782" y="36" width="44" height="114"/><rect x="834" y="80" width="22" height="70"/><rect x="864" y="104" width="56" height="46"/><rect x="928" y="48" width="36" height="102"/><rect x="972" y="72" width="28" height="78"/><rect x="1008" y="26" width="40" height="124"/><rect x="1056" y="90" width="30" height="60"/><rect x="1094" y="60" width="44" height="90"/><rect x="1146" y="110" width="54" height="40"/><rect x="0" y="146" width="1200" height="4"/>
+      </g></svg>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="facts" aria-label="Gurugram at a glance">
+      <div class="fact"><b>12.8 lakh+</b><span data-i18n="fact.pop">residents in the city (2024), still rising fast</span></div>
+      <div class="fact"><b>1,100 tonnes</b><span data-i18n="fact.waste">of waste a day; about 81% dumped without recovery</span></div>
+      <div class="fact"><b>36 <span data-i18n="fact.wardsWord">wards</span></b><span data-i18n="fact.wards">elected in March 2025, across MCG, GMDA and HSVP jurisdictions</span> <a href="#/wards" data-i18n="fact.wardsLink">See your ward</a></div>
+      <div class="fact"><b>1,000+</b><span data-i18n="fact.corp">corporations and 600+ startups based here</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band-2" id="about">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker" data-i18n="why.k">Why the Forum exists</div>
+      <h2 data-i18n="why.h">Two gaps keep Gurugram from working the way its residents expect.</h2>
+      <p class="lede" data-i18n="why.l">The city has the money, the talent and the political support. What it lacks is a working link between the people who live here and the people who run it.</p>
+    </div>
+    <div class="two">
+      <div class="col">
+        <h3><span class="dot" style="background:var(--saffron)"></span><span data-i18n="why.g1">The governance gap</span></h3>
+        <ul>
+          <li>Expansion has outrun planning: roads, drains and waste systems were built for a smaller city.</li>
+          <li>Responsibility is split between MCG, GMDA, HSVP, DTCP and the district administration. Residents rarely know whose desk a problem belongs on, and agencies rarely coordinate.</li>
+          <li>Civic aspirations go unmet even when budgets exist, because nobody is tracking a problem from complaint to closure.</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3><span class="dot" style="background:var(--green)"></span><span data-i18n="why.g2">The participation gap</span></h3>
+        <ul>
+          <li>High-rise societies, working professionals and young residents have the most at stake and the least contact with the administration.</li>
+          <li>Goodwill for the city's leadership has not turned into structured civic participation; many residents are not even registered to vote here.</li>
+          <li>RWAs, corporates, universities and NGOs each work alone; their expertise never reaches the policy table together.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="quote">A city that thrives on collaboration, innovation and active participation from every stakeholder.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="two" style="margin-bottom:2.5rem">
+      <div><h2 data-i18n="vis.h">Vision</h2><p class="lede">A world-class, community-driven and sustainable Gurugram that becomes the model for how India's fast-growing cities are run.</p></div>
+      <div><h2 data-i18n="mis.h">Mission</h2><ul style="margin:0; padding-left:1.15rem"><li>Give residents a real say in city policies and development decisions.</li><li>Strengthen the dialogue between civil society and the administration.</li><li>Channel civic energy and professional expertise into solutions that get implemented.</li></ul></div>
+    </div>
+    <h3 style="margin-bottom:1rem" data-i18n="obj.h">What we commit to do</h3>
+    <ol class="objectives">
+      <li><b>Identify and communicate urban problems</b> to the authority that owns them, with evidence.</li>
+      <li><b>Submit policy and planning solutions</b> to the administration, drafted with domain experts.</li>
+      <li><b>Build regular dialogue</b> between residents and government bodies at the ward, sector and city level.</li>
+      <li><b>Organise sewa and social initiatives</b> for needs that cannot wait for a policy.</li>
+      <li><b>Engage young residents</b> through fellowships, internships and innovation labs.</li>
+      <li><b>Connect political goodwill to civic delivery</b>, so support for the city turns into visible improvement.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="band-green" id="programmes">
+  <div class="wrap">
+    <div class="section-head"><div class="kicker" data-i18n="prog.k">What we do</div><h2 data-i18n="prog.h">Six programmes, one loop: listen, solve, follow through.</h2></div>
+    <div class="prog">
+      <article><h3>Policy dialogues</h3><p>Regular, minuted meetings between residents and officers from MCG, GMDA and HSVP on specific policies, with action points tracked publicly on the <a href="#/dashboard">dashboard</a>.</p></article>
+      <article><h3>Urban innovation labs</h3><p>Problem-solving workshops where experts, residents and officials design practical fixes for one problem at a time: a drain, a junction, a waste stream.</p></article>
+      <article><h3>Community townhalls</h3><p>Open forums, sector by sector, where residents put questions directly to the officers and councillors responsible.</p></article>
+      <article><h3>Sewa drives</h3><p>Volunteer action on cleanliness, greening, education and safety, run with RWAs and corporate volunteers.</p></article>
+      <article><h3>Gurugram Vision Summit</h3><p>An annual conclave where every stakeholder reviews the year's progress and sets the next year's priorities.</p></article>
+      <article><h3>Digital platform</h3><p>This site and the app that follows it: report an issue, find who owns it, track it to closure, and see what the Forum is working on.</p></article>
+    </div>
+    <div class="roadmap" aria-label="First-year roadmap">
+      <div class="q"><div class="qh"><span class="qn">Q1</span><span class="qt">Foundation</span><span class="qm">Months 1–3</span></div><ul><li>Advisory board of 8–12 experts</li><li>Register the Forum; charter and governance model</li><li>Brand and digital presence</li></ul></div>
+      <div class="q"><div class="qh"><span class="qn">Q2</span><span class="qt">Mobilisation</span><span class="qm">Months 4–6</span></div><ul><li>Area chapter leadership</li><li>Volunteer programme</li><li>Youth fellowship applications</li><li>Partnership outreach</li></ul></div>
+      <div class="q"><div class="qh"><span class="qn">Q3</span><span class="qt">Outreach</span><span class="qm">Months 7–9</span></div><ul><li>First policy dialogues</li><li>First sewa projects</li><li>Sector townhalls</li><li>First innovation lab</li></ul></div>
+      <div class="q"><div class="qh"><span class="qn">Q4</span><span class="qt">Consolidation</span><span class="qm">Months 10–12</span></div><ul><li>Gurugram Vision Summit</li><li>First policy documents</li><li>Outcome assessment; year-2 plan</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section id="report">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker" data-i18n="rep.k">Report an issue</div>
+      <h2 data-i18n="rep.h">Tell us what is broken. We will point it at the right desk and follow it through.</h2>
+      <p class="lede" data-i18n="rep.l">Anything that affects you, your family, your society or your sector: roads, waste, water, drains, lights, parks, traffic, safety, construction, pollution, billing. If it is an emergency, call 112 first.</p>
+    </div>
+    <div class="report-layout">
+      <div>
+        <form class="form-card" id="reportForm" novalidate>
+          <div class="form-grid">
+            <div class="field span">
+              <label for="fCat" data-i18n="f.cat">What is the issue about?</label>
+              <select id="fCat" required></select>
+              <div class="route-hint" id="fHint"></div>
+            </div>
+            <div class="field">
+              <label for="fScope" data-i18n="f.scope">Who does it affect?</label>
+              <select id="fScope" required>
+                <option value="" data-i18n="f.choose">Choose one</option>
+                <option data-i18n="f.s1">Me or my family</option>
+                <option data-i18n="f.s2">My society or RWA</option>
+                <option data-i18n="f.s3">My sector or neighbourhood</option>
+                <option data-i18n="f.s4">The whole city</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="fWhere" data-i18n="f.area">Sector, colony or society</label>
+              <input type="text" id="fWhere" list="areaList" data-i18n-ph="f.areaPh" placeholder="Start typing: Sector 56, DLF Phase 3, Palam Vihar" required autocomplete="off">
+              <datalist id="areaList"></datalist>
+            </div>
+            <div class="field">
+              <label for="fWard" data-i18n="f.ward">Municipal ward</label>
+              <select id="fWard"></select>
+              <div class="ward-hint" id="wardHint"></div>
+              <div class="hint"><span data-i18n="f.wardHint">Not sure?</span> <a href="https://onemapggm.gmda.gov.in/" target="_blank" rel="noopener" class="ext">OneMap GGM</a> · <a href="https://gurugram.gov.in/voter-list-for-mc-election-gurugram-2025/" target="_blank" rel="noopener" class="ext">2025 ward voter lists</a> · <a href="#/wards" data-i18n="f.wardDir">ward directory</a></div>
+            </div>
+            <div class="field">
+              <label for="fLandmark" data-i18n="f.landmark">Exact spot</label>
+              <input type="text" id="fLandmark" data-i18n-ph="f.landmarkPh" placeholder="Near the community centre gate, opposite house 412" required>
+              <div class="geo"><button type="button" class="btn btn-ghost btn-sm" id="geoBtn" data-i18n="f.geo">Use my location</button><span id="geoOut" class="muted"></span></div>
+            </div>
+            <div class="field span">
+              <label for="fDesc" data-i18n="f.desc">What is happening?</label>
+              <textarea id="fDesc" data-i18n-ph="f.descPh" placeholder="What is the problem, since when, and what has already been tried. Earlier complaint or ticket numbers help." required></textarea>
+            </div>
+            <div class="field"><label for="fName" data-i18n="f.name">Your name</label><input type="text" id="fName" autocomplete="name" required></div>
+            <div class="field"><label for="fPhone" data-i18n="f.phone">Mobile</label><input type="tel" id="fPhone" autocomplete="tel" inputmode="tel" placeholder="10-digit number" required></div>
+            <div class="field span"><label for="fEmail" data-i18n="f.email">Email (optional)</label><input type="email" id="fEmail" autocomplete="email"></div>
+            <div class="field span"><label class="check"><input type="checkbox" id="fConsent" required><span data-i18n="f.consent">The Forum may contact me about this issue and share the details, without my phone number, with the authority responsible.</span></label></div>
+          </div>
+          <div class="err" id="fErr" data-i18n="f.err">Fill in the highlighted fields to send the report.</div>
+          <div class="form-foot"><button class="btn btn-primary" type="submit" data-i18n="f.send">Send report to the Forum</button><span class="note" data-i18n="f.note">You get a reference number right away.</span></div>
+        </form>
+        <div class="confirm" id="confirm" role="status"></div>
+        <div class="recent" id="recent" hidden><h3 data-i18n="f.recent">Reports you have sent from this device</h3><ul id="recentList"></ul></div>
+      </div>
+      <aside class="side" aria-label="Before you report">
+        <div class="tip"><h4 data-i18n="tip1h">File with the authority too</h4><p data-i18n="tip1">The Forum is not a replacement for the official complaint. Use the channel shown for your issue, note the ticket number, and add it to your report. That is what lets us escalate.</p></div>
+        <div class="tip"><h4 data-i18n="tip2h">Photos and dates win</h4><p data-i18n="tip2">A dated photo, the exact spot and the earlier complaint number turn a grievance into a case an officer can act on.</p></div>
+        <div class="tip"><h4 data-i18n="tip3h">What happens next</h4><p data-i18n="tip3">A Forum volunteer checks the report within three working days, maps it to the responsible desk and your ward councillor, and tells you the next step. Recurring problems across a sector go to a policy dialogue.</p></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="band-blue" id="portals">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker" data-i18n="por.k">Official channels</div>
+      <h2 data-i18n="por.h">Every government portal and helpline a Gurugram resident should know.</h2>
+      <p class="lede" data-i18n="por.l">These are the systems that create a record and a timeline. Jurisdictions overlap in this city, so when in doubt start with the GMDA integrated portal: it routes complaints to MCG, GMDA and MC Manesar.</p>
+    </div>
+    <div class="filters" id="pFilters" role="group" aria-label="Filter channels by topic"></div>
+    <ul class="portal-list" id="portalList"></ul>
+    <p class="muted small" style="margin-top:1rem">Links and helplines checked on 25 September 2026. If one has changed, <a href="#report">tell us</a>.</p>
+  </div>
+</section>
+
+<section id="charters">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker" data-i18n="ch.k">Your rights</div>
+      <h2 data-i18n="ch.h">The charters that put a deadline on a public servant's desk.</h2>
+      <p class="lede" data-i18n="ch.l">Most residents do not know that many services and complaints already carry statutory timelines, appeal routes and penalties. Knowing them changes the conversation.</p>
+    </div>
+    <div class="acc" id="charterList"></div>
+    <p class="muted small" style="margin-top:1rem">Plain-language summaries for orientation, not legal advice. Each entry links to the notified source.</p>
+  </div>
+</section>
+
+<section class="band-2" id="stakeholders">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker" data-i18n="st.k">Who is responsible</div>
+      <h2 data-i18n="st.h">Everyone whose job it is to make your part of Gurugram work.</h2>
+      <p class="lede" data-i18n="st.l">From Parliament to your RWA: the chain of responsibility for the city, what each link owns, and the official page where you can verify and reach them.</p>
+    </div>
+    <div class="tiers" id="tiers"></div>
+    <div class="ward-box">
+      <div>
+        <h3 style="margin-bottom:.3rem" data-i18n="st.wardH">Your ward and your councillor</h3>
+        <p data-i18n="st.wardP">Gurugram elected 36 ward councillors in March 2025. Your councillor is the first elected person responsible for local civic issues, and sits in the MCG House that passes the city's budget.</p>
+      </div>
+      <div style="display:grid; gap:.5rem">
+        <a class="btn btn-green btn-sm" href="#/wards" data-i18n="st.wardBtn">Open the ward directory</a>
+        <a class="btn btn-ghost btn-sm ext" href="https://onemapggm.gmda.gov.in/" target="_blank" rel="noopener">Ward map on OneMap GGM</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band-saffron" id="civic-teaser">
+  <div class="wrap">
+    <div class="two">
+      <div>
+        <div class="kicker" data-i18n="cv.k">The civic charter</div>
+        <h2 data-i18n="cv.h">What you owe the city, and what the city owes you.</h2>
+        <p class="lede" data-i18n="cv.l">Rights without duties do not build a city. The charter sets out both, for your home, your society, your ward and the city, and lets you check where you stand.</p>
+        <a class="btn btn-primary" href="#/charter" data-i18n="cv.btn">Open the civic charter</a>
+      </div>
+      <div class="side">
+        <div class="tip"><h4 data-i18n="cv.t1h">Your home</h4><p data-i18n="cv.t1">Segregate waste, pay property tax on time, harvest rainwater, keep the footpath outside clear.</p></div>
+        <div class="tip"><h4 data-i18n="cv.t2h">Your ward</h4><p data-i18n="cv.t2">Know your councillor, attend the ward committee, register to vote in Gurugram, file complaints where they count.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="latest">
+  <div class="wrap">
+    <div class="section-head"><div class="kicker" data-i18n="bl.k">From the blog</div><h2 data-i18n="bl.h">Practical guides for getting things done in this city.</h2></div>
+    <div class="posts" id="latestPosts"></div>
+    <p style="margin-top:1.25rem"><a href="#/blog" data-i18n="bl.all">All posts</a></p>
+  </div>
+</section>
+
+<section class="band-green" id="join">
+  <div class="wrap">
+    <div class="join-grid">
+      <div>
+        <div class="kicker" data-i18n="jn.k">Join the Forum</div>
+        <h2 data-i18n="jn.h">Let's build the Gurugram we all want to live in.</h2>
+        <p class="lede" data-i18n="jn.l">The Forum is driven by professionals, entrepreneurs, students and community leaders. Pick the way you want to contribute.</p>
+        <ul class="ways">
+          <li><b>Member.</b> Take part in dialogues, townhalls and the annual summit.</li>
+          <li><b>Volunteer.</b> Help run sewa drives, events and issue follow-ups in your sector.</li>
+          <li><b>Youth fellow.</b> Research and innovation support for students and early-career professionals.</li>
+          <li><b>RWA or society partner.</b> Bring your society's issues into the Forum's pipeline.</li>
+          <li><b>Corporate or institutional partner.</b> CSR, employee volunteering, research and technology.</li>
+        </ul>
+      </div>
+      <form class="form-card" id="joinForm" novalidate>
+        <div class="form-grid">
+          <div class="field"><label for="jName" data-i18n="f.name">Your name</label><input type="text" id="jName" autocomplete="name" required></div>
+          <div class="field"><label for="jPhone" data-i18n="f.phone">Mobile</label><input type="tel" id="jPhone" inputmode="tel" autocomplete="tel" required></div>
+          <div class="field span"><label for="jEmail" data-i18n="jn.email">Email</label><input type="email" id="jEmail" autocomplete="email" required></div>
+          <div class="field"><label for="jHow" data-i18n="jn.how">I want to join as</label><select id="jHow" required><option value="" data-i18n="f.choose">Choose one</option><option>Member</option><option>Volunteer</option><option>Youth fellow</option><option>RWA or society partner</option><option>Corporate or institutional partner</option></select></div>
+          <div class="field"><label for="jSector" data-i18n="jn.sector">Sector or area</label><input type="text" id="jSector" list="areaList" placeholder="Sector 45"></div>
+          <div class="field span"><label for="jNote" data-i18n="jn.note">Anything you want us to know (optional)</label><textarea id="jNote" style="min-height:90px" placeholder="Skills, interests, the issue you care most about"></textarea></div>
+        </div>
+        <div class="err" id="jErr" data-i18n="f.err2">Fill in the highlighted fields to send.</div>
+        <div class="form-foot"><button class="btn btn-green" type="submit" data-i18n="jn.send">Send my details</button></div>
+        <div class="confirm" id="jConfirm" role="status" style="margin-top:1rem"></div>
+      </form>
+    </div>
+  </div>
+</section>
+</div>
+<!-- Pages -->
+<section class="page" id="page-charter">
+  <div class="page-head"><div class="wrap">
+    <div class="kicker" data-i18n="cv.k">The civic charter</div>
+    <h1 style="font-size:clamp(1.9rem,4vw,3rem)" data-i18n="cv.h">What you owe the city, and what the city owes you.</h1>
+    <p class="lede" data-i18n="cvp.l">Tick what you already do. The list is saved on your device only. Every entitlement links to the rule or the channel that enforces it.</p>
+  </div></div>
+  <div class="wrap" style="padding:2rem 0 4rem">
+    <div class="tabs" id="cvTabs" role="tablist"></div>
+    <div id="cvBody"></div>
+    <div class="score">
+      <div>
+        <h3 style="margin-bottom:.2rem" data-i18n="cvp.score">Your civic score</h3>
+        <p class="muted small" style="margin:0" data-i18n="cvp.scoreP">Across all four scopes. Nobody sees this but you.</p>
+        <div class="bar-track"><div class="bar-fill" id="cvFill"></div></div>
+        <span id="cvMsg" class="small"></span>
+      </div>
+      <div class="n" id="cvScore">0 / 0</div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="page-wards">
+  <div class="page-head"><div class="wrap">
+    <div class="kicker" data-i18n="wd.k">Ward directory</div>
+    <h1 style="font-size:clamp(1.9rem,4vw,3rem)" data-i18n="wd.h">Your ward, your councillor.</h1>
+    <p class="lede" data-i18n="wd.l">All 36 councillors elected on 2 March 2025, as declared, with the official sources to verify them. Office phone numbers and emails are being collected from the councillors themselves.</p>
+  </div></div>
+  <div class="wrap" style="padding:2rem 0 4rem">
+    <div class="find-ward">
+      <div class="step"><b data-i18n="wd.s1">Find your ward on the map</b><span class="small">OneMap GGM is GMDA's official GIS: search your sector or drop a pin and read the ward number.</span><br><a class="ext small" href="https://onemapggm.gmda.gov.in/" target="_blank" rel="noopener">onemapggm.gmda.gov.in</a></div>
+      <div class="step"><b data-i18n="wd.s2">Or find it from the voter list</b><span class="small">The district published the 2025 municipal voter lists ward by ward and booth by booth.</span><br><a class="ext small" href="https://gurugram.gov.in/voter-list-for-mc-election-gurugram-2025/" target="_blank" rel="noopener">gurugram.gov.in voter lists</a></div>
+      <div class="step"><b data-i18n="wd.s3">Then use it everywhere</b><span class="small">Put the ward number on every complaint. It routes the ticket to the right junior engineer and sanitation supervisor.</span><br><a class="small" href="#report" data-i18n="wd.s3a">Report an issue</a></div>
+    </div>
+    <div class="field" style="max-width:420px; margin-bottom:1rem"><label for="wardSearch" data-i18n="wd.search">Search by ward number or councillor</label><input type="search" id="wardSearch" placeholder="12, Yadav, BJP"></div>
+    <div class="table-wrap"><table class="wards" id="wardTable"><thead><tr><th data-i18n="wd.c1">Ward</th><th data-i18n="wd.c2">Councillor</th><th data-i18n="wd.c3">Party (as elected)</th><th data-i18n="wd.c4">Verify and reach</th></tr></thead><tbody id="wardBody"></tbody></table></div>
+    <p class="muted small" style="margin-top:1rem">Source: result declared 12 March 2025 (State Election Commission, Haryana, as reported). Several independents have since joined parties; the House composition is published by MCG. Report a correction through the <a href="#report">form</a>.</p>
+  </div>
+</section>
+
+<section class="page" id="page-blog">
+  <div class="page-head"><div class="wrap">
+    <div class="kicker" data-i18n="nav.blog">Blog</div>
+    <h1 style="font-size:clamp(1.9rem,4vw,3rem)" data-i18n="bl.h">Practical guides for getting things done in this city.</h1>
+    <p class="lede" data-i18n="blp.l">Short, sourced and specific to Gurugram. New posts go up from the Forum's content team.</p>
+  </div></div>
+  <div class="wrap" style="padding:2rem 0 4rem"><div class="posts" id="blogList"></div></div>
+</section>
+
+<section class="page" id="page-post">
+  <div class="wrap" style="padding:2.5rem 0 4rem">
+    <div class="breadcrumb"><a href="#/blog" data-i18n="post.back">All posts</a></div>
+    <div class="post-body" id="postBody"></div>
+  </div>
+</section>
+
+<section class="page" id="page-media">
+  <div class="page-head"><div class="wrap">
+    <div class="kicker" data-i18n="nav.media">Updates</div>
+    <h1 style="font-size:clamp(1.9rem,4vw,3rem)" data-i18n="md.h">Photos, videos and news from the ground.</h1>
+    <p class="lede" data-i18n="md.l">Every drive, dialogue and townhall gets an album here, published by the Forum's team from the content system. Nothing has been published yet; the tiles below show the layout.</p>
+  </div></div>
+  <div class="wrap" style="padding:2rem 0 4rem">
+    <h3 data-i18n="md.photos">Photo albums</h3>
+    <div class="tiles" id="photoTiles"></div>
+    <h3 style="margin-top:2.5rem" data-i18n="md.videos">Videos</h3>
+    <div class="tiles" id="videoTiles"></div>
+    <h3 style="margin-top:2.5rem" data-i18n="md.news">Press and announcements</h3>
+    <ul class="ent" id="newsList"></ul>
+    <div class="howto">
+      <h3 data-i18n="md.how">How the team publishes here</h3>
+      <p class="small" style="margin-bottom:.25rem" data-i18n="md.howP">On the production site every item on this page is a record in the content system, so no developer is needed:</p>
+      <ol class="small"><li>Log in to the CMS and open Updates.</li><li>Create an album, a video or a news item; upload photos, paste the YouTube or Instagram link, write the caption.</li><li>Choose the programme it belongs to (sewa drive, townhall, policy dialogue, summit) and the ward.</li><li>Publish. It appears here and on the home page within seconds.</li></ol>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="page-dashboard">
+  <div class="page-head"><div class="wrap">
+    <div class="kicker" data-i18n="nav.dash">Accountability dashboard</div>
+    <h1 style="font-size:clamp(1.9rem,4vw,3rem)" data-i18n="db.h">What residents reported, and where each report stands.</h1>
+    <p class="lede" data-i18n="db.l">The Forum holds itself to the same standard it asks of the administration. Every report is counted here by cause and by status, and the figures update from the case system.</p>
+  </div></div>
+  <div class="wrap" style="padding:2rem 0 4rem">
+    <p><span class="badge" id="dbBadge">Sample figures</span> <span class="small muted" id="dbNote"></span></p>
+    <div class="kpis" id="kpis"></div>
+    <h3 data-i18n="db.byCause">Reports by cause and status</h3>
+    <div class="bars" id="bars"></div>
+    <div class="legend" id="legend"></div>
+    <div class="commit">
+      <div class="c"><b>3 <span data-i18n="db.days">working days</span></b><span class="small" data-i18n="db.c1">to review a report, map it to the responsible desk and tell you the next step.</span></div>
+      <div class="c"><b>21 <span data-i18n="db.daysPlain">days</span></b><span class="small" data-i18n="db.c2">before a filed ticket with no action is escalated one level, matching the CPGRAMS timeline.</span></div>
+      <div class="c"><b><span data-i18n="db.monthly">Monthly</span></b><span class="small" data-i18n="db.c3">publication of this dashboard and the list of issues taken to policy dialogues.</span></div>
+    </div>
+    <div class="recent" id="dbLocal" style="margin-top:2.5rem" hidden><h3 data-i18n="f.recent">Reports you have sent from this device</h3><ul id="dbLocalList"></ul></div>
+  </div>
+</section>
+
+<section class="page" id="page-track">
+  <div class="page-head"><div class="wrap">
+    <div class="kicker" data-i18n="nav.track">Track a report</div>
+    <h1 style="font-size:clamp(1.9rem,4vw,3rem)" data-i18n="tr.h">Where is my report?</h1>
+    <p class="lede" data-i18n="tr.l">Enter the reference number you received. The five stages are the same for every report, and you are told at each move.</p>
+  </div></div>
+  <div class="wrap" style="padding:2rem 0 4rem">
+    <div class="form-card" style="max-width:640px">
+      <div class="field"><label for="trRef" data-i18n="tr.ref">Reference number</label><input type="text" id="trRef" placeholder="GVF-2026-ABCDE" autocomplete="off"></div>
+      <div class="form-foot"><button class="btn btn-primary" id="trGo" type="button" data-i18n="tr.go">Show status</button></div>
+      <div id="trOut" style="margin-top:1rem"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="#top">
+          <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="none" stroke="#F0803A" stroke-width="2.5"/><circle cx="24" cy="24" r="17" fill="none" stroke="#3DB578" stroke-width="2"/><g fill="#fff"><rect x="15" y="22" width="5" height="11"/><rect x="21.5" y="16" width="5" height="17"/><rect x="28" y="19" width="5" height="14"/><rect x="13" y="33" width="22" height="1.6"/></g></svg>
+          <span>Gurugram Vision Forum<small>Collaborate. Contribute. Change.</small></span>
+        </a>
+        <p style="margin-top:1rem" data-i18n="ft.about">A citizens' civic-policy platform linking residents, government bodies and elected representatives to co-create Gurugram's development.</p>
+        <p class="hindi">गुरुग्राम: साथ बढ़ते हुए।</p>
+      </div>
+      <div>
+        <h4 data-i18n="ft.contact">Contact</h4>
+        <p>Sidharth Yadav, <span data-i18n="ft.lead">project lead</span></p>
+        <p><a href="tel:+919899375445">+91 98993 75445</a></p>
+        <p><a href="mailto:contact@gurugramvisionforum.org">contact@gurugramvisionforum.org</a></p>
+        <p>Sector 29, Gurugram, Haryana</p>
+      </div>
+      <div>
+        <h4 data-i18n="ft.pages">Pages</h4>
+        <p><a href="#/charter" data-i18n="nav.charter">Civic charter</a> · <a href="#/wards" data-i18n="nav.wards">Wards</a> · <a href="#/blog" data-i18n="nav.blog">Blog</a></p>
+        <p><a href="#/media" data-i18n="nav.media">Updates</a> · <a href="#/dashboard" data-i18n="nav.dash">Dashboard</a> · <a href="#/track" data-i18n="nav.track">Track a report</a></p>
+        <p class="small" style="color:#B8C7D8" data-i18n="ft.social">LinkedIn, Instagram and WhatsApp community links go live with the launch.</p>
+      </div>
+    </div>
+    <div class="foot-note">
+      <span data-i18n="ft.reg">Gurugram Vision Forum. Registration as a not-for-profit is in progress.</span>
+      <span data-i18n="ft.notgov">Not an official government website. Emergencies: 112.</span>
+    </div>
+  </div>
+  <div class="tricolour" style="margin-top:1.5rem"></div>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+window.GVF = (function(){
+"use strict";
+var L = {
+  gmdaPortal:"https://services.gmda.gov.in/", gmda:"https://www.gmda.gov.in/", mcg:"https://www.mcg.gov.in/", district:"https://gurugram.gov.in/",
+  districtReps:"https://gurugram.gov.in/public-representative/", districtHelp:"https://gurugram.gov.in/helpline/", voterList:"https://gurugram.gov.in/voter-list-for-mc-election-gurugram-2025/",
+  onemap:"https://onemapggm.gmda.gov.in/", police:"https://haryanapolice.gov.in/", cmwindow:"https://cmharyanacell.nic.in/", aas:"https://aas.saralharyana.nic.in/", saral:"https://saralharyana.gov.in/",
+  haryana:"https://haryana.gov.in/", assembly:"https://haryanaassembly.gov.in/", ulb:"https://ulbharyana.gov.in/", dtcp:"https://tcpharyana.gov.in/", hsvp:"https://hsvphry.org.in/",
+  dhbvn:"https://dhbvn.org.in/", hspcb:"https://hspcb.gov.in/", hrera:"https://haryanarera.gov.in/", cpgrams:"https://pgportal.gov.in/", swachh:"https://swachhbharaturban.gov.in/",
+  cpcb:"https://cpcb.nic.in/", rti:"https://rtionline.gov.in/", consumer:"https://consumerhelpline.gov.in/", edaakhil:"https://edaakhil.nic.in/", cyber:"https://cybercrime.gov.in/",
+  nhai:"https://nhai.gov.in/", mygov:"https://www.mygov.in/", mohua:"https://mohua.gov.in/", caqm:"https://caqm.nic.in/", sansad:"https://sansad.in/ls/members", mospi:"https://mospi.gov.in/sites/default/files/profileHonMin/Minister_Profile_28062024.pdf",
+  eci:"https://voters.eci.gov.in/", ulbtax:"https://ulbhryndc.org/"
+};
+var STD = [
+  {k:"Portal", v:"GMDA integrated grievance portal (routes to MCG, GMDA, MC Manesar)", href:L.gmdaPortal},
+  {k:"Toll-free", v:"1800 180 1817", href:"tel:18001801817"},
+  {k:"WhatsApp", v:"78400 01817 (send a photo and the location)", href:"https://wa.me/917840001817"},
+  {k:"App", v:"myGurugram (Android and iOS)"}
+];
+var STD_LADDER = [
+  "Register a ticket on the integrated portal and keep the ticket number. Only you can close it.",
+  "No action in the promised time: escalate to the division head named on the ticket (Executive Engineer or Joint Commissioner of the zone).",
+  "Still pending: MCG Commissioner and Mayor, or GMDA CEO, with the ticket history.",
+  "Final step: CM Window (Directorate of Urban Local Bodies), attaching every ticket number."
+];
+var CATS = [
+ {id:"roads", label:"Roads, potholes and footpaths", agency:"GMDA for master roads, MCG for internal roads",
+  owns:"GMDA owns the master roads that divide sectors and the major corridors. MCG owns internal roads, lanes and footpaths inside sectors and colonies. In HSVP sectors not yet transferred, HSVP maintains internal services; in licensed private colonies not yet handed over, the developer does under DTCP oversight. NH-48 and the expressways belong to NHAI.",
+  channels:STD.concat([{k:"Highways", v:"NHAI helpline 1033 for NH-48 and expressway issues", href:"tel:1033"}]), ladder:STD_LADDER},
+ {id:"waste", label:"Garbage, sweeping and waste collection", agency:"Municipal Corporation of Gurugram, sanitation wing",
+  owns:"Door-to-door collection, road sweeping, secondary collection points, bulk-waste pickup and construction debris. Bulk generators (100 kg a day or more) must process their wet waste on site under the 2016 rules.",
+  channels:STD.concat([{k:"Central record", v:"Swachhata app, Swachh Bharat Mission Urban", href:L.swachh}]),
+  ladder:["Ticket on the integrated portal or the Swachhata app; note the number.","Not attended: the ward sanitary inspector or sanitation supervisor, then the zone Joint Commissioner.","Still pending: MCG Commissioner and Mayor.","Final step: CM Window with the ticket history."]},
+ {id:"water", label:"Water supply and sewer", agency:"GMDA for bulk supply and master lines, MCG for distribution",
+  owns:"GMDA runs the treatment plants, master water lines and master sewers. MCG owns distribution and internal sewer lines inside sectors; HSVP does so in its own sectors. Tankers during shortages are arranged through the same ticket.", channels:STD, ladder:STD_LADDER},
+ {id:"drains", label:"Drains, waterlogging and flooding", agency:"GMDA for master storm drains, MCG for internal drains",
+  owns:"GMDA owns the master storm-water network and the natural creeks. MCG owns internal drains, desilting and blocked road gullies. During monsoon the district disaster control room coordinates emergency pumping.",
+  channels:STD.concat([{k:"District", v:"Gurugram district helplines and control room", href:L.districtHelp}]), ladder:STD_LADDER},
+ {id:"lights", label:"Streetlights", agency:"MCG for internal roads, GMDA for master roads",
+  owns:"Dark stretches, faulty poles and timers on internal roads are MCG; on sector-dividing and master roads they are GMDA. Mention the pole number if it is painted on.", channels:STD, ladder:STD_LADDER},
+ {id:"parks", label:"Parks, green belts and trees", agency:"MCG horticulture wing; HSVP in its sectors; Forest Department for trees",
+  owns:"Neighbourhood parks and their upkeep are MCG. Green belts along HSVP roads are HSVP. Felling or damaging trees needs Forest Department permission; report illegal felling to the Forest Department and the police.", channels:STD, ladder:STD_LADDER},
+ {id:"traffic", label:"Traffic, signals and road encroachment", agency:"Gurugram Traffic Police; GMDA for signals and road engineering",
+  owns:"Enforcement, wrong-side driving, parking and traffic management are the Gurugram Traffic Police. Faulty signals, missing signage and junction design are GMDA. Encroachment by vendors and structures on roads is MCG enforcement.",
+  channels:[{k:"Emergency", v:"112", href:"tel:112"},{k:"Police", v:"Haryana Police citizen portal", href:L.police},{k:"Signals", v:"GMDA integrated portal", href:L.gmdaPortal},{k:"Toll-free", v:"1800 180 1817", href:"tel:18001801817"}],
+  ladder:["Report to the Traffic Police for enforcement, and raise a GMDA ticket for signal or engineering fixes.","Not attended: the ACP Traffic of the zone, then the DCP Traffic.","Still pending: the Commissioner of Police, Gurugram.","Final step: CM Window, or a policy dialogue through the Forum for recurring junction problems."]},
+ {id:"power", label:"Electricity supply and billing", agency:"Dakshin Haryana Bijli Vitran Nigam (DHBVN)",
+  owns:"Outages, tripping, broken poles, meter faults and billing disputes. Timelines for restoring supply and resolving meter complaints are set by the Haryana Electricity Regulatory Commission standards of performance.",
+  channels:[{k:"Helpline", v:"1912", href:"tel:1912"},{k:"Portal", v:"DHBVN consumer portal", href:L.dhbvn}],
+  ladder:["Register on 1912 or the DHBVN portal and keep the complaint number.","Not resolved: the SDO (Operation) of your sub-division, then the Executive Engineer.","Still pending: the Consumer Grievance Redressal Forum of DHBVN.","Final step: the Electricity Ombudsman, Haryana."]},
+ {id:"pollution", label:"Air, dust, noise and burning of waste", agency:"Haryana State Pollution Control Board, regional office Gurugram",
+  owns:"Construction dust, industrial emissions, noise and burning of waste. Garbage burning on public land is also MCG. During GRAP stages the air-monitoring cell on the GMDA portal takes complaints; the Commission for Air Quality Management sets the NCR-wide restrictions.",
+  channels:[{k:"Central app", v:"Sameer app, Central Pollution Control Board", href:L.cpcb},{k:"State board", v:"Haryana State Pollution Control Board", href:L.hspcb},{k:"Portal", v:"GMDA integrated portal, air monitoring cell", href:L.gmdaPortal},{k:"Toll-free", v:"1800 180 1817", href:"tel:18001801817"}],
+  ladder:["Complaint on the Sameer app or the GMDA portal, with a photo and time.","Not attended: the HSPCB Regional Officer, Gurugram.","Still pending: the Member Secretary, HSPCB, and the Deputy Commissioner.","Final step: CM Window, or CPGRAMS for CPCB and CAQM."]},
+ {id:"animals", label:"Stray dogs, cattle and animal issues", agency:"MCG veterinary wing",
+  owns:"Stray dog sterilisation and vaccination, stray cattle removal, animal carcass removal and dog-bite follow-up.", channels:STD, ladder:STD_LADDER},
+ {id:"construction", label:"Illegal construction and encroachment", agency:"MCG town-planning wing; DTCP for licensed colonies; HSVP in its sectors",
+  owns:"Unauthorised floors, commercial use of residential plots and encroachment on public land inside municipal limits are MCG. Violations inside licensed private colonies are the District Town Planner (DTCP). HSVP sectors are the HSVP Estate Officer.",
+  channels:STD.concat([{k:"DTCP", v:"Town and Country Planning, Haryana", href:L.dtcp},{k:"HSVP", v:"Haryana Shehri Vikas Pradhikaran", href:L.hsvp}]),
+  ladder:["Written complaint with photos to the responsible office and a ticket on the integrated portal.","Not attended: Senior Town Planner (MCG) or District Town Planner (DTCP).","Still pending: MCG Commissioner or Director, Town and Country Planning.","Final step: CM Window."]},
+ {id:"property", label:"Property tax, building plans and NOCs", agency:"Municipal Corporation of Gurugram",
+  owns:"Property-tax assessment and correction, building plan approval, occupation certificates and no-dues certificates. Many of these are notified services under the Right to Service Act with fixed time limits.",
+  channels:[{k:"Portal", v:"Haryana ULB property tax and services", href:L.ulbtax},{k:"Services", v:"Saral Haryana (notified services)", href:L.saral},{k:"MCG", v:"mcg.gov.in", href:L.mcg}],
+  ladder:["Apply online and keep the application number.","Past the notified time limit: the Auto Appeal System escalates for you.","Still pending: Grievance Officer of the department, then the Right to Service Commission, which can penalise the officer.","Parallel route: CM Window."]},
+ {id:"housing", label:"Builder delays, defects and society management", agency:"HRERA Gurugram; DTCP; District Registrar for RWAs and AOAs",
+  owns:"Delayed possession, defects and promoter violations go to HRERA Gurugram. Maintenance handover and licence conditions in private colonies are DTCP. Disputes inside an RWA or Apartment Owners Association fall under the Haryana Registration and Regulation of Societies Act, 2012 and the District Registrar.",
+  channels:[{k:"HRERA", v:"Haryana Real Estate Regulatory Authority, Gurugram", href:L.hrera},{k:"DTCP", v:"Town and Country Planning, Haryana", href:L.dtcp},{k:"District", v:"District Registrar, Firms and Societies", href:L.district}],
+  ladder:["File the complaint with HRERA or DTCP with the agreement and payment record.","HRERA: appeal to the Real Estate Appellate Tribunal.","DTCP: Director, Town and Country Planning, then CM Window.","The Forum takes up society-wide patterns in policy dialogues."]},
+ {id:"safety", label:"Police, safety, harassment and cyber fraud", agency:"Gurugram Police",
+  owns:"Crime, harassment, threats, domestic violence and cyber fraud. Any police station must register a Zero FIR for a cognisable offence regardless of jurisdiction, and you are entitled to a free copy of the FIR.",
+  channels:[{k:"Emergency", v:"112", href:"tel:112"},{k:"Women", v:"181", href:"tel:181"},{k:"Cyber fraud", v:"1930 and cybercrime.gov.in (report within the first hour to freeze the money)", href:L.cyber},{k:"Children", v:"1098", href:"tel:1098"},{k:"Portal", v:"Haryana Police", href:L.police}],
+  ladder:["Call 112 in an emergency; otherwise file at the station or online.","FIR refused: written complaint to the Deputy Commissioner of Police of the zone.","Still refused: the Commissioner of Police, Gurugram, or a complaint before the Judicial Magistrate.","Cyber fraud: 1930 first, then the cybercrime portal, then the police station."]},
+ {id:"consumer", label:"Consumer complaints (shops, services, online)", agency:"National Consumer Helpline; District Consumer Commission, Gurugram",
+  owns:"Defective goods, unfair charges, deficient services, e-commerce disputes. The District Commission hears claims up to 50 lakh rupees; the State Commission above that up to 2 crore.",
+  channels:[{k:"Helpline", v:"1915", href:"tel:1915"},{k:"Portal", v:"consumerhelpline.gov.in", href:L.consumer},{k:"File online", v:"e-Daakhil, consumer commission e-filing", href:L.edaakhil}],
+  ladder:["Written complaint to the seller or service provider; keep the record.","No resolution: register on 1915 or the helpline portal (mediation with the company).","Still unresolved: complaint before the District Consumer Disputes Redressal Commission, Gurugram, on e-Daakhil.","Appeal to the State Commission, Panchkula."]},
+ {id:"rti", label:"Information from a government office (RTI)", agency:"The Public Information Officer of the office concerned",
+  owns:"Any record held by a public authority: files, tenders, inspection reports, budgets. Reply is due in 30 days (48 hours where life or liberty is involved).",
+  channels:[{k:"Central", v:"RTI Online for central ministries and bodies", href:L.rti},{k:"State", v:"Apply to the PIO of MCG, GMDA, HSVP or DTCP directly with a 10 rupee fee"}],
+  ladder:["Application to the PIO with the fee.","No reply in 30 days or an unsatisfactory one: first appeal to the First Appellate Authority of the same office.","Second appeal to the Haryana State Information Commission (or the CIC for central bodies).","The Forum can help draft a precise RTI."]},
+ {id:"other", label:"Something else, or a policy suggestion", agency:"Depends on the subject; the Forum will map it",
+  owns:"Anything that does not fit above: a scheme that is not reaching you, a service that needs redesign, or an idea for the city. The Forum reads every submission and points it to the right desk or a policy dialogue.",
+  channels:[{k:"State", v:"CM Window, Haryana", href:L.cmwindow},{k:"Central", v:"CPGRAMS", href:L.cpgrams},{k:"Forum", v:"Use the form below"}],
+  ladder:["Send it through the Forum form.","A volunteer maps it to the responsible desk within three working days.","Recurring themes go to a policy dialogue with the department."]}
+];
+
+var PORTALS = [
+ {n:"GMDA integrated grievance portal", h:L.gmdaPortal, l:"city", f:"Civic complaints for GMDA, MCG and MC Manesar: roads, water, sewer, drains, waste, lights, parks, encroachment, stray animals.", how:"<b>Web</b>, toll-free <b>1800 180 1817</b>, WhatsApp <b>78400 01817</b>, missed call <b>98733 53224</b>, myGurugram app, email services.gmda@gmail.com.", t:["civic"]},
+ {n:"Municipal Corporation of Gurugram", h:L.mcg, l:"city", f:"Property tax, building plans, trade licences, birth and death certificates, ward information, House proceedings.", how:"Online services through the ULB portals; offices at the MCG zonal offices.", t:["civic","housing"]},
+ {n:"District Administration, Gurugram", h:L.district, l:"city", f:"Deputy Commissioner and SDM offices, disaster control room, helplines, public representatives, RTI officers.", how:"<a href='"+L.districtHelp+"' target='_blank' rel='noopener'>Helpline directory</a>; CM Window counter at the Mini Secretariat.", t:["civic","escalation"]},
+ {n:"OneMap GGM", h:L.onemap, l:"city", f:"GMDA's official GIS: ward, sector and jurisdiction maps, so you can see which agency owns a road or a drain.", how:"Search a sector or drop a pin.", t:["civic"]},
+ {n:"Gurugram Police", h:L.police, l:"city", f:"FIR and e-FIR, character and tenant verification, lost-report, women safety.", how:"Emergency <b>112</b>, women <b>181</b>, children <b>1098</b>.", t:["safety"]},
+ {n:"CM Window, Haryana", h:L.cmwindow, l:"state", f:"Grievance against any Haryana department or agency, including MCG, GMDA, HSVP and DTCP, once the direct route has failed.", how:"Register at any DC or SDM office CM Window counter or online; you get a registration number by SMS to track it.", t:["escalation"]},
+ {n:"Auto Appeal System, Right to Service", h:L.aas, l:"state", f:"Automatic appeal when a notified service (certificate, approval, connection) is late or refused without reason.", how:"Escalates on its own from the officer to two grievance officers and then the Right to Service Commission, which can fine the officer.", t:["escalation","civic"]},
+ {n:"Saral Haryana", h:L.saral, l:"state", f:"Single window for several hundred notified state services with published time limits.", how:"Apply online and track; keep the application number for the Auto Appeal System.", t:["civic"]},
+ {n:"Haryana ULB services and property tax", h:L.ulbtax, l:"state", f:"Property tax payment, no-dues certificate and other municipal services for Haryana cities.", how:"Search your property ID; pay and download the receipt.", t:["civic","housing"]},
+ {n:"HRERA Gurugram", h:L.hrera, l:"state", f:"Complaints against promoters: delayed possession, defects, refunds, non-registered projects.", how:"Online complaint with the agreement and payment proof; hearings in Gurugram.", t:["housing"]},
+ {n:"Town and Country Planning, Haryana (DTCP)", h:L.dtcp, l:"state", f:"Licensed private colonies: licence conditions, maintenance handover, violations, change of land use.", how:"District Town Planner, Gurugram; online services on the portal.", t:["housing"]},
+ {n:"Haryana Shehri Vikas Pradhikaran (HSVP)", h:L.hsvp, l:"state", f:"HSVP sectors: plots, allotments, internal roads and services not yet transferred to MCG.", how:"Estate Officer, Gurugram; online plot services.", t:["civic","housing"]},
+ {n:"DHBVN", h:L.dhbvn, l:"state", f:"Electricity supply, outages, meters, new connections and bills in south Haryana.", how:"Helpline <b>1912</b>; consumer portal for bills and complaints.", t:["utilities"]},
+ {n:"Haryana State Pollution Control Board", h:L.hspcb, l:"state", f:"Air, water and noise pollution, construction dust, industrial emissions.", how:"Regional office, Gurugram; complaints online.", t:["environment"]},
+ {n:"Haryana Legislative Assembly", h:L.assembly, l:"state", f:"Profiles of all 90 MLAs, session attendance, questions and business of the House.", how:"Members section; attendance published each session.", t:["escalation"]},
+ {n:"CPGRAMS", h:L.cpgrams, l:"central", f:"Grievances against central ministries, departments and bodies (NHAI, CPCB, banks, telecom, railways, EPFO).", how:"Redressal expected within <b>21 days</b>; interim reply if longer; appeal after feedback.", t:["escalation"]},
+ {n:"Swachhata app (Swachh Bharat Mission Urban)", h:L.swachh, l:"central", f:"Garbage not collected, dumping, dirty public toilets, dead animals.", how:"Geo-tagged photo complaint routed to the municipal body; tracked nationally.", t:["civic","environment"]},
+ {n:"Sameer app (CPCB)", h:L.cpcb, l:"central", f:"Air quality readings and pollution complaints in the NCR.", how:"Photo complaint routed to the state board and local body.", t:["environment"]},
+ {n:"RTI Online", h:L.rti, l:"central", f:"Right to Information requests to central ministries and bodies.", how:"10 rupee fee online; reply due in 30 days; first appeal on the same portal.", t:["consumer"]},
+ {n:"National Consumer Helpline and e-Daakhil", h:L.consumer, l:"central", f:"Complaints against sellers, service providers and e-commerce platforms; e-filing before consumer commissions.", how:"Helpline <b>1915</b>; file before the District Commission on <a href='"+L.edaakhil+"' target='_blank' rel='noopener'>e-Daakhil</a>.", t:["consumer"]},
+ {n:"National Cybercrime Reporting Portal", h:L.cyber, l:"central", f:"Online fraud, UPI fraud, harassment and child abuse content.", how:"Helpline <b>1930</b>; report within the first hour to freeze the money trail.", t:["safety"]},
+ {n:"NHAI", h:L.nhai, l:"central", f:"National highways and expressways through Gurugram: potholes, lighting, accidents, toll issues.", how:"Helpline <b>1033</b>.", t:["civic"]},
+ {n:"Voter registration (ECI)", h:L.eci, l:"central", f:"Register or shift your vote to your Gurugram address, check your name on the roll, download the e-EPIC.", how:"Form 6 for a new registration, Form 8 to shift; helpline <b>1950</b>.", t:["civic","escalation"]},
+ {n:"MyGov", h:L.mygov, l:"central", f:"Public consultations on central policies and schemes; ideas and suggestions.", how:"Register and take part in open consultations.", t:["escalation"]}
+];
+var FILTERS = [["all","Everything"],["civic","Civic services"],["escalation","Escalation and appeals"],["housing","Housing and property"],["utilities","Electricity"],["safety","Safety"],["environment","Environment"],["consumer","Consumer and RTI"]];
+
+var CHARTERS = [
+ {t:"Haryana Right to Service Act, 2014 and the Auto Appeal System", src:[["Auto Appeal System",L.aas],["Saral Haryana",L.saral]], b:"<p>Several hundred state services carry a notified time limit: certificates, approvals, connections, corrections. If the designated officer misses the limit or refuses without a legible reason, the Auto Appeal System files the appeal for you and moves the case up to two grievance officers and then the Right to Service Commission.</p><ul><li>The Commission can impose a penalty recovered from the officer's salary, and part of it can be paid to you as compensation.</li><li>Cases raised on CM Window that concern notified services are routed into the same system.</li></ul><div class='use'><b>Use it when</b> a property-tax correction, building plan, occupation certificate, water or sewer connection, or any Saral Haryana application is stuck past its time limit.</div>"},
+ {t:"CPGRAMS: the 21-day rule for central grievances", src:[["CPGRAMS portal",L.cpgrams]], b:"<p>The Centralised Public Grievance Redress and Monitoring System covers every central ministry and body. Under the August 2024 guidelines the maximum redressal time is 21 days; if more time is needed you must get an interim reply with a reason and an expected date.</p><ul><li>A grievance cannot be closed with 'does not pertain to this department'; it has to be transferred to the right one.</li><li>After disposal you are called for feedback; a poor rating opens an appeal to a senior authority.</li></ul><div class='use'><b>Use it when</b> the problem sits with NHAI, CPCB or CAQM, a bank, a telecom operator, railways, EPFO or any central scheme.</div>"},
+ {t:"CM Window and the MCG escalation ladder", src:[["CM Window",L.cmwindow],["MCG",L.mcg],["GMDA portal",L.gmdaPortal]], b:"<p>MCG's citizen charter sets a three-level route: first the complaint ticket, then the head of the department (Joint or Deputy Commissioner), then the Commissioner and the Mayor. If that fails, CM Window sends the case to the Directorate of Urban Local Bodies with a registration number you can track.</p><ul><li>On the GMDA integrated system a ticket can only be closed by the complainant, not by the officer.</li><li>Keep every ticket number: the escalation is only as strong as the paper trail.</li></ul><div class='use'><b>Use it when</b> a civic complaint has been marked resolved but the problem is still there.</div>"},
+ {t:"Right to Information Act, 2005", src:[["RTI Online (central bodies)",L.rti]], b:"<p>Any resident can ask any public authority for the records it holds: inspection reports, tenders, sanction letters, expenditure. The fee is 10 rupees; the reply is due in 30 days, or 48 hours where life or liberty is involved.</p><ul><li>First appeal to the First Appellate Authority in the same office; second appeal to the State Information Commission (Central Information Commission for central bodies).</li><li>Ask for specific documents rather than explanations: 'copy of the work order and measurement book for the road in Sector 45' gets an answer, 'why is the road bad' does not.</li></ul><div class='use'><b>Use it when</b> you need proof of what was sanctioned, paid for and inspected before escalating.</div>"},
+ {t:"Solid Waste Management Rules, 2016", src:[["Swachh Bharat Mission Urban",L.swachh]], b:"<p>The rules set duties on both sides. Every household must segregate waste into wet, dry and domestic hazardous streams and hand it to the authorised collector. Bulk generators, which includes most large societies and offices, must process their wet waste on site or through an authorised agency.</p><ul><li>The municipal body must run door-to-door collection, transport segregated waste separately, and process it rather than dump it.</li><li>Spot fines apply to littering, burning and unsegregated handover.</li></ul><div class='use'><b>Use it when</b> your society is planning composting, or when collection is mixing the streams you separated.</div>"},
+ {t:"Homebuyers: RERA, 2016 and the Haryana Apartment Ownership Act", src:[["HRERA Gurugram",L.hrera],["DTCP Haryana",L.dtcp]], b:"<p>Every project over the threshold must be registered with HRERA with a promised delivery date. Delay entitles you to interest or a refund; defects must be fixed for five years after possession. Common areas belong to the association of allottees once it is formed.</p><ul><li>Complaints are heard by HRERA Gurugram; appeals go to the Real Estate Appellate Tribunal.</li><li>Maintenance handover and licence conditions in private colonies are enforced by DTCP.</li></ul><div class='use'><b>Use it when</b> possession is late, the builder controls the society funds, or promised facilities never came.</div>"},
+ {t:"Consumer Protection Act, 2019", src:[["National Consumer Helpline",L.consumer],["e-Daakhil",L.edaakhil]], b:"<p>Defective goods and deficient services, including from builders, hospitals, schools and online platforms, can be taken to the District Consumer Commission for claims up to 50 lakh rupees, the State Commission up to 2 crore, and the National Commission above that.</p><ul><li>The National Consumer Helpline (1915) mediates with the company before you file.</li><li>Complaints can be filed online on e-Daakhil and from where you live, not where the company is.</li></ul><div class='use'><b>Use it when</b> a service provider will not honour what was paid for.</div>"},
+ {t:"Police: what you are entitled to", src:[["Haryana Police",L.police],["Cybercrime portal",L.cyber]], b:"<p>Any police station must record a Zero FIR for a cognisable offence and transfer it; you cannot be turned away for jurisdiction. You are entitled to a free copy of the FIR. Refusal can be taken to the Deputy Commissioner of Police and then to the Magistrate.</p><ul><li>Emergency 112; women 181; children 1098; cyber fraud 1930.</li><li>Cyber fraud reported within the first hour has the best chance of freezing the money.</li></ul><div class='use'><b>Use it when</b> a station delays or declines to register a complaint.</div>"},
+ {t:"Electricity: DHBVN standards of performance", src:[["DHBVN",L.dhbvn]], b:"<p>The Haryana Electricity Regulatory Commission sets time limits for restoring supply, replacing faulty meters, releasing new connections and resolving billing disputes. Missed limits can attract compensation.</p><ul><li>Escalate from 1912 to the SDO and Executive Engineer, then the Consumer Grievance Redressal Forum, then the Electricity Ombudsman.</li></ul><div class='use'><b>Use it when</b> outages or meter problems keep recurring without a fix.</div>"},
+ {t:"Air quality: GRAP and the right to complain", src:[["CAQM",L.caqm],["CPCB and the Sameer app",L.cpcb]], b:"<p>The Commission for Air Quality Management runs the Graded Response Action Plan for the NCR: as the AQI worsens, construction, diesel generators, waste burning and traffic face escalating restrictions. Violations can be reported on the Sameer app and the GMDA portal's air-monitoring cell.</p><div class='use'><b>Use it when</b> a construction site runs without dust control, or waste is being burnt in your sector.</div>"},
+ {t:"Your vote in Gurugram: the entitlement most residents leave unused", src:[["Voter portal (ECI)",L.eci],["2025 ward voter lists",L.voterList]], b:"<p>Anyone ordinarily resident at a Gurugram address can register here, and shift an existing registration with Form 8. Turnout in the 2025 municipal election was under 42 percent; the councillor who decides your ward's works was often elected by a few thousand votes, and one ward in 2025 was decided by two.</p><ul><li>Registration is online; the e-EPIC downloads to your phone.</li><li>Municipal, assembly and parliamentary rolls all flow from the same registration.</li></ul><div class='use'><b>Use it when</b> you have lived in Gurugram for a year and still vote somewhere else.</div>"}
+];
+
+var TIERS = [
+ {h:"Parliament and Union ministries", s:"National schemes, highways, NCR air", r:[
+   {b:"Member of Parliament, Gurgaon", who:"Rao Inderjit Singh (BJP), Union Minister of State (Independent Charge), Statistics and Planning", owns:"Represents the constituency in Lok Sabha; MPLADS funds for local works; can take up central schemes and agencies for the city.", links:[["Official profile (MoSPI)",L.mospi],["Lok Sabha members",L.sansad],["District list of representatives",L.districtReps]]},
+   {b:"Union Ministry of Housing and Urban Affairs", owns:"Swachh Bharat Mission, AMRUT water and sewer funding, metro projects.", links:[["mohua.gov.in",L.mohua],["Grievance: CPGRAMS",L.cpgrams]]},
+   {b:"NHAI and the Ministry of Road Transport", owns:"NH-48, the Dwarka and Sohna expressways, toll plazas.", links:[["nhai.gov.in",L.nhai],["Grievance: CPGRAMS",L.cpgrams]]},
+   {b:"Commission for Air Quality Management", owns:"GRAP restrictions across the NCR.", links:[["caqm.nic.in",L.caqm],["Sameer app (CPCB)",L.cpcb]]}
+ ]},
+ {h:"Haryana Government", s:"Policy, budgets, the departments that run the city", r:[
+   {b:"Chief Minister and Council of Ministers", who:"Nayab Singh Saini, Chief Minister", owns:"State policy and budgets; CM Window is the top of every state escalation ladder.", links:[["CM Window",L.cmwindow],["haryana.gov.in",L.haryana]]},
+   {b:"MLA, Gurgaon (77)", who:"Mukesh Sharma (BJP)", owns:"Old Gurugram and the central sectors; MLA local development funds; questions in the Assembly.", links:[["Assembly members and attendance",L.assembly],["District list of representatives",L.districtReps]]},
+   {b:"MLA, Badshahpur (76)", who:"Rao Narbir Singh (BJP), Cabinet Minister", owns:"Badshahpur, Sohna Road belt and the new sectors; also a minister in the state cabinet.", links:[["Assembly members and attendance",L.assembly],["District list of representatives",L.districtReps]]},
+   {b:"MLA, Sohna (78)", who:"Tejpal Tanwar (BJP)", owns:"Sohna and the southern sectors.", links:[["Assembly members and attendance",L.assembly],["District list of representatives",L.districtReps]]},
+   {b:"MLA, Pataudi (75)", who:"Bimla Chaudhary (BJP)", owns:"Pataudi, Manesar side and the western villages.", links:[["Assembly members and attendance",L.assembly],["District list of representatives",L.districtReps]]},
+   {b:"Urban Local Bodies Department", owns:"Controls MCG and MC Manesar; property tax rules; the Directorate hears CM Window cases against municipal bodies.", links:[["ulbharyana.gov.in",L.ulb],["CM Window",L.cmwindow]]},
+   {b:"Town and Country Planning (DTCP)", owns:"Licenses private colonies; enforces licence conditions and handover.", links:[["tcpharyana.gov.in",L.dtcp]]},
+   {b:"Right to Service Commission", owns:"Hears auto-appeals when notified services are late; can fine officers.", links:[["Auto Appeal System",L.aas]]}
+ ]},
+ {h:"District administration", s:"Law and order, coordination, disasters", r:[
+   {b:"Deputy Commissioner, Gurugram", owns:"Head of the district; revenue, elections, disaster management, coordination between agencies; chairs district-level committees.", links:[["gurugram.gov.in",L.district],["Helplines and control room",L.districtHelp]]},
+   {b:"Sub-Divisional Magistrates", owns:"Gurugram North, Gurugram South, Badshahpur, Sohna, Pataudi and Manesar sub-divisions; certificates, encroachment on revenue land, local coordination.", links:[["District administration",L.district]]},
+   {b:"Commissioner of Police, Gurugram", owns:"Policing, traffic and public order through the DCPs of each zone.", links:[["haryanapolice.gov.in",L.police],["Cybercrime portal",L.cyber]]},
+   {b:"District Consumer Commission and District Registrar", owns:"Consumer disputes; registration and disputes of RWAs and societies.", links:[["e-Daakhil (consumer e-filing)",L.edaakhil],["District administration",L.district]]}
+ ]},
+ {h:"City agencies", s:"The bodies that build and run services", r:[
+   {b:"Gurugram Metropolitan Development Authority (GMDA)", who:"Chief Executive Officer", owns:"Master roads, bulk water, master sewers and storm drains, mobility, the integrated command and control centre, the integrated grievance portal.", links:[["gmda.gov.in",L.gmda],["Grievance portal",L.gmdaPortal],["OneMap GGM",L.onemap]]},
+   {b:"Municipal Corporation of Gurugram (MCG)", who:"Mayor Raj Rani Malhotra; Municipal Commissioner; 36 ward councillors", owns:"Sanitation, internal roads, streetlights, parks, internal water and sewer, property tax, building plans, stray animals, encroachment.", links:[["mcg.gov.in",L.mcg],["Grievance portal",L.gmdaPortal],["Ward directory","#/wards"]]},
+   {b:"Municipal Corporation of Manesar", owns:"The same functions for the Manesar side of the district.", links:[["Grievance portal",L.gmdaPortal]]},
+   {b:"HSVP Estate Office", owns:"HSVP sectors and their internal services until transfer to MCG; plot allotments.", links:[["hsvphry.org.in",L.hsvp]]},
+   {b:"DHBVN, Gurugram circles", owns:"Power distribution and billing.", links:[["dhbvn.org.in",L.dhbvn]]},
+   {b:"HSPCB regional office", owns:"Pollution enforcement.", links:[["hspcb.gov.in",L.hspcb]]}
+ ]},
+ {h:"Your ward and your colony", s:"The first people responsible for your street", r:[
+   {b:"Ward councillor", owns:"Elected for your ward; first point of contact for local civic works; sits in the MCG House and its committees.", links:[["Ward directory (all 36)","#/wards"],["mcg.gov.in",L.mcg]]},
+   {b:"Sanitation supervisor and junior engineer", owns:"The field staff who actually clear a complaint in your ward; named on your ticket.", links:[["Raise a ticket",L.gmdaPortal]]},
+   {b:"RWA or Apartment Owners Association", owns:"Internal roads, security, common areas, and the society's voice with the agencies.", links:[["Civic charter for societies","#/charter"]]},
+   {b:"Forum area chapter", owns:"Volunteers who map issues in your sector, follow tickets, and bring recurring problems to policy dialogues.", links:[["Join","#join"]]}
+ ]}
+];
+
+var WARDS = [[1,"Sundar Singh","BJP"],[2,"Jyotsna Yadav","BJP"],[3,"Rakesh Yadav","Independent"],[4,"Pradeep Kadam","Independent"],[5,"Ram Avtar Rana","JJP"],[6,"Satpal","Congress"],[7,"Dinesh Dahiya","Independent"],[8,"Naresh Kumar","BJP"],[9,"Avnish Raghav","Independent"],[10,"Mahabir","Independent"],[11,"Kuldeep Yadav","BJP"],[12,"Ruchi","Independent"],[13,"Pawan Kumar","BJP"],[14,"Pratham Vashistha","BJP"],[15,"Bharati Harshana","BJP"],[16,"Vikramjit Singh","BJP"],[17,"Neha Dewatwal","Independent"],[18,"Jyoti Jaildar","BJP"],[19,"Raj Singh Amit","BJP"],[20,"Narayan Bhadana","BJP"],[21,"Sonia Yadav","BJP"],[22,"Vikash Yadav","BJP (unopposed)"],[23,"Kunal Yadav","Independent"],[24,"Aarti Yadav","BJP"],[25,"Anoop Singh","BJP"],[26,"Sunita Rani","BJP"],[27,"Ashish Gupta","BJP"],[28,"Dharambir Bhangrola","BJP"],[29,"Usha","BJP"],[30,"Madhu Batra","BJP"],[31,"Dalip Kumar Sahani","BJP"],[32,"Vijay","BJP"],[33,"Sarika Bhardwaj","Independent"],[34,"Surekha","BJP"],[35,"Parminder Kataria","Independent"],[36,"Rekha","BJP"]];
+
+var AREAS = (function(){var a=[]; for(var i=1;i<=115;i++){a.push("Sector "+i)} return a.concat(["DLF Phase 1","DLF Phase 2","DLF Phase 3","DLF Phase 4","DLF Phase 5","DLF Cyber City","Sushant Lok 1","Sushant Lok 2","Sushant Lok 3","South City 1","South City 2","Palam Vihar","Palam Vihar Extension","Udyog Vihar","Sohna Road","Golf Course Road","Golf Course Extension Road","MG Road","Old Gurugram","Civil Lines","Jacubpura","Sadar Bazar","Rajiv Nagar","Laxman Vihar","Surya Vihar","Ashok Vihar","Shivaji Nagar","Krishna Colony","Arjun Nagar","Madanpuri","Basai","Kadipur","Khandsa","Sikanderpur","Chakkarpur","Nathupur","Wazirabad","Ghata","Badshahpur","Ghasola","Tikri","Fazilpur Jharsa","Kanhai","Jharsa","Islampur","Naharpur Rupa","Dundahera","Sirhaul","Manesar","IMT Manesar","Dwarka Expressway","New Gurugram","Ambience Island","Nirvana Country","Uppal Southend","Vatika City","Rosewood City","Mayfield Garden","Malibu Towne","Ardee City","Greenwood City","Suncity","Central Park","Emaar Palm Drive","Vipul World","Orchid Petals","Tulip Group","Bestech Park View"])})();
+
+var CIVIC = [
+ {id:"home", t:"Your home", owe:[
+   {id:"h1", t:"I segregate waste into wet, dry and domestic hazardous before handing it over."},
+   {id:"h2", t:"I pay property tax by the due date and check the self-assessment every year."},
+   {id:"h3", t:"My plot has working rainwater harvesting and the recharge pit is cleaned before the monsoon."},
+   {id:"h4", t:"The footpath and drain outside my gate are clear: no ramps, planters or parked vehicles blocking pedestrians."},
+   {id:"h5", t:"I fix leaks, use water-saving fixtures and report supply leaks on the street."},
+   {id:"h6", t:"My tenants and domestic staff are police-verified."},
+   {id:"h7", dont:true, t:"I do not throw waste into drains, burn garbage or leaves, or dump debris on public land."},
+   {id:"h8", dont:true, t:"I have not added unauthorised floors or run a business from a residential plot without permission."}
+ ], ent:[
+   {t:"Door-to-door collection of segregated waste and regular sweeping of your street.", l:"Report a miss", h:L.gmdaPortal},
+   {t:"A water and sewer connection on payment, within the notified time limit.", l:"Saral Haryana", h:L.saral},
+   {t:"A streetlight, road or drain complaint that gets a ticket only you can close.", l:"GMDA portal", h:L.gmdaPortal},
+   {t:"Power restored within the regulator's time limits, with compensation for delay.", l:"DHBVN 1912", h:L.dhbvn},
+   {t:"Building plan approval and occupation certificate within the notified time, with automatic appeal if late.", l:"Auto Appeal System", h:L.aas}
+ ]},
+ {id:"society", t:"Your society", owe:[
+   {id:"s1", t:"Our RWA or AOA is registered, holds elections on schedule and publishes audited accounts."},
+   {id:"s2", t:"We process wet waste on site or through an authorised agency, as a bulk generator must."},
+   {id:"s3", t:"Our STP, rainwater harvesting and fire systems work and the fire NOC is current."},
+   {id:"s4", t:"We keep a monthly civic slot: list issues, file tickets, track them on the noticeboard."},
+   {id:"s5", t:"We have shared our ward number, councillor and the responsible JE with every resident."},
+   {id:"s6", dont:true, t:"We do not encroach green belts, gate public roads, or dump construction waste outside the boundary."}
+ ], ent:[
+   {t:"Handover of maintenance and common areas as per the colony licence.", l:"DTCP", h:L.dtcp},
+   {t:"Action against the promoter for delay, defects or diverted funds.", l:"HRERA Gurugram", h:L.hrera},
+   {t:"Registration and dispute resolution for the society under the 2012 Act.", l:"District Registrar", h:L.district},
+   {t:"Fire safety inspection and NOC through the fire services under Urban Local Bodies.", l:"ULB Haryana", h:L.ulb},
+   {t:"Tanker supply during a shortage against a ticket.", l:"GMDA portal", h:L.gmdaPortal}
+ ]},
+ {id:"ward", t:"Your ward", owe:[
+   {id:"w1", t:"I am registered to vote at my Gurugram address and check the roll before every election."},
+   {id:"w2", t:"I know my ward number, my councillor, and the JE and sanitation supervisor for my area."},
+   {id:"w3", t:"I voted in the 2025 municipal election, or will in the next one."},
+   {id:"w4", t:"I attend ward committee or RWA-federation meetings and ask for the ward works list."},
+   {id:"w5", t:"I file complaints with the ward number on official channels, not only on social media."},
+   {id:"w6", dont:true, t:"I do not pay unofficial fixers; I use the official channel so a record exists."}
+ ], ent:[
+   {t:"A councillor who represents the ward in the MCG House, its committees and the budget.", l:"Ward directory", h:"#/wards"},
+   {t:"Public ward-wise voter lists and booth details.", l:"2025 voter lists", h:L.voterList},
+   {t:"Maps that show which agency owns each road, drain and park in your ward.", l:"OneMap GGM", h:L.onemap},
+   {t:"Time-bound response to tickets and escalation to the zone Joint Commissioner.", l:"GMDA portal", h:L.gmdaPortal},
+   {t:"The right to see what works were sanctioned and paid for in your ward.", l:"RTI", h:L.rti}
+ ]},
+ {id:"city", t:"Your city", owe:[
+   {id:"c1", t:"I follow traffic rules: lane discipline, no wrong-side driving, helmet and belt, no honking near schools and hospitals."},
+   {id:"c2", t:"I use public transport, carpool or cycle when I can; the air is everyone's problem."},
+   {id:"c3", t:"I report on the official portal, not only on social media, so the complaint counts."},
+   {id:"c4", t:"I volunteer for at least one civic activity a quarter: a drive, a townhall, a lab."},
+   {id:"c5", t:"I help the people who work for me register to vote and access the schemes they are entitled to."},
+   {id:"c6", dont:true, t:"I do not litter, spit or dump, and I do not burn leaves or waste in winter."}
+ ], ent:[
+   {t:"A central grievance answered within 21 days, and state services with automatic appeal.", l:"CPGRAMS", h:L.cpgrams},
+   {t:"CM Window for any state department, with a tracking number.", l:"CM Window", h:L.cmwindow},
+   {t:"Clean-air action under GRAP and a channel to report violations.", l:"Sameer app", h:L.cpcb},
+   {t:"Information from any public authority within 30 days.", l:"RTI Online", h:L.rti},
+   {t:"A police station that registers a Zero FIR and gives a free copy.", l:"Haryana Police", h:L.police},
+   {t:"A say in central consultations and policy.", l:"MyGov", h:L.mygov}
+ ]}
+];
+
+var BLOG = [
+ {slug:"complaint-that-gets-acted-on", t:"How to file a civic complaint in Gurugram that actually gets acted on", d:"25 Sep 2026", tag:"Guide", x:"Which channel creates a record, what to put in it, and the three moves that turn a grievance into a case.",
+  b:"<p>Most complaints in this city die in a WhatsApp group. The ones that get fixed share three features: they were filed on a channel that creates a ticket, they contained what an engineer needs, and someone kept the ticket number.</p><h2>1. Use the channel that creates a record</h2><p>For anything civic (roads, water, sewer, drains, waste, lights, parks, encroachment) start with the <a href='"+L.gmdaPortal+"' target='_blank' rel='noopener'>GMDA integrated grievance portal</a>: web, the toll-free line 1800 180 1817, WhatsApp 78400 01817 or the myGurugram app. It routes to MCG, GMDA and MC Manesar, and by the current SOP only the complainant can close a ticket. For electricity, 1912; for police matters, 112 or the station; for a builder, HRERA.</p><h2>2. Put in what an engineer needs</h2><ul><li>The exact spot: sector, street, a landmark or house number, and the ward number.</li><li>A dated photo. Two if the problem has a before and after.</li><li>Since when, and the numbers of any earlier complaints.</li><li>What you want done, in one line.</li></ul><h2>3. Keep the number and use the ladder</h2><p>Note the ticket number. If the promised time passes, escalate to the officer named on the ticket, then the zone Joint Commissioner (MCG) or the Chief Engineer (GMDA), then the Commissioner and Mayor, then <a href='"+L.cmwindow+"' target='_blank' rel='noopener'>CM Window</a>. At each step attach the history. If you need proof of what was sanctioned, an RTI for the work order and measurement book is 10 rupees.</p><p>Send the Forum a copy with the ticket number and we track it with you.</p>"},
+ {slug:"what-your-councillor-can-do", t:"Your ward councillor: what they can do, and what they cannot", d:"25 Sep 2026", tag:"Explainer", x:"Gurugram elected 36 councillors in March 2025. Here is what the office actually controls.",
+  b:"<p>A councillor is the only elected person whose job is your street. They sit in the MCG House, which passes the corporation budget, and on its committees. They can move works for the ward, push the zone engineers, and raise resident issues on record. The 2025 House was the first elected since 2022 and turnout was under 42 percent, so a few thousand votes decided most wards.</p><h2>What is in their power</h2><ul><li>Internal roads, streetlights, parks, sanitation and stray-animal services run by MCG.</li><li>Ward development funds and the priority list of works sent to the zone.</li><li>Raising an issue in the House and its standing committees.</li></ul><h2>What is not</h2><ul><li>Master roads, master drains and bulk water: those are GMDA, whose CEO is an officer, not an elected body.</li><li>HSVP sectors not yet transferred, and licensed private colonies still with the developer under DTCP.</li><li>Police, electricity, pollution enforcement.</li></ul><h2>How to work with them</h2><p>Bring a list, not a grievance: five issues with photos, locations and ticket numbers. Ask which are MCG and what the timeline is. Follow up in writing. The <a href='#/wards'>ward directory</a> lists every councillor with the official sources; office contacts are being collected.</p>"},
+ {slug:"deadlines-government-set-for-itself", t:"The 21-day rule and other deadlines the government has set for itself", d:"25 Sep 2026", tag:"Rights", x:"Statutory timelines residents can quote back: CPGRAMS, Right to Service, RTI, power supply, GRAP.",
+  b:"<p>The most useful sentence in a complaint is a deadline the department already agreed to. Here are the ones that apply in Gurugram.</p><ul><li><b>Central grievances: 21 days.</b> DARPG's August 2024 guidelines cut the CPGRAMS redressal time from 30 to 21 days, with an interim reply if it will take longer and an appeal if you rate the resolution poor. <a href='"+L.cpgrams+"' target='_blank' rel='noopener'>pgportal.gov.in</a></li><li><b>State services: the notified limit, then automatic appeal.</b> Under the Haryana Right to Service Act, 2014, each notified service has a time limit; miss it and the <a href='"+L.aas+"' target='_blank' rel='noopener'>Auto Appeal System</a> escalates the case without you filing anything. The Commission can fine the officer.</li><li><b>Information: 30 days.</b> RTI replies are due in 30 days, 48 hours where life or liberty is involved. <a href='"+L.rti+"' target='_blank' rel='noopener'>rtionline.gov.in</a> for central bodies; the PIO of MCG, GMDA or HSVP for city matters.</li><li><b>Electricity: the regulator's standards.</b> HERC sets limits for restoring supply and fixing meters; DHBVN owes compensation for delay. Helpline 1912.</li><li><b>Air: GRAP stages.</b> When the AQI crosses thresholds, CAQM restrictions on construction, generators and burning apply automatically; violations can be reported on the Sameer app.</li></ul><p>Quote the deadline, attach the date you filed, and the conversation changes from a request to a compliance question.</p>"},
+ {slug:"segregate-at-source", t:"Segregate at source: what the 2016 rules ask of every Gurugram household and society", d:"25 Sep 2026", tag:"Guide", x:"Around 1,100 tonnes a day, most of it unprocessed. The rules put half the fix in residents' hands.",
+  b:"<p>Gurugram produces around 1,100 tonnes of waste a day and processes very little of it; most has ended up in the Bandhwari landfill. The Solid Waste Management Rules, 2016 place duties on both the corporation and the generator, and the generator's half is where a society can act this month.</p><h2>Every household</h2><ul><li>Three streams: wet (kitchen), dry (paper, plastic, metal, glass), and domestic hazardous (batteries, medicines, sanitary waste, paint).</li><li>Hand over only to the authorised collector; no dumping, no burning.</li><li>Construction debris goes to the designated collection point, not the roadside.</li></ul><h2>Every society over 100 kg a day</h2><p>Most gated societies and office complexes are bulk generators. The rules require them to process wet waste on site (composting or biomethanation) or through an authorised agency, and to hand over only dry and hazardous waste to the corporation. Societies that have done this cut their waste to the landfill by more than half.</p><h2>What the corporation owes you</h2><p>Door-to-door collection of segregated waste, separate transport so streams are not mixed again, and processing rather than dumping. If your collector mixes what you separated, that is a complaint: raise it on the <a href='"+L.gmdaPortal+"' target='_blank' rel='noopener'>GMDA portal</a> or the <a href='"+L.swachh+"' target='_blank' rel='noopener'>Swachhata app</a> with a photo.</p><p>The Forum runs composting set-up clinics for societies; ask through the join form.</p>"}
+];
+
+var MEDIA = {
+ photos:[{t:"Launch townhall", s:"Album appears after the first public townhall.", c:"var(--blue)"},{t:"Sector sewa drive", s:"Cleanliness and greening drives, sector by sector.", c:"var(--green)"},{t:"Policy dialogue with MCG and GMDA", s:"Photos and minutes of each dialogue.", c:"var(--saffron)"}],
+ videos:[{t:"The Forum in 90 seconds", s:"Explainer video, published with the launch.", c:"var(--ink)"},{t:"How to file a complaint that works", s:"Walkthrough of the GMDA portal and the escalation ladder.", c:"var(--green)"}],
+ news:[{t:"Registration of the Forum as a not-for-profit is under way.", d:"September 2026"},{t:"Core committee formation: professionals, community leaders and domain experts are being assembled.", d:"September 2026"},{t:"First public townhall: date and venue to be announced here and on WhatsApp.", d:"To be announced"}]
+};
+
+var STATS = {
+ period:"Sample figures for layout only. Live counts come from the Forum's case system once it launches.",
+ statuses:[["Received, being mapped","var(--line-strong)"],["Filed with the authority","var(--blue)"],["Past due, escalated","var(--saffron)"],["Resolved and closed","var(--green)"]],
+ rows:[["Garbage and sweeping",[3,14,6,11]],["Roads and footpaths",[2,13,5,9]],["Water and sewer",[1,8,3,6]],["Drains and waterlogging",[2,7,4,3]],["Streetlights",[1,4,1,5]],["Traffic and encroachment",[1,5,2,2]],["Illegal construction",[1,4,2,2]],["Parks and trees",[0,3,0,4]],["Electricity",[0,2,0,4]],["Pollution",[1,2,0,2]],["Stray animals",[0,1,0,2]]]
+};
+
+var HI = {"tb.emergency":"आपातकाल","tb.helpline":"नागरिक हेल्पलाइन","nav.track":"रिपोर्ट ट्रैक करें","brand.tag":"नागरिक और शासन, साझेदारी में","nav.about":"परिचय","nav.report":"समस्या दर्ज करें","nav.channels":"सरकारी माध्यम","nav.rights":"अधिकार","nav.who":"ज़िम्मेदार कौन","nav.charter":"नागरिक चार्टर","nav.wards":"वार्ड","nav.blog":"ब्लॉग","nav.media":"अपडेट","nav.dash":"डैशबोर्ड","nav.join":"जुड़ें",
+"hero.tag":"नागरिक और शासन — साझेदारी में","hero.h1":"गुरुग्राम उन व्यवस्थाओं से तेज़ बढ़ा जो इसे चलाने के लिए बनी थीं। हम वही दूरी पाटने आए हैं।","hero.lede":"फ़ोरम नागरिकों का एक नागरिक-नीति मंच है। हम निवासियों को उनकी समस्या के सही डेस्क तक पहुँचाते हैं, मामले पर नज़र रखते हैं, और बार-बार आने वाली समस्याओं को ऐसे नीति-प्रस्तावों में बदलते हैं जिन पर प्रशासन और जनप्रतिनिधि काम कर सकें।","hero.charterBtn":"आप शहर के लिए क्या करें, शहर आपके लिए क्या करे",
+"router.title":"मेरी समस्या के लिए ज़िम्मेदार कौन है?","router.issue":"समस्या","router.where":"गुरुग्राम में कहाँ","router.wherePh":"सेक्टर, कॉलोनी या सोसाइटी (वैकल्पिक)","router.go":"बताएँ, यह किसकी ज़िम्मेदारी है",
+"fact.pop":"शहर के निवासी (2024), संख्या तेज़ी से बढ़ रही है","fact.waste":"टन कचरा प्रतिदिन; लगभग 81% बिना प्रसंस्करण के डाला जाता है","fact.wardsWord":"वार्ड","fact.wards":"मार्च 2025 में चुने गए, MCG, GMDA और HSVP क्षेत्रों में","fact.wardsLink":"अपना वार्ड देखें","fact.corp":"कंपनियाँ और 600+ स्टार्टअप यहाँ स्थित",
+"why.k":"फ़ोरम क्यों","why.h":"दो कमियाँ गुरुग्राम को वैसा चलने नहीं देतीं जैसा निवासी चाहते हैं।","why.l":"शहर के पास पैसा, प्रतिभा और राजनीतिक समर्थन है। कमी है यहाँ रहने वालों और इसे चलाने वालों के बीच एक काम करने वाली कड़ी की।","why.g1":"शासन की कमी","why.g2":"भागीदारी की कमी","vis.h":"दृष्टि","mis.h":"उद्देश्य","obj.h":"हम क्या करने का संकल्प लेते हैं","prog.k":"हम क्या करते हैं","prog.h":"छह कार्यक्रम, एक चक्र: सुनें, सुलझाएँ, अंत तक साथ रहें।",
+"rep.k":"समस्या दर्ज करें","rep.h":"बताइए क्या बिगड़ा है। हम उसे सही डेस्क तक पहुँचाएँगे और अंत तक साथ रहेंगे।","rep.l":"जो भी आपको, आपके परिवार, सोसाइटी या सेक्टर को प्रभावित करे: सड़क, कचरा, पानी, नाले, बत्ती, पार्क, ट्रैफ़िक, सुरक्षा, निर्माण, प्रदूषण, बिल। आपातकाल में पहले 112 पर कॉल करें।",
+"f.cat":"समस्या किस बारे में है?","f.scope":"यह किसे प्रभावित करती है?","f.choose":"एक चुनें","f.s1":"मुझे या मेरे परिवार को","f.s2":"मेरी सोसाइटी या RWA को","f.s3":"मेरे सेक्टर या मोहल्ले को","f.s4":"पूरे शहर को","f.area":"सेक्टर, कॉलोनी या सोसाइटी","f.areaPh":"लिखना शुरू करें: सेक्टर 56, DLF फ़ेज़ 3, पालम विहार","f.ward":"नगर निगम वार्ड","f.wardHint":"पता नहीं?","f.wardDir":"वार्ड सूची","f.landmark":"सटीक जगह","f.landmarkPh":"कम्युनिटी सेंटर के गेट के पास, मकान 412 के सामने","f.geo":"मेरी लोकेशन लें","f.desc":"क्या हो रहा है?","f.descPh":"समस्या क्या है, कब से है, और अब तक क्या किया गया। पुराने शिकायत या टिकट नंबर मददगार हैं।","f.name":"आपका नाम","f.phone":"मोबाइल","f.email":"ईमेल (वैकल्पिक)","f.consent":"फ़ोरम इस मुद्दे पर मुझसे संपर्क कर सकता है और मेरे फ़ोन नंबर के बिना विवरण ज़िम्मेदार प्राधिकरण से साझा कर सकता है।","f.err":"रिपोर्ट भेजने के लिए चिह्नित खाने भरें।","f.send":"फ़ोरम को रिपोर्ट भेजें","f.note":"आपको तुरंत एक संदर्भ संख्या मिलेगी।","f.recent":"इस डिवाइस से भेजी गई रिपोर्टें",
+"tip1h":"प्राधिकरण के पास भी दर्ज करें","tip1":"फ़ोरम आधिकारिक शिकायत का विकल्प नहीं है। अपनी समस्या के लिए दिखाए गए माध्यम का उपयोग करें, टिकट नंबर नोट करें और रिपोर्ट में जोड़ें। इसी से हम मामला आगे बढ़ा पाते हैं।","tip2h":"फ़ोटो और तारीखें काम आती हैं","tip2":"तारीख वाली फ़ोटो, सटीक जगह और पुराना शिकायत नंबर एक शिकायत को ऐसा मामला बना देते हैं जिस पर अधिकारी कार्रवाई कर सके।","tip3h":"आगे क्या होगा","tip3":"फ़ोरम का स्वयंसेवक तीन कार्यदिवसों में रिपोर्ट जाँचता है, उसे ज़िम्मेदार डेस्क और आपके वार्ड पार्षद से जोड़ता है, और अगला कदम बताता है। किसी सेक्टर में बार-बार आने वाली समस्याएँ नीति-संवाद में जाती हैं।",
+"por.k":"सरकारी माध्यम","por.h":"हर सरकारी पोर्टल और हेल्पलाइन जो गुरुग्राम के निवासी को पता होनी चाहिए।","por.l":"ये वे व्यवस्थाएँ हैं जो रिकॉर्ड और समय-सीमा बनाती हैं। इस शहर में अधिकार-क्षेत्र आपस में मिलते हैं, इसलिए संदेह हो तो GMDA के एकीकृत पोर्टल से शुरू करें: यह शिकायत MCG, GMDA और MC मानेसर तक पहुँचाता है।",
+"ch.k":"आपके अधिकार","ch.h":"वे चार्टर जो किसी सरकारी अधिकारी की मेज़ पर समय-सीमा तय करते हैं।","ch.l":"अधिकतर निवासियों को पता नहीं कि कई सेवाओं और शिकायतों की क़ानूनी समय-सीमा, अपील का रास्ता और दंड पहले से तय हैं। इन्हें जानने से बातचीत बदल जाती है।",
+"st.k":"ज़िम्मेदार कौन","st.h":"हर वह व्यक्ति जिसका काम आपके हिस्से के गुरुग्राम को चलाना है।","st.l":"संसद से आपकी RWA तक: शहर की ज़िम्मेदारी की कड़ी, हर कड़ी क्या संभालती है, और वह आधिकारिक पेज जहाँ आप उन्हें सत्यापित कर और संपर्क कर सकें।","st.wardH":"आपका वार्ड और आपके पार्षद","st.wardP":"गुरुग्राम ने मार्च 2025 में 36 वार्ड पार्षद चुने। आपका पार्षद स्थानीय नागरिक मुद्दों के लिए पहला निर्वाचित ज़िम्मेदार है और MCG सदन में बैठता है जो शहर का बजट पास करता है।","st.wardBtn":"वार्ड सूची खोलें",
+"cv.k":"नागरिक चार्टर","cv.h":"आप शहर के लिए क्या करें, और शहर आपके लिए क्या करे।","cv.l":"कर्तव्यों के बिना अधिकार शहर नहीं बनाते। यह चार्टर दोनों तय करता है, आपके घर, सोसाइटी, वार्ड और शहर के लिए, और आपको बताता है कि आप कहाँ खड़े हैं।","cv.btn":"नागरिक चार्टर खोलें","cv.t1h":"आपका घर","cv.t1":"कचरा अलग करें, संपत्ति कर समय पर भरें, वर्षा-जल संचयन करें, बाहर का फ़ुटपाथ खाली रखें।","cv.t2h":"आपका वार्ड","cv.t2":"अपने पार्षद को जानें, वार्ड समिति में जाएँ, गुरुग्राम में मतदाता पंजीकरण कराएँ, शिकायत वहीं दर्ज करें जहाँ उसकी गिनती हो।",
+"bl.k":"ब्लॉग से","bl.h":"इस शहर में काम करवाने के व्यावहारिक तरीक़े।","bl.all":"सभी लेख","jn.k":"फ़ोरम से जुड़ें","jn.h":"आइए वह गुरुग्राम बनाएँ जिसमें हम सब रहना चाहते हैं।","jn.l":"फ़ोरम को पेशेवर, उद्यमी, छात्र और सामुदायिक नेता चलाते हैं। चुनें कि आप कैसे योगदान देना चाहते हैं।","jn.email":"ईमेल","jn.how":"मैं इस रूप में जुड़ना चाहता/चाहती हूँ","jn.sector":"सेक्टर या क्षेत्र","jn.note":"कुछ और जो आप बताना चाहें (वैकल्पिक)","f.err2":"भेजने के लिए चिह्नित खाने भरें।","jn.send":"मेरा विवरण भेजें",
+"cvp.l":"जो आप पहले से करते हैं उसे टिक करें। यह सूची केवल आपके डिवाइस पर सहेजी जाती है। हर अधिकार उस नियम या माध्यम से जुड़ा है जो उसे लागू करता है।","cvp.score":"आपका नागरिक स्कोर","cvp.scoreP":"चारों दायरों में। इसे आपके अलावा कोई नहीं देखता।",
+"wd.k":"वार्ड सूची","wd.h":"आपका वार्ड, आपका पार्षद।","wd.l":"2 मार्च 2025 को चुने गए सभी 36 पार्षद, घोषित परिणाम के अनुसार, सत्यापन के आधिकारिक स्रोतों सहित। कार्यालय के फ़ोन नंबर और ईमेल पार्षदों से ही एकत्र किए जा रहे हैं।","wd.s1":"नक़्शे पर अपना वार्ड खोजें","wd.s2":"या मतदाता सूची से पता करें","wd.s3":"फिर हर जगह इसका उपयोग करें","wd.s3a":"समस्या दर्ज करें","wd.search":"वार्ड नंबर या पार्षद के नाम से खोजें","wd.c1":"वार्ड","wd.c2":"पार्षद","wd.c3":"दल (चुनाव के समय)","wd.c4":"सत्यापन और संपर्क",
+"blp.l":"छोटे, स्रोत-सहित और गुरुग्राम के लिए विशिष्ट। नए लेख फ़ोरम की कंटेंट टीम प्रकाशित करती है।","post.back":"सभी लेख","md.h":"ज़मीन से फ़ोटो, वीडियो और ख़बरें।","md.l":"हर अभियान, संवाद और टाउनहॉल का एल्बम यहाँ आता है, जिसे फ़ोरम की टीम कंटेंट सिस्टम से प्रकाशित करती है। अभी कुछ प्रकाशित नहीं हुआ है; नीचे के टाइल लेआउट दिखाते हैं।","md.photos":"फ़ोटो एल्बम","md.videos":"वीडियो","md.news":"प्रेस और घोषणाएँ","md.how":"टीम यहाँ कैसे प्रकाशित करती है","md.howP":"प्रोडक्शन साइट पर इस पेज की हर चीज़ कंटेंट सिस्टम में एक रिकॉर्ड है, इसलिए डेवलपर की ज़रूरत नहीं:",
+"db.h":"निवासियों ने क्या रिपोर्ट किया, और हर रिपोर्ट कहाँ खड़ी है।","db.l":"फ़ोरम खुद को उसी मानक पर रखता है जिसकी माँग वह प्रशासन से करता है। हर रिपोर्ट यहाँ कारण और स्थिति के अनुसार गिनी जाती है, और आँकड़े केस सिस्टम से अपडेट होते हैं।","db.byCause":"कारण और स्थिति के अनुसार रिपोर्टें","db.days":"कार्यदिवस","db.daysPlain":"दिन","db.monthly":"हर महीने","db.c1":"रिपोर्ट की समीक्षा, ज़िम्मेदार डेस्क से जोड़ने और आपको अगला कदम बताने के लिए।","db.c2":"बिना कार्रवाई पड़े टिकट को एक स्तर ऊपर भेजने से पहले, CPGRAMS की समय-सीमा के अनुरूप।","db.c3":"इस डैशबोर्ड और नीति-संवाद में ले जाए गए मुद्दों की सूची का प्रकाशन।",
+"tr.h":"मेरी रिपोर्ट कहाँ है?","tr.l":"आपको मिली संदर्भ संख्या दर्ज करें। हर रिपोर्ट के पाँच चरण एक जैसे हैं, और हर बदलाव पर आपको बताया जाता है।","tr.ref":"संदर्भ संख्या","tr.go":"स्थिति दिखाएँ",
+"ft.about":"निवासियों, सरकारी निकायों और जनप्रतिनिधियों को जोड़कर गुरुग्राम के विकास को साथ मिलकर गढ़ने वाला नागरिक-नीति मंच।","ft.contact":"संपर्क","ft.lead":"परियोजना प्रमुख","ft.pages":"पेज","ft.social":"LinkedIn, Instagram और WhatsApp समुदाय के लिंक लॉन्च के साथ शुरू होंगे।","ft.reg":"गुरुग्राम विज़न फ़ोरम। ग़ैर-लाभकारी संस्था के रूप में पंजीकरण प्रक्रिया में है।","ft.notgov":"यह आधिकारिक सरकारी वेबसाइट नहीं है। आपातकाल: 112।"};
+
+return {L:L, CATS:CATS, PORTALS:PORTALS, FILTERS:FILTERS, CHARTERS:CHARTERS, TIERS:TIERS, WARDS:WARDS, AREAS:AREAS, CIVIC:CIVIC, BLOG:BLOG, MEDIA:MEDIA, STATS:STATS, HI:HI};
+})();
+</script>
+<script>
+(function(){
+"use strict";
+var D = window.GVF, L = D.L;
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function ext(h){return h && h.indexOf("http")===0 ? ' target="_blank" rel="noopener" class="ext"' : ''}
+function toast(msg){var t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove("show")},2600)}
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function load(k,d){try{var v=localStorage.getItem(k); return v?JSON.parse(v):d}catch(e){return d}}
+function catById(id){for(var i=0;i<D.CATS.length;i++){if(D.CATS[i].id===id)return D.CATS[i]} return D.CATS[D.CATS.length-1]}
+
+/* ---------- language ---------- */
+var EN = {};
+document.querySelectorAll("[data-i18n]").forEach(function(el){var k=el.getAttribute("data-i18n"); if(!(k in EN)) EN[k]=el.textContent});
+var ENPH = {};
+document.querySelectorAll("[data-i18n-ph]").forEach(function(el){var k=el.getAttribute("data-i18n-ph"); if(!(k in ENPH)) ENPH[k]=el.getAttribute("placeholder")});
+function applyLang(lang){
+  var dict = lang==="hi" ? D.HI : EN;
+  document.querySelectorAll("[data-i18n]").forEach(function(el){var k=el.getAttribute("data-i18n"); if(dict[k]!=null) el.textContent=dict[k]});
+  document.querySelectorAll("[data-i18n-ph]").forEach(function(el){var k=el.getAttribute("data-i18n-ph"); var v = lang==="hi" ? D.HI[k] : ENPH[k]; if(v!=null) el.setAttribute("placeholder",v)});
+  document.documentElement.lang = lang;
+  $("langBtn").textContent = lang==="hi" ? "English" : "हिंदी";
+  $("heroHindi").style.display = lang==="hi" ? "none" : "";
+  store("gvf_lang", lang);
+}
+var curLang = load("gvf_lang","en");
+if(curLang==="hi") applyLang("hi");
+$("langBtn").addEventListener("click",function(){curLang = curLang==="hi" ? "en" : "hi"; applyLang(curLang); toast(curLang==="hi" ? "हिंदी में दिखाया जा रहा है; लंबे लेख अभी अंग्रेज़ी में हैं" : "Showing English")});
+
+/* ---------- menu ---------- */
+var menuBtn=$("menuBtn"), navLinks=$("navLinks");
+menuBtn.addEventListener("click",function(){var o=navLinks.classList.toggle("open"); menuBtn.setAttribute("aria-expanded",o?"true":"false")});
+navLinks.addEventListener("click",function(e){if(e.target.tagName==="A"){navLinks.classList.remove("open"); menuBtn.setAttribute("aria-expanded","false")}});
+
+/* ---------- routing ---------- */
+var PAGES = {"charter":"page-charter","wards":"page-wards","blog":"page-blog","post":"page-post","media":"page-media","dashboard":"page-dashboard","track":"page-track"};
+function route(){
+  var h = location.hash || "#top";
+  var isPage = h.indexOf("#/")===0;
+  document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active")});
+  if(isPage){
+    var parts = h.slice(2).split("/"), name = parts[0], arg = parts[1];
+    if(name==="blog" && arg){ renderPost(arg); name="post" }
+    var pid = PAGES[name];
+    if(!pid){ location.hash="#top"; return }
+    $("home").classList.add("hidden");
+    $(pid).classList.add("active");
+    if(name==="dashboard") renderDashboard();
+    if(name==="track"){ var q=parts[1]; if(q){ $("trRef").value=decodeURIComponent(q); showTrack() } }
+    window.scrollTo(0,0);
+  } else {
+    $("home").classList.remove("hidden");
+    var id = h.slice(1); var el = id ? document.getElementById(id) : null;
+    if(el){ setTimeout(function(){ el.scrollIntoView({behavior:"smooth", block:"start"}) }, 30) }
+  }
+  document.querySelectorAll(".nav-links a").forEach(function(a){ a.classList.toggle("on", a.getAttribute("href")===h) });
+}
+window.addEventListener("hashchange", route);
+
+/* ---------- shared renderers ---------- */
+function channelsHTML(c){
+  var h='<ul class="chan">';
+  for(var i=0;i<c.channels.length;i++){var ch=c.channels[i];
+    h+='<li><span class="k">'+esc(ch.k)+'</span><span>'+(ch.href?'<a href="'+ch.href+'"'+ext(ch.href)+'>'+esc(ch.v)+'</a>':esc(ch.v))+'</span></li>'}
+  return h+'</ul>';
+}
+function ladderHTML(c){
+  var h='<div class="ladder"><strong>If it is not fixed, escalate in this order</strong><ol>';
+  for(var i=0;i<c.ladder.length;i++){h+='<li>'+esc(c.ladder[i])+'</li>'}
+  return h+'</ol></div>';
+}
+function fillCats(sel, placeholder){
+  var h = placeholder ? '<option value="">'+esc(placeholder)+'</option>' : '';
+  for(var i=0;i<D.CATS.length;i++){h+='<option value="'+D.CATS[i].id+'">'+esc(D.CATS[i].label)+'</option>'}
+  sel.innerHTML=h;
+}
+
+/* ---------- hero router ---------- */
+fillCats($("rCat"));
+$("rGo").addEventListener("click",function(){
+  var c=catById($("rCat").value), where=$("rWhere").value.trim(), box=$("rResult");
+  box.innerHTML='<p class="agency">'+esc(c.agency)+'</p><p class="owns">'+esc(c.owns)+(where?' You mentioned '+esc(where)+'; add that exact location to the complaint.':'')+'</p>'+channelsHTML(c)+ladderHTML(c)+
+    '<div class="result-actions"><button class="btn btn-primary btn-sm" type="button" data-report="'+c.id+'">Report this through the Forum</button>'+(c.channels[0].href?'<a class="btn btn-ghost btn-sm" href="'+c.channels[0].href+'" target="_blank" rel="noopener">Open the official channel</a>':'')+'</div>';
+  box.classList.add("show");
+});
+document.addEventListener("click",function(e){
+  var b=e.target.closest("[data-report]"); if(!b)return;
+  $("fCat").value=b.getAttribute("data-report"); showHint();
+  if($("rWhere").value.trim() && !$("fWhere").value){$("fWhere").value=$("rWhere").value.trim()}
+  if(location.hash!=="#report"){ location.hash="#report" } else { $("report").scrollIntoView({behavior:"smooth"}) }
+  setTimeout(function(){$("fScope").focus()},600);
+});
+
+/* ---------- areas + wards in the form ---------- */
+$("areaList").innerHTML = D.AREAS.map(function(a){return '<option value="'+esc(a)+'">'}).join("");
+(function(){
+  var h='<option value="">Not sure yet</option>';
+  D.WARDS.forEach(function(w){h+='<option value="'+w[0]+'">Ward '+w[0]+' · '+esc(w[1])+'</option>'});
+  $("fWard").innerHTML=h;
+})();
+$("fWard").addEventListener("change",function(){
+  var n=parseInt(this.value,10), box=$("wardHint");
+  if(!n){box.classList.remove("show"); box.innerHTML=""; return}
+  var w=D.WARDS[n-1];
+  box.innerHTML='<strong>Ward '+n+'.</strong> Councillor '+esc(w[1])+' ('+esc(w[2])+', elected March 2025). Your report will be copied to the councillor once the Forum has verified the office contact. <a href="#/wards">Ward directory</a>';
+  box.classList.add("show");
+});
+var geo = null;
+$("geoBtn").addEventListener("click",function(){
+  var out=$("geoOut");
+  if(!navigator.geolocation){out.textContent="Location is not available in this browser."; return}
+  out.textContent="Finding you…";
+  navigator.geolocation.getCurrentPosition(function(p){
+    geo = {lat:p.coords.latitude.toFixed(5), lng:p.coords.longitude.toFixed(5)};
+    out.innerHTML='Pinned '+geo.lat+', '+geo.lng+' · <a href="https://www.google.com/maps?q='+geo.lat+','+geo.lng+'" target="_blank" rel="noopener">check on a map</a> · <a href="'+L.onemap+'" target="_blank" rel="noopener">find the ward on OneMap</a>';
+  }, function(){ out.textContent="Could not get a location. Type the spot instead." }, {enableHighAccuracy:true, timeout:10000});
+});
+
+/* ---------- report form ---------- */
+fillCats($("fCat"),"Choose the closest match");
+function showHint(){
+  var id=$("fCat").value, h=$("fHint");
+  if(!id){h.classList.remove("show"); h.innerHTML=""; return}
+  var c=catById(id), first=c.channels[0];
+  h.innerHTML='<strong>Responsible desk:</strong> '+esc(c.agency)+'. Also file it on the official channel: '+(first.href?'<a href="'+first.href+'"'+ext(first.href)+'>'+esc(first.v)+'</a>':esc(first.v))+', and add the ticket number in the description.';
+  h.classList.add("show");
+}
+$("fCat").addEventListener("change",showHint);
+function validate(form, ids){
+  var ok=true;
+  ids.forEach(function(id){var el=$(id); var v=el.type==="checkbox"?el.checked:el.value.trim();
+    var bad = !v || (el.type==="tel" && !/^\+?[0-9\s-]{10,14}$/.test(el.value.trim())) || (el.type==="email" && el.required && !/^\S+@\S+\.\S+$/.test(el.value.trim()));
+    if(bad){ok=false; el.style.borderColor="var(--red)"; el.setAttribute("aria-invalid","true")} else {el.style.borderColor=""; el.removeAttribute("aria-invalid")}});
+  return ok;
+}
+function makeRef(){var a="ABCDEFGHJKLMNPQRSTUVWXYZ23456789", s=""; for(var i=0;i<5;i++){s+=a[Math.floor(Math.random()*a.length)]} return "GVF-"+new Date().getFullYear()+"-"+s}
+function recents(){return load("gvf_reports",[])}
+function renderRecent(){
+  var list=recents(), box=$("recent"), ul=$("recentList");
+  if(!list.length){box.hidden=true; return}
+  ul.innerHTML=list.map(function(r){return '<li><span><a href="#/track/'+r.ref+'"><b>'+esc(r.ref)+'</b></a> '+esc(r.cat)+(r.ticket?' · ticket '+esc(r.ticket):'')+'</span><span class="m">'+esc(r.where)+(r.ward?' · ward '+r.ward:'')+' · '+esc(r.date)+'</span></li>'}).join("");
+  box.hidden=false;
+}
+renderRecent();
+$("reportForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var ok=validate(this,["fCat","fScope","fWhere","fLandmark","fDesc","fName","fPhone","fConsent"]);
+  $("fErr").classList.toggle("show",!ok);
+  if(!ok){var bad=this.querySelector('[aria-invalid="true"]'); if(bad)bad.focus(); return}
+  var c=catById($("fCat").value), ref=makeRef(), ward=$("fWard").value;
+  var date=new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+  var rec={ref:ref, catId:c.id, cat:c.label, where:$("fWhere").value.trim(), ward:ward, date:date, stage:0, ticket:""};
+  var list=recents(); list.unshift(rec); store("gvf_reports", list.slice(0,20)); renderRecent();
+  var body="Reference: "+ref+"\nIssue: "+c.label+"\nAffects: "+$("fScope").value+"\nArea: "+rec.where+(ward?"\nWard: "+ward:"")+"\nExact spot: "+$("fLandmark").value.trim()+(geo?"\nCoordinates: "+geo.lat+", "+geo.lng:"")+"\n\n"+$("fDesc").value.trim()+"\n\nName: "+$("fName").value.trim()+"\nMobile: "+$("fPhone").value.trim()+($("fEmail").value.trim()?"\nEmail: "+$("fEmail").value.trim():"")+"\n\nResponsible desk (auto-mapped): "+c.agency;
+  var mail="mailto:contact@gurugramvisionforum.org?subject="+encodeURIComponent("Issue report "+ref+": "+c.label)+"&body="+encodeURIComponent(body);
+  var box=$("confirm");
+  var steps='<div class="next-steps"><strong>Next: file it officially, then add the ticket number here.</strong><ol>';
+  c.channels.forEach(function(ch){ if(ch.href && ch.href.indexOf("tel:")!==0) steps+='<li>'+esc(ch.k)+': <a href="'+ch.href+'"'+ext(ch.href)+'>'+esc(ch.v)+'</a></li>'; else steps+='<li>'+esc(ch.k)+': '+esc(ch.v)+'</li>' });
+  steps+='</ol><div class="field" style="margin-top:.6rem; max-width:360px"><label for="tk_'+ref+'">Official ticket or complaint number</label><div style="display:flex; gap:.5rem"><input type="text" id="tk_'+ref+'" placeholder="e.g. GMDA ticket number"><button class="btn btn-ghost btn-sm" type="button" data-ticket="'+ref+'">Save</button></div></div></div>';
+  box.innerHTML='<div class="ref">'+ref+'</div><p style="margin:.3rem 0 .8rem"><strong>Report received.</strong> Keep this reference. A Forum volunteer will map it to the responsible desk and your ward councillor and get back to you within three working days. <a href="#/track/'+ref+'">Track it</a>.</p><p><strong>Responsible desk:</strong> '+esc(c.agency)+'</p>'+steps+
+    '<div class="result-actions"><a class="btn btn-primary btn-sm" href="'+mail+'">Email a copy to the Forum</a><button class="btn btn-ghost btn-sm" type="button" id="copyBtn">Copy the report</button></div>';
+  box.classList.add("show");
+  $("copyBtn").addEventListener("click",function(){ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(body).then(function(){toast("Report copied")},function(){toast("Could not copy; select the text instead")})}else{toast("Copy is not supported in this browser")} });
+  this.reset(); showHint(); $("wardHint").classList.remove("show"); geo=null; $("geoOut").textContent="";
+  box.scrollIntoView({behavior:"smooth", block:"center"});
+});
+document.addEventListener("click",function(e){
+  var b=e.target.closest("[data-ticket]"); if(!b)return;
+  var ref=b.getAttribute("data-ticket"), v=$("tk_"+ref).value.trim(); if(!v){toast("Enter the ticket number first"); return}
+  var list=recents(); list.forEach(function(r){ if(r.ref===ref){ r.ticket=v; r.stage=Math.max(r.stage,2) } }); store("gvf_reports",list); renderRecent(); toast("Ticket "+v+" saved with "+ref);
+});
+
+/* ---------- join ---------- */
+$("joinForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var ok=validate(this,["jName","jPhone","jEmail","jHow"]);
+  $("jErr").classList.toggle("show",!ok);
+  if(!ok){var bad=this.querySelector('[aria-invalid="true"]'); if(bad)bad.focus(); return}
+  var body="Name: "+$("jName").value.trim()+"\nMobile: "+$("jPhone").value.trim()+"\nEmail: "+$("jEmail").value.trim()+"\nJoin as: "+$("jHow").value+"\nArea: "+$("jSector").value.trim()+"\n\n"+$("jNote").value.trim();
+  var mail="mailto:contact@gurugramvisionforum.org?subject="+encodeURIComponent("Joining the Forum as "+$("jHow").value)+"&body="+encodeURIComponent(body);
+  var box=$("jConfirm");
+  box.innerHTML='<p style="margin:0 0 .6rem"><strong>Thank you, '+esc($("jName").value.trim().split(" ")[0])+'.</strong> Someone from the Forum will write to you within a week with the next step for a '+esc($("jHow").value.toLowerCase())+'.</p><a class="btn btn-green btn-sm" href="'+mail+'">Email a copy to the Forum</a>';
+  box.classList.add("show"); this.reset(); box.scrollIntoView({behavior:"smooth", block:"center"});
+});
+
+/* ---------- portals ---------- */
+var activeFilter="all";
+function renderFilters(){ $("pFilters").innerHTML=D.FILTERS.map(function(f){return '<button class="chip" type="button" data-f="'+f[0]+'" aria-pressed="'+(f[0]===activeFilter)+'">'+f[1]+'</button>'}).join("") }
+function renderPortals(){
+  var lv={city:"Gurugram", state:"Haryana", central:"Government of India"};
+  var items=D.PORTALS.filter(function(p){return activeFilter==="all"||p.t.indexOf(activeFilter)>-1});
+  $("portalList").innerHTML=items.length?items.map(function(p){ return '<li class="portal"><div><div class="name"><a href="'+p.h+'" target="_blank" rel="noopener" class="ext">'+esc(p.n)+'</a></div><span class="lvl '+p.l+'">'+lv[p.l]+'</span></div><p class="for">'+esc(p.f)+'</p><p class="how">'+p.how+'</p></li>' }).join(""):'<li class="empty">Nothing under this filter yet.</li>';
+}
+renderFilters(); renderPortals();
+$("pFilters").addEventListener("click",function(e){var b=e.target.closest("[data-f]"); if(!b)return; activeFilter=b.getAttribute("data-f"); renderFilters(); renderPortals()});
+
+/* ---------- charters ---------- */
+$("charterList").innerHTML=D.CHARTERS.map(function(c,i){
+  var src = c.src.map(function(s){return '<a href="'+s[1]+'"'+ext(s[1])+'>'+esc(s[0])+'</a>'}).join(" · ");
+  return '<details'+(i===0?' open':'')+'><summary><span>'+esc(c.t)+'</span><span class="plus" aria-hidden="true">+</span></summary><div class="body">'+c.b+'<p class="src muted">Source: '+src+'</p></div></details>'
+}).join("");
+
+/* ---------- stakeholders ---------- */
+$("tiers").innerHTML=D.TIERS.map(function(t){
+  return '<div class="tier"><div class="th">'+esc(t.h)+'<small>'+esc(t.s)+'</small></div><div class="roles">'+t.r.map(function(r){
+    var links=(r.links||[]).map(function(l){return '<a href="'+l[1]+'"'+ext(l[1])+'>'+esc(l[0])+'</a>'}).join("");
+    return '<div class="role"><b>'+esc(r.b)+'</b>'+(r.who?'<div class="who">'+esc(r.who)+'</div>':'')+'<div class="owns">'+esc(r.owns)+'</div><div class="links">'+links+'</div></div>'
+  }).join("")+'</div></div>'
+}).join("");
+
+/* ---------- blog ---------- */
+function postCard(p){ return '<article class="post-card"><div class="meta">'+esc(p.tag)+' · '+esc(p.d)+'</div><h3><a href="#/blog/'+p.slug+'">'+esc(p.t)+'</a></h3><p>'+esc(p.x)+'</p></article>' }
+$("latestPosts").innerHTML=D.BLOG.slice(0,3).map(postCard).join("");
+$("blogList").innerHTML=D.BLOG.map(postCard).join("");
+function renderPost(slug){
+  var p=null; D.BLOG.forEach(function(x){ if(x.slug===slug) p=x });
+  $("postBody").innerHTML = p ? '<div class="meta muted small">'+esc(p.tag)+' · '+esc(p.d)+'</div><h1 style="font-size:clamp(1.8rem,3.6vw,2.6rem)">'+esc(p.t)+'</h1>'+p.b : '<p>That post does not exist. <a href="#/blog">All posts</a></p>';
+}
+
+/* ---------- civic charter ---------- */
+var cvTab = load("gvf_cvtab","home"), cvChecks = load("gvf_civic",{});
+function renderCivic(){
+  $("cvTabs").innerHTML=D.CIVIC.map(function(s){return '<button class="tab" role="tab" type="button" data-tab="'+s.id+'" aria-selected="'+(s.id===cvTab)+'">'+esc(s.t)+'</button>'}).join("");
+  var s=null; D.CIVIC.forEach(function(x){ if(x.id===cvTab) s=x });
+  var owe=s.owe.map(function(o){ return '<li><label'+(o.dont?' class="dont"':'')+'><input type="checkbox" data-cv="'+o.id+'"'+(cvChecks[o.id]?' checked':'')+'><span>'+esc(o.t)+'</span></label></li>' }).join("");
+  var ent=s.ent.map(function(x){ return '<li><b>'+esc(x.t)+'</b><a href="'+x.h+'"'+ext(x.h)+'>'+esc(x.l)+'</a></li>' }).join("");
+  $("cvBody").innerHTML='<div class="owe"><div><h3><span class="sw" style="background:var(--green)"></span>What you owe the city</h3><ul class="cl">'+owe+'</ul></div><div><h3><span class="sw" style="background:var(--blue)"></span>What the city owes you</h3><ul class="ent">'+ent+'</ul></div></div>';
+  renderScore();
+}
+function renderScore(){
+  var total=0, done=0; D.CIVIC.forEach(function(s){ s.owe.forEach(function(o){ total++; if(cvChecks[o.id]) done++ }) });
+  $("cvScore").textContent=done+" / "+total; $("cvFill").style.width=(total?Math.round(done/total*100):0)+"%";
+  var pct=total?done/total:0;
+  $("cvMsg").textContent = pct===0 ? "Tick what already applies to you." : pct<.4 ? "A start. The ward items are the fastest wins." : pct<.8 ? "Better than most of the city. Keep going." : "You are the resident every ward needs.";
+}
+renderCivic();
+$("cvTabs").addEventListener("click",function(e){var b=e.target.closest("[data-tab]"); if(!b)return; cvTab=b.getAttribute("data-tab"); store("gvf_cvtab",cvTab); renderCivic()});
+$("cvBody").addEventListener("change",function(e){var c=e.target.closest("[data-cv]"); if(!c)return; cvChecks[c.getAttribute("data-cv")]=c.checked; store("gvf_civic",cvChecks); renderScore()});
+
+/* ---------- wards ---------- */
+function renderWards(q){
+  q=(q||"").toLowerCase();
+  var rows=D.WARDS.filter(function(w){ return !q || String(w[0])===q || (w[1]+" "+w[2]).toLowerCase().indexOf(q)>-1 });
+  $("wardBody").innerHTML = rows.length ? rows.map(function(w){ return '<tr><td class="n">'+w[0]+'</td><td>'+esc(w[1])+'</td><td>'+esc(w[2])+'</td><td><a href="'+L.mcg+'" target="_blank" rel="noopener" class="ext">MCG</a> · <a href="'+L.voterList+'" target="_blank" rel="noopener" class="ext">Ward '+w[0]+' voter list</a> · <a href="#report">Report an issue in ward '+w[0]+'</a></td></tr>' }).join("") : '<tr><td colspan="4" class="empty">No ward matches that.</td></tr>';
+}
+renderWards("");
+$("wardSearch").addEventListener("input",function(){renderWards(this.value.trim())});
+
+/* ---------- media ---------- */
+function tile(m, video){
+  return '<div class="tile"><svg viewBox="0 0 400 300" role="img" aria-label="'+esc(m.t)+'"><rect width="400" height="300" fill="'+m.c+'" opacity=".12"/><g fill="'+m.c+'" opacity=".35"><rect x="30" y="200" width="40" height="70"/><rect x="80" y="160" width="30" height="110"/><rect x="120" y="180" width="50" height="90"/><rect x="180" y="130" width="34" height="140"/><rect x="224" y="170" width="26" height="100"/><rect x="260" y="150" width="46" height="120"/><rect x="316" y="190" width="54" height="80"/></g>'+(video?'<circle cx="200" cy="130" r="34" fill="'+m.c+'" opacity=".9"/><polygon points="190,112 190,148 220,130" fill="#fff"/>':'')+'<text x="20" y="40" font-family="Bricolage Grotesque, Arial" font-size="18" font-weight="700" fill="'+m.c+'">Sample</text></svg><div class="cap"><b>'+esc(m.t)+'</b>'+esc(m.s)+'</div></div>';
+}
+$("photoTiles").innerHTML=D.MEDIA.photos.map(function(m){return tile(m,false)}).join("");
+$("videoTiles").innerHTML=D.MEDIA.videos.map(function(m){return tile(m,true)}).join("");
+$("newsList").innerHTML=D.MEDIA.news.map(function(n){return '<li><b>'+esc(n.t)+'</b><span class="muted small" style="margin-left:.4rem">'+esc(n.d)+'</span></li>'}).join("");
+
+/* ---------- dashboard ---------- */
+function renderDashboard(){
+  var S=D.STATS, tot=[0,0,0,0], all=0;
+  S.rows.forEach(function(r){ r[1].forEach(function(v,i){ tot[i]+=v; all+=v }) });
+  $("dbNote").textContent=S.period;
+  var k='<div class="kpi"><b>'+all+'</b><span>reports received</span></div>';
+  S.statuses.forEach(function(s,i){ k+='<div class="kpi"><b>'+tot[i]+'</b><span><span class="sw" style="background:'+s[1]+'"></span>'+esc(s[0])+'</span></div>' });
+  $("kpis").innerHTML=k;
+  var max=0; S.rows.forEach(function(r){ var s=r[1].reduce(function(a,b){return a+b},0); if(s>max)max=s });
+  $("bars").innerHTML=S.rows.map(function(r){ var s=r[1].reduce(function(a,b){return a+b},0); var segs=r[1].map(function(v,i){ return v?'<div class="seg" style="width:'+(v/s*100)+'%; background:'+S.statuses[i][1]+'" title="'+esc(S.statuses[i][0])+': '+v+'"></div>':'' }).join(""); return '<div class="bar"><span>'+esc(r[0])+'</span><div class="track" style="width:'+(s/max*100)+'%">'+segs+'</div><span class="tot">'+s+'</span></div>' }).join("");
+  $("legend").innerHTML=S.statuses.map(function(s){return '<span><span class="sw" style="background:'+s[1]+'"></span>'+esc(s[0])+'</span>'}).join("");
+  var list=recents(), box=$("dbLocal");
+  if(list.length){ $("dbLocalList").innerHTML=list.map(function(r){return '<li><span><a href="#/track/'+r.ref+'"><b>'+esc(r.ref)+'</b></a> '+esc(r.cat)+'</span><span class="m">'+esc(r.date)+'</span></li>'}).join(""); box.hidden=false } else box.hidden=true;
+}
+
+/* ---------- track ---------- */
+var STAGES=[["Received","Your report is with the Forum and is being read."],["Mapped to the responsible desk","A volunteer has identified the agency, the officer level and your ward councillor."],["Filed with the authority","An official ticket exists. Its number is on the report."],["Escalated","No action in time; the case has moved one level up the ladder."],["Resolved and closed","You confirmed the fix, or the case was closed with a reason."]];
+function showTrack(){
+  var ref=$("trRef").value.trim().toUpperCase(), out=$("trOut");
+  if(!ref){out.innerHTML='<p class="muted">Enter a reference number.</p>'; return}
+  var r=null; recents().forEach(function(x){ if(x.ref===ref) r=x });
+  if(!r){ out.innerHTML='<p><strong>'+esc(ref)+'</strong> is not on this device. Once the Forum case system is live, any reference can be tracked here from any device. Until then, reply to your confirmation email or call the Forum.</p>'; return }
+  var stage=r.stage||0;
+  out.innerHTML='<p><strong>'+esc(r.ref)+'</strong> · '+esc(r.cat)+' · '+esc(r.where)+(r.ward?' · ward '+r.ward:'')+' · sent '+esc(r.date)+(r.ticket?' · official ticket '+esc(r.ticket):'')+'</p><ol class="timeline">'+STAGES.map(function(s,i){ return '<li class="'+(i<stage?'done':i===stage?'now':'')+'"><b>'+esc(s[0])+'</b><span>'+esc(s[1])+'</span></li>' }).join("")+'</ol>';
+}
+$("trGo").addEventListener("click",showTrack);
+$("trRef").addEventListener("keydown",function(e){ if(e.key==="Enter") showTrack() });
+
+route();
+})();
+</script>
+</body>
+</html>
