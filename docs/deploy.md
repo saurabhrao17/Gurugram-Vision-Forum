@@ -23,13 +23,21 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
    - `SUPABASE_SERVICE_ROLE_KEY`: from Supabase → Settings → API. Mark it Sensitive. Never put it in `site/`.
    - `IP_HASH_SALT`: any long random string.
    - `TURNSTILE_SECRET` (optional): turns on bot checks for both forms. Needs the matching site key in `site/index.html`.
+   - `GOOGLE_MAPS_KEY` (optional): Google Geocoding for the place search; without it the API uses OpenStreetMap Nominatim.
 4. **Domain.** Vercel → Domains: add `gurugramvisionforum.org` and `www`, follow the DNS records shown at the registrar. Add `gurgaonvisionforum.org` as a redirect to the first.
-5. **Volunteer desk and the first owner.** The desk is `site/triage.html` (linked from the public footer as "Volunteer desk"). Sign-in is Supabase Auth with email and password; the API checks every request against `public.staff`. Bootstrap once: in Supabase → Authentication → Users → Add user → Create new user, enter the owner's email and a password with "Auto Confirm User" ticked. Then run in the SQL editor:
+5. **Volunteer desk and the first owner.** The desk is the `#/desk` route of the main site (linked from the public footer as "Volunteer sign-in"; a "Desk" item appears in the navigation once signed in; the old `triage.html` redirects). Sign-in is Supabase Auth with email and password; the API checks every request against `public.staff`. Bootstrap once: in Supabase → Authentication → Users → Add user → Create new user, enter the owner's email and a password with "Auto Confirm User" ticked. Then run in the SQL editor:
    ```sql
    insert into public.staff (user_id, name, role, email)
    select id, 'Owner name', 'owner', email from auth.users where email = 'owner@example.org';
    ```
-   From then on, owners and coordinators add volunteers from the desk's Team tab (no email is sent; hand the temporary password over in person). Roles: `owner` (everything, can remove accounts), `coordinator` (triage plus adding triage volunteers), `triage` (reports only).
+   From then on, owners and coordinators add volunteers from the desk's Team tab (no email is sent; hand the temporary password over in person). Roles: `owner` (everything, can remove accounts), `coordinator` (everything except removing accounts), `triage` = ward volunteer (sees only the wards assigned to them).
+6. **Ward volunteers.** Each ward has one lead and one support volunteer, set in the Team tab's ward grid (`ward_volunteers` table). Every ticket shows its ward's volunteers, and ward volunteers see only their wards' reports. Assignments can be changed at any time; the change takes effect on the volunteer's next request.
+7. **Maps and ward matching.** The report form has a map pin picker and a place search; the desk has a map of open reports by stage.
+   - Map tiles: OpenStreetMap raster tiles through MapLibre, loaded only when a map is shown. Free with attribution; fine at launch scale. For heavy traffic switch to a tile provider (MapTiler, Google) by changing `osmStyle()` in `site/app.js`.
+   - Place search: `GET /api/geocode` uses Google Geocoding when `GOOGLE_MAPS_KEY` is set in Vercel (best for Indian addresses; needs a Google Cloud billing account, free monthly credit covers this scale; restrict the key to the Geocoding API), otherwise OpenStreetMap Nominatim, bounded to Gurugram.
+   - Ward from a pin: `ward_boundaries` (PostGIS) holds the 36 ward polygons once GMDA's GIS file is loaded. **No public API provides them.** Ask GMDA's GIS cell (OneMap GGM team) for the MCG ward boundary shapefile or KML, or file an RTI; then load it with `ST_GeomFromGeoJSON` into `ward_boundaries`. Until then `ward_for_point` returns null.
+   - Ward from an area name: `area_wards` (sector or colony to ward). Fill it from the 2023 delimitation notification (Phase 4 of the launch guide); `ward_for_area` understands "Sector 29", "Sec-29" and colony names inside longer text.
+   - Every report stores the resident's ward, the detected ward and its source; the desk flags a mismatch so volunteers can correct it.
 
 ## Checks after each deploy
 
@@ -48,10 +56,10 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 
 ## Next build items on this stack
 
-1. Photo upload from the report form to the `report-photos` bucket.
-2. Daily cron (Vercel Cron) for SLA flags: unmapped past 3 working days, filed past 21 days; email to the coordinator.
-3. Stage-change notifications by email, then WhatsApp once Meta verification is done.
-4. WhatsApp and Exotel webhooks creating reports with `source` set accordingly.
-5. Public anonymised report pages with follow buttons.
-6. 24-month retention job.
-7. Clearer geolocation message in the report form (blocked vs unavailable).
+1. Load the ward boundary file into `ward_boundaries` and fill `area_wards`, so wards are set automatically and checked.
+2. Photo upload from the report form to the `report-photos` bucket.
+3. Daily cron (Vercel Cron) for SLA flags: unmapped past 3 working days, filed past 21 days; email to the coordinator.
+4. Stage-change notifications by email, then WhatsApp once Meta verification is done.
+5. WhatsApp and Exotel webhooks creating reports with `source` set accordingly.
+6. Public anonymised report pages with follow buttons, on the same map.
+7. 24-month retention job.

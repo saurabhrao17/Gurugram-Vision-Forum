@@ -72,12 +72,12 @@ $("searchBtn").addEventListener("click",openCmd); $("searchBtn2").addEventListen
 $("cmdList").addEventListener("click",function(e){if(e.target.closest("a"))closeCmd()});
 
 /* router */
-var VIEWS={home:"v-home",report:"v-report",track:"v-track",directory:"v-directory",rights:"v-rights",who:"v-who",wards:"v-wards",charter:"v-charter",dashboard:"v-dashboard",updates:"v-updates",post:"v-post",join:"v-join",about:"v-about",access:"v-access"};
-var TITLES={home:"Who fixes my problem?",report:"Report an issue",track:"Track a report",directory:"Official channels",rights:"Your rights",who:"Who is responsible",wards:"Your ward",charter:"The civic charter",dashboard:"Accountability dashboard",updates:"Updates",post:"Updates",join:"Join the Forum",about:"About the Forum",access:"Accessibility statement"};
+var VIEWS={desk:"v-desk",home:"v-home",report:"v-report",track:"v-track",directory:"v-directory",rights:"v-rights",who:"v-who",wards:"v-wards",charter:"v-charter",dashboard:"v-dashboard",updates:"v-updates",post:"v-post",join:"v-join",about:"v-about",access:"v-access"};
+var TITLES={desk:"Volunteer desk",home:"Who fixes my problem?",report:"Report an issue",track:"Track a report",directory:"Official channels",rights:"Your rights",who:"Who is responsible",wards:"Your ward",charter:"The civic charter",dashboard:"Accountability dashboard",updates:"Updates",post:"Updates",join:"Join the Forum",about:"About the Forum",access:"Accessibility statement"};
 var curView=null;
 function route(){
   var h=location.hash.replace(/^#\/?/,""); var parts=h.split("/"); var name=parts[0]||"home"; var arg=parts[1]?decodeURIComponent(parts[1]):"";
-  var map={"":"home",home:"home",fix:"home",report:"report",track:"track",directory:"directory",rights:"rights",who:"who",wards:"wards",charter:"charter",dashboard:"dashboard",updates:"updates",join:"join",about:"about",accessibility:"access"};
+  var map={"":"home",home:"home",fix:"home",desk:"desk",report:"report",track:"track",directory:"directory",rights:"rights",who:"who",wards:"wards",charter:"charter",dashboard:"dashboard",updates:"updates",join:"join",about:"about",accessibility:"access"};
   var v=map[name]; if(!v){location.hash="#/";return}
   if(name==="updates"&&arg){renderPost(arg);v="post"}
   var changed=v!==curView;
@@ -91,6 +91,7 @@ function route(){
   if(name==="track"&&arg){$("trRef").value=arg;showTrack()}
   if(name==="report"&&arg){pendingCat=arg}
   if(v==="report"){initReport()}
+  if(v==="desk"){deskRoute(arg)}
   if(v==="dashboard"){renderDash()}
   if(changed){window.scrollTo({top:0,behavior:"instant" in window?"instant":"auto"});curView=v}
   closeMenu();
@@ -129,10 +130,10 @@ function showHint(){var c=catById($("fCat").value),h=$("fHint");if(!c){h.classLi
   h.innerHTML='<b>'+esc(c.agency)+'</b> handles this. Also file it officially: '+(first?'<a href="'+first.href+'"'+ext(first.href)+'>'+esc(first.v)+'</a>':esc(c.channels[0].v))+'.';h.classList.add("show")}
 $("fCat").addEventListener("change",showHint);
 $("fWard").addEventListener("change",function(){var n=+this.value;var p=$("wardHint");if(n){var w=D.WARDS[n-1];p.innerHTML='<b>Ward '+n+'.</b> Councillor '+esc(w[1])+' ('+esc(w[2])+'). The report is copied to the councillor once the office contact is verified.'}else{p.innerHTML='<span data-i18n="f.wardHint">'+(lang==="hi"?"पता नहीं?":"Not sure?")+'</span> <a href="'+L.onemap+'" target="_blank" rel="noopener" class="ext">OneMap</a>, <a href="'+L.voterList+'" target="_blank" rel="noopener" class="ext">voter lists</a>, <a href="#/wards">ward directory</a>'}});
-$("geoBtn").addEventListener("click",function(){var o=$("geoOut");if(!navigator.geolocation){o.textContent="Location is not available here. Type the spot instead.";return}o.textContent="Finding you…";navigator.geolocation.getCurrentPosition(function(p){geo={lat:p.coords.latitude.toFixed(5),lng:p.coords.longitude.toFixed(5)};o.innerHTML='Pinned '+geo.lat+', '+geo.lng+'. <a href="https://www.google.com/maps?q='+geo.lat+','+geo.lng+'" target="_blank" rel="noopener">Check on a map</a>'},function(){o.textContent="Could not get a location. Type the spot instead."},{enableHighAccuracy:true,timeout:10000})});
+$("geoBtn").addEventListener("click",function(){var o=$("geoOut");if(!navigator.geolocation){o.textContent=t("f.geoNo","Location is not available here. Tap the map or type the spot.");return}o.textContent=t("f.geoFinding","Finding your location…");navigator.geolocation.getCurrentPosition(function(p){setPin(p.coords.latitude,p.coords.longitude,true);o.textContent=""},function(err){o.textContent=err&&err.code===1?t("f.geoDenied","Location is blocked for this site. Allow it in the browser, or tap the map."):t("f.geoNo","Location is not available here. Tap the map or type the spot.")},{enableHighAccuracy:true,timeout:10000,maximumAge:60000})});
 function valid(ids){var ok=true;ids.forEach(function(id){var el=$(id);var v=el.type==="checkbox"?el.checked:el.value.trim();var bad=!v||(el.type==="tel"&&!/^\+?[0-9\s-]{10,14}$/.test(el.value.trim()))||(el.type==="email"&&el.required&&!/^\S+@\S+\.\S+$/.test(v));if(bad){ok=false;el.setAttribute("aria-invalid","true")}else el.removeAttribute("aria-invalid")});return ok}
 var STEP_FIELDS={1:["fCat","fScope"],2:["fWhere","fSpot"],3:["fDesc","fName","fPhone","fConsent"]};
-function goStep(n){step=n;document.querySelectorAll(".fstep").forEach(function(s){s.classList.toggle("on",+s.getAttribute("data-step")===n)});var segs=$("prog").children;for(var i=0;i<4;i++){segs[i].className=i+1<n?"done":i+1===n?"now":""}if(n===4)renderSummary();$("fErr").classList.remove("show");var f=$("reportForm");f.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})}
+function goStep(n){step=n;if(n===2)initSpotMap();document.querySelectorAll(".fstep").forEach(function(s){s.classList.toggle("on",+s.getAttribute("data-step")===n)});var segs=$("prog").children;for(var i=0;i<4;i++){segs[i].className=i+1<n?"done":i+1===n?"now":""}if(n===4)renderSummary();$("fErr").classList.remove("show");var f=$("reportForm");f.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})}
 $("reportForm").addEventListener("click",function(e){var b=e.target.closest("[data-go]");if(!b)return;var to=+b.getAttribute("data-go");if(to>step){var ok=true;for(var s=step;s<to;s++){if(!valid(STEP_FIELDS[s])){ok=false;break}}if(!ok){$("fErr").classList.add("show");var bad=$("reportForm").querySelector('[aria-invalid="true"]');if(bad)bad.focus();return}}goStep(to)});
 function renderSummary(){var c=catById($("fCat").value);var rows=[["Issue",c?c.label:""],["Affects",$("fScope").value],["Area",$("fWhere").value],["Ward",$("fWard").value?"Ward "+$("fWard").value:"Not sure"],["Spot",$("fSpot").value+(geo?" ("+geo.lat+", "+geo.lng+")":"")],["Details",$("fDesc").value],["Name",$("fName").value],["Mobile",$("fPhone").value]];if($("fEmail").value)rows.push(["Email",$("fEmail").value]);
   $("summary").innerHTML=rows.map(function(r){return '<div><dt>'+esc(r[0])+'</dt><dd>'+esc(r[1])+'</dd></div>'}).join("")}
@@ -267,6 +268,158 @@ $("joinForm").addEventListener("submit",function(e){e.preventDefault();if(!valid
 
 /* about */
 $("mix").innerHTML=D.FUNDING.map(function(f){return '<div><span>'+esc(f[0])+'</span><div class="trk"><div class="fill" style="width:'+f[1]+'%"></div></div><span class="num" style="text-align:right">'+f[1]+'%</span></div>'}).join("");
+
+
+/* ---------------- maps (MapLibre + OpenStreetMap tiles; Google swaps in server-side for search) ---------------- */
+var GGN={lat:28.4595,lng:77.0266};
+var mapLib=null;
+function loadMapLib(){if(mapLib)return mapLib;if(!API_ON){return Promise.reject(new Error("offline"))}
+  mapLib=new Promise(function(res,rej){if(window.maplibregl){res(window.maplibregl);return}
+    var l=document.createElement("link");l.rel="stylesheet";l.href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css";document.head.appendChild(l);
+    var sc=document.createElement("script");sc.src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js";sc.async=true;sc.onload=function(){window.maplibregl?res(window.maplibregl):rej(new Error("maplibre"))};sc.onerror=function(){mapLib=null;rej(new Error("maplibre"))};document.head.appendChild(sc)});
+  return mapLib}
+function osmStyle(){return {version:8,sources:{osm:{type:"raster",tiles:["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],tileSize:256,maxzoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}},layers:[{id:"osm",type:"raster",source:"osm"}]}}
+function makeMap(el,zoom){return new window.maplibregl.Map({container:el,style:osmStyle(),center:[GGN.lng,GGN.lat],zoom:zoom||11.5,attributionControl:{compact:true}})}
+function pinEl(color){var d=document.createElement("div");d.className="pin";d.style.background=color||"#0B2545";return d}
+
+/* report form: spot picker */
+var spotMap=null,spotMarker=null,spotInit=false;
+function initSpotMap(){if(spotInit||!$("spotMap"))return;spotInit=true;loadMapLib().then(function(ml){spotMap=makeMap($("spotMap"),11.5);spotMap.addControl(new ml.NavigationControl({showCompass:false}),"top-right");
+    spotMap.on("click",function(e){setPin(e.lngLat.lat,e.lngLat.lng,false)});if(geo)setPin(geo.lat,geo.lng,true)},function(){spotInit=false})}
+function setPin(lat,lng,fly){lat=+lat.toFixed(6);lng=+lng.toFixed(6);geo={lat:lat,lng:lng};$("geoOut").innerHTML='<a href="https://www.google.com/maps?q='+lat+','+lng+'" target="_blank" rel="noopener" class="ext">'+lat+', '+lng+'</a>';
+  if(spotMap&&window.maplibregl){if(!spotMarker){spotMarker=new window.maplibregl.Marker({element:pinEl("#FF9933"),draggable:true,anchor:"bottom"}).setLngLat([lng,lat]).addTo(spotMap);spotMarker.on("dragend",function(){var p=spotMarker.getLngLat();setPin(p.lat,p.lng,false)})}else spotMarker.setLngLat([lng,lat]);
+    if(fly)spotMap.flyTo({center:[lng,lat],zoom:Math.max(spotMap.getZoom(),15),duration:reduce?0:800})}
+  suggestWard()}
+var wardT;function suggestWard(){clearTimeout(wardT);wardT=setTimeout(function(){var area=$("fWhere").value.trim();if(!geo&&!area)return;
+  api("/ward?"+(geo?"lat="+geo.lat+"&lng="+geo.lng+"&":"")+"area="+encodeURIComponent(area)).then(function(j){var h=$("wardAuto");if(!j.ward){h.hidden=true;return}var src=j.source==="map"?t("f.srcMap","from the map"):t("f.srcTable","from the sector table");var cur=$("fWard").value;
+    if(!cur){$("fWard").value=String(j.ward);$("fWard").dispatchEvent(new Event("change"));h.textContent=t("f.wardAuto1","Ward {n} suggested ({src}). Change it if that is wrong.").replace("{n}",j.ward).replace("{src}",src);h.hidden=false}
+    else if(String(j.ward)!==cur){h.textContent=t("f.wardAuto2","Ward {n} {src}; you chose ward {m}.").replace("{n}",j.ward).replace("{src}",src).replace("{m}",cur);h.hidden=false}else h.hidden=true},function(){})},250)}
+$("fWhere").addEventListener("change",suggestWard);
+var mapQT;$("mapQ").addEventListener("input",function(){clearTimeout(mapQT);var q=this.value.trim();var ul=$("mapHits");if(q.length<2){ul.hidden=true;return}mapQT=setTimeout(function(){api("/geocode?q="+encodeURIComponent(q)).then(function(j){var hits=j.results||[];ul.innerHTML=hits.length?hits.map(function(h,i){return '<li><button type="button" data-hit="'+i+'">'+esc(h.name)+'</button></li>'}).join(""):'<li><button type="button" disabled>No match in Gurugram. Try a sector number or a landmark.</button></li>';ul._hits=hits;ul.hidden=false},function(){ul.hidden=true})},350)});
+$("mapHits").addEventListener("click",function(e){var b=e.target.closest("[data-hit]");if(!b)return;var h=$("mapHits")._hits[+b.getAttribute("data-hit")];$("mapHits").hidden=true;$("mapQ").value=h.name.split(",")[0];initSpotMap();setPin(h.lat,h.lng,true)});
+document.addEventListener("click",function(e){if(!e.target.closest(".mapsearch"))$("mapHits").hidden=true});
+
+/* ---------------- volunteer desk (#/desk) ---------------- */
+var STAGE_TAG=["tag","tag-blue","tag-blue","tag-saffron","tag-green"],STAGE_COLOR=["#94A3B8","#7FB2F0","#0A4A8C","#FF9933","#4ADE80"];
+var CHANNELS=["GMDA portal","Swachhata app","DHBVN 1912","Police or 112","HRERA","DTCP","HSPCB or Sameer","CM Window","CPGRAMS","Consumer helpline 1915","RTI","Other"];
+function fmtT(iso){if(!iso)return "";try{return new Date(iso).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"})}catch(e){return ""}}
+function ago(iso){var d=Math.floor((Date.now()-new Date(iso).getTime())/864e5);return d<=0?"today":d===1?"1 day ago":d+" days ago"}
+function stageTag(n){return '<span class="tag '+STAGE_TAG[n]+'">'+esc(STAGES[n]?STAGES[n][0]:"?")+'</span>'}
+function flags(r){var h="";if(r.unmapped_overdue)h+='<span class="tag tag-danger">'+ic("alert")+'Unmapped 3+ working days</span>';if(r.filed_overdue)h+='<span class="tag tag-danger">'+ic("alert")+'Filed 21+ days</span>';if(r.ward_mismatch)h+='<span class="tag tag-warn">'+ic("alert")+'Map says ward '+r.ward_detected+'</span>';return h?'<span class="flags">'+h+'</span>':''}
+
+var S=load("gvf_staff",null),deskLoaded=false;
+function setSession(x){S=x;if(x)store("gvf_staff",x);else{try{localStorage.removeItem("gvf_staff")}catch(e){}}var on=!!(x&&x.session);$("navDesk").hidden=!on;$("menuDesk").hidden=!on}
+function dapi(path,opts,retry){opts=opts||{};var h={};if(opts.body)h["Content-Type"]="application/json";if(S&&S.session)h.Authorization="Bearer "+S.session.access_token;
+  if(!API_ON)return Promise.reject({offline:true});
+  return fetch(API+path,{method:opts.method||"GET",headers:h,body:opts.body?JSON.stringify(opts.body):undefined}).then(function(r){return r.json().then(function(j){return j},function(){return {}}).then(function(j){
+    if(r.status===401&&S&&S.session&&S.session.refresh_token&&retry!==false){return drefresh().then(function(){return dapi(path,opts,false)})}
+    if(!r.ok){var e=new Error(j.error||("http_"+r.status));e.status=r.status;e.fields=j.fields;throw e}return j})})}
+function drefresh(){return fetch(API+"/triage/refresh",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({refresh_token:S.session.refresh_token})}).then(function(r){return r.json().then(function(j){if(!r.ok||!j.session){signOut(true);throw new Error("expired")}setSession({session:j.session,staff:j.staff})})},function(){signOut(true);throw new Error("offline")})}
+function signOut(silent){setSession(null);deskLoaded=false;deskShow("login");if(!silent)toast("Signed out")}
+function isMgr(){return !!(S&&S.staff&&(S.staff.role==="owner"||S.staff.role==="coordinator"))}
+function deskShow(v){$("deskLogin").hidden=v!=="login";$("deskMain").hidden=v!=="desk";
+  if(v==="desk"&&S){$("whoAmI").textContent=(S.staff.name||S.staff.email)+" · "+(S.staff.role==="triage"?"ward volunteer"+(S.staff.wards&&S.staff.wards.length?" · wards "+S.staff.wards.join(", "):""):S.staff.role);$("teamTab").hidden=!isMgr()}
+  if(v==="login"){$("lErr").classList.remove("show")}}
+function deskRoute(ref){if(S&&S.session){deskShow("desk");if(!deskLoaded){deskLoaded=true;deskBoot()}if(ref)openReport(ref.toUpperCase())}else{deskShow("login");setTimeout(function(){if(curView==="desk")$("lEmail").focus()},80)}}
+setSession(S);
+
+$("loginForm").addEventListener("submit",function(e){e.preventDefault();var btn=$("lBtn"),email=$("lEmail").value.trim(),pass=$("lPass").value;$("lErr").classList.remove("show");
+  if(!email||!pass){$("lErr").textContent="Enter your email and password.";$("lErr").classList.add("show");return}
+  btn.disabled=true;btn.textContent="Signing in…";
+  dapi("/triage/login",{method:"POST",body:{email:email,password:pass}},false).then(function(j){setSession({session:j.session,staff:j.staff});$("lPass").value="";deskLoaded=true;deskShow("desk");deskBoot()},function(err){
+    $("lErr").textContent=err.status===403?"This account is not on the volunteer list. Ask the coordinator.":err.status===401?"Wrong email or password.":"Could not reach the server. Try again.";$("lErr").classList.add("show")}).then(function(){btn.disabled=false;btn.textContent="Sign in"})});
+$("signOut").addEventListener("click",function(){signOut(false)});
+
+$("tTabs").addEventListener("click",function(e){var b=e.target.closest("[data-tab]");if(!b)return;var tb=b.getAttribute("data-tab");$("tTabs").querySelectorAll(".tab").forEach(function(x){x.setAttribute("aria-selected",x===b)});$("tReports").hidden=tb!=="reports";$("tMap").hidden=tb!=="map";$("tTeam").hidden=tb!=="team";if(tb==="team")loadTeam();if(tb==="map")initDeskMap()});
+
+var F={stage:"open",issue:"",ward:"",flag:"",q:""},tOffset=0,T_LIMIT=50,tTotal=0,rowsCache={};
+var STAGE_CHIPS=[["open","All open"],["0","Received"],["1","Mapped"],["2","Filed"],["3","Escalated"],["4","Resolved"],["all","Everything"]];
+function renderChips(){$("stageChips").innerHTML=STAGE_CHIPS.map(function(c){return '<button class="chip" type="button" data-stage="'+c[0]+'" aria-pressed="'+(F.stage===c[0])+'">'+c[1]+'</button>'}).join("")}
+$("stageChips").addEventListener("click",function(e){var b=e.target.closest("[data-stage]");if(!b)return;F.stage=b.getAttribute("data-stage");renderChips();loadReports(true)});
+$("fIssue").innerHTML+=D.CATS.map(function(c){return '<option value="'+c.id+'">'+esc(c.label)+'</option>'}).join("");
+$("fWardF").innerHTML+=D.WARDS.map(function(w){return '<option value="'+w[0]+'">Ward '+w[0]+', '+esc(w[1])+'</option>'}).join("");
+["fIssue","fWardF","fFlag"].forEach(function(id){$(id).addEventListener("change",function(){F.issue=$("fIssue").value;F.ward=$("fWardF").value;F.flag=$("fFlag").value;loadReports(true)})});
+var qT;$("fQ").addEventListener("input",function(){clearTimeout(qT);qT=setTimeout(function(){F.q=$("fQ").value.trim();loadReports(true)},350)});
+$("tRefresh").addEventListener("click",function(){loadReports(true)});
+$("tMore").addEventListener("click",function(){loadReports(false)});
+function qs(extra){var p=["stage="+encodeURIComponent(F.stage),"offset="+tOffset,"limit="+T_LIMIT];if(F.issue)p.push("issue="+encodeURIComponent(F.issue));if(F.ward)p.push("ward="+F.ward);if(F.flag)p.push("flag="+F.flag);if(F.q)p.push("q="+encodeURIComponent(F.q));if(extra)p.push(extra);return p.join("&")}
+function loadReports(reset){if(reset){tOffset=0;$("tList").innerHTML="";rowsCache={}}
+  $("tSummary").textContent="Loading…";
+  return dapi("/triage/reports?"+qs()).then(function(j){tTotal=j.total||0;(j.reports||[]).forEach(function(r){rowsCache[r.ref]=r});
+    var got=(j.reports||[]).length;$("tList").insertAdjacentHTML("beforeend",(j.reports||[]).map(rowHtml).join(""));tOffset+=got;
+    $("tEmpty").hidden=tOffset>0;$("tMore").hidden=typeof tTotal==="number"?tOffset>=tTotal:got<T_LIMIT;
+    var s=j.summary;
+    if(j.scope&&!j.scope.length){$("tSummary").textContent="No ward is assigned to you yet. Ask the coordinator.";$("tEmpty").textContent="Nothing to show until a ward is assigned to you.";$("tEmpty").hidden=false}
+    else if(j.scope){$("tSummary").textContent="Your wards: "+j.scope.join(", ")+" · "+tTotal+" report"+(tTotal==1?"":"s")+" match these filters"}
+    else $("tSummary").textContent=s?(s.total+" reports in all · "+s.received+" received · "+s.filed+" filed · "+s.escalated+" escalated · "+s.resolved+" resolved"+((+s.unmapped_past_due||+s.filed_past_due)?" · past due: "+(+s.unmapped_past_due)+" unmapped, "+(+s.filed_past_due)+" filed":"")):(tTotal+" reports");
+  },function(err){$("tSummary").textContent=err.status===401||err.status===403?"Signed out.":"Could not load reports. "+(err.message||"");if(err.status===403)signOut(true)})}
+function rowHtml(r){var c=catById(r.issue_type);var vol=(r.lead_name||r.support_name)?' · '+(r.lead_name?'Lead: '+esc(r.lead_name):'')+(r.lead_name&&r.support_name?', ':'')+(r.support_name?'Support: '+esc(r.support_name):''):'';
+  return '<li class="row" id="row_'+esc(r.ref)+'">'+ic(c?c.ic:"alert")+'<div><b><a href="#/desk/'+esc(r.ref)+'" data-open="'+esc(r.ref)+'">'+esc(r.ref)+'</a> '+stageTag(r.stage)+flags(r)+'</b><p class="for">'+esc(r.issue_label||r.issue_type)+' · '+esc(r.area)+(r.ward?', ward '+r.ward:'')+(r.spot?' · '+esc(r.spot):'')+'</p><div class="meta">Sent '+esc(fmtDate(r.created_at))+' ('+esc(ago(r.created_at))+')'+(r.desk?' · '+esc(r.desk):'')+(r.official_ticket?' · ticket '+esc(r.official_ticket):'')+vol+' · '+(r.events_count||0)+' update'+(r.events_count==1?'':'s')+' · via '+esc(r.source)+'</div></div></li>'}
+document.addEventListener("click",function(e){var a=e.target.closest("[data-open]");if(!a)return;e.preventDefault();openReport(a.getAttribute("data-open"))});
+
+var current=null;
+function openReport(ref){openSheet(ref,'<p class="muted">Loading…</p>');dapi("/triage/reports/"+encodeURIComponent(ref)).then(function(j){current=j;renderDetail(j)},function(err){$("sheetBody").innerHTML='<div class="empty">'+(err.status===404?'No report with this reference.':err.status===403?'This report is outside your wards.':'Could not load this report.')+'</div>'})}
+function authorityText(r){var c=catById(r.issue_type);return "Gurugram Vision Forum report "+r.ref+"\nIssue: "+(r.issue_label||r.issue_type)+"\nArea: "+r.area+(r.ward?"\nWard: "+r.ward:"")+(r.spot?"\nSpot: "+r.spot:"")+(r.lat!=null?"\nCoordinates: "+r.lat+", "+r.lng+"\nMap: https://www.google.com/maps?q="+r.lat+","+r.lng:"")+"\nReported: "+fmtDate(r.created_at)+"\n\n"+r.description+"\n\nResponsible desk: "+(r.desk||(c?c.agency:""))+"\nContact: Gurugram Vision Forum, contact@gurugramvisionforum.org (the reporter's details are held by the Forum)"}
+function wardLine(r){if(!r.ward)return 'Not given'+(r.ward_detected?' · map/table suggests ward '+r.ward_detected:'');var src={manual:"chosen by the resident",table:"from the sector table",map:"from the map pin",desk:"set at the desk"}[r.ward_source]||"";var h='Ward '+r.ward+(r.councillor?', councillor '+esc(r.councillor):'')+(src?' <span class="small muted">('+src+')</span>':'');if(r.ward_mismatch)h+=' <span class="tag tag-warn">'+ic("alert")+'map/table says ward '+r.ward_detected+'</span>';return h}
+function renderDetail(j){var r=j.report,ev=j.events||[],c=catById(r.issue_type),v=j.volunteers;
+  var h='<p>'+stageTag(r.stage)+' '+flags(r)+'</p>';
+  h+='<dl class="sl"><div><dt>Issue</dt><dd>'+esc(r.issue_label||r.issue_type)+'</dd></div><div><dt>Affects</dt><dd>'+esc(r.affects||"—")+'</dd></div><div><dt>Area</dt><dd>'+esc(r.area)+'</dd></div><div><dt>Ward</dt><dd>'+wardLine(r)+'</dd></div><div><dt>Spot</dt><dd>'+esc(r.spot||"—")+(r.lat!=null?' · <a href="https://www.google.com/maps?q='+encodeURIComponent(r.lat+','+r.lng)+'" target="_blank" rel="noopener" class="ext">map</a>':'')+'</dd></div><div><dt>Volunteers</dt><dd>'+(v&&(v.lead_name||v.support_name)?(v.lead_name?'Lead: '+esc(v.lead_name)+(v.lead_email?' <span class="small muted">'+esc(v.lead_email)+'</span>':''):'')+(v.lead_name&&v.support_name?'<br>':'')+(v.support_name?'Support: '+esc(v.support_name)+(v.support_email?' <span class="small muted">'+esc(v.support_email)+'</span>':''):''):'<span class="muted">None assigned to this ward yet'+(isMgr()?' (Team tab)':'')+'</span>')+'</dd></div><div><dt>Sent</dt><dd>'+esc(fmtT(r.created_at))+' via '+esc(r.source)+'</dd></div></dl>';
+  h+='<p class="desc">'+esc(r.description)+'</p>';
+  h+='<div class="rbox"><b>Reporter</b><br>'+esc(r.reporter_name)+' · <a href="tel:'+esc(r.reporter_phone)+'">'+esc(r.reporter_phone)+'</a>'+(r.reporter_email?' · <a href="mailto:'+esc(r.reporter_email)+'">'+esc(r.reporter_email)+'</a>':'')+'<p class="note">Consent given '+esc(fmtDate(r.consent_at))+'. Share the issue and the place with the authority, never the phone number.</p></div>';
+  h+='<p><button class="btn btn-line btn-sm" type="button" id="copyAuth">Copy for the authority (no reporter details)</button></p>';
+  h+='<h4>Updates</h4><ol class="tl">'+ev.map(function(e,i){return '<li class="'+(i<ev.length-1?'done':'now')+'"><b>'+esc(STAGES[e.stage]?STAGES[e.stage][0]:"")+' <span class="small muted">· '+esc(e.actor||"system")+'</span></b><span>'+esc(e.note||"")+' · '+esc(fmtT(e.created_at))+'</span></li>'}).join("")+'</ol>';
+  h+='<form class="form" id="editForm" novalidate style="margin-top:1.25rem"><h4 style="margin-top:0">Update</h4><div class="err" id="eErr" role="alert"></div>'+
+     '<div class="frow"><div class="field"><label for="eIssue">Issue type</label><select id="eIssue">'+D.CATS.map(function(x){return '<option value="'+x.id+'"'+(x.id===r.issue_type?' selected':'')+'>'+esc(x.label)+'</option>'}).join("")+'</select></div>'+
+     '<div class="field"><label for="eWard">Ward</label><select id="eWard"><option value="">Not known</option>'+D.WARDS.map(function(w){return '<option value="'+w[0]+'"'+(w[0]===r.ward?' selected':'')+'>Ward '+w[0]+', '+esc(w[1])+'</option>'}).join("")+'</select></div></div>'+
+     '<div class="frow"><div class="field"><label for="eDesk">Responsible desk</label><input type="text" id="eDesk" list="deskList" value="'+esc(r.desk||"")+'" placeholder="'+esc(c?c.agency:"")+'"><datalist id="deskList">'+D.CATS.map(function(x){return '<option value="'+esc(x.agency)+'">'}).join("")+'</datalist></div>'+
+     '<div class="field"><label for="eStage">Stage</label><select id="eStage">'+STAGES.map(function(st,i){return '<option value="'+i+'"'+(i===r.stage?' selected':'')+'>'+i+'. '+st[0]+'</option>'}).join("")+'</select></div></div>'+
+     '<div class="frow"><div class="field"><label for="eChan">Official channel</label><select id="eChan"><option value="">Not filed yet</option>'+CHANNELS.map(function(x){return '<option'+(x===r.official_channel?' selected':'')+'>'+esc(x)+'</option>'}).join("")+'</select></div>'+
+     '<div class="field"><label for="eTicket">Official ticket number</label><input type="text" id="eTicket" value="'+esc(r.official_ticket||"")+'" placeholder="GMDA or MCG ticket"><p class="hint">Saving a ticket number moves the stage to Filed officially.</p></div></div>'+
+     '<div class="frow"><div class="field"><label for="eEsc">Escalated to</label><input type="text" id="eEsc" value="'+esc(r.escalated_to||"")+'" placeholder="Zone Joint Commissioner, GMDA CEO, CM Window"></div>'+
+     '<div class="field"><label for="eRes">Resolution note</label><input type="text" id="eRes" value="'+esc(r.resolution_note||"")+'" placeholder="Fixed on 12 Oct, reporter confirmed"></div></div>'+
+     '<div class="field"><label for="eNote">Add a note to the timeline (optional)</label><textarea id="eNote" style="min-height:80px" placeholder="Called the JE; site visit promised Thursday."></textarea></div>'+
+     '<div class="fnav"><span></span><button class="btn btn-primary" type="submit" id="eSave">Save</button></div></form>';
+  $("sheetBody").innerHTML=h;
+  $("copyAuth").addEventListener("click",function(){var tx=authorityText(r);if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(tx).then(function(){toast("Copied without reporter details")},function(){toast("Could not copy")});else toast("Copy is not supported here")});
+  $("editForm").addEventListener("submit",function(e){e.preventDefault();saveReport(r)});
+}
+function saveReport(r){var p={},note=$("eNote").value.trim(),v;
+  v=$("eIssue").value;if(v!==r.issue_type)p.issue_type=v;
+  v=$("eWard").value;if((v||"")!==(r.ward==null?"":String(r.ward)))p.ward=v;
+  v=$("eDesk").value.trim();if(v!==(r.desk||""))p.desk=v;
+  v=+$("eStage").value;if(v!==r.stage)p.stage=v;
+  v=$("eChan").value;if(v!==(r.official_channel||""))p.official_channel=v;
+  v=$("eTicket").value.trim();if(v!==(r.official_ticket||""))p.official_ticket=v;
+  v=$("eEsc").value.trim();if(v!==(r.escalated_to||""))p.escalated_to=v;
+  v=$("eRes").value.trim();if(v!==(r.resolution_note||""))p.resolution_note=v;
+  if(!Object.keys(p).length&&!note){toast("Nothing changed");return}
+  if(note)p.note=note;
+  var btn=$("eSave");btn.disabled=true;btn.textContent="Saving…";
+  dapi("/triage/reports/"+encodeURIComponent(r.ref),{method:"PATCH",body:p}).then(function(j){current=j;renderDetail(j);toast("Saved");var row=$("row_"+r.ref);if(row){rowsCache[r.ref]=Object.assign({},rowsCache[r.ref]||{},j.report,{events_count:(j.events||[]).length,lead_name:j.volunteers&&j.volunteers.lead_name,support_name:j.volunteers&&j.volunteers.support_name});row.outerHTML=rowHtml(rowsCache[r.ref])}},function(err){var el=$("eErr");el.textContent=err.fields?"Please check: "+err.fields.join(", "):err.status===401?"Session expired. Sign in again.":"Could not save. "+(err.message||"");el.classList.add("show");btn.disabled=false;btn.textContent="Save"})}
+
+/* desk map */
+var deskMap=null,deskMarkers=[];
+function initDeskMap(){$("mapLegend").innerHTML=STAGES.map(function(st,i){return '<span><span class="sw" style="background:'+STAGE_COLOR[i]+'"></span>'+esc(st[0])+'</span>'}).join("");
+  loadMapLib().then(function(ml){if(!deskMap){deskMap=makeMap($("deskMap"),11.3);deskMap.addControl(new ml.NavigationControl({showCompass:false}),"top-right")}
+    return dapi("/triage/reports?"+qs("fields=map")).then(function(j){deskMarkers.forEach(function(m){m.remove()});deskMarkers=[];var pts=j.reports||[];
+      pts.forEach(function(r){var m=new ml.Marker({element:pinEl(STAGE_COLOR[r.stage]||"#0B2545"),anchor:"bottom"}).setLngLat([r.lng,r.lat]).setPopup(new ml.Popup({offset:24}).setHTML('<b>'+esc(r.ref)+'</b><br>'+esc(r.issue_label||r.issue_type)+' · '+esc(r.area)+(r.ward?', ward '+r.ward:'')+'<br>'+esc(STAGES[r.stage]?STAGES[r.stage][0]:"")+' · <a href="#/desk/'+esc(r.ref)+'" data-open="'+esc(r.ref)+'">Open</a>')).addTo(deskMap);deskMarkers.push(m)});
+      $("mapCount").textContent=pts.length+" report"+(pts.length==1?"":"s")+" with a pinned location"+(F.stage!=="all"?" (filters from the Reports tab apply)":"")+". Tap a pin to open the report."+(pts.length?"":" Reports without a map pin are only in the list.");
+      if(pts.length){var b=new ml.LngLatBounds();pts.forEach(function(r){b.extend([r.lng,r.lat])});deskMap.fitBounds(b,{padding:60,maxZoom:15,duration:0})}})},function(){$("mapCount").textContent="The map could not load. Check the connection and try again."})}
+
+/* team: ward assignments and accounts */
+var staffCache=[];
+function loadTeam(){loadStaff().then(loadWards)}
+function loadStaff(){$("staffList").innerHTML='<li class="row"><div>Loading…</div></li>';return dapi("/triage/staff").then(function(j){staffCache=j.staff||[];var me=S&&S.staff?S.staff.user_id:null;var isOwner=S&&S.staff&&S.staff.role==="owner";
+  $("staffList").innerHTML=staffCache.map(function(st){var w=(st.wards||[]).map(function(x){return "ward "+x.ward+" ("+x.role+")"}).join(", ");return '<li class="row">'+ic("who")+'<div><b>'+esc(st.name||st.email)+' <span class="tag tag-blue">'+esc(st.role==="triage"?"ward volunteer":st.role)+'</span></b><p class="for">'+esc(st.email||"")+(w?' · '+esc(w):(st.role==="triage"?' · no ward yet':''))+'</p>'+(isOwner&&st.user_id!==me?'<div class="acts"><button class="btn btn-line btn-sm" type="button" data-remove="'+esc(st.user_id)+'" data-name="'+esc(st.name||st.email)+'">Remove</button></div>':'')+'</div></li>'}).join("")||'<li class="row"><div>No accounts yet.</div></li>'},function(err){$("staffList").innerHTML='<li class="row"><div>'+(err.status===403?'Only owners and coordinators manage the team.':'Could not load the team.')+'</div></li>'})}
+function volOptions(sel){var vols=staffCache.filter(function(x){return x.role==="triage"});return '<option value="">—</option>'+vols.map(function(x){return '<option value="'+esc(x.user_id)+'"'+(x.user_id===sel?' selected':'')+'>'+esc(x.name||x.email)+'</option>'}).join("")}
+function loadWards(){return dapi("/triage/wards").then(function(j){$("wardBody2").innerHTML=(j.wards||[]).map(function(w){return '<tr><td data-l="Ward"><b>'+w.ward+'</b></td><td data-l="Councillor">'+esc(w.councillor||"")+'</td><td data-l="Lead"><select data-ward="'+w.ward+'" data-role="lead" aria-label="Lead volunteer, ward '+w.ward+'">'+volOptions(w.lead_user_id)+'</select></td><td data-l="Support"><select data-ward="'+w.ward+'" data-role="support" aria-label="Support volunteer, ward '+w.ward+'">'+volOptions(w.support_user_id)+'</select></td></tr>'}).join("")},function(){$("wardBody2").innerHTML='<tr><td colspan="4">Could not load ward assignments.</td></tr>'})}
+$("wardBody2").addEventListener("change",function(e){var sel=e.target.closest("select[data-ward]");if(!sel)return;sel.disabled=true;
+  dapi("/triage/wards",{method:"PUT",body:{ward:+sel.getAttribute("data-ward"),role:sel.getAttribute("data-role"),user_id:sel.value||null}}).then(function(){toast("Ward "+sel.getAttribute("data-ward")+" updated");sel.disabled=false;loadStaff()},function(err){toast(err.status===403?"Only owners and coordinators can assign wards":"Could not save");sel.disabled=false})});
+$("staffList").addEventListener("click",function(e){var b=e.target.closest("[data-remove]");if(!b)return;if(!confirm("Remove "+b.getAttribute("data-name")+"'s access? Their account is deleted."))return;dapi("/triage/staff",{method:"DELETE",body:{user_id:b.getAttribute("data-remove")}}).then(function(){toast("Removed");loadTeam()},function(){toast("Could not remove")})});
+$("staffForm").addEventListener("submit",function(e){e.preventDefault();var el=$("sErr");el.classList.remove("show");var b={name:$("sName").value.trim(),email:$("sEmail").value.trim(),password:$("sPass").value,role:$("sRole").value};
+  if(!b.name||!b.email||b.password.length<10){el.textContent="Name, email and a password of at least 10 characters are needed.";el.classList.add("show");return}
+  dapi("/triage/staff",{method:"POST",body:b}).then(function(){toast("Account created");$("staffForm").reset();loadTeam()},function(err){el.textContent=err.status===409?"An account with this email already exists.":err.fields?"Please check: "+err.fields.join(", "):err.status===403?"Your role cannot create this kind of account.":"Could not create the account.";el.classList.add("show")})});
+function deskBoot(){renderChips();loadReports(true)}
 
 /* boot */
 renderTiles(); renderWhoFilter(); renderCatSelect();

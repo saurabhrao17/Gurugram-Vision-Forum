@@ -1,7 +1,7 @@
 // GET  /api/triage/reports/:ref        -> full report with reporter details and events (staff only)
 // PATCH /api/triage/reports/:ref       -> { issue_type?, ward?, desk?, stage?, official_channel?, official_ticket?, escalated_to?, resolution_note?, note? }
 import { supabase } from "../../../lib/supabase.js";
-import { requireStaff, handleError, actorOf } from "../../../lib/auth.js";
+import { requireStaff, handleError, actorOf, scopeFor } from "../../../lib/auth.js";
 import { send, methodNotAllowed, readJson, text } from "../../../lib/http.js";
 
 const REF = /^GVF-\d{4}-[A-Z2-9]{5}$/;
@@ -27,8 +27,9 @@ async function load(sb, ref) {
   if (error) throw error;
   if (!report) return null;
   const { data: events } = await sb.from("report_events").select("stage, note, actor, created_at").eq("report_id", report.id).order("created_at", { ascending: true });
+  const { data: assign } = report.ward ? await sb.from("ward_assignments").select("lead_name, lead_email, support_name, support_email").eq("ward", report.ward).maybeSingle() : { data: null };
   delete report.ip_hash; delete report.user_agent;
-  return { report, events: events || [] };
+  return { report, events: events || [], volunteers: assign || null };
 }
 
 export default async function handler(req, res) {
@@ -38,6 +39,12 @@ export default async function handler(req, res) {
     const ref = text(req.query?.ref, 20).toUpperCase();
     if (!REF.test(ref)) return send(res, 400, { ok: false, error: "invalid" });
     const sb = supabase();
+    const scope = await scopeFor(s);
+    if (scope) {
+      const { data: w } = await sb.from("reports").select("ward").eq("ref", ref).maybeSingle();
+      if (!w) return send(res, 404, { ok: false, error: "not_found" });
+      if (!scope.includes(w.ward)) return send(res, 403, { ok: false, error: "outside_your_wards" });
+    }
 
     if (req.method === "PATCH") {
       const b = readJson(req);

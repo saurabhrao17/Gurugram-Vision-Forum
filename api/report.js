@@ -52,8 +52,18 @@ export default async function handler(req, res) {
     return send(res, 429, { ok: false, error: "too_many_reports" });
   }
 
+  // Ward: keep the resident's choice, but record what the map or the sector table says.
+  let detected = null, detectedSource = null;
+  try {
+    const { data: d } = await sb.rpc("detect_ward", { p_lat: out.lat, p_lng: out.lng, p_area: out.area });
+    if (d && d.ward) { detected = d.ward; detectedSource = d.source; }
+  } catch (e) { console.error("detect_ward failed", e); }
+  const wardSource = out.ward ? "manual" : (detected ? detectedSource : null);
   const row = {
     ...out,
+    ward: out.ward || detected,
+    ward_detected: detected,
+    ward_source: wardSource,
     consent_at: new Date().toISOString(),
     source: "web",
     ip_hash: hash,
@@ -65,5 +75,5 @@ export default async function handler(req, res) {
     console.error("report insert failed", error);
     return send(res, 500, { ok: false, error: "server_error" });
   }
-  return send(res, 201, { ok: true, ref: data.ref, stage: data.stage, created_at: data.created_at });
+  return send(res, 201, { ok: true, ref: data.ref, stage: data.stage, created_at: data.created_at, ward: row.ward, ward_source: row.ward_source });
 }

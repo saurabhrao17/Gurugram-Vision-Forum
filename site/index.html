@@ -73,6 +73,7 @@
       <li><a href="#/who" data-v="who" data-i18n="n.who">Who's who</a></li>
       <li><a href="#/wards" data-v="wards" data-i18n="n.wards">Wards</a></li>
       <li><a href="#/dashboard" data-v="dashboard" data-i18n="n.dash">Dashboard</a></li>
+      <li id="navDesk" hidden><a href="#/desk" data-v="desk" data-i18n="n.desk">Desk</a></li>
     </ul>
     <div class="util">
       <button class="tgl" id="langBtn" type="button" aria-label="Switch language"><b>EN</b><span>|</span><span lang="hi">हिं</span></button>
@@ -162,6 +163,12 @@
             <div class="field"><label for="fWard" data-i18n="f.ward">Municipal ward</label><select id="fWard"></select><p class="hint" id="wardHint"><span data-i18n="f.wardHint">Not sure?</span> <a href="https://onemapggm.gmda.gov.in/" target="_blank" rel="noopener" class="ext">OneMap</a>, <a href="https://gurugram.gov.in/voter-list-for-mc-election-gurugram-2025/" target="_blank" rel="noopener" class="ext" data-i18n="f.voter">voter lists</a>, <a href="#/wards" data-i18n="f.wdir">ward directory</a></p></div>
           </div>
           <div class="field"><label for="fSpot" data-i18n="f.spot">Exact spot</label><input type="text" id="fSpot" data-i18n-ph="f.spotPh" placeholder="Near the community centre gate, opposite house 412" required><div class="geo"><button type="button" class="btn btn-line btn-sm" id="geoBtn"><svg class="i i-s" aria-hidden="true"><use href="#i-pin"/></svg><span data-i18n="f.geo">Use my location</span></button><span id="geoOut" class="muted"></span></div></div>
+          <div class="field" id="mapField"><label for="mapQ" data-i18n="f.map">Pin the spot on the map</label>
+            <div class="mapsearch"><input type="search" id="mapQ" data-i18n-ph="f.mapQ" placeholder="Search a sector, society or landmark" autocomplete="off"><ul class="maphits" id="mapHits" hidden></ul></div>
+            <div class="mapbox" id="spotMap" aria-label="Map of Gurugram"></div>
+            <p class="hint" id="mapHint" data-i18n="f.mapHint">Tap the map to drop the pin, or drag it. The ward is suggested from the pin.</p>
+            <p class="hint" id="wardAuto" hidden></p>
+          </div>
           <div class="fnav"><button class="btn btn-line" type="button" data-go="1" data-i18n="f.back">Back</button><button class="btn btn-ink" type="button" data-go="3" data-i18n="f.next">Continue</button></div>
         </div>
         <div class="fstep" data-step="3">
@@ -299,6 +306,64 @@
   </div></div>
 </section>
 
+<!-- VOLUNTEER DESK -->
+<section class="view" id="v-desk">
+  <div class="sec"><div class="wrap">
+    <div id="deskLogin">
+      <div class="head"><h1>Volunteer sign-in</h1><p>For the Forum's ward volunteers and coordinators. Residents report issues on the <a href="#/report">report page</a>.</p></div>
+      <form class="form login-card" id="loginForm" novalidate>
+        <div class="err" id="lErr" role="alert">Check your email and password.</div>
+        <div class="field"><label for="lEmail">Email</label><input type="email" id="lEmail" autocomplete="username" required></div>
+        <div class="field"><label for="lPass">Password</label><input type="password" id="lPass" autocomplete="current-password" required></div>
+        <button class="btn btn-primary" type="submit" id="lBtn">Sign in</button>
+        <p class="hint" style="margin-top:1rem">Accounts are created by the coordinator. Reporter details stay inside this desk; share the issue and the place with an authority, never the phone number.</p>
+      </form>
+    </div>
+    <div id="deskMain" hidden>
+      <div class="deskbar" id="userBar"><span class="who" id="whoAmI"></span><button class="btn btn-line btn-sm" type="button" id="signOut">Sign out</button></div>
+      <div class="head"><h1>Reports</h1><p id="tSummary">Loading…</p></div>
+      <div class="tabs" id="tTabs" role="tablist"><button class="tab" role="tab" type="button" data-tab="reports" aria-selected="true">Reports</button><button class="tab" role="tab" type="button" data-tab="map" aria-selected="false">Map</button><button class="tab" role="tab" type="button" data-tab="team" aria-selected="false" id="teamTab" hidden>Team</button></div>
+      <div id="tReports">
+        <div class="chips" id="stageChips" role="group" aria-label="Stage"></div>
+        <div class="filters">
+          <div class="field"><label for="fIssue">Issue</label><select id="fIssue"><option value="">All issues</option></select></div>
+          <div class="field"><label for="fWardF">Ward</label><select id="fWardF"><option value="">All wards</option></select></div>
+          <div class="field"><label for="fFlag">Deadline</label><select id="fFlag"><option value="">All</option><option value="overdue">Past due only</option></select></div>
+          <div class="field"><label for="fQ">Search</label><input type="search" id="fQ" placeholder="Reference, area, name, ticket" autocomplete="off"></div>
+          <div class="field" style="align-self:end"><button class="btn btn-line" type="button" id="tRefresh">Refresh</button></div>
+        </div>
+        <ul class="rows" id="tList"></ul>
+        <div class="empty" id="tEmpty" hidden>No reports match these filters.</div>
+        <p style="margin-top:1rem"><button class="btn btn-line" type="button" id="tMore" hidden>Load more</button></p>
+      </div>
+      <div id="tMap" hidden>
+        <p class="small muted" id="mapCount">Open reports with a pinned location. Tap a pin to open the report.</p>
+        <div class="mapbox mapbox-tall" id="deskMap" aria-label="Map of reports"></div>
+        <div class="legend" id="mapLegend"></div>
+      </div>
+      <div id="tTeam" hidden>
+        <h3 style="margin-top:0">Ward volunteers</h3>
+        <p class="small muted">One lead and one support volunteer per ward. Volunteers see only the reports in their wards; every ticket shows its ward's volunteers.</p>
+        <table class="tbl wardgrid" id="wardGrid"><thead><tr><th>Ward</th><th>Councillor</th><th>Lead volunteer</th><th>Support volunteer</th></tr></thead><tbody id="wardBody2"></tbody></table>
+        <h3 style="margin-top:2rem">Accounts</h3>
+        <ul class="rows" id="staffList"></ul>
+        <h3 style="margin-top:1.5rem">Add a volunteer</h3>
+        <form class="form" id="staffForm" novalidate>
+          <div class="err" id="sErr" role="alert">Check the highlighted fields.</div>
+          <div class="frow">
+            <div class="field"><label for="sName">Name</label><input type="text" id="sName" required></div>
+            <div class="field"><label for="sEmail">Email</label><input type="email" id="sEmail" required autocomplete="off"></div>
+            <div class="field"><label for="sPass">Temporary password (10+ characters)</label><input type="text" id="sPass" required autocomplete="off"></div>
+            <div class="field"><label for="sRole">Role</label><select id="sRole"><option value="triage">Ward volunteer</option><option value="coordinator">Coordinator</option><option value="owner">Owner</option></select></div>
+          </div>
+          <button class="btn btn-primary" type="submit">Create account</button>
+          <p class="hint" style="margin-top:.75rem">Hand the password over in person or by phone, not by email. Then assign the volunteer to a ward above. Only owners can remove accounts.</p>
+        </form>
+      </div>
+    </div>
+  </div></div>
+</section>
+
 <!-- ABOUT -->
 <section class="view" id="v-about">
   <div class="sec"><div class="wrap">
@@ -351,6 +416,7 @@
     <a href="#/updates"><svg class="i" aria-hidden="true"><use href="#i-news"/></svg><span data-i18n="n.updates">Updates</span></a>
     <a href="#/join"><svg class="i" aria-hidden="true"><use href="#i-join"/></svg><span data-i18n="n.join">Join</span></a>
     <a href="#/about"><svg class="i" aria-hidden="true"><use href="#i-info"/></svg><span data-i18n="n.about">About</span></a>
+    <a href="#/desk" id="menuDesk" hidden><svg class="i" aria-hidden="true"><use href="#i-who"/></svg><span data-i18n="n.desk">Desk</span></a>
   </div>
   <div class="foot"><button class="tgl" id="searchBtn2" type="button" aria-label="Search the site"><svg class="i i-s" aria-hidden="true"><use href="#i-search"/></svg><span style="color:var(--ink)">Search</span></button><button class="tgl" id="langBtn2" type="button"><b>EN</b><span>|</span><span lang="hi">हिं</span></button><button class="tgl" id="themeBtn2" type="button" aria-label="Switch theme"><svg class="i i-s" aria-hidden="true"><use href="#i-moon"/></svg></button></div>
 </div>
@@ -370,7 +436,7 @@
       <div><h4 data-i18n="ft.fix">Fix</h4><ul><li><a href="#/" data-i18n="ft.fix1">Who fixes it</a></li><li><a href="#/report" data-i18n="n.report">Report an issue</a></li><li><a href="#/track" data-i18n="n.track">Track a report</a></li></ul></div>
       <div><h4 data-i18n="ft.know">Know</h4><ul><li><a href="#/directory" data-i18n="n.dir">Directory</a></li><li><a href="#/rights" data-i18n="n.rights">Your rights</a></li><li><a href="#/who" data-i18n="n.who">Who's who</a></li><li><a href="#/wards" data-i18n="n.wards">Wards</a></li></ul></div>
       <div><h4 data-i18n="ft.join">Join</h4><ul><li><a href="#/join" data-i18n="n.join">Join</a></li><li><a href="#/charter" data-i18n="n.charter">Civic charter</a></li><li><a href="#/updates" data-i18n="n.updates">Updates</a></li></ul></div>
-      <div><h4 data-i18n="ft.about">About</h4><ul><li><a href="#/about" data-i18n="n.about">About</a></li><li><a href="#/dashboard" data-i18n="n.dash">Dashboard</a></li><li><a href="#/accessibility" data-i18n="n.access">Accessibility statement</a></li><li><a href="triage.html" data-i18n="n.triage">Volunteer desk</a></li></ul></div>
+      <div><h4 data-i18n="ft.about">About</h4><ul><li><a href="#/about" data-i18n="n.about">About</a></li><li><a href="#/dashboard" data-i18n="n.dash">Dashboard</a></li><li><a href="#/accessibility" data-i18n="n.access">Accessibility statement</a></li><li><a href="#/desk" data-i18n="n.signin">Volunteer sign-in</a></li></ul></div>
     </div>
     <div class="fnote"><span data-i18n="ft.n1">Not a government website. Emergencies: 112.</span><span data-i18n="ft.n2">Links verified 25 September 2026.</span></div>
   </div>

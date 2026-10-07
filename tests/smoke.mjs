@@ -38,9 +38,9 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
-  page.on("console", (m) => { if (m.type() === "error") errors.push("console: " + m.text()); });
-  // Google Fonts are not reachable offline; ignore those network failures.
-  page.on("requestfailed", (r) => { if (!/fonts\.g/.test(r.url())) errors.push("request failed: " + r.url()); });
+  page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) errors.push("console: " + m.text()); });
+  // Google Fonts and the map library are not reachable offline; ignore those network failures.
+  page.on("requestfailed", (r) => { if (!/fonts\.g|unpkg\.com|openstreetmap/.test(r.url())) errors.push("request failed: " + r.url()); });
 
   await page.goto(url);
   check((await page.locator("#tiles .tile").count()) === 17, "17 issue tiles on home");
@@ -155,6 +155,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
       by_ward: [] }) });
   });
   await page.route("**/api/join", (route) => route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ok: true }) }));
+  await page.route("**/api/ward**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, ward: 30, source: "table" }) }));
+  await page.route("**/api/geocode**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, results: [{ name: "Sector 29, Gurugram", lat: 28.46, lng: 77.07 }] }) }));
 
   const fillReport = async () => {
     await page.goto(httpUrl + "#/report");
@@ -163,7 +165,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     await page.selectOption("#fScope", { index: 1 });
     await page.click('[data-go="2"]');
     await page.fill("#fWhere", "Sector 29");
-    await page.selectOption("#fWard", "30");
+    await page.locator("#fWhere").dispatchEvent("change");
+    await page.waitForTimeout(400);
     await page.fill("#fSpot", "Near the main gate");
     await page.click('[data-go="3"]');
     await page.fill("#fDesc", "Garbage not collected for four days.");
@@ -179,6 +182,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
 
   await fillReport();
   check((await page.locator("#confirm .ref").innerText()).trim() === "GVF-2026-SRV01", "report uses the server reference");
+  check(calls[0] && calls[0].ward === "30", "ward suggested from the sector table is sent with the report");
   check(calls[0] && calls[0].issue_type === "waste" && calls[0].ward === "30" && calls[0].consent === true && calls[0].phone === "9899 999999", "report posts the expected payload");
   check((await page.locator("#confirm .err").count()) === 0, "no offline notice when the server answered");
 
@@ -240,7 +244,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
 
 // ---- Volunteer desk (triage.html) with mocked /api/triage ----
 {
-  console.log("\nVolunteer desk (mocked /api/triage over http, 1366x860)");
+  console.log("\nVolunteer desk at #/desk (mocked /api/triage over http, 1366x860)");
   const ctx = await browser.newContext({ viewport: { width: 1366, height: 860 } });
   const page = await ctx.newPage();
   const errors = [];
@@ -270,12 +274,19 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
       state = report({ stage: p.official_ticket ? 2 : (p.stage ?? state.stage), desk: p.desk ?? state.desk, official_ticket: p.official_ticket ?? state.official_ticket, official_channel: p.official_channel ?? state.official_channel, events_count: 3 });
       events = events.concat([{ stage: 2, note: "Filed officially, ticket " + p.official_ticket, actor: "Coordinator <coord@example.org>", created_at: "2026-10-08T10:00:00Z" }, { stage: 2, note: p.note, actor: "Coordinator <coord@example.org>", created_at: "2026-10-08T10:00:01Z" }]);
     }
-    return json(route, 200, { ok: true, report: state, events });
+    return json(route, 200, { ok: true, report: state, events, volunteers: { lead_name: "Vol One", lead_email: "vol@example.org", support_name: null, support_email: null } });
   });
-  await page.route("**/api/triage/staff", (route) => json(route, 200, { ok: true, staff: [staff, { user_id: "u2", name: "Vol One", role: "triage", email: "vol@example.org" }] }));
+  await page.route("**/api/triage/staff", (route) => json(route, 200, { ok: true, staff: [{ ...staff, wards: [] }, { user_id: "u2", name: "Vol One", role: "triage", email: "vol@example.org", wards: [{ ward: 10, role: "lead" }] }] }));
+  const wardPuts = [];
+  await page.route("**/api/triage/wards", (route) => {
+    if (route.request().method() === "PUT") { wardPuts.push(JSON.parse(route.request().postData() || "{}")); return json(route, 200, { ok: true, ward: { ward: wardPuts[wardPuts.length - 1].ward } }); }
+    return json(route, 200, { ok: true, wards: [{ ward: 10, councillor: "Mahabir", lead_user_id: "u2", lead_name: "Vol One", support_user_id: null, support_name: null }, { ward: 30, councillor: "Madhu Batra", lead_user_id: null, lead_name: null, support_user_id: null, support_name: null }] });
+  });
 
-  await page.goto(httpUrl + "triage.html");
-  check(await page.locator("#v-login.on").isVisible(), "desk starts on the sign-in form");
+  await page.goto(httpUrl + "#/desk");
+  await page.waitForTimeout(150);
+  check(await page.locator("#v-desk.on").isVisible() && !(await page.locator("#deskLogin").isHidden()), "desk route starts on the sign-in form");
+  check(await page.locator("#navDesk").isHidden(), "Desk nav item is hidden before sign-in");
   await page.fill("#lEmail", "coord@example.org");
   await page.fill("#lPass", "wrong");
   await page.click("#lBtn");
@@ -283,8 +294,15 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#lErr").innerText()).includes("Wrong email or password"), "wrong password shows an error");
   await page.fill("#lPass", "secret-pass");
   await page.click("#lBtn");
-  await page.waitForSelector("#v-desk.on");
+  await page.waitForSelector("#deskMain:not([hidden])");
   await page.waitForTimeout(200);
+  check(!(await page.locator("#navDesk").isHidden()), "Desk nav item appears after sign-in");
+  await page.click('#nav a[data-v="directory"]');
+  await page.waitForTimeout(80);
+  check(await page.locator("#v-directory.on").isVisible(), "public pages stay reachable while signed in");
+  await page.click('#nav a[data-v="desk"]');
+  await page.waitForTimeout(80);
+  check(await page.locator("#deskMain").isVisible(), "returning to the desk keeps the session");
   check((await page.locator("#whoAmI").innerText()).includes("Coordinator"), "header shows who is signed in");
   check((await page.locator("#tList .row").count()) === 2, "list shows two reports");
   check((await page.locator("#tList .tag-danger").count()) === 1, "overdue report carries a past-due flag");
@@ -294,6 +312,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click('[data-open="GVF-2026-SRV01"]');
   await page.waitForSelector("#editForm");
   check((await page.locator("#sheetBody").innerText()).includes("Test Reporter"), "detail shows the reporter to signed-in staff");
+  check((await page.locator("#sheetBody").innerText()).includes("Lead: Vol One"), "detail shows the ward's lead volunteer");
   check((await page.locator("#sheetBody .tl li").count()) === 1, "detail shows the event timeline");
   await page.fill("#eDesk", "MCG sanitation wing");
   await page.selectOption("#eChan", "GMDA portal");
@@ -307,13 +326,18 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#sheetClose");
 
   await page.click('[data-tab="team"]');
-  await page.waitForTimeout(150);
+  await page.waitForTimeout(250);
   check((await page.locator("#staffList .row").count()) === 2, "team tab lists the accounts");
   check((await page.locator("#staffList [data-remove]").count()) === 0, "coordinator cannot remove accounts");
+  check((await page.locator("#wardBody2 tr").count()) === 2, "ward grid lists the wards");
+  check((await page.locator('#wardBody2 select[data-ward="10"][data-role="lead"]').inputValue()) === "u2", "ward grid shows the current lead");
+  await page.selectOption('#wardBody2 select[data-ward="30"][data-role="support"]', "u2");
+  await page.waitForTimeout(150);
+  check(wardPuts.length === 1 && wardPuts[0].ward === 30 && wardPuts[0].role === "support" && wardPuts[0].user_id === "u2", "changing a ward select saves the assignment");
 
   await page.click("#signOut");
   await page.waitForTimeout(100);
-  check(await page.locator("#v-login.on").isVisible(), "sign out returns to the sign-in form");
+  check(!(await page.locator("#deskLogin").isHidden()) && (await page.locator("#deskMain").isHidden()), "sign out returns to the sign-in form");
   check((await page.evaluate(() => localStorage.getItem("gvf_staff"))) === null, "sign out clears the stored session");
 
   check(errors.length === 0, "zero console or page errors" + (errors.length ? ": " + errors.join(" | ") : ""));
