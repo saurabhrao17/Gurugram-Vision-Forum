@@ -324,14 +324,14 @@ const weekTables = (extra = {}) => ({
 });
 
 test("autopost drafts once on the configured weekday, from the run's pulse, and mails the coordinator", async () => {
-  const sb = fakeSb({ tables: weekTables(), counts: { public_reports: 49 } });
+  const sb = fakeSb({ tables: weekTables(), counts: { reports: 49 } });
   const env = { COORDINATOR_EMAIL: "coord@example.org", SITE_URL: "https://gvf.test" };
   const r = await autopostStep(sb, env, { fetch: async () => ({ ok: false, status: 503 }), now: MONDAY, ctx: { insight: PULSE } });
   assert.deepEqual({ drafted: r.drafted, published: r.published, skipped: r.skipped, slug: r.slug, ai: r.ai }, { drafted: true, published: 0, skipped: null, slug: "civic-week-2026-W41", ai: false });
   const dup = sb.calls.queries.find((q) => q.table === "posts" && q.op === "select" && q.filters.some((f) => f[1] === "source"));
   assert.deepEqual(dup.filters, [["eq", "source", "auto:weekly:2026-W41"]]);
   assert.ok(!sb.calls.queries.some((q) => q.table === "insights"), "the pulse came from the run, not the table");
-  const stats = sb.calls.queries.filter((q) => q.table === "public_reports");
+  const stats = sb.calls.queries.filter((q) => q.table === "reports");
   assert.equal(stats.length, 1, "under 50 reports the week's breakdown is not even read");
   assert.deepEqual(stats[0].opts, { count: "exact", head: true });
   const ins = sb.calls.queries.find((q) => q.table === "posts" && q.op === "insert");
@@ -397,14 +397,14 @@ test("autopost reads the latest stored insight when this run's insights step did
   assert.ok(ins.row.body.includes("<strong>Waste</strong>: 7 mentions"));
 });
 
-test("autopost includes the report counts once the public view holds 50 reports", async () => {
+test("autopost includes the report counts once 50 reports exist", async () => {
   const sb = fakeSb({
-    tables: weekTables({ public_reports: [{ stage: 0, issue_type: "waste" }, { stage: 2, issue_type: "waste" }, { stage: 2, issue_type: "drains" }] }),
-    counts: { public_reports: 50 }
+    tables: weekTables({ reports: [{ stage: 0, issue_type: "waste" }, { stage: 2, issue_type: "waste" }, { stage: 2, issue_type: "drains" }] }),
+    counts: { reports: 50 }
   });
   const r = await autopostStep(sb, {}, { fetch: async () => ({ ok: false, status: 503 }), now: MONDAY, ctx: { insight: PULSE } });
   assert.equal(r.drafted, true);
-  const week = sb.calls.queries.find((q) => q.table === "public_reports" && !q.opts?.head);
+  const week = sb.calls.queries.find((q) => q.table === "reports" && !q.opts?.head);
   assert.equal(week.cols, "stage, issue_type");
   assert.deepEqual(week.filters, [["gte", "created_at", iso(MONDAY - 7 * 86400000)]]);
   const ins = sb.calls.queries.find((q) => q.table === "posts" && q.op === "insert");

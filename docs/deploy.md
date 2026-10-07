@@ -43,9 +43,9 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 
 - `vercel.json` schedules two cron calls, both with `Authorization: Bearer $CRON_SECRET`: `GET /api/cron/fetch` at 03:30 UTC (09:00 IST: news sources and link checks, the slow network steps) and `GET /api/cron/analyse` at 03:50 UTC (signals, insights, weekly round-up, digest, IndexNow, SLA digest, outbox, retention). A Vercel function gets 60 seconds, so the two groups never share one invocation. `GET /api/cron/daily` runs everything (or `?steps=news,links`) for manual use; the GitHub Actions workflow "Run the daily cron now" calls both groups on demand (repository secret `CRON_SECRET`, or the run input). Vercel sends `Authorization: Bearer $CRON_SECRET`; set `CRON_SECRET` in the project (any long random string). The run does three things and reports each: the SLA digest (reports unmapped past 3 working days or filed past 21 days, emailed to `COORDINATOR_EMAIL` with references and desk links only), the outbox (stage-change emails to reporters who gave an email and to followers, sent through Resend when `RESEND_API_KEY` and `MAIL_FROM` are set; without a key the rows wait in `outbox`), and the retention sweep (reports resolved more than 24 months ago are deleted with their attachments).
 - Stage changes are queued by a database trigger (`reports_notify_stage`), so every path that moves a report (desk, API, SQL) notifies the same way. Bodies carry the reference, stage, desk and ticket and a tracking link; never a name or number.
-- Public pages: `/api/public/report?ref=` and `/api/public/reports` serve the anonymised view `public_reports` (no names, contact details, description, spot, ticket or files; coordinates rounded to about 100 m). The site shows them at `/r/<ref>` and `/map`, with follow-by-email (`POST /api/follow`; one-click unsubscribe link in every mail).
+- Reports are confidential: there is no public report page, map or feed (removed 8 Oct 2026 on the owner's decision). The public sees counts only: `/api/dashboard` (always, no threshold), `/ward/:n` and the Wards page (per ward: total, by stage, by issue, through the `ward_counts()` function). `/r/<ref>` and `/map` show a "Reports are private" notice for old links. The site shows them at `/r/<ref>` and `/map`, with follow-by-email (`POST /api/follow`; one-click unsubscribe link in every mail).
 - WhatsApp: point the Meta Cloud API webhook at `https://gurugramvisionforum.org/api/hooks/whatsapp` (subscribe to `messages`) with `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`, `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` set. Texts become reports with `source = whatsapp` (issue type "Something else" until the desk maps them) and the sender gets the reference back; a message quoting a reference gets its stage. Exotel: set the passthru or status-callback URL to `https://gurugramvisionforum.org/api/hooks/exotel?token=<EXOTEL_WEBHOOK_TOKEN>`; calls become reports with `source = phone` and the recording link in the description. Both dedupe on the provider message or call id (`inbound_messages`).
-- Real URLs: `/report`, `/track/<ref>`, `/r/<ref>`, `/map`, `/privacy` and the other views are rewritten to `index.html` and moved into the hash by the app, so links shared from the site work and unfurl (OG tags and `og.png`).
+- Real URLs: `/report`, `/track/<ref>`, `/privacy` and the other views are rewritten to `index.html` and moved into the hash by the app, so links shared from the site work and unfurl (OG tags and `og.png`).
 - Volunteers change their own password from the desk header (`POST /api/triage/password`, 10+ characters with letters and a number).
 
 ## Visitors, content, news and checks
@@ -63,20 +63,20 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 
 ## Checks after each deploy
 
-- `GET /api/dashboard` returns `{"ok":true,"published":false,...}` before 50 reports.
+- `GET /api/dashboard` returns counts by issue, ward and stage from the first report (`published` is always true).
 - Submit a report from a phone: the confirmation shows a server reference (the device shows "saved on this device only" if the API is unreachable).
 - Track page: reference plus last four digits of the mobile returns the stage; a wrong last four is refused.
 - Report form, step 3: choosing an issue shows "Needed to file with <portal>" with the portal's fields and document slots (`GVF.FILING` in `site/data.js`, mirrored in `issue_types.filing`). After submitting, the confirmation lists anything still missing and the upload status.
 - Desk, report detail: the filing checklist shows each portal field and document as present or Missing, with the files as links, and offers "Ask the reporter for the missing items" (copies a message; opens email when the reporter gave one).
 - Language toggle: every public page, panel, sheet, form and confirmation switches fully between English and Hindi (the desk stays English). The smoke test checks each route in Hindi for leftover English words.
-- `GET /api/public/reports` answers with counts and pins only; `/r/<ref>` of a real report shows stage and ward but no name; `/privacy` and `/map` open.
+- `/r/<ref>` and `/map` show the "Reports are private" notice; `/api/public/reports`, `/api/public/report` and `/api/follow` answer 404; `/ward/15` shows counts and no reference.
 - `node tests/smoke.mjs` passes locally; `npm test` runs the unit tests for the API validation.
 
 ## Privacy, as enforced
 
 - Phone numbers and names live in `reports` and `joins`, readable only by `staff` or the service role.
 - The status endpoint returns stage, dates, desk and official ticket number. Nothing about the reporter.
-- The dashboard endpoint returns counts and medians only, and nothing at all until 50 reports exist.
+- The dashboard endpoint returns counts and medians only. Every response from the site carries HSTS and a Content-Security-Policy (check with `curl -I https://gurugramvisionforum.org/`).
 - IP addresses are stored as salted hashes for rate limiting (5 reports per address per hour).
 - Filing details (`reports.extra`, for example a DHBVN account number or a Property ID) and attachments are reporter data: readable only by `staff` or the service role, never returned by the status or dashboard endpoints.
 - Retention: reports are to be deleted 24 months after closure. A scheduled job for this is a next build item.

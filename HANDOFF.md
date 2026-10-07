@@ -439,7 +439,7 @@ Items marked **(go-live)** are the minimum to start recording complaints.
 - Status lookup API **(go-live)**: rate-limited endpoint keyed by reference plus OTP or the last four digits of the mobile, feeding the Track page. Until then, the CRM's customer portal link.
 - Stage-change notifications: CRM webhooks → WhatsApp/SMS/email at each of the five stages.
 - Dashboard feed: a scheduled job pulls CRM counts by cause, ward, status and SLA compliance and publishes a JSON file to the CDN; the dashboard reads it. Metabase can produce the same feed.
-- Public report list: anonymised reports as a JSON feed for a map or list with follow buttons (phase 2).
+- Public report list: dropped on 8 Oct 2026 (owner: reports are confidential; the public sees counts per ward, issue and stage only).
 - Monthly open-data CSV from the same job.
 
 **7.5 Content and directory upkeep: team → site**

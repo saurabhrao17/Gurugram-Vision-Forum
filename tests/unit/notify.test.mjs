@@ -1,7 +1,6 @@
 import { test, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import cron, { runDaily, sendMail, slaDigestMail } from "../../lib/handlers/cron.js";
-import follow, { validateFollow, unsubscribeToken } from "../../lib/handlers/follow.js";
 
 // ---------------------------------------------------------------------------
 // Fakes: a Vercel-style response and a Supabase client that records every
@@ -252,84 +251,3 @@ test("runDaily isolates a failing step and reports it", async () => {
 // ---------------------------------------------------------------------------
 // Follow
 // ---------------------------------------------------------------------------
-test("validateFollow normalises the reference and email", () => {
-  const { errors, out } = validateFollow({ ref: " gvf-2026-abcde ", email: " Someone@Example.org " });
-  assert.deepEqual(errors, []);
-  assert.deepEqual(out, { ref: "GVF-2026-ABCDE", email: "someone@example.org" });
-});
-
-test("validateFollow rejects bad references and emails", () => {
-  assert.deepEqual(validateFollow({ ref: "GVF-2026-ABC01", email: "a@b.co" }).errors, ["ref"]);
-  assert.deepEqual(validateFollow({ ref: "GVF-26-ABCDE", email: "a@b.co" }).errors, ["ref"]);
-  assert.deepEqual(validateFollow({ ref: "GVF-2026-ABCDE", email: "nope" }).errors, ["email"]);
-  assert.deepEqual(validateFollow({}).errors, ["ref", "email"]);
-  assert.deepEqual(validateFollow(null).errors, ["ref", "email"]);
-});
-
-test("unsubscribeToken accepts only a 48-hex token", () => {
-  const t = "a".repeat(48);
-  assert.equal(unsubscribeToken({ unsubscribe: t.toUpperCase() }), t);
-  assert.equal(unsubscribeToken({ unsubscribe: "short" }), null);
-  assert.equal(unsubscribeToken({}), null);
-});
-
-test("follow POST creates a follower with a 48-hex token and never reveals duplicates", async () => {
-  const sb = fakeSb({ tables: { reports: [{ id: "11111111-1111-1111-1111-111111111111" }] }, counts: { followers: 3 } });
-  const res = fakeRes();
-  await follow({ method: "POST", headers: {}, body: { ref: "gvf-2026-abcde", email: "A@Example.org" } }, res, sb);
-  assert.equal(res.statusCode, 200);
-  assert.deepEqual(res.json(), { ok: true });
-  const up = sb.calls.queries.find((q) => q.table === "followers" && q.op === "upsert");
-  assert.ok(up);
-  assert.equal(up.row.report_id, "11111111-1111-1111-1111-111111111111");
-  assert.equal(up.row.email, "a@example.org");
-  assert.match(up.row.token, /^[0-9a-f]{48}$/);
-  assert.deepEqual(up.opts, { onConflict: "report_id,email", ignoreDuplicates: true });
-  const look = sb.calls.queries.find((q) => q.table === "reports");
-  assert.deepEqual(look.filters, [["eq", "ref", "GVF-2026-ABCDE"]]);
-});
-
-test("follow POST answers 400, 404 and 429", async () => {
-  let res = fakeRes();
-  await follow({ method: "POST", headers: {}, body: { ref: "x", email: "y" } }, res, fakeSb());
-  assert.equal(res.statusCode, 400);
-  assert.deepEqual(res.json().fields, ["ref", "email"]);
-
-  res = fakeRes();
-  await follow({ method: "POST", headers: {}, body: "{bad" }, res, fakeSb());
-  assert.equal(res.statusCode, 400);
-  assert.equal(res.json().error, "bad_json");
-
-  res = fakeRes();
-  await follow({ method: "POST", headers: {}, body: { ref: "GVF-2026-ABCDE", email: "a@b.co" } }, res, fakeSb({ tables: { reports: [] } }));
-  assert.equal(res.statusCode, 404);
-  assert.equal(res.json().error, "not_found");
-
-  res = fakeRes();
-  const sb = fakeSb({ tables: { reports: [{ id: "r1" }] }, counts: { followers: 500 } });
-  await follow({ method: "POST", headers: {}, body: { ref: "GVF-2026-ABCDE", email: "a@b.co" } }, res, sb);
-  assert.equal(res.statusCode, 429);
-  assert.equal(res.json().error, "too_many");
-  assert.ok(!sb.calls.queries.some((q) => q.op === "upsert"));
-});
-
-test("follow GET unsubscribe deletes by token and answers an HTML page either way", async () => {
-  const token = "b".repeat(48);
-  let sb = fakeSb();
-  let res = fakeRes();
-  await follow({ method: "GET", headers: {}, query: { unsubscribe: token } }, res, sb);
-  assert.equal(res.statusCode, 200);
-  assert.match(res.headers["Content-Type"], /text\/html/);
-  assert.ok(res.body.includes("You will no longer get updates for this report."));
-  assert.ok(res.body.includes("अब आपको इस रिपोर्ट की सूचनाएँ नहीं मिलेंगी।"));
-  const del = sb.calls.queries.find((q) => q.table === "followers" && q.op === "delete");
-  assert.deepEqual(del.filters, [["eq", "token", token]]);
-
-  res = fakeRes();
-  await follow({ method: "GET", headers: {}, query: { unsubscribe: "not-a-token" } }, res, fakeSb());
-  assert.equal(res.statusCode, 400);
-
-  res = fakeRes();
-  await follow({ method: "DELETE", headers: {}, query: {} }, res, fakeSb());
-  assert.equal(res.statusCode, 405);
-});
