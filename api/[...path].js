@@ -29,11 +29,20 @@ export function resolve(parts) {
   return null;
 }
 
+// Path segments from the request URL, independent of how the platform fills req.query.
+export function pathParts(url) {
+  const pathname = new URL(url || "/", "http://local").pathname;
+  return pathname.replace(/^\/api\/?/, "").split("/").map(decodeURIComponent).filter(Boolean);
+}
+
 export default async function handler(req, res) {
-  const raw = req.query?.path;
-  const parts = Array.isArray(raw) ? raw : typeof raw === "string" ? raw.split("/") : [];
-  const match = resolve(parts.filter(Boolean));
-  if (!match) return send(res, 404, { ok: false, error: "not_found" });
+  let parts = pathParts(req.url);
+  if (!parts.length) {
+    const raw = req.query?.path;
+    parts = (Array.isArray(raw) ? raw : typeof raw === "string" ? raw.split("/") : []).filter(Boolean);
+  }
+  const match = resolve(parts);
+  if (!match) return send(res, 404, { ok: false, error: "not_found", path: parts.join("/") });
   req.query = { ...(req.query || {}), ...match.params };
   delete req.query.path;
   return match.handler(req, res);
