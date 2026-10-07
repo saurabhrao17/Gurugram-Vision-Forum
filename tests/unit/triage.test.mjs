@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { bearer, HttpError } from "../../lib/auth.js";
-import { validatePatch } from "../../api/triage/reports/[ref].js";
+import { validatePatch } from "../../lib/handlers/triage/report.js";
 
 test("bearer extracts the token and ignores other schemes", () => {
   assert.equal(bearer({ headers: { authorization: "Bearer abc.def" } }), "abc.def");

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { normalisePhone, isEmail, text } from "../../lib/http.js";
-import { validate } from "../../api/report.js";
+import { validate } from "../../lib/handlers/report.js";
 
 test("normalisePhone accepts Indian mobiles in common spellings", () => {
   assert.equal(normalisePhone("98993 75445"), "+919899375445");

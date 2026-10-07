@@ -7,7 +7,7 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 | Piece | Where | Notes |
 | --- | --- | --- |
 | Website | Vercel, static from `site/` | No build step. `vercel.json` sets `outputDirectory` to `site`. |
-| `POST /api/report`, `GET /api/status`, `POST /api/join`, `GET /api/dashboard` | Vercel serverless functions in `api/` | Node 20+, ESM. Hold the Supabase service key. |
+| `/api/*` (report, status, join, dashboard, ward, geocode, triage/*) | One Vercel serverless function, `api/[...path].js`, routing to `lib/handlers/` | Node 20+, ESM. Holds the Supabase service key. One function because the Hobby plan caps deployments at 12; a 13th file under `api/` fails the deploy with `exceeded_serverless_functions_per_deployment`. |
 | Reports, events, joins, master data | Supabase Postgres, schema in `supabase/migrations/` | Row Level Security on every table. Anon key reads master data only. |
 | Photos | Supabase Storage bucket `report-photos` | Private, 10 MB, images only. Upload path is the next build item. |
 | Volunteer logins | Supabase Auth + `staff` table | Rows in `staff` grant access to reporter details. |
