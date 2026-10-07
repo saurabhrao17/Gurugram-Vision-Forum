@@ -67,6 +67,9 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.selectOption("#fWard", "30");
   await page.fill("#fSpot", "Near the main gate");
   await page.click('[data-go="3"]');
+  check(!(await page.locator("#filingBox").isHidden()) && (await page.locator("#filingTitle").innerText()).includes("GMDA"), "step 3 shows what the official portal needs for the issue");
+  check((await page.locator("#filingFields select[data-x=where]").count()) === 1 && (await page.locator("#filingFields input[type=file][data-doc=photo]").count()) === 1, "filing box lists the portal's fields and documents");
+  await page.selectOption("#filingFields select[data-x=where]", "Street or lane");
   await page.fill("#fDesc", "Garbage not collected for four days.");
   await page.fill("#fName", "Test Reporter");
   await page.fill("#fPhone", "9999999999");
@@ -77,6 +80,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(100);
   const ref = (await page.locator("#confirm .ref").innerText()).trim();
   check(/^GVF-\d{4}-[A-Z2-9]{5}$/.test(ref), `confirmation shows a reference (${ref})`);
+  check((await page.locator("#confirm .notice").innerText()).includes("Photo of the garbage"), "confirmation lists what is still needed for the official filing");
 
   // Track the reference
   await page.goto(url + "#/track/" + ref);
@@ -129,13 +133,26 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   // The mocked API deliberately answers 404, 429 and aborted requests; the browser logs those as resource errors.
   page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) errors.push("console: " + m.text()); });
   const calls = [];
+  const uploadCalls = [];
+  const attachCalls = [];
   let reportMode = "ok";
   await page.route("**/api/report", async (route) => {
     calls.push(JSON.parse(route.request().postData() || "{}"));
     if (reportMode === "down") return route.abort();
     if (reportMode === "limit") return route.fulfill({ status: 429, contentType: "application/json", body: JSON.stringify({ ok: false, error: "too_many_reports" }) });
-    return route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ok: true, ref: "GVF-2026-SRV01", stage: 0, created_at: "2026-10-07T10:00:00Z" }) });
+    return route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ok: true, ref: "GVF-2026-SRV01", stage: 0, created_at: "2026-10-07T10:00:00Z", upload_token: "a".repeat(48) }) });
   });
+  await page.route("**/api/report/upload-url", async (route) => {
+    const b = JSON.parse(route.request().postData() || "{}"); uploadCalls.push(b);
+    const uploads = (b.files || []).map((f, i) => ({ url: httpUrl + "/_up/" + i, path: "GVF-2026-SRV01/1-" + i + "-" + f.name, name: f.name, size: f.size, type: f.type, kind: f.kind }));
+    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, uploads }) });
+  });
+  await page.route("**/_up/**", (route) => route.fulfill({ status: 200, body: "" }));
+  await page.route("**/api/report/attach", async (route) => {
+    const b = JSON.parse(route.request().postData() || "{}"); attachCalls.push(b);
+    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, attached: (b.files || []).length }) });
+  });
+  const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
   await page.route("**/api/status**", async (route) => {
     const u = new URL(route.request().url());
     if (u.searchParams.get("ref") === "GVF-2026-SRV01" && u.searchParams.get("last4") === "9999") {
@@ -158,7 +175,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.route("**/api/ward**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, ward: 30, source: "table" }) }));
   await page.route("**/api/geocode**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, results: [{ name: "Sector 29, Gurugram", lat: 28.46, lng: 77.07 }] }) }));
 
-  const fillReport = async () => {
+  const fillReport = async (withFile) => {
     await page.goto(httpUrl + "#/report");
     await page.waitForTimeout(100);
     await page.selectOption("#fCat", "waste");
@@ -169,6 +186,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     await page.waitForTimeout(400);
     await page.fill("#fSpot", "Near the main gate");
     await page.click('[data-go="3"]');
+    await page.selectOption("#filingFields select[data-x=where]", "Street or lane");
+    if (withFile) await page.setInputFiles("#filingFields input[type=file][data-doc=photo]", { name: "spot.png", mimeType: "image/png", buffer: png });
     await page.fill("#fDesc", "Garbage not collected for four days.");
     await page.fill("#fName", "Test Reporter");
     await page.fill("#fPhone", "9899 999999");
@@ -180,8 +199,14 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     await page.waitForSelector("#confirm.show");
   };
 
-  await fillReport();
+  await fillReport(true);
   check((await page.locator("#confirm .ref").innerText()).trim() === "GVF-2026-SRV01", "report uses the server reference");
+  check(calls[0] && calls[0].extra && calls[0].extra.where === "Street or lane", "portal fields travel with the report as extra");
+  await page.waitForFunction(() => /attached/.test((document.getElementById("upStatus") || {}).textContent || ""), null, { timeout: 5000 }).catch(() => {});
+  check(uploadCalls.length === 1 && uploadCalls[0].ref === "GVF-2026-SRV01" && uploadCalls[0].token === "a".repeat(48) && uploadCalls[0].files.length === 1 && uploadCalls[0].files[0].kind === "photo", "asks the API for a signed upload URL with the one-hour token");
+  check(attachCalls.length === 1 && attachCalls[0].files[0].path === "GVF-2026-SRV01/1-0-spot.png" && attachCalls[0].files[0].kind === "photo", "attaches the uploaded file to the report");
+  check((await page.locator("#upStatus").innerText()).includes("1 files attached"), "confirmation reports the attached file");
+  check((await page.locator("#confirm .notice").count()) === 0, "nothing listed as missing when the portal's needs are met");
   check(calls[0] && calls[0].ward === "30", "ward suggested from the sector table is sent with the report");
   check(calls[0] && calls[0].issue_type === "waste" && calls[0].ward === "30" && calls[0].consent === true && calls[0].phone === "9899 999999", "report posts the expected payload");
   check((await page.locator("#confirm .err").count()) === 0, "no offline notice when the server answered");
@@ -190,6 +215,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await fillReport();
   check(/^GVF-\d{4}-[A-Z2-9]{5}$/.test((await page.locator("#confirm .ref").innerText()).trim()), "falls back to a local reference when the API is down");
   check((await page.locator("#confirm .err.show").count()) === 1, "shows the saved-on-this-device notice when the API is down");
+  check((await page.locator("#confirm .notice").innerText()).includes("Photo of the garbage"), "lists the photo as still needed when it could not be uploaded");
 
   reportMode = "limit";
   await fillReport();
@@ -255,7 +281,10 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   const report = (over) => Object.assign({ ref: "GVF-2026-SRV01", issue_type: "waste", issue_label: "Garbage", affects: "My society or RWA", area: "Sector 29", ward: 30, councillor: "Madhu Batra", spot: "Near the gate", lat: null, lng: null,
     stage: 0, desk: null, official_channel: null, official_ticket: null, official_filed_at: null, escalated_to: null, resolved_at: null, resolution_note: null, source: "web",
     reporter_name: "Test Reporter", reporter_phone: "+919899999999", reporter_email: null, consent_at: "2026-10-07T10:00:00Z", description: "Garbage not collected.",
-    created_at: "2026-10-07T10:00:00Z", updated_at: "2026-10-07T10:00:00Z", unmapped_overdue: false, filed_overdue: false, events_count: 1, last_event_at: "2026-10-07T10:00:00Z" }, over);
+    created_at: "2026-10-07T10:00:00Z", updated_at: "2026-10-07T10:00:00Z", unmapped_overdue: false, filed_overdue: false, events_count: 1, last_event_at: "2026-10-07T10:00:00Z", extra: { where: "Street or lane" }, attachments: [] }, over);
+  const filing = { portal: "GMDA integrated grievance portal or Swachhata app", url: "https://services.gmda.gov.in/", note: "A geo-tagged photo routes the complaint.",
+    fields: [{ key: "where", label: "Type of place", required: true, value: "Street or lane", missing: false }, { key: "since", label: "Since when", required: false, value: "", missing: false }],
+    docs: [{ key: "photo", label: "Photo of the garbage", required: true, files: [], have: false, missing: true }], missing: ["Photo of the garbage"], complete: false };
   let events = [{ stage: 0, note: "Report received", actor: "system", created_at: "2026-10-07T10:00:00Z" }];
   let state = report();
   const patches = [];
@@ -274,7 +303,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
       state = report({ stage: p.official_ticket ? 2 : (p.stage ?? state.stage), desk: p.desk ?? state.desk, official_ticket: p.official_ticket ?? state.official_ticket, official_channel: p.official_channel ?? state.official_channel, events_count: 3 });
       events = events.concat([{ stage: 2, note: "Filed officially, ticket " + p.official_ticket, actor: "Coordinator <coord@example.org>", created_at: "2026-10-08T10:00:00Z" }, { stage: 2, note: p.note, actor: "Coordinator <coord@example.org>", created_at: "2026-10-08T10:00:01Z" }]);
     }
-    return json(route, 200, { ok: true, report: state, events, volunteers: { lead_name: "Vol One", lead_email: "vol@example.org", support_name: null, support_email: null } });
+    return json(route, 200, { ok: true, report: state, events, volunteers: { lead_name: "Vol One", lead_email: "vol@example.org", support_name: null, support_email: null }, filing });
   });
   await page.route("**/api/triage/staff", (route) => json(route, 200, { ok: true, staff: [{ ...staff, wards: [] }, { user_id: "u2", name: "Vol One", role: "triage", email: "vol@example.org", wards: [{ ward: 10, role: "lead" }] }] }));
   const wardPuts = [];
@@ -314,13 +343,17 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#sheetBody").innerText()).includes("Test Reporter"), "detail shows the reporter to signed-in staff");
   check((await page.locator("#sheetBody").innerText()).includes("Lead: Vol One"), "detail shows the ward's lead volunteer");
   check((await page.locator("#sheetBody .tl li").count()) === 1, "detail shows the event timeline");
+  check((await page.locator("#sheetBody").innerText()).includes("Filing checklist: GMDA"), "detail shows the filing checklist for the portal");
+  check((await page.locator("#sheetBody .chk .tag-danger").count()) === 1 && (await page.locator("#askMissing").count()) === 1, "checklist flags the missing photo and offers to ask the reporter");
+  check((await page.locator("#ex_where").inputValue()) === "Street or lane", "filing details are editable at the desk");
+  await page.fill("#ex_since", "2026-10-01");
   await page.fill("#eDesk", "MCG sanitation wing");
   await page.selectOption("#eChan", "GMDA portal");
   await page.fill("#eTicket", "GMDA-4471");
   await page.fill("#eNote", "Filed on the portal.");
   await page.click("#eSave");
   await page.waitForTimeout(250);
-  check(patches.length === 1 && patches[0].desk === "MCG sanitation wing" && patches[0].official_ticket === "GMDA-4471" && patches[0].official_channel === "GMDA portal" && patches[0].note === "Filed on the portal." && !("stage" in patches[0]), "save sends only the changed fields");
+  check(patches.length === 1 && patches[0].desk === "MCG sanitation wing" && patches[0].official_ticket === "GMDA-4471" && patches[0].official_channel === "GMDA portal" && patches[0].note === "Filed on the portal." && !("stage" in patches[0]) && patches[0].extra && patches[0].extra.since === "2026-10-01" && !("where" in patches[0].extra), "save sends only the changed fields, including the filing detail");
   check((await page.locator("#sheetBody .tl li").count()) === 3, "timeline refreshes after saving");
   check((await page.locator("#row_GVF-2026-SRV01 .tag").first().innerText()).includes("Filed officially"), "list row updates to the new stage");
   await page.click("#sheetClose");

@@ -9,6 +9,8 @@ import join from "../lib/handlers/join.js";
 import dashboard from "../lib/handlers/dashboard.js";
 import ward from "../lib/handlers/ward.js";
 import geocode from "../lib/handlers/geocode.js";
+import reportUpload from "../lib/handlers/report-upload.js";
+import reportAttach from "../lib/handlers/report-attach.js";
 import triageLogin from "../lib/handlers/triage/login.js";
 import triageRefresh from "../lib/handlers/triage/refresh.js";
 import triageMe from "../lib/handlers/triage/me.js";
@@ -19,7 +21,7 @@ import triageReport from "../lib/handlers/triage/report.js";
 import { send } from "../lib/http.js";
 
 const ROUTES = {
-  "report": report, "status": status, "join": join, "dashboard": dashboard, "ward": ward, "geocode": geocode,
+  "report": report, "report/upload-url": reportUpload, "report/attach": reportAttach, "status": status, "join": join, "dashboard": dashboard, "ward": ward, "geocode": geocode,
   "triage/login": triageLogin, "triage/refresh": triageRefresh, "triage/me": triageMe,
   "triage/staff": triageStaff, "triage/wards": triageWards, "triage/reports": triageReports
 };
