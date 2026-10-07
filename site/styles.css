@@ -1,4 +1,5 @@
 :root{
+  --navy:#0B2545; /* fixed navy for bands, footer and toasts; never flips in dark mode */
   --ink:#0B2545; --blue:#0A4A8C; --blue-50:#EAF2FB; --blue-100:#D4E4F7;
   --green:#0F6B3A; --green-50:#E8F5EC; --saffron:#FF9933; --saffron-700:#B45309; --saffron-50:#FFF4E6;
   --warn:#8A5A00; --warn-50:#FFF7E0; --danger:#B42318; --danger-50:#FCECEA;
@@ -30,6 +31,7 @@
     color-scheme:dark;
   }
 }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .btn-ink{background:var(--blue); color:#0B2545; border-color:var(--blue)} }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth; scroll-padding-top:calc(var(--hdr) + 16px); -webkit-text-size-adjust:100%}
 body{margin:0; background:var(--paper); color:var(--text); font-family:var(--body); font-size:1.125rem; line-height:1.6; -webkit-font-smoothing:antialiased; padding-top:env(safe-area-inset-top,0px)}
@@ -121,7 +123,7 @@ body{padding-bottom:calc(var(--bbar) + env(safe-area-inset-bottom,0px))}
 .head h1,.head h2{margin-bottom:.35rem}
 .head p{margin:0}
 .band{background:var(--surface-2)}
-.band-ink{background:var(--ink); color:#E6EAF0}
+.band-ink{background:var(--navy); color:#E6EAF0}
 .band-ink h1,.band-ink h2,.band-ink h3,.band-ink h4{color:#fff}
 .band-ink a{color:#BFD7F5}
 .band-ink .muted{color:#B7C3D1}
@@ -261,7 +263,7 @@ body{padding-bottom:calc(var(--bbar) + env(safe-area-inset-bottom,0px))}
 .field{display:flex; flex-direction:column; gap:.3rem; margin-bottom:1rem}
 .field label{font-family:var(--head); font-weight:600; font-size:1rem; color:var(--ink)}
 .field .hint{font-size:.95rem; color:var(--muted); margin:0}
-input[type=text],input[type=email],input[type=tel],input[type=search],select,textarea{width:100%; font:inherit; font-size:1.0625rem; padding:.7rem .85rem; min-height:48px; border:1.5px solid var(--line); border-radius:var(--r-ctl); background:var(--surface); color:var(--text)}
+input[type=text],input[type=email],input[type=tel],input[type=search],input[type=password],input[type=number],select,textarea{width:100%; font:inherit; font-size:1.0625rem; padding:.7rem .85rem; min-height:48px; border:1.5px solid var(--line); border-radius:var(--r-ctl); background:var(--surface); color:var(--text)}
 input:focus,select:focus,textarea:focus{border-color:var(--ink); box-shadow:var(--ring); outline:none}
 select{appearance:none; -webkit-appearance:none; background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%); background-position:calc(100% - 18px) 50%,calc(100% - 12px) 50%; background-size:6px 6px; background-repeat:no-repeat; padding-right:2.4rem}
 textarea{min-height:130px; resize:vertical}
@@ -450,7 +452,7 @@ input[aria-invalid="true"],select[aria-invalid="true"],textarea[aria-invalid="tr
 .cmdk .none{padding:1rem; color:var(--muted)}
 
 /* footer */
-.ftr{background:var(--ink); color:#D3DCE7; padding:3rem 0 2rem}
+.ftr{background:var(--navy); color:#D3DCE7; padding:3rem 0 2rem}
 :root[data-theme="dark"] .ftr{background:#0B2545}
 .ftr a{color:#fff}
 .fgrid{display:grid; grid-template-columns:1fr 1fr; gap:1.5rem 2rem}
@@ -463,7 +465,7 @@ input[aria-invalid="true"],select[aria-invalid="true"],textarea[aria-invalid="tr
 .tri{height:4px; background:linear-gradient(90deg,var(--saffron) 0 33.33%,#fff 33.33% 66.66%,#138808 66.66% 100%); margin-top:1.5rem}
 
 /* toast + motion */
-.toast{position:fixed; left:50%; bottom:calc(var(--bbar) + 1rem + env(safe-area-inset-bottom,0px)); transform:translateX(-50%) translateY(12px); background:var(--ink); color:#fff; padding:.7rem 1.1rem; border-radius:8px; font-size:.98rem; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:80; max-width:calc(100% - 2rem)}
+.toast{position:fixed; left:50%; bottom:calc(var(--bbar) + 1rem + env(safe-area-inset-bottom,0px)); transform:translateX(-50%) translateY(12px); background:var(--navy); color:#fff; padding:.7rem 1.1rem; border-radius:8px; font-size:.98rem; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:80; max-width:calc(100% - 2rem)}
 :root[data-theme="dark"] .toast{background:#E6EAF0; color:#0B2545}
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
 .rv{opacity:0; transform:translateY(8px); transition:opacity .4s cubic-bezier(.2,.7,.2,1), transform .4s cubic-bezier(.2,.7,.2,1)}
@@ -485,3 +487,6 @@ body.triage{--bbar:0px}
 .rbox .note{font-size:.9rem; color:var(--muted); margin:.4rem 0 0}
 .desc{white-space:pre-wrap}
 .login-card{max-width:460px}
+body.triage .ftr{padding:1.25rem 0 .75rem}
+body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
+.util[hidden],.tab[hidden]{display:none}
