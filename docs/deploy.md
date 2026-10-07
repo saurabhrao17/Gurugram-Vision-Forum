@@ -16,8 +16,8 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 
 1. **Supabase project.** Done 7 Oct 2026: project `Gurugram-Vision-Forum`, ref `xiirhismxuahujdcxsuw`, organisation Catalyse X SR17, region Mumbai (ap-south-1), API URL `https://xiirhismxuahujdcxsuw.supabase.co`. Both migrations in `supabase/migrations/` and `supabase/seed.sql` are applied (17 issue types, 36 wards). For a fresh project, apply them in file order. Regenerate `seed.sql` with `npm run seed` whenever `site/data.js` changes.
    Note for Claude Code: the Supabase connector holds any `drop ... if exists` statement for a confirmation that never arrives in a non-interactive session and then times out, and it times out on large scripts. Apply in chunks of one object group each, sequentially, without `drop` statements on a new project.
-2. **Vercel project.** Import the GitHub repository `saurabhrao17/Gurugram-Vision-Forum`. Framework preset: Other. Leave build command empty. Production branch: `main`.
-3. **Environment variables** (Vercel → Settings → Environment Variables, all environments):
+2. **Vercel project.** Done 7 Oct 2026: project `gurugram-vision-forum` (id `prj_mm4lhQP11LPgbV3pvvFxTLvctcIV`) on the saurabhrao17's projects team, imported from `saurabhrao17/Gurugram-Vision-Forum`, preset Other, no build command, production branch `main`. Production alias: https://gurugram-visio-forum.vercel.app (the alias kept the original project name). Every push to `main` deploys production; pull requests get preview URLs.
+3. **Environment variables** (set 7 Oct 2026 for Production and Preview; Vercel → Settings → Environment Variables):
    - `SUPABASE_URL`: the project's API URL.
    - `SUPABASE_SERVICE_ROLE_KEY`: from Supabase → Settings → API. Mark it Sensitive. Never put it in `site/`.
    - `IP_HASH_SALT`: any long random string.
