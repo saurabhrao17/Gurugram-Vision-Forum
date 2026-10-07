@@ -46,6 +46,7 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 - Track page: reference plus last four digits of the mobile returns the stage; a wrong last four is refused.
 - Report form, step 3: choosing an issue shows "Needed to file with <portal>" with the portal's fields and document slots (`GVF.FILING` in `site/data.js`, mirrored in `issue_types.filing`). After submitting, the confirmation lists anything still missing and the upload status.
 - Desk, report detail: the filing checklist shows each portal field and document as present or Missing, with the files as links, and offers "Ask the reporter for the missing items" (copies a message; opens email when the reporter gave one).
+- Language toggle: every public page, panel, sheet, form and confirmation switches fully between English and Hindi (the desk stays English). The smoke test checks each route in Hindi for leftover English words.
 - `node tests/smoke.mjs` passes locally; `npm test` runs the unit tests for the API validation.
 
 ## Privacy, as enforced

@@ -28,6 +28,14 @@ const server = http.createServer(async (req, res) => {
 await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const httpUrl = `http://127.0.0.1:${server.address().port}/`;
 const routes = ["", "report", "track", "directory", "rights", "who", "wards", "charter", "dashboard", "updates", "join", "about", "accessibility"];
+
+// Latin tokens that are allowed to remain in Hindi mode: agency acronyms, product names, codes.
+const LATIN_OK = new Set("GMDA MCG DHBVN HRERA DTCP HSVP HSPCB NHAI CAQM CPGRAMS HERC GRAP RERA RWA UPI FIR AQI PIO BPL ECI MPLADS MoSPI CPCB SDM DC OneMap GGM Daakhil Sameer myGurugram Swachhata Saral MyGov RTI NH GVF EN WCAG WhatsApp MLA MP MC Manesar ULB HSIIDC HUDA IC PDF MB NCR Lok Sabha SMS ID OTP JJP INLD AAP BJP INC CSR DLF SPR MG HSVP MCG NIT DMRC RRTS CM Window ABCDE HTML Haryana Online Form Zero GIS".split(" "));
+function latinWords(text) {
+  const t = String(text).replace(/\S+@\S+/g, " ").replace(/https?:\/\/\S+|www\.\S+/g, " ").replace(/GVF-\d{4}-[A-Z0-9]{5}/g, " ").replace(/\S+\.(gov|nic|org|com|in)(\.in)?(\/\S*)?/g, " ");
+  return (t.match(/[A-Za-z][A-Za-z'’]{2,}/g) || []).filter((w) => !LATIN_OK.has(w) && !LATIN_OK.has(w.replace(/[’'].*$/, "")));
+}
+const DEVANAGARI = /[\u0900-\u097F]/;
 let failures = 0;
 const check = (ok, msg) => { if (!ok) { failures++; console.log("  FAIL", msg); } else console.log("  ok  ", msg); };
 
@@ -119,6 +127,52 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click(langBtn);
   await page.waitForTimeout(60);
   check((await page.evaluate(() => document.documentElement.lang)) === "hi", "Hindi toggle switches <html lang>");
+  await page.keyboard.press("Escape");
+
+  // Hindi mode: every public view, panel and sheet must read in Hindi (acronyms and codes aside)
+  const hiRoutes = routes.concat(["fix/waste", "rights/rts", "who/mp", "updates/complaint-that-gets-acted-on"]);
+  const visibleText = () => page.evaluate(() => {
+    const parts = [document.querySelector("header"), document.querySelector("section.view.on"), document.querySelector("footer"), document.querySelector("#sheet.open"), document.querySelector("#panel.show")];
+    return parts.filter(Boolean).map((el) => el.innerText).join("\n");
+  });
+  for (const r of hiRoutes) {
+    await page.goto(url + "#/" + r);
+    await page.waitForTimeout(120);
+    if (r === "report") { await page.selectOption("#fCat", "waste"); await page.selectOption("#fScope", { index: 1 }); await page.click('[data-go="2"]'); await page.fill("#fWhere", "सेक्टर 29"); await page.fill("#fSpot", "गेट के पास"); await page.click('[data-go="3"]'); await page.waitForTimeout(80); }
+    const txt = await visibleText();
+    if (r === "report") { await page.click('.fstep.on [data-go="2"]'); await page.click('.fstep.on [data-go="1"]'); await page.waitForTimeout(40); }
+    const latin = latinWords(txt);
+    check(DEVANAGARI.test(txt) && latin.length === 0, `#/${r || ""} reads in Hindi` + (latin.length ? " (English left: " + [...new Set(latin)].slice(0, 12).join(", ") + ")" : ""));
+  }
+  check(await page.evaluate(() => document.title.includes("गुरुग्राम")), "document title is in Hindi");
+  await page.goto(url + "#/report");
+  await page.waitForTimeout(100);
+  check((await page.locator("#areaList option").first().getAttribute("value")) === "सेक्टर 1", "area suggestions are in Hindi");
+  await page.selectOption("#fCat", "waste");
+  await page.waitForTimeout(60);
+  check((await page.locator("#filingFields select[data-x=where] option").nth(1).getAttribute("value")) === "Street or lane" && DEVANAGARI.test(await page.locator("#filingFields select[data-x=where] option").nth(1).innerText()), "filing options show Hindi but keep English values");
+  await page.goto(url + "#/wards");
+  await page.fill("#wardSearch", "यादव");
+  await page.waitForTimeout(60);
+  check((await page.locator("#wardBody tr").count()) > 0 && !(await page.locator("#wardBody tr td").first().innerText()).includes("No ward"), "ward search works with Hindi names");
+  await page.fill("#wardSearch", "");
+
+  // Back to English: nothing Devanagari remains except the language toggle itself
+  await page.keyboard.press("Escape");
+  await page.goto(url + "#/");
+  await page.waitForTimeout(80);
+  if (vp.w < 1024) { await page.click("#menuBtn"); await page.waitForTimeout(60); }
+  await page.click(langBtn);
+  await page.waitForTimeout(80);
+  await page.keyboard.press("Escape");
+  check((await page.evaluate(() => document.documentElement.lang)) === "en", "toggle returns to English");
+  for (const r of ["", "directory", "rights", "wards", "join"]) {
+    await page.goto(url + "#/" + r);
+    await page.waitForTimeout(80);
+    const txt = (await visibleText()).replace(/हिं/g, "");
+    check(!DEVANAGARI.test(txt), `#/${r} reads in English again`);
+  }
+  check((await page.locator("#tiles .tile").first().innerText()).trim() === "Roads, footpaths", "tiles are English again");
 
   check(errors.length === 0, "zero console or page errors" + (errors.length ? ": " + errors.join(" | ") : ""));
   await ctx.close();
@@ -220,6 +274,41 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   reportMode = "limit";
   await fillReport();
   check((await page.locator("#confirm .err.show").innerText()).includes("Too many reports"), "shows the rate-limit notice on 429");
+
+  // Hindi mode sends English values to the API
+  reportMode = "ok";
+  await page.goto(httpUrl + "#/");
+  await page.evaluate(() => localStorage.setItem("gvf_lang", JSON.stringify("hi")));
+  await page.reload();
+  await page.waitForTimeout(150);
+  await page.goto(httpUrl + "#/report");
+  await page.waitForTimeout(100);
+  await page.selectOption("#fCat", "waste");
+  await page.selectOption("#fScope", { index: 1 });
+  await page.click('[data-go="2"]');
+  await page.fill("#fWhere", "सेक्टर 29");
+  await page.locator("#fWhere").dispatchEvent("change");
+  await page.waitForTimeout(400);
+  await page.fill("#fSpot", "मुख्य गेट के पास");
+  await page.click('[data-go="3"]');
+  await page.selectOption("#filingFields select[data-x=where]", "Street or lane");
+  await page.fill("#fDesc", "चार दिन से कचरा नहीं उठा।");
+  await page.fill("#fName", "Test Reporter");
+  await page.fill("#fPhone", "9899 999999");
+  await page.check("#fConsent");
+  await page.click('[data-go="4"]');
+  check(DEVANAGARI.test(await page.locator("#summary").innerText()) && latinWords(await page.locator("#summary dt").allInnerTexts().then((a) => a.join(" "))).length === 0, "step 4 summary labels are in Hindi");
+  await page.evaluate(() => document.getElementById("confirm").classList.remove("show"));
+  await page.click("#reportForm button[type=submit]");
+  await page.waitForSelector("#confirm.show");
+  const hiCall = calls[calls.length - 1];
+  check(hiCall.area === "Sector 29" && hiCall.affects === "Me or my family" && hiCall.extra.where === "Street or lane", "Hindi report sends English area, scope and filing values (" + JSON.stringify({ area: hiCall.area, affects: hiCall.affects, where: hiCall.extra && hiCall.extra.where }) + ")");
+  check(hiCall.ward === "30", "ward lookup still works with a Hindi area");
+  const confirmTxt = await page.locator("#confirm").innerText();
+  check(DEVANAGARI.test(confirmTxt) && latinWords(confirmTxt).length === 0, "confirmation reads in Hindi" + (latinWords(confirmTxt).length ? " (English left: " + [...new Set(latinWords(confirmTxt))].slice(0, 10).join(", ") + ")" : ""));
+  await page.evaluate(() => localStorage.setItem("gvf_lang", JSON.stringify("en")));
+  await page.reload();
+  await page.waitForTimeout(150);
 
   // Track: server record wins and shows dates
   await page.goto(httpUrl + "#/track");
