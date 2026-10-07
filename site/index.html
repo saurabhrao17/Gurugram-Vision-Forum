@@ -190,9 +190,13 @@
 <!-- TRACK -->
 <section class="view" id="v-track">
   <div class="sec"><div class="wrap">
-    <div class="head"><h1 data-i18n="k.h">Where is my report?</h1><p data-i18n="k.p">Enter the reference number. Five stages, and you are told at each move.</p></div>
+    <div class="head"><h1 data-i18n="k.h">Where is my report?</h1><p data-i18n="k.p">Enter the reference and the last 4 digits of your mobile. Five stages, and you are told at each move.</p></div>
     <div class="form" style="max-width:640px">
-      <div class="field"><label for="trRef" data-i18n="k.ref">Reference number</label><input type="text" id="trRef" placeholder="GVF-2026-ABCDE" autocomplete="off"></div>
+      <div class="frow">
+        <div class="field"><label for="trRef" data-i18n="k.ref">Reference number</label><input type="text" id="trRef" placeholder="GVF-2026-ABCDE" autocomplete="off"></div>
+        <div class="field"><label for="trLast4" data-i18n="k.last4">Last 4 digits of your mobile</label><input type="text" id="trLast4" inputmode="numeric" maxlength="4" placeholder="1234" autocomplete="off"></div>
+      </div>
+      <p class="hint" data-i18n="k.hint">Both are on your confirmation. The last 4 digits stop anyone else looking up your report.</p>
       <button class="btn btn-ink" id="trGo" type="button" data-i18n="k.go">Show status</button>
       <div id="trOut" style="margin-top:1rem"></div>
     </div>

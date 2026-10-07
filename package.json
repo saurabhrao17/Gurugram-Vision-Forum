@@ -1,0 +1,16 @@
+{
+  "name": "gurugram-vision-forum",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Gurugram Vision Forum: static site plus Vercel API functions on Supabase",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test \"tests/unit/**/*.test.mjs\"",
+    "smoke": "node tests/smoke.mjs",
+    "seed": "node scripts/export-seed.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.58.0"
+  }
+}
