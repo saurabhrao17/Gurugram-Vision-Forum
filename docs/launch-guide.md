@@ -42,7 +42,7 @@ One provider for domain, hosting and spam protection keeps this to two accounts:
 **Step 1: buy the domain (30 minutes)**
 
 1. Go to cloudflare.com, create an account with the Forum email, turn on two-factor.
-2. Domain Registration, then Register domains: search gurugramvisionforum.org, buy it, and buy gurgaonvisionforum.org as well. Turn on auto-renew for both.
+2. Domain Registration, then Register domains: search gurugramvisionforum.org, buy it, and buy gurgaonvisionforum.com as well (done 8 Oct 2026 on Vercel Domains). Turn on auto-renew for both.
 3. Under the domain, WHOIS privacy is on by default; leave it on.
 
 **Step 2: email on the domain (1 hour, then 1 to 2 days for checks)**
@@ -58,7 +58,7 @@ One provider for domain, hosting and spam protection keeps this to two accounts:
 1. In Cloudflare, Workers and Pages, Create, Pages, Upload assets. Name the project gvf-site.
 2. Rename the file you received to index.html, put it in a folder, upload the folder. Cloudflare gives a temporary address ending in pages.dev; open it on your phone and check it works.
 3. Custom domains, Set up a custom domain: type gurugramvisionforum.org; Cloudflare adds the record itself. Repeat with www. Within an hour the site opens on the real address with https.
-4. Point the second domain: in gurgaonvisionforum.org, Rules, Redirect Rules, create one that sends all traffic to https://gurugramvisionforum.org.
+4. Point the second domain: in gurgaonvisionforum.com, Rules, Redirect Rules, create one that sends all traffic to https://gurugramvisionforum.org.
 
 **Step 4: spam protection and the backend home (15 minutes)**
 
