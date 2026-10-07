@@ -8,7 +8,7 @@ Read HANDOFF.md first; it holds the context, research, design rules and roadmap.
 
 ## Layout
 - `site/` is the website: `index.html`, `styles.css`, `data.js`, `app.js`. Static, hash-routed, no framework, no build step unless we deliberately add one.
-- `api/index.js` is the single Vercel function, reached through the `/api/:path*` rewrite in `vercel.json`: a router that maps every `/api/*` path to a handler in `lib/handlers/` (`report`, `status`, `join`, `dashboard`, `ward`, `geocode`, `triage/*`). Add a route by adding a handler and one line in the router. The Hobby plan allows 12 functions per deployment, so never add files under `api/`. `lib/` holds shared code. ESM, Node 20+.
+- `api/index.js` is the single Vercel function, reached through the `/api/:path*` rewrite in `vercel.json`: a router that maps every `/api/*` path to a handler in `lib/handlers/` (`report`, `report/upload-url`, `report/attach`, `status`, `join`, `dashboard`, `ward`, `geocode`, `triage/*`). Add a route by adding a handler and one line in the router. The Hobby plan allows 12 functions per deployment, so never add files under `api/`. `lib/` holds shared code. ESM, Node 20+.
 - The volunteer desk is the `#/desk` route inside `site/app.js` (English only; internal tool). It talks only to `/api/triage/*` with a Supabase Auth bearer token. `triage.html` is a redirect kept for old links.
 - Maps: MapLibre with OpenStreetMap tiles, lazy-loaded from unpkg only when a map is shown; `/api/geocode` and `/api/ward` do search and ward detection server-side (Google when `GOOGLE_MAPS_KEY` is set). Ward polygons live in `ward_boundaries` (PostGIS), sector names in `area_wards`.
 - `supabase/migrations/` is the schema; `supabase/seed.sql` is generated from `site/data.js` by `npm run seed`. Apply both to a new project in that order.
@@ -20,6 +20,7 @@ Read HANDOFF.md first; it holds the context, research, design rules and roadmap.
 
 ## Rules
 - Content lives in `site/data.js` (`window.GVF`). Edit data, not markup, to change issues, portals, charters, roles, wards, Hindi strings.
+- Every issue type carries what its official portal needs (`GVF.FILING`: fields and document slots with required flags). The report form collects these at step 3, the API stores them in `reports.extra` and `reports.attachments` (files go to the private `report-photos` bucket through one-hour upload tokens and signed URLs; the browser never holds a storage key), and the desk shows the checklist with what is missing. When a portal changes its form, update `FILING`, run `npm run seed`, and write the live `issue_types.filing` with `gvf_set_filing()`.
 - Design tokens and components are in `styles.css`; keep the navy-led palette, saffron as accent only (never saffron text on white), Anek/Noto type, 44 px targets, visible focus, reduced-motion support.
 - Public copy is non-partisan; never add party framing to civic tools. Party appears only as a factual field (ward table).
 - Never display or transmit a reporter's phone number publicly; public pages and dashboards show counts, never names.
@@ -33,7 +34,7 @@ Read HANDOFF.md first; it holds the context, research, design rules and roadmap.
 
 ## Next build items (in order)
 1. Load the MCG ward boundary file (from GMDA's GIS cell) into `ward_boundaries`; fill `area_wards` from the 2023 delimitation notification.
-2. Photo upload from the report form to the `report-photos` bucket (images, 10 MB) through an API function.
+2. Hindi labels for the filing fields (`GVF.FILING`), and a quarterly review of the requirements against each portal's live form.
 3. Vercel Cron for SLA flags (3 working days unmapped, 21 days filed) and stage-change emails; WhatsApp templates after Meta verification.
 4. "Report on WhatsApp" deep link and helpline number once they exist; WhatsApp and Exotel webhooks creating reports.
 5. Privacy notice page; public anonymised report pages on the map; real URLs and OG tags; 24-month retention job; password change in the desk.

@@ -174,6 +174,13 @@
         <div class="fstep" data-step="3">
           <div class="stepname"><span data-i18n="f.s3">Step 3 of 4</span></div><h3 data-i18n="f.details">Details</h3>
           <div class="field"><label for="fDesc" data-i18n="f.desc">What is happening?</label><p class="hint" data-i18n="f.descHint">Since when, what was tried, any earlier ticket number.</p><textarea id="fDesc" required></textarea></div>
+          <div class="filing" id="filingBox" hidden>
+            <h4 id="filingTitle" style="margin:0 0 .25rem"></h4>
+            <p class="hint" id="filingNote" style="margin:0 0 .75rem"></p>
+            <p class="hint" data-i18n="f.filingWhy" style="margin:0 0 .75rem">The government portal asks for these details and documents. Give what you have; the rest can follow later.</p>
+            <div id="filingFields"></div>
+            <ul class="filelist" id="fileList" hidden></ul>
+          </div>
           <div class="frow">
             <div class="field"><label for="fName" data-i18n="f.name">Your name</label><input type="text" id="fName" autocomplete="name" required></div>
             <div class="field"><label for="fPhone" data-i18n="f.phone">Mobile</label><input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" required></div>

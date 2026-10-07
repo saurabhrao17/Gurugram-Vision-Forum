@@ -510,3 +510,14 @@ body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
 .wardgrid select{min-height:40px; padding:.35rem .6rem; font-size:.95rem}
 .wardgrid td{vertical-align:middle}
 .notice{padding:.75rem .9rem; border-left:4px solid var(--saffron); background:var(--saffron-50); border-radius:0 8px 8px 0; margin:0 0 1rem; font-size:.98rem}
+
+/* filing requirements */
+.filing{border:1.5px solid var(--line); border-left:4px solid var(--saffron); border-radius:var(--r-ctl); padding:1rem 1rem .25rem; margin:0 0 1.25rem; background:var(--surface-2)}
+.filing .field{margin-bottom:.9rem}
+.filing input[type=file]{padding:.5rem; font-size:.95rem}
+.filelist{list-style:none; margin:.25rem 0 .75rem; padding:0; font-size:.95rem; color:var(--muted)}
+.chk{list-style:none; margin:.5rem 0 1rem; padding:0}
+.chk li{display:flex; gap:.6rem; align-items:flex-start; padding:.45rem 0; border-bottom:1px solid var(--line); font-size:.98rem}
+.chk li:last-child{border-bottom:0}
+.chk .k{min-width:40%; color:var(--muted)}
+.chk .v{flex:1}
