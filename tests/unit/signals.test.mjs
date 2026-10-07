@@ -217,7 +217,7 @@ test("signalsFromReports keeps reference, type, area, ward and date only", () =>
     { ref: null }
   ]);
   assert.equal(out.length, 2);
-  assert.deepEqual(out[0], { source: "reports", external_id: "GVF-2026-ABC23", title: "Drains, flooding, Sector 29", snippet: null, url: "https://gurugramvisionforum.org/#/r/GVF-2026-ABC23", posted_at: "2026-10-05T10:00:00.000Z", issue_type: "drains", area: "Sector 29", ward: 12, score: 10, lang: "en" });
+  assert.deepEqual(out[0], { source: "reports", external_id: "GVF-2026-ABC23", title: "Drains, flooding, Sector 29", snippet: null, url: "https://gurugramvisionforum.org/r/GVF-2026-ABC23", posted_at: "2026-10-05T10:00:00.000Z", issue_type: "drains", area: "Sector 29", ward: 12, score: 10, lang: "en" });
   assert.equal(out[1].title, "Garbage");
   assert.equal(out[1].ward, null);
   assert.ok(!JSON.stringify(out).includes("9999999999"));
@@ -502,4 +502,16 @@ test("runDaily stores the insight when the week has signals, rule-based without 
   assert.equal(ins.row.data.ai, false);
   assert.match(ins.row.data.summary_en, /^This week residents talked most about/);
   assert.equal(ins.row.period_start, ins.row.data.period.from);
+});
+
+test("the unclassified bucket ranks last and stays out of the headline and actions", () => {
+  const now = Date.parse("2026-10-07T06:00:00Z");
+  const mk = (issue_type, n) => Array.from({ length: n }, (_, i) => ({ source: "news", title: `${issue_type} item ${i}`, url: `https://n.example/${issue_type}/${i}`, posted_at: new Date(now - 3600000).toISOString(), fetched_at: new Date(now - 1800000).toISOString(), issue_type, area: null, score: 5 }));
+  const pulse = computePulse([...mk("other", 21), ...mk("waste", 18), ...mk("traffic", 7)], { days: 7, prev: 7, now });
+  assert.deepEqual(pulse.topics.map((t) => t.issue_type), ["waste", "traffic", "other"]);
+  const brief = fallbackBrief(pulse);
+  assert.match(brief.headline_en, /^Garbage/);
+  assert.ok(!brief.actions.some((a) => a.issue_type === "other"), "no action for the unclassified bucket while named topics exist");
+  const onlyOther = computePulse(mk("other", 3), { days: 7, prev: 7, now });
+  assert.equal(fallbackBrief(onlyOther).actions.length, 1);
 });
