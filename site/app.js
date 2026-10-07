@@ -82,7 +82,7 @@ function rerender(){renderTiles();renderWhoFilter();renderCatSelect();if(selecte
   if(reportInit){initAreas();showHint();renderRecent();if(step===4)renderSummary();if($("confirm").classList.contains("show"))paintConfirm()}
   renderDir();renderRights();renderWho();renderWards(($("wardSearch").value||"").trim());renderCivic();renderUpdates();renderJoin();renderMix();renderSubscribe();
   if(curView==="dashboard")paintDash();if(curView==="post")renderPost(decodeURIComponent(location.hash.split("/")[2]||""));
-  if(curView==="pub")paintPub();if(curView==="map")renderPubMap();if(curView==="news")renderNews();if(curView==="pulse")renderPulse();renderPopups();renderSocial();
+  if(curView==="news")renderNews();if(curView==="pulse")renderPulse();renderPopups();renderSocial();
   if(curView)document.title=hs("Gurugram Vision Forum")+" — "+hs(TITLES[curView]);
   if($("trRef").value.trim()&&$("trOut").innerHTML)showTrack()}
 function toggleLang(){applyLang(lang==="hi"?"en":"hi");toast(lang==="hi"?"हिंदी में":"English")}
@@ -119,12 +119,12 @@ $("searchBtn").addEventListener("click",openCmd); $("searchBtn2").addEventListen
 $("cmdList").addEventListener("click",function(e){if(e.target.closest("a"))closeCmd()});
 
 /* router */
-var VIEWS={desk:"v-desk",pulse:"v-pulse",news:"v-news",map:"v-map",pub:"v-pub",privacy:"v-privacy",home:"v-home",report:"v-report",track:"v-track",directory:"v-directory",rights:"v-rights",who:"v-who",wards:"v-wards",charter:"v-charter",dashboard:"v-dashboard",updates:"v-updates",post:"v-post",join:"v-join",about:"v-about",access:"v-access"};
-var TITLES={desk:"Volunteer desk",pulse:"What Gurugram is talking about",news:"What's new from the authorities",map:"Reports on the map",pub:"Report",privacy:"Privacy notice",home:"Who fixes my problem?",report:"Report an issue",track:"Track a report",directory:"Official channels",rights:"Your rights",who:"Who is responsible",wards:"Your ward",charter:"The civic charter",dashboard:"Accountability dashboard",updates:"Updates",post:"Updates",join:"Join the Forum",about:"About the Forum",access:"Accessibility statement"};
+var VIEWS={desk:"v-desk",pulse:"v-pulse",news:"v-news",private:"v-private",privacy:"v-privacy",home:"v-home",report:"v-report",track:"v-track",directory:"v-directory",rights:"v-rights",who:"v-who",wards:"v-wards",charter:"v-charter",dashboard:"v-dashboard",updates:"v-updates",post:"v-post",join:"v-join",about:"v-about",access:"v-access"};
+var TITLES={desk:"Volunteer desk",pulse:"What Gurugram is talking about",news:"What's new from the authorities",private:"Reports are private",privacy:"Privacy notice",home:"Who fixes my problem?",report:"Report an issue",track:"Track a report",directory:"Official channels",rights:"Your rights",who:"Who is responsible",wards:"Your ward",charter:"The civic charter",dashboard:"Accountability dashboard",updates:"Updates",post:"Updates",join:"Join the Forum",about:"About the Forum",access:"Accessibility statement"};
 var curView=null;
 function route(){
   var h=location.hash.replace(/^#\/?/,""); var parts=h.split("/"); var name=parts[0]||"home"; var arg=parts[1]?decodeURIComponent(parts[1]):"";
-  var map={"":"home",home:"home",fix:"home",desk:"desk",pulse:"pulse",news:"news",map:"map",r:"pub",privacy:"privacy",report:"report",track:"track",directory:"directory",rights:"rights",who:"who",wards:"wards",charter:"charter",dashboard:"dashboard",updates:"updates",join:"join",about:"about",accessibility:"access"};
+  var map={"":"home",home:"home",fix:"home",desk:"desk",pulse:"pulse",news:"news",map:"private",r:"private",privacy:"privacy",report:"report",track:"track",directory:"directory",rights:"rights",who:"who",wards:"wards",charter:"charter",dashboard:"dashboard",updates:"updates",join:"join",about:"about",accessibility:"access"};
   var v=map[name]; if(!v){location.hash="#/";return}
   if(name==="updates"&&arg){renderPost(arg);v="post"}
   var changed=v!==curView;
@@ -140,11 +140,10 @@ function route(){
   if(v==="report"){initReport();track("report_start")}
   if(v==="desk"){deskRoute(arg)}
   if(v==="dashboard"){renderDash()}
-  if(v==="map"){renderPubMap()}
+  if(v==="wards"){loadWardCounts()}
   if(v==="news"){renderNews()}
   if(v==="pulse"){renderPulse()}
   if(v==="updates"||v==="post"){loadContent()}
-  if(v==="pub"){renderPub(arg.toUpperCase())}
   if(changed){window.scrollTo({top:0,behavior:"instant" in window?"instant":"auto"});curView=v}
   closeMenu();gateTick(v);track("page_view");
 }
@@ -297,8 +296,15 @@ $("bands").addEventListener("click",function(e){var b=e.target.closest("[data-ro
 renderWho();
 
 /* wards */
-function renderWards(q){q=(q||"").toLowerCase();var rows=D.WARDS.filter(function(w){return !q||String(w[0])===q||(w[1]+" "+w[2]+" "+hs(w[1])+" "+hs(w[2])).toLowerCase().indexOf(q)>-1});
-  $("wardBody").innerHTML=rows.length?rows.map(function(w){return '<tr><td class="n">'+w[0]+'</td><td data-l="'+esc(hs("Councillor"))+'">'+esc(hs(w[1]))+'</td><td data-l="'+esc(hs("Party"))+'">'+esc(hs(w[2]))+'</td><td data-l="'+esc(hs("Verify"))+'"><a href="'+L.mcg+'" target="_blank" rel="noopener" class="ext">MCG</a> · <a href="'+L.voterList+'" target="_blank" rel="noopener" class="ext">'+hs("Voter list")+'</a> · <a href="'+srv("/ward/"+w[0])+'" data-ward-page="'+w[0]+'">'+hs("Ward page")+'</a></td></tr>'}).join(""):'<tr><td colspan="4" class="muted">'+hs("No ward matches that.")+'</td></tr>'}
+/* Per-ward counts come from /api/dashboard (by_ward): total, open (received + filed + escalated), resolved and the median days to resolve.
+   Counts only, never a report; when the API cannot be reached the column stays hidden and nothing else is shown. */
+function wardCounts(){if(!dash||!dash.ok||!dash.by_ward)return null;if(!dash._byWard){var m={};dash.by_ward.forEach(function(r){m[+r.ward]=r});dash._byWard=m}return dash._byWard}
+function wardCell(r){var tot=r?+r.total||0:0,open=r?(+r.received||0)+(+r.filed||0)+(+r.escalated||0):0,res=r?+r.resolved||0:0,md=r&&r.median_days_to_resolve!=null?Math.round(+r.median_days_to_resolve):null;
+  return '<span class="wc"><b>'+tot+'</b> '+hs(tot===1?"report":"reports")+' · '+fmt(hs("{n} open"),{n:open})+' · '+fmt(hs("{n} resolved"),{n:res})+(md!=null?' · '+fmt(hs("{n} days to resolve (median)"),{n:md}):'')+'</span>'}
+function loadWardCounts(){if(sample)return;loadDash().then(function(j){if(j&&j.ok&&j.by_ward)renderWards(($("wardSearch").value||"").trim())})}
+function renderWards(q){q=(q||"").toLowerCase();var rows=D.WARDS.filter(function(w){return !q||String(w[0])===q||(w[1]+" "+w[2]+" "+hs(w[1])+" "+hs(w[2])).toLowerCase().indexOf(q)>-1});var wc=wardCounts();
+  $("wardCountsTh").hidden=!wc;$("wardCounts").hidden=!wc;if(wc)$("wardCounts").textContent=fmt(hs("Reports per ward from the Forum's case system, updated {d}. Counts only, never names or places."),{d:fmtDate(dash.updated_at)});
+  $("wardBody").innerHTML=rows.length?rows.map(function(w){return '<tr><td class="n">'+w[0]+'</td><td data-l="'+esc(hs("Councillor"))+'">'+esc(hs(w[1]))+'</td><td data-l="'+esc(hs("Party"))+'">'+esc(hs(w[2]))+'</td>'+(wc?'<td data-l="'+esc(hs("Reports"))+'">'+wardCell(wc[w[0]])+'</td>':'')+'<td data-l="'+esc(hs("Verify"))+'"><a href="'+L.mcg+'" target="_blank" rel="noopener" class="ext">MCG</a> · <a href="'+L.voterList+'" target="_blank" rel="noopener" class="ext">'+hs("Voter list")+'</a> · <a href="'+srv("/ward/"+w[0])+'" data-ward-page="'+w[0]+'">'+hs("Ward page")+'</a></td></tr>'}).join(""):'<tr><td colspan="'+(wc?5:4)+'" class="muted">'+hs("No ward matches that.")+'</td></tr>'}
 $("wardSearch").addEventListener("input",function(){renderWards(this.value.trim())}); renderWards("");
 
 /* charter */
@@ -313,10 +319,13 @@ $("cvBody").addEventListener("change",function(e){var c=e.target.closest("[data-
 renderCivic();
 
 /* dashboard */
-var sample=false,dash=null,dashAt=0;
-function renderDash(){if(API_ON&&!sample&&(!dash||Date.now()-dashAt>300000)){api("/dashboard").then(function(j){dash=j;dashAt=Date.now();paintDash()},function(){dash={ok:false};dashAt=Date.now();paintDash()})}paintDash()}
+var sample=false,dash=null,dashAt=0,dashReq=null;
+/* loadDash(): the public counts (/api/dashboard), fetched at most once every five minutes and shared by the dashboard and the wards page. Resolves null when the API cannot be reached. */
+function loadDash(){if(!API_ON)return Promise.resolve(null);if(dash&&dash.ok&&Date.now()-dashAt<300000)return Promise.resolve(dash);if(dashReq)return dashReq;
+  dashReq=api("/dashboard").then(function(j){dash=j;dashAt=Date.now();dashReq=null;return j},function(){dash={ok:false};dashAt=Date.now();dashReq=null;return null});return dashReq}
+function renderDash(){if(!sample)loadDash().then(function(){paintDash()});paintDash()}
 function fmtDate(iso){try{return new Date(iso).toLocaleDateString(lang==="hi"?"hi-IN":"en-IN",{day:"numeric",month:"short",year:"numeric"})}catch(e){return ""}}
-function paintDash(){var S=D.STATS;var local=recents().length;var live=!sample&&dash&&dash.ok&&dash.published;
+function paintDash(){var S=D.STATS;var live=!sample&&dash&&dash.ok&&dash.summary;
   var rows=[],tot=[0,0,0,0],all=0,updated="",actuals=null;
   if(live){var s=dash.summary;rows=(dash.by_issue||[]).map(function(r){return [r.label,[+r.received||0,+r.filed||0,+r.escalated||0,+r.resolved||0]]});tot=[+s.received||0,+s.filed||0,+s.escalated||0,+s.resolved||0];all=+s.total||0;updated=fmtDate(dash.updated_at);actuals=[s.mapped_in_3_days_pct,s.acted_in_21_days_pct,null]}
   else if(sample){rows=S.rows;S.rows.forEach(function(r){r[1].forEach(function(v,i){tot[i]+=v;all+=v})})}
@@ -324,10 +333,9 @@ function paintDash(){var S=D.STATS;var local=recents().length;var live=!sample&&
   $("kpis").innerHTML='<div class="kpi"><b>'+(show?all:"—")+'</b><span>'+hs("reports received")+'</span></div><div class="kpi"><b>'+(show?tot[1]:"—")+'</b><span>'+hs("filed with the authority")+'</span></div><div class="kpi"><b>'+(show?tot[2]:"—")+'</b><span>'+hs("past due, escalated")+'</span></div><div class="kpi"><b>'+(show?tot[3]:"—")+'</b><span>'+hs("resolved and closed")+'</span></div>';
   var hh='<div class="dash-card"><h3>'+hs("Commitments")+'</h3><table class="commit"><thead><tr><th>'+hs("Promise")+'</th><th>'+hs("What it means")+'</th><th>'+hs("Actual")+'</th></tr></thead><tbody>'+S.commit.map(function(c,i){var actual;
     if(live){var pct=actuals[i];if(pct==null)actual=i===2?'<span class="tag tag-green">'+ic("check")+fmt(hs("Updated {d}"),{d:esc(updated)})+'</span>':'<span class="tag">'+hs("No data yet")+'</span>';else actual='<span class="tag '+(pct>=80?'tag-green':pct>=50?'tag-warn':'tag-danger')+'">'+fmt(hs("{p}% on time"),{p:Math.round(pct)})+'</span>'}
-    else if(sample)actual='<span class="tag tag-green">'+ic("check")+hs("On target")+'</span>';else actual='<span class="tag">'+hs("Reporting starts at launch")+'</span>';
+    else if(sample)actual='<span class="tag tag-green">'+ic("check")+hs("On target")+'</span>';else actual='<span class="tag">'+hs("No data yet")+'</span>';
     return '<tr><td class="n">'+esc(hs(c[0]))+'</td><td>'+esc(hs(c[1]))+'</td><td>'+actual+'</td></tr>'}).join("")+'</tbody></table></div>';
-  if(!show){var sofar=dash&&dash.ok&&dash.total?' '+fmt(hs("The Forum has received {n} so far."),{n:dash.total}):'';
-    hh+='<div class="dash-card"><h3>'+hs("Reports by cause and status")+'</h3><div class="emptybox"><svg class="ring" viewBox="0 0 96 96" aria-hidden="true"><circle cx="48" cy="48" r="40" fill="none" stroke="var(--line)" stroke-width="6" stroke-dasharray="5.6 1.4"/></svg><p>'+fmt(hs("We publish from the first 50 reports. Be one of them: {a}."),{a:'<a href="#/report">'+hs("report an issue")+'</a>'})+sofar+(local?' '+fmt(hs("This device has sent {n}."),{n:local}):'')+'</p></div><p class="src">'+hs("Live figures come from the Forum's case system; counts only, never names.")+' <button class="btn btn-line btn-sm" type="button" id="sampleBtn" style="margin-left:.5rem">'+hs("Preview the layout with sample data")+'</button></p></div>'}
+  if(!show){hh+='<div class="dash-card"><h3>'+hs("Reports by cause and status")+'</h3><div class="emptybox"><svg class="ring" viewBox="0 0 96 96" aria-hidden="true"><circle cx="48" cy="48" r="40" fill="none" stroke="var(--line)" stroke-width="6" stroke-dasharray="5.6 1.4"/></svg><p>'+hs("The live counts could not be loaded. Check the connection and try again in a minute.")+'</p></div><p class="src">'+hs("Live figures come from the Forum's case system; counts only, never names.")+' <button class="btn btn-line btn-sm" type="button" id="sampleBtn" style="margin-left:.5rem">'+hs("Preview the layout with sample data")+'</button></p></div>'}
   else{var max=0;rows.forEach(function(r){var s=r[1].reduce(function(a,b){return a+b},0);if(s>max)max=s});
     hh+='<div class="dash-card"><h3>'+hs("Reports by cause and status")+' '+(sample?'<span class="tag tag-saffron">'+hs("Sample data")+'</span>':'')+'</h3><div class="bars">'+rows.map(function(r){var s=r[1].reduce(function(a,b){return a+b},0);return '<div class="bar"><span>'+esc(hs(r[0]))+'</span><div class="trk" style="width:'+(max?s/max*100:0)+'%">'+r[1].map(function(v,i){return v?'<div class="seg" style="width:'+(v/s*100)+'%;background:'+S.statuses[i][1]+'" title="'+esc(hs(S.statuses[i][0]))+': '+v+'"></div>':''}).join("")+'</div><span class="tot">'+s+'</span></div>'}).join("")+'</div><div class="legend">'+S.statuses.map(function(s){return '<span><span class="sw" style="background:'+s[1]+'"></span>'+esc(hs(s[0]))+'</span>'}).join("")+'</div>'+
       (live?'<p class="src">'+fmt(hs("Source: {s} · Updated {d}. Counts only, never names."),{s:esc(hs(dash.source||"the Forum case system")),d:esc(updated)})+'</p>':'<p class="src">'+hs("Sample figures for layout only. Source: the Forum case system, updated monthly.")+' <button class="btn btn-line btn-sm" type="button" id="sampleBtn" style="margin-left:.5rem">'+hs("Hide sample data")+'</button></p>')+'</div>'}
@@ -363,7 +371,7 @@ function renderPulse(){var box=$("pulseBody");if(!box)return;if(!API_ON){box.inn
     var head=(lang==="hi"&&p.headline_hi)||p.headline_en||"",sum=(lang==="hi"&&p.summary_hi)||p.summary_en||"";
     var html=(head?'<h2 style="margin-bottom:.35rem">'+esc(head)+'</h2>':'')+(sum?'<p class="lead">'+esc(sum)+'</p>':'')+'<p class="small muted">'+fmt(hs("Week of {a} to {b}."),{a:esc(fmtDate(p.period&&p.period.from)),b:esc(fmtDate(p.period&&p.period.to))})+(j.generated_at?' '+fmt(hs("Updated {d}"),{d:esc(fmtDate(j.generated_at))})+'.':'')+'</p>';
     html+='<div class="dash-card"><h3>'+hs("Mentions this week")+'</h3><div class="bars">'+p.topics.map(function(x){var c=catById(x.issue_type);var label=c?catLabel(c):hs(x.label||x.issue_type);return '<div class="bar"><span>'+esc(label)+'</span><div class="trk" style="width:'+Math.round((x.count||0)/max*100)+'%"><div class="seg" style="width:100%;background:var(--blue)"></div></div><span class="tot">'+(x.count||0)+'</span></div>'}).join("")+'</div></div>';
-    html+=p.topics.slice(0,8).map(function(x){var c=catById(x.issue_type);var label=c?catLabel(c):hs(x.label||x.issue_type);return '<div class="dash-card"><h3>'+esc(label)+' <span class="tag">'+(x.count||0)+' · '+trendWord(x.trend)+'</span></h3>'+(x.areas&&x.areas.length?'<p class="small muted">'+hs("Areas")+': '+x.areas.slice(0,5).map(function(a){return esc(hs(a.area))+' ('+a.n+')'}).join(", ")+'</p>':'')+(x.examples&&x.examples.length?'<ul class="linklist">'+x.examples.slice(0,4).map(function(e){return '<li>'+ic("link")+(e.url?'<a href="'+esc(e.url)+'" target="_blank" rel="noopener">'+esc(e.title)+'</a>':esc(e.title))+' <span class="small muted">· '+esc(hs(e.source==="reports"?"Forum report":e.source==="news"?"news":"Reddit"))+(e.posted_at?' · '+esc(fmtDate(e.posted_at)):'')+'</span></li>'}).join("")+'</ul>':'')+'</div>'}).join("");
+    html+=p.topics.slice(0,8).map(function(x){var c=catById(x.issue_type);var label=c?catLabel(c):hs(x.label||x.issue_type);return '<div class="dash-card"><h3>'+esc(label)+' <span class="tag">'+(x.count||0)+' · '+trendWord(x.trend)+'</span></h3>'+(x.areas&&x.areas.length?'<p class="small muted">'+hs("Areas")+': '+x.areas.slice(0,5).map(function(a){return esc(hs(a.area))+' ('+a.n+')'}).join(", ")+'</p>':'')+(x.examples&&x.examples.length?'<ul class="linklist">'+x.examples.slice(0,4).map(function(e){return '<li>'+ic("link")+(e.url?'<a href="'+esc(e.url)+'" target="_blank" rel="noopener">'+esc(e.title)+'</a>':esc(e.title))+' <span class="small muted">· '+esc(hs(e.source==="news"?"news":"Reddit"))+(e.posted_at?' · '+esc(fmtDate(e.posted_at)):'')+'</span></li>'}).join("")+'</ul>':'')+'</div>'}).join("");
     if(p.actions&&p.actions.length)html+='<div class="dash-card"><h3>'+hs("What the Forum could do next")+'</h3>'+stepsHtml(p.actions.map(function(a){return (a.title||a.action||"")+(a.why?" — "+a.why:"")+(a.when?" ("+a.when+")":"")}))+'</div>';
     html+='<p class="small muted" style="margin:1rem 0 .25rem">'+hs("Share this")+'</p>'+shareRow(head||hs("What Gurugram is talking about"),siteUrl("/pulse"));
     html+='<p class="small muted">'+hs("Sources: public posts on Reddit, local news via Google News, and reports to the Forum. Counts only; no names are stored.")+'</p>';
@@ -461,36 +469,7 @@ $("gateForm").addEventListener("submit",function(e){e.preventDefault();var err=$
   var btn=this.querySelector("button[type=submit]");btn.disabled=true;registerVisitor(d).then(function(){btn.disabled=false;track("gate_done")});
   if(curView==="report"){if(!$("fName").value)$("fName").value=d.name;if(!$("fPhone").value)$("fPhone").value=d.phone;if(!$("fEmail").value)$("fEmail").value=d.email;if(!$("fPincode").value)$("fPincode").value=d.pincode;if(!$("fWhere").value)$("fWhere").value=d.area}});
 
-/* ---------------- public report pages and map (#/r/REF, #/map) ---------------- */
-var PUB_STAGES=["Received","Mapped","Filed officially","Escalated","Resolved"];
-var pubData=null,pubRef="";
-function pubUrl(ref){return "https://gurugramvisionforum.org/r/"+ref}
-function renderPub(ref){var box=$("pubBody");pubRef=ref;if(!/^GVF-\d{4}-[A-Z0-9]{5}$/.test(ref)){box.innerHTML='<h1>'+hs("Report")+'</h1><div class="empty">'+hs("No report has this reference.")+'</div>';return}
-  box.innerHTML='<h1>'+fmt(hs("Report {ref}"),{ref:esc(ref)})+'</h1><p class="muted">'+hs("Loading…")+'</p>';
-  if(!API_ON){pubData=null;box.innerHTML='<h1>'+fmt(hs("Report {ref}"),{ref:esc(ref)})+'</h1><div class="empty">'+t("k.offline","The Forum\'s server could not be reached. Try again in a minute.")+'</div>';return}
-  api("/public/report?ref="+encodeURIComponent(ref)).then(function(j){pubData=j.report;paintPub()},function(err){pubData=null;box.innerHTML='<h1>'+fmt(hs("Report {ref}"),{ref:esc(ref)})+'</h1><div class="empty">'+(err.status===404?hs("No report has this reference."):t("k.offline","The Forum\'s server could not be reached. Try again in a minute."))+'</div>'})}
-function paintPub(){var r=pubData,box=$("pubBody");if(!r)return;var c=catById(r.issue_type),st=r.stage||0,ev={};(r.events||[]).forEach(function(e){if(ev[e.stage]==null)ev[e.stage]=e.created_at});
-  var w=r.ward?D.WARDS[r.ward-1]:null;
-  var tl='<ol class="tl">'+PUB_STAGES.map(function(name,i){var tag=i<st?'<span class="tag tag-green">'+ic("check")+hs("Done")+'</span>':i===st?'<span class="tag tag-saffron">'+hs("Now")+'</span>':'';var when=ev[i]!=null&&i<=st?'<span class="small muted"> · '+esc(fmtDate(ev[i]))+'</span>':'';return '<li class="'+(i<st?'done':i===st?'now':'')+'"><b>'+esc(hs(name))+' '+tag+'</b><span>'+esc(hs(STAGES[i][1]))+when+'</span></li>'}).join("")+'</ol>';
-  var share=pubUrl(r.ref),shareTitle=fmt(hs("Report {ref}"),{ref:r.ref})+": "+(c?catLabel(c):r.issue_type)+", "+hs(r.area);
-  box.innerHTML='<p class="small muted" style="margin:0 0 .25rem">'+hs("Public view: issue, place and stage only. No names, no contact details.")+'</p><h1 style="margin-top:0">'+fmt(hs("Report {ref}"),{ref:esc(r.ref)})+'</h1>'+
-    '<p style="font-size:1.15rem"><b>'+esc(c?catLabel(c):hs(r.issue_label||r.issue_type))+'</b> · '+esc(hs(r.area))+(r.ward?fmt(hs(", ward {n}"),{n:r.ward})+(w?' ('+esc(hs(w[1]))+')':''):'')+'</p>'+
-    '<p class="small muted">'+fmt(hs("Received {d}"),{d:esc(fmtDate(r.created_at))})+(r.official_filed_at?' · '+fmt(hs("Filed officially {d}"),{d:esc(fmtDate(r.official_filed_at))}):'')+(r.resolved_at?' · '+fmt(hs("Resolved {d}"),{d:esc(fmtDate(r.resolved_at))}):'')+(r.desk?' · '+fmt(hs("Desk: {d}"),{d:esc(hs(r.desk))}):'')+'</p>'+tl+
-    '<div class="box" style="margin-top:1.25rem"><h4 style="margin-bottom:.35rem">'+hs("Follow by email")+'</h4><p class="small muted" style="margin:0 0 .6rem">'+hs("You will get an email at each stage change. One click stops it.")+(r.followers?' '+fmt(hs("{n} people follow this report."),{n:r.followers}):'')+'</p><form id="followForm" novalidate><div class="frow" style="align-items:end"><div class="field" style="margin:0"><label for="fwEmail">'+hs("Your email")+'</label><input type="email" id="fwEmail" autocomplete="email"></div><button class="btn btn-ink" type="submit">'+hs("Follow")+'</button></div><p class="err" id="fwErr"></p><p class="small" id="fwOk" hidden></p></form></div>'+
-    '<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem"><a class="btn btn-primary" href="#/report/'+esc(r.issue_type)+'">'+hs("Me too: report the same issue")+'</a></div>'+
-    '<p class="small muted" style="margin:1rem 0 .25rem">'+hs("Share this report")+'</p>'+shareRow(shareTitle,share)+
-    '<p class="small muted" style="margin-top:1rem"><a href="#/track/'+esc(r.ref)+'">'+hs("Is this your report? Track it with the last 4 digits of your mobile.")+'</a></p>';
-  $("followForm").addEventListener("submit",function(e){e.preventDefault();var em=$("fwEmail").value.trim(),err=$("fwErr"),ok=$("fwOk");err.classList.remove("show");if(!/^\S+@\S+\.\S+$/.test(em)){err.textContent=hs("Enter a valid email.");err.classList.add("show");return}
-    var btn=this.querySelector("button[type=submit]");btn.disabled=true;api("/follow",{method:"POST",body:{ref:r.ref,email:em}}).then(function(){btn.disabled=false;ok.textContent=hs("Following. We email you when the stage changes.");ok.hidden=false;$("fwEmail").value=""},function(){btn.disabled=false;err.textContent=hs("Could not save. Try again.");err.classList.add("show")})})}
-var pubMap=null,pubMarkers=[];
-function renderPubMap(){$("pubLegend").innerHTML=PUB_STAGES.map(function(name,i){return '<span><span class="sw" style="background:'+STAGE_COLOR[i]+'"></span>'+esc(hs(name))+'</span>'}).join("");
-  if(!API_ON){$("pubCount").textContent=hs("The map could not load. Check the connection and try again.");return}
-  $("pubCount").textContent=hs("Loading…");
-  loadMapLib().then(function(ml){if(!pubMap){pubMap=makeMap($("pubMap"),11.3);pubMap.addControl(new ml.NavigationControl({showCompass:false}),"top-right")}
-    return api("/public/reports").then(function(j){pubMarkers.forEach(function(m){m.remove()});pubMarkers=[];var pts=j.reports||[];
-      pts.forEach(function(r){var c=catById(r.issue_type);var m=new ml.Marker({element:pinEl(STAGE_COLOR[r.stage]||"#0B2545"),anchor:"bottom"}).setLngLat([r.lng,r.lat]).setPopup(new ml.Popup({offset:24}).setHTML('<b>'+esc(r.ref)+'</b><br>'+esc(c?catLabel(c):r.issue_type)+(r.ward?fmt(hs(", ward {n}"),{n:r.ward}):'')+'<br>'+esc(hs(PUB_STAGES[r.stage]||""))+' · <a href="#/r/'+esc(r.ref)+'">'+hs("View")+'</a>')).addTo(pubMap);pubMarkers.push(m)});
-      $("pubCount").textContent=fmt(hs("{n} reports with a map pin"),{n:pts.length})+(j.counts&&j.counts.total!=null?' · '+fmt(hs("{n} reports in all"),{n:j.counts.total}):'')+'.';
-      if(pts.length){var b=new ml.LngLatBounds();pts.forEach(function(r){b.extend([r.lng,r.lat])});pubMap.fitBounds(b,{padding:60,maxZoom:15,duration:0})}})},function(){$("pubCount").textContent=hs("The map could not load. Check the connection and try again.")})}
+/* Reports are private: #/r/REF and #/map (old public links) show the notice in #v-private; counts per ward live on #/wards. */
 if(L.whatsapp){$("waLink").href=L.whatsapp;$("waRow").hidden=false}
 
 /* ---------------- volunteer desk (#/desk) ---------------- */
@@ -545,7 +524,10 @@ $("fWardF").innerHTML+=D.WARDS.map(function(w){return '<option value="'+w[0]+'">
 var qT;$("fQ").addEventListener("input",function(){clearTimeout(qT);qT=setTimeout(function(){F.q=$("fQ").value.trim();loadReports(true)},350)});
 $("tRefresh").addEventListener("click",function(){loadReports(true)});
 $("tMore").addEventListener("click",function(){loadReports(false)});
-function qs(extra){var p=["stage="+encodeURIComponent(F.stage),"offset="+tOffset,"limit="+T_LIMIT];if(F.issue)p.push("issue="+encodeURIComponent(F.issue));if(F.ward)p.push("ward="+F.ward);if(F.flag)p.push("flag="+F.flag);if(F.q)p.push("q="+encodeURIComponent(F.q));if(extra)p.push(extra);return p.join("&")}
+/* qsFilters(): the Reports tab filters only (stage, issue, ward, flag, q). qs() adds the list's offset and limit; the map must not use them,
+   or after the list has paged the map request skips the first rows and shows nothing. */
+function qsFilters(){var p=["stage="+encodeURIComponent(F.stage)];if(F.issue)p.push("issue="+encodeURIComponent(F.issue));if(F.ward)p.push("ward="+F.ward);if(F.flag)p.push("flag="+F.flag);if(F.q)p.push("q="+encodeURIComponent(F.q));return p}
+function qs(extra){var p=qsFilters();p.splice(1,0,"offset="+tOffset,"limit="+T_LIMIT);if(extra)p.push(extra);return p.join("&")}
 function loadReports(reset){if(reset){tOffset=0;$("tList").innerHTML="";rowsCache={}}
   $("tSummary").textContent="Loading…";
   return dapi("/triage/reports?"+qs()).then(function(j){tTotal=j.total||0;(j.reports||[]).forEach(function(r){rowsCache[r.ref]=r});
@@ -614,7 +596,7 @@ function saveReport(r){var p={},note=$("eNote").value.trim(),v;
 var deskMap=null,deskMarkers=[];
 function initDeskMap(){$("mapLegend").innerHTML=STAGES.map(function(st,i){return '<span><span class="sw" style="background:'+STAGE_COLOR[i]+'"></span>'+esc(st[0])+'</span>'}).join("");
   loadMapLib().then(function(ml){if(!deskMap){deskMap=makeMap($("deskMap"),11.3);deskMap.addControl(new ml.NavigationControl({showCompass:false}),"top-right")}
-    return dapi("/triage/reports?"+qs("fields=map")).then(function(j){deskMarkers.forEach(function(m){m.remove()});deskMarkers=[];var pts=j.reports||[];
+    return dapi("/triage/reports?"+qsFilters().concat(["fields=map"]).join("&")).then(function(j){deskMarkers.forEach(function(m){m.remove()});deskMarkers=[];var pts=j.reports||[];
       pts.forEach(function(r){var m=new ml.Marker({element:pinEl(STAGE_COLOR[r.stage]||"#0B2545"),anchor:"bottom"}).setLngLat([r.lng,r.lat]).setPopup(new ml.Popup({offset:24}).setHTML('<b>'+esc(r.ref)+'</b><br>'+esc(r.issue_label||r.issue_type)+' · '+esc(r.area)+(r.ward?', ward '+r.ward:'')+'<br>'+esc(STAGES[r.stage]?STAGES[r.stage][0]:"")+' · <a href="#/desk/'+esc(r.ref)+'" data-open="'+esc(r.ref)+'">Open</a>')).addTo(deskMap);deskMarkers.push(m)});
       $("mapCount").textContent=pts.length+" report"+(pts.length==1?"":"s")+" with a pinned location"+(F.stage!=="all"?" (filters from the Reports tab apply)":"")+". Tap a pin to open the report."+(pts.length?"":" Reports without a map pin are only in the list.");
       if(pts.length){var b=new ml.LngLatBounds();pts.forEach(function(r){b.extend([r.lng,r.lat])});deskMap.fitBounds(b,{padding:60,maxZoom:15,duration:0})}})},function(){$("mapCount").textContent="The map could not load. Check the connection and try again."})}
@@ -688,7 +670,7 @@ TR_PAIRS.forEach(function(p){[p[0],p[1]].forEach(function(id){$(id).addEventList
 function loadInsights(){var box=$("insightsBody");box.innerHTML='<p class="muted">Loading…</p>';dapi("/triage/insights?limit=6").then(function(j){var list=j.insights||[];var latest=list[0],p=latest&&latest.data;var html="";
     if(!p||!p.topics||!p.topics.length)html+='<div class="empty">No scan yet. The daily cron builds the first pulse tonight; it needs no key, and reads better with a free AI key for the summary.</div>';
     else{html+='<div class="rbox"><b>'+esc(p.headline_en||"This week")+'</b><p class="note">'+esc(p.summary_en||"")+(p.summary_hi?'<br>'+esc(p.summary_hi):'')+'</p><p class="note">'+esc(fmtDate(p.period&&p.period.from))+' to '+esc(fmtDate(p.period&&p.period.to))+' · generated '+esc(fmtT(latest.generated_at))+'</p></div>';
-      html+='<table class="tbl"><thead><tr><th>Issue</th><th>Mentions</th><th>Reddit / news / reports</th><th>Trend</th><th>Areas</th></tr></thead><tbody>'+p.topics.map(function(x){var c=catById(x.issue_type),bs=x.by_source||{};return '<tr><td class="n">'+esc(c?c.label:x.label||x.issue_type)+'</td><td data-l="Mentions">'+(x.count||0)+'</td><td data-l="Sources">'+(bs.reddit||0)+' / '+(bs.news||0)+' / '+(bs.reports||0)+'</td><td data-l="Trend">'+esc(x.trend||"")+'</td><td data-l="Areas">'+esc((x.areas||[]).slice(0,4).map(function(a){return a.area+" ("+a.n+")"}).join(", "))+'</td></tr>'}).join("")+'</tbody></table>';
+      html+='<table class="tbl"><thead><tr><th>Issue</th><th>Mentions</th><th>Reddit / news</th><th>Trend</th><th>Areas</th></tr></thead><tbody>'+p.topics.map(function(x){var c=catById(x.issue_type),bs=x.by_source||{};return '<tr><td class="n">'+esc(c?c.label:x.label||x.issue_type)+'</td><td data-l="Mentions">'+(x.count||0)+'</td><td data-l="Sources">'+(bs.reddit||0)+' / '+(bs.news||0)+'</td><td data-l="Trend">'+esc(x.trend||"")+'</td><td data-l="Areas">'+esc((x.areas||[]).slice(0,4).map(function(a){return a.area+" ("+a.n+")"}).join(", "))+'</td></tr>'}).join("")+'</tbody></table>';
       if(p.actions&&p.actions.length)html+='<h3 style="margin:1.25rem 0 .5rem">Suggested actions</h3>'+stepsHtml(p.actions.map(function(a){return (a.title||a.action||"")+(a.why?" — "+a.why:"")+(a.who?" · "+a.who:"")+(a.when?" · "+a.when:"")}))}
     var sig=j.signals||[];if(sig.length)html+='<h3 style="margin:1.25rem 0 .5rem">Top signals this week</h3><ul class="rows">'+sig.slice(0,40).map(function(x){var c=catById(x.issue_type);return '<li class="row"><div>'+ic("news")+'</div><div><b>'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.title)+'</a>':esc(x.title))+'</b><div class="meta">'+esc(x.source)+(c?' · '+esc(c.label):'')+(x.area?' · '+esc(x.area):'')+(x.posted_at?' · '+esc(fmtT(x.posted_at)):'')+' · score '+(x.score||0)+'</div></div></li>'}).join("")+'</ul>';
     if(list.length>1)html+='<p class="small muted" style="margin-top:1rem">Earlier scans: '+list.slice(1).map(function(i){return esc(fmtDate(i.generated_at))}).join(", ")+'</p>';

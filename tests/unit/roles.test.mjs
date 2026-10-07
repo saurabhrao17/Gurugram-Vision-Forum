@@ -231,3 +231,39 @@ test("translate handler: 503 without keys, 400 on bad input, 403 for triage, 502
   assert.equal(garbage.statusCode, 502);
   assert.equal(garbage.body.error, "translate_unparseable");
 });
+
+// The desk map asks for every pinned report that matches the filters. It must
+// never be paged: the desk once sent the list's offset with fields=map and the
+// map came back empty as soon as the list had scrolled past the pinned rows.
+test("reports with fields=map ignore offset and limit; the list keeps them", async () => {
+  const calls = [];
+  const sbRec = {
+    from(table) {
+      const q = { table, filters: [], range: null };
+      const chain = {
+        select: () => chain, order: () => chain, single: async () => ({ data: { total: 1 }, error: null }),
+        range: (a, b) => { q.range = [a, b]; return chain; },
+        in: (k, v) => { q.filters.push(["in", k, v]); return chain; },
+        not: (k, op, v) => { q.filters.push(["not", k, op, v]); return chain; },
+        lt: (k, v) => { q.filters.push(["lt", k, v]); return chain; },
+        eq: (k, v) => { q.filters.push(["eq", k, v]); return chain; },
+        or: (v) => { q.filters.push(["or", v]); return chain; },
+        then: (ok) => { calls.push(q); return ok({ data: [{ ref: "GVF-2026-T4DG5", lat: 28.44, lng: 77.0, stage: 0 }], error: null, count: 1 }); }
+      };
+      return chain;
+    }
+  };
+  let res = fakeRes();
+  await makeReports({ auth: authAs("owner"), sb: sbRec })({ method: "GET", query: { fields: "map", stage: "open", offset: "2", limit: "50" } }, res);
+  assert.equal(res.statusCode, 200);
+  let q = calls.find((c) => c.table === "triage_reports");
+  assert.deepEqual(q.range, [0, 999], "map: from the first row, up to 1000 pins");
+  assert.ok(q.filters.some((f) => f[0] === "not" && f[1] === "lat"), "map: only pinned reports");
+  assert.equal(res.body.reports.length, 1);
+
+  calls.length = 0;
+  res = fakeRes();
+  await makeReports({ auth: authAs("owner"), sb: sbRec })({ method: "GET", query: { stage: "open", offset: "2", limit: "50" } }, res);
+  q = calls.find((c) => c.table === "triage_reports");
+  assert.deepEqual(q.range, [2, 51], "list: paged as asked");
+});

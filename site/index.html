@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co https://tile.openstreetmap.org; worker-src 'self' blob:; child-src 'self' blob:; frame-src https://www.youtube.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; manifest-src 'self'">
 <title>Gurugram Vision Forum — Who fixes my problem?</title>
 <meta name="description" content="Find the desk responsible for your civic issue in Gurugram, report it, know your rights and your ward, and see what the Forum is fixing.">
 <link rel="canonical" href="https://gurugramvisionforum.org/">
@@ -149,7 +150,7 @@
         <a class="teaser" href="#/who"><svg class="i" aria-hidden="true"><use href="#i-who"/></svg><div><b data-i18n="t.who">Who's who</b><span data-i18n="t.whop">Parliament to your ward councillor: who owns what, with official pages.</span></div></a>
         <a class="teaser" href="#/wards"><svg class="i" aria-hidden="true"><use href="#i-wards"/></svg><div><b data-i18n="t.wards">Wards</b><span data-i18n="t.wardsp">All 36 councillors, and three ways to find your ward.</span></div></a>
         <a class="teaser" href="#/charter"><svg class="i" aria-hidden="true"><use href="#i-charter"/></svg><div><b data-i18n="t.charter">Civic charter</b><span data-i18n="t.charterp">What you owe the city and what it owes you. Tick your score.</span></div></a>
-        <a class="teaser" href="#/dashboard"><svg class="i" aria-hidden="true"><use href="#i-dash"/></svg><div><b data-i18n="t.dash">Dashboard</b><span data-i18n="t.dashp">What residents reported, and where each report stands.</span></div></a>
+        <a class="teaser" href="#/dashboard"><svg class="i" aria-hidden="true"><use href="#i-dash"/></svg><div><b data-i18n="t.dash">Dashboard</b><span data-i18n="t.dashp">How many reports there are by cause, ward and stage, against the Forum's commitments.</span></div></a>
       </div>
     </div>
   </div>
@@ -278,7 +279,8 @@
       <div class="card"><b data-i18n="wd.f3">Then use it</b><p data-i18n="wd.f3p">Put the ward number on every complaint; it routes to the right engineer.</p><a href="#/report" data-i18n="n.report">Report an issue</a></div>
     </div>
     <div class="field" style="max-width:420px"><label for="wardSearch" data-i18n="wd.search">Search by ward number or councillor</label><input type="search" id="wardSearch" data-i18n-ph="wd.ph" placeholder="12, Yadav, BJP"></div>
-    <table class="tbl" id="wardTable"><thead><tr><th data-i18n="wd.c1">Ward</th><th data-i18n="wd.c2">Councillor</th><th data-i18n="wd.c3">Party, as elected</th><th data-i18n="wd.c4">Verify</th></tr></thead><tbody id="wardBody"></tbody></table>
+    <p class="small muted" id="wardCounts" hidden></p>
+    <table class="tbl" id="wardTable"><thead><tr><th data-i18n="wd.c1">Ward</th><th data-i18n="wd.c2">Councillor</th><th data-i18n="wd.c3">Party, as elected</th><th id="wardCountsTh" data-i18n="wd.c5" hidden>Reports</th><th data-i18n="wd.c4">Verify</th></tr></thead><tbody id="wardBody"></tbody></table>
     <p class="src" data-i18n="wd.src">Source: results declared 12 March 2025, as reported. Some independents have since joined parties. Office contacts are being collected.</p>
   </div></div>
 </section>
@@ -498,7 +500,7 @@
     <div class="trust">
       <div><b data-i18n="a.t1">Registration</b><span data-i18n="a.t1p">Registration as a not-for-profit is in progress. The charter and accounts will be published here.</span></div>
       <div><b data-i18n="a.t2">Funding mix planned</b><div class="mix" id="mix"></div></div>
-      <div><b data-i18n="a.t3">Your data</b><span data-i18n="a.t3p">Reports are shared with authorities without your phone number. Public pages never show reporter names.</span></div>
+      <div><b data-i18n="a.t3">Your data</b><span data-i18n="a.t3p">Reports are shared with authorities without your phone number. No report is shown publicly; only the count of reports per ward.</span></div>
       <div><b data-i18n="a.t4">Not a government site</b><span data-i18n="a.t4p">The Forum is independent and non-partisan. Emergencies: call 112.</span></div>
     </div>
     <h2 style="margin-top:2rem" data-i18n="a.contact">Contact</h2>
@@ -519,25 +521,21 @@
     <div id="newsBody"></div>
   </div></div>
 </section>
-<section class="view" id="v-map">
-  <div class="sec"><div class="wrap">
-    <div class="head"><h1 data-i18n="mp.h">Reports on the map</h1><p data-i18n="mp.p">Every report with a map pin, by stage. Locations are rounded to about 100 metres; names are never shown.</p></div>
-    <p class="small muted" id="pubCount"></p>
-    <div class="legend" id="pubLegend"></div>
-    <div class="mapbox mapbox-tall" id="pubMap" aria-label="Map of reports" data-i18n-aria="a.pubMap" style="margin-top:.75rem"></div>
-    <p class="small muted" style="margin-top:.75rem" data-i18n="mp.note">Tap a pin for the public page of that report. Counts and stages only; the Forum publishes figures from the first 50 reports.</p>
+<!-- Reports are private: #/map and #/r/REF (old public links) show this notice; counts per ward are on #/wards -->
+<section class="view" id="v-private">
+  <div class="sec"><div class="wrap read">
+    <div class="head"><h1 data-i18n="pr.h">Reports are private</h1><p data-i18n="pr.p">What residents report stays with the Forum team that works on it. Nothing about a single report is published: no reference number, place, date or description. What is public is the count of reports in each ward, by issue type and by stage.</p></div>
+    <div class="btns"><a class="btn btn-primary" href="#/track" data-i18n="pr.track">Track my own report</a></div>
+    <p><a href="#/wards" data-i18n="pr.wards">See how many reports each ward has</a></p>
   </div></div>
-</section>
-<section class="view" id="v-pub">
-  <div class="sec"><div class="wrap read" id="pubBody"></div></div>
 </section>
 <section class="view" id="v-privacy">
   <div class="sec"><div class="wrap read">
     <h1 data-i18n="pv.h">Privacy notice</h1>
     <p><b data-i18n="pv.h1">What we collect.</b> <span data-i18n="pv.p1">When you report an issue we store the issue, the place, your description, your name and mobile number and, if you give them, your email and the documents you attach. The Forum uses them to map the report, file it with the responsible desk on your behalf when you ask, and tell you what happened.</span></p>
-    <p><b data-i18n="pv.h2">What is public.</b> <span data-i18n="pv.p2">Public pages, the map and the dashboard show counts, stages, issue types, areas and wards. Your name, mobile number, email, description and documents are never shown publicly and are sent to no one except the official desk the report is filed with.</span></p>
+    <p><b data-i18n="pv.h2">What is public.</b> <span data-i18n="pv.p2">No report is ever published on its own. The dashboard and the ward table show counts only: how many reports there are by issue type, ward and stage. Your name, mobile number, email, description and documents are never shown publicly and are sent to no one except the official desk the report is filed with.</span></p>
     <p><b data-i18n="pv.h3">Who sees your details.</b> <span data-i18n="pv.p3">Only the Forum's signed-in volunteers for your ward and its coordinators, each of whom agrees in writing to use them for the report alone.</span></p>
-    <p><b data-i18n="pv.h4">Messages.</b> <span data-i18n="pv.p4">We message you only about your report, on the channel you used. Follow emails stop with one click.</span></p>
+    <p><b data-i18n="pv.h4">Messages.</b> <span data-i18n="pv.p4">We message you only about your report, on the channel you used.</span></p>
     <p><b data-i18n="pv.h5">Retention.</b> <span data-i18n="pv.p5">Reports are deleted 24 months after they close, with their attachments. To limit abuse we keep a salted hash of your connection address for one hour, never the address itself.</span></p>
     <p><b data-i18n="pv.h6">Your choices.</b> <span data-i18n="pv.p6">Write to</span> <a href="mailto:contact@gurugramvisionforum.org">contact@gurugramvisionforum.org</a> <span data-i18n="pv.p6b">to see, correct or delete what we hold, quoting your reference number.</span></p>
     <p class="small muted" data-i18n="pv.upd">Last updated 8 October 2026.</p>
@@ -609,7 +607,7 @@
   <div class="wrap">
     <div class="fgrid">
       <div><a class="brand" href="#/"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-mark"/></svg><span data-i18n="brand">Gurugram Vision Forum</span></a><p data-i18n="ft.tag">Citizens and governance in partnership. Collaborate, contribute, change.</p><p><a href="mailto:contact@gurugramvisionforum.org">contact@gurugramvisionforum.org</a><br><a href="tel:+919899375445">+91 98993 75445</a><br><span data-i18n="ft.addr">Sector 29, Gurugram</span></p><p id="ftSocial" hidden></p></div>
-      <div><h4 data-i18n="ft.fix">Fix</h4><ul><li><a href="#/" data-i18n="ft.fix1">Who fixes it</a></li><li><a href="#/report" data-i18n="n.report">Report an issue</a></li><li><a href="#/track" data-i18n="n.track">Track a report</a></li><li><a href="#/map" data-i18n="n.map">Live map</a></li></ul></div>
+      <div><h4 data-i18n="ft.fix">Fix</h4><ul><li><a href="#/" data-i18n="ft.fix1">Who fixes it</a></li><li><a href="#/report" data-i18n="n.report">Report an issue</a></li><li><a href="#/track" data-i18n="n.track">Track a report</a></li></ul></div>
       <div><h4 data-i18n="ft.know">Know</h4><ul><li><a href="#/directory" data-i18n="n.dir">Directory</a></li><li><a href="#/rights" data-i18n="n.rights">Your rights</a></li><li><a href="#/who" data-i18n="n.who">Who's who</a></li><li><a href="#/wards" data-i18n="n.wards">Wards</a></li></ul></div>
       <div><h4 data-i18n="ft.join">Join</h4><ul><li><a href="#/join" data-i18n="n.join">Join</a></li><li><a href="#/charter" data-i18n="n.charter">Civic charter</a></li><li><a href="#/updates" data-i18n="n.updates">Updates</a></li><li><a href="/blog" data-srv="/blog" data-i18n="n.blog">Blog</a></li><li><a href="#/news" data-i18n="n.news">Official news</a></li><li><a href="#/pulse" data-i18n="n.pulse">City pulse</a></li></ul></div>
       <div><h4 data-i18n="ft.about">About</h4><ul><li><a href="#/about" data-i18n="n.about">About</a></li><li><a href="/guides" data-srv="/guides" data-i18n="n.guides">Guides</a></li><li><a href="/ward/1" data-srv="/ward/1" data-i18n="n.wardPages">Ward pages</a></li><li><a href="#/dashboard" data-i18n="n.dash">Dashboard</a></li><li><a href="#/accessibility" data-i18n="n.access">Accessibility statement</a></li><li><a href="#/privacy" data-i18n="n.privacy">Privacy notice</a></li><li><a href="#/desk" data-i18n="n.signin">Volunteer sign-in</a></li></ul></div>

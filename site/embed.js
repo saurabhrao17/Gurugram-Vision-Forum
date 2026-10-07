@@ -49,7 +49,7 @@
 
   if (!window.fetch) return;
   fetch(origin + "/api/dashboard", { mode: "cors", credentials: "omit" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-    // The Forum publishes figures from the first 50 reports; before that the API says published:false and no number is shown.
+    // Counts only (never one report); the API says published:false only while it has nothing to show.
     if (!j || !j.ok || !j.published) return;
     var n = +j.total || (j.summary && +j.summary.total) || 0;
     if (!n) return;

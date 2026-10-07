@@ -20,9 +20,6 @@ import triageReports from "../lib/handlers/triage/reports.js";
 import triageReport from "../lib/handlers/triage/report.js";
 import triagePassword from "../lib/handlers/triage/password.js";
 import cron from "../lib/handlers/cron.js";
-import follow from "../lib/handlers/follow.js";
-import publicReport from "../lib/handlers/public-report.js";
-import publicReports from "../lib/handlers/public-reports.js";
 import hooksWhatsapp from "../lib/handlers/hooks/whatsapp.js";
 import hooksExotel from "../lib/handlers/hooks/exotel.js";
 import content from "../lib/handlers/content.js";
@@ -47,7 +44,7 @@ const ROUTES = {
   "report": report, "report/upload-url": reportUpload, "report/attach": reportAttach, "status": status, "join": join, "dashboard": dashboard, "ward": ward, "geocode": geocode,
   "triage/login": triageLogin, "triage/refresh": triageRefresh, "triage/me": triageMe,
   "triage/staff": triageStaff, "triage/wards": triageWards, "triage/reports": triageReports, "triage/password": triagePassword,
-  "cron/daily": cron, "follow": follow, "public/report": publicReport, "public/reports": publicReports,
+  "cron/daily": cron,
   "hooks/whatsapp": hooksWhatsapp, "hooks/exotel": hooksExotel,
   "content": content, "triage/content": triageContent, "triage/content/upload-url": triageContentUpload, "triage/draft": triageDraft,
   "visitor": visitor, "news": news, "health": health, "triage/visitors": triageVisitors, "triage/translate": triageTranslate, "pulse": pulse, "triage/insights": triageInsights,

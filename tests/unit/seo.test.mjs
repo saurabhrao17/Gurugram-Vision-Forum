@@ -8,7 +8,7 @@ import { handle as gsc } from "../../lib/handlers/gsc.js";
 import { gvf, hs } from "../../lib/site-data.js";
 import { siteUrl, BUILD_DATE } from "../../lib/seo/site.js";
 import { describe, esc, jsonLd } from "../../lib/seo/layout.js";
-import { parseDate, mergePosts, normalisePost, PUBLIC_MIN } from "../../lib/seo/data.js";
+import { parseDate, mergePosts, normalisePost } from "../../lib/seo/data.js";
 import { chartersFor, faqFor } from "../../lib/seo/guides.js";
 
 const ENV = { SUPABASE_URL: "https://proj.supabase.co" };
@@ -23,8 +23,14 @@ function fakeRes() {
 
 // Supabase double: tables[name] is an array or (q) => array; counts[name] a
 // number for head:true counts; errors[name] makes every query on it fail.
-function fakeSb({ tables = {}, counts = {}, errors = {} } = {}) {
+function fakeSb({ tables = {}, counts = {}, errors = {}, rpc = {} } = {}) {
   const calls = [];
+  const rpcFn = async (name, args) => {
+    calls.push({ table: "rpc:" + name, args });
+    if (errors[name]) return { data: null, error: { message: errors[name] } };
+    const v = rpc[name];
+    return { data: typeof v === "function" ? v(args) : (v ?? null), error: null };
+  };
   const from = (table) => {
     const q = { table, filters: [], cols: null, opts: null, single: false, limit: null, order: null };
     const chain = {
@@ -54,7 +60,7 @@ function fakeSb({ tables = {}, counts = {}, errors = {} } = {}) {
     };
     return chain;
   };
-  return { from, calls };
+  return { from, calls, rpc: rpcFn };
 }
 
 async function render(path, sb, env = ENV) {
@@ -228,21 +234,18 @@ test("unknown guide and bad paths are 404 pages with the shell", async () => {
   assert.equal(res.statusCode, 405);
 });
 
-test("ward page: councillor, party, areas, recent reports; counts only at 50+", async () => {
-  const reports = [
-    { ref: "GVF-2026-ABCDE", issue_type: "waste", issue_label: "Garbage", stage: 2, ward: 5, created_at: "2026-10-03T00:00:00Z", reporter_phone: "+919999999999" },
-    { ref: "GVF-2026-FGHJK", issue_type: "roads", issue_label: "Roads", stage: 4, ward: 5, created_at: "2026-10-02T00:00:00Z" },
-    { ref: "GVF-2026-MNPQR", issue_type: "roads", issue_label: "Roads", stage: 0, ward: 6, created_at: "2026-10-01T00:00:00Z" }
-  ];
+test("ward page: councillor, party, areas and report counts; never one report", async () => {
+  const counts = { ward: 5, total: 3, site_total: 12, by_stage: [1, 0, 1, 0, 1],
+    by_issue: [{ issue_type: "waste", label: "Garbage", total: 1, resolved: 0 }, { issue_type: "roads", label: "Roads", total: 2, resolved: 1 }, { issue_type: "water", label: "Water", total: 0, resolved: 0 }] };
   const areas = [{ area: "Sector 45", ward: 5, note: "checked" }, { area: "Sector 46", ward: 5, note: null }, { area: "Sector 10", ward: 6, note: null }];
   const w = gvf().WARDS.find((x) => x[0] === 5);
 
-  let sb = fakeSb({ tables: { public_reports: reports, area_wards: areas }, counts: { public_reports: 12 } });
-  let res = await render("ward/5", sb);
+  const sb = fakeSb({ tables: { area_wards: areas }, rpc: { ward_counts: (a) => (a.p_ward === 5 ? counts : null) } });
+  const res = await render("ward/5", sb);
   assert.equal(res.statusCode, 200);
-  let h = res.body;
+  const h = res.body;
   cleanOutput(h, "ward/5");
-  assert.equal(titleOf(h), "Ward 5, Gurugram: councillor, sectors and public reports | Gurugram Vision Forum");
+  assert.equal(titleOf(h), "Ward 5, Gurugram: councillor, sectors and report counts | Gurugram Vision Forum");
   assert.equal(canonicalOf(h), "https://gurugramvisionforum.org/ward/5");
   assert.equal(alternates(h)["hi-IN"], "https://gurugramvisionforum.org/hi/ward/5");
   assert.deepEqual(lds(h).map((x) => x["@type"]), ["Organization", "WebSite", "BreadcrumbList", "WebPage"]);
@@ -250,28 +253,22 @@ test("ward page: councillor, party, areas, recent reports; counts only at 50+", 
   assert.ok(h.includes("Party (as elected, March 2025)"));
   assert.ok(h.includes(esc(w[2])), "party");
   assert.ok(h.includes("Sector 45") && h.includes("Sector 46") && !h.includes("Sector 10"));
-  assert.ok(h.includes('href="/r/GVF-2026-ABCDE"') && h.includes('href="/r/GVF-2026-FGHJK"') && !h.includes("GVF-2026-MNPQR"));
-  assert.ok(h.includes("Filed officially") && h.includes("Resolved"));
-  assert.ok(!h.includes("Counts by stage"), "no counts under 50 public reports");
-  assert.ok(!h.includes("9999999999"));
+  assert.ok(/<b>3<\/b><span>Reports so far<\/span>/.test(h));
+  assert.ok(/<b>1<\/b><span>Received<\/span>/.test(h) && /<b>1<\/b><span>Filed officially<\/span>/.test(h) && /<b>0<\/b><span>Escalated<\/span>/.test(h) && /<b>1<\/b><span>Resolved<\/span>/.test(h));
+  assert.ok(h.includes("By issue") && h.includes('href="/guide/roads"'));
+  assert.ok(!h.includes("Water") || !/Water<\/a><\/td><td[^>]*>0</.test(h), "issues with no reports are left out");
+  assert.ok(!h.includes("GVF-20") && !h.includes("/r/") && !h.includes("/map"), "nothing that identifies one report, no feed links");
+  assert.ok(!sb.calls.some((q) => q.table === "reports" || q.table === "public_reports"), "the page never reads report rows");
   assert.ok(h.includes('href="/ward/4"') && h.includes('href="/ward/6"'));
-  assert.ok(h.includes('href="/guide/roads"'));
   assert.ok(h.includes('href="/report"'));
 
-  sb = fakeSb({ tables: { public_reports: reports, area_wards: areas }, counts: { public_reports: PUBLIC_MIN } });
-  res = await render("ward/5", sb);
-  h = res.body;
-  assert.ok(h.includes("Counts by stage"), "counts at 50");
-  assert.ok(/<b>1<\/b><span>Filed officially<\/span>/.test(h));
-  assert.ok(/<b>1<\/b><span>Resolved<\/span>/.test(h));
-  assert.ok(/<b>0<\/b><span>Received<\/span>/.test(h));
-
-  res = await render("hi/ward/5", sb);
-  assert.equal(res.statusCode, 200);
-  cleanOutput(res.body, "hi/ward/5");
-  assert.ok(res.body.includes("दल (मार्च 2025 के चुनाव अनुसार)"));
-  assert.ok(res.body.includes("आधिकारिक रूप से दर्ज"));
-  assert.equal(canonicalOf(res.body), "https://gurugramvisionforum.org/hi/ward/5");
+  const hi = await render("hi/ward/5", sb);
+  assert.equal(hi.statusCode, 200);
+  cleanOutput(hi.body, "hi/ward/5");
+  assert.ok(hi.body.includes("दल (मार्च 2025 के चुनाव अनुसार)"));
+  assert.ok(hi.body.includes("आधिकारिक रूप से दर्ज"));
+  assert.ok(hi.body.includes("अब तक रिपोर्टें"));
+  assert.equal(canonicalOf(hi.body), "https://gurugramvisionforum.org/hi/ward/5");
 });
 
 test("ward 99, ward 0 and a database failure", async () => {
@@ -280,9 +277,9 @@ test("ward 99, ward 0 and a database failure", async () => {
     assert.equal(res.statusCode, 404, p);
     assert.ok(res.body.includes("<title>"));
   }
-  const res = await render("ward/1", fakeSb({ errors: { public_reports: "down", area_wards: "down", site_settings: "down" } }));
+  const res = await render("ward/1", fakeSb({ errors: { ward_counts: "down", area_wards: "down", site_settings: "down" } }));
   assert.equal(res.statusCode, 200, "degrades to data-only page");
-  assert.ok(res.body.includes("No public reports from this ward yet."));
+  assert.ok(res.body.includes("No reports from this ward yet."));
   assert.ok(res.body.includes("being checked by volunteers"));
   const res2 = await render("ward/36", null, {});
   assert.equal(res2.statusCode, 200);
@@ -367,7 +364,7 @@ test("sitemap lists every page pair with alternates and is well formed", async (
   assert.ok(!x.includes("draft-only"));
   const opens = (x.match(/<url>/g) || []).length, closes = (x.match(/<\/url>/g) || []).length;
   assert.equal(opens, closes);
-  assert.equal(opens, 14 + 2 * (1 + gvf().CATS.length + 36 + 1 + gvf().BLOG.length + 1));
+  assert.equal(opens, 13 + 2 * (1 + gvf().CATS.length + 36 + 1 + gvf().BLOG.length + 1));
   // without a database: static posts only
   const plain = buildSitemap(mergePosts([]));
   assert.ok(plain.includes("/blog/segregate-at-source</loc>"));
