@@ -263,7 +263,7 @@ body{padding-bottom:calc(var(--bbar) + env(safe-area-inset-bottom,0px))}
 .field{display:flex; flex-direction:column; gap:.3rem; margin-bottom:1rem}
 .field label{font-family:var(--head); font-weight:600; font-size:1rem; color:var(--ink)}
 .field .hint{font-size:.95rem; color:var(--muted); margin:0}
-input[type=text],input[type=email],input[type=tel],input[type=search],select,textarea{width:100%; font:inherit; font-size:1.0625rem; padding:.7rem .85rem; min-height:48px; border:1.5px solid var(--line); border-radius:var(--r-ctl); background:var(--surface); color:var(--text)}
+input[type=text],input[type=email],input[type=tel],input[type=search],input[type=password],input[type=number],select,textarea{width:100%; font:inherit; font-size:1.0625rem; padding:.7rem .85rem; min-height:48px; border:1.5px solid var(--line); border-radius:var(--r-ctl); background:var(--surface); color:var(--text)}
 input:focus,select:focus,textarea:focus{border-color:var(--ink); box-shadow:var(--ring); outline:none}
 select{appearance:none; -webkit-appearance:none; background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%); background-position:calc(100% - 18px) 50%,calc(100% - 12px) 50%; background-size:6px 6px; background-repeat:no-repeat; padding-right:2.4rem}
 textarea{min-height:130px; resize:vertical}
@@ -489,3 +489,4 @@ body.triage{--bbar:0px}
 .login-card{max-width:460px}
 body.triage .ftr{padding:1.25rem 0 .75rem}
 body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
+.util[hidden],.tab[hidden]{display:none}
