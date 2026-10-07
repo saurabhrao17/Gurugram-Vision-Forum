@@ -380,11 +380,13 @@ test("parseHtmlLinks scopes to a tag.class selector and resolves relative URLs",
   assert.deepEqual(footer.map((i) => i.title), ["Contact the corporation office today"]);
 });
 
-test("parseHtmlLinks falls back to all anchors with 20..200 character text", () => {
+test("parseHtmlLinks falls back to notice-like anchors outside navigation and chrome", () => {
   const items = parseHtmlLinks(HTML, "", "https://www.mcg.gov.in/");
-  assert.deepEqual(items.map((i) => i.title), ["About the municipal corporation", "Road closure on Sohna road from Monday", "Joint drive with GMDA", "Contact the corporation office today"]);
+  assert.deepEqual(items.map((i) => i.title), ["Road closure on Sohna road from Monday"]);
   const missing = parseHtmlLinks(HTML, "section.nothing", "https://www.mcg.gov.in/");
-  assert.equal(missing.length, 4);
+  assert.equal(missing.length, 1);
+  const dated = parseHtmlLinks('<main><ul><li>07/10/2026 <a href="/x/1">Water supply schedule for the festival week</a></li><li><a href="/about">About the department of water</a></li><li><a href="/docs/order-12.pdf">Order on tanker rates</a></li><li>Posted 5 October 2026: <a href="/y">Ward committee meetings announced</a></li></ul><nav><a href="/n">Navigation link long enough</a></nav></main>', "", "https://w.gov.in/");
+  assert.deepEqual(dated.map((i) => [i.title, i.published_at && i.published_at.slice(0, 10)]), [["Water supply schedule for the festival week", "2026-10-07"], ["Order on tanker rates", null], ["Ward committee meetings announced", "2026-10-05"]]);
   assert.equal(scopeHtml("<div><p class='a'>x<p class='a'>y</p></p></div>", "p.a"), "x<p class='a'>y</p>");
 });
 

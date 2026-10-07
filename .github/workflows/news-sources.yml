@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 22
       - name: Probe every source
-        run: node scripts/check-news-sources.mjs --json news-check.json --timeout=20000
+        run: node scripts/check-news-sources.mjs --json news-check.json --timeout=20000 --dump --candidates data/news-candidates.json
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
