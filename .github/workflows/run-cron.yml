@@ -1,0 +1,41 @@
+name: Run the daily cron now
+
+# Triggers /api/cron/daily on production outside its 03:30 UTC schedule
+# (news, links, city pulse signals and insights, weekly round-up, digest,
+# IndexNow, SLA digest, outbox, retention). The bearer token comes from the
+# repository secret CRON_SECRET (Settings → Secrets → Actions) or, failing
+# that, from the run input. Vercel's own schedule is unaffected.
+on:
+  workflow_dispatch:
+    inputs:
+      secret:
+        description: "CRON_SECRET (only if the repository secret is not set)"
+        required: false
+        default: ""
+      base_url:
+        description: "Site origin"
+        required: false
+        default: "https://gurugram-vision-forum.vercel.app"
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call the cron endpoint
+        env:
+          SECRET_FROM_REPO: ${{ secrets.CRON_SECRET }}
+          SECRET_FROM_INPUT: ${{ github.event.inputs.secret }}
+          BASE_URL: ${{ github.event.inputs.base_url }}
+        run: |
+          TOKEN="${SECRET_FROM_REPO:-$SECRET_FROM_INPUT}"
+          if [ -z "$TOKEN" ]; then echo "No CRON_SECRET available"; exit 1; fi
+          echo "::add-mask::$TOKEN"
+          code=$(curl -sS -m 120 -o out.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/cron/daily")
+          echo "HTTP $code"
+          if command -v jq >/dev/null; then jq . out.json; else cat out.json; fi
+          { echo "## Cron run"; echo; echo "HTTP $code"; echo; echo '```json'; cat out.json; echo; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          [ "$code" = "200" ]
