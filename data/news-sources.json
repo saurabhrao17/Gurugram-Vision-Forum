@@ -12,14 +12,14 @@
   },
   {
     "id": "gurugram-district-notices",
-    "name": "District Administration, Gurugram: notices",
-    "url": "https://gurugram.gov.in/notice_category/announcements/",
+    "name": "District Administration, Gurugram: new updates, notices and tenders",
+    "url": "https://gurugram.gov.in/",
     "type": "html",
-    "selector": "table td a, .notice a, article h2 a",
+    "selector": "#1527242546872-c5ef4564-a38c a, .vc_tta-panel-body a",
     "home": "https://gurugram.gov.in/",
-    "enabled": false,
-    "verified": "failing",
-    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): /notice_category/announcements/, /notice_category/notice/, /notice_category/announcement/, /notices/ and /public-notices/ all 404. The notice archive slug must be read from the site's menu by hand; until then this entry is off."
+    "enabled": true,
+    "verified": "2026-10-07",
+    "note": "second check 7 Oct 2026 (run 37687124291): the notice archive URLs are all 404 but the home page's 'New Updates' tab lists the current orders, notices and tenders (31 items, e.g. grievance-meeting proceedings, Section 163 orders). The first selector is that tab's panel id; the fallback takes every tab panel."
   },
   {
     "id": "ulb-whats-new",
@@ -44,12 +44,12 @@
   {
     "id": "haryana-assembly",
     "name": "Haryana Vidhan Sabha: news and press releases",
-    "url": "https://haryanaassembly.gov.in/news-press-release/",
-    "type": "html",
-    "selector": ".article-heading a, article h2 a",
+    "url": "https://haryanaassembly.gov.in/feed/",
+    "type": "rss",
+    "selector": "",
     "home": "https://haryanaassembly.gov.in/",
     "verified": "2026-10-07",
-    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): items parsed; the selector is now the article heading so 'View more' and the attached PDF do not duplicate the title."
+    "note": "second check 7 Oct 2026 (run 37687124291): the WordPress feed /feed/ returns 10 items with dates; switched from the HTML page to the feed."
   },
   {
     "id": "hsvp-tenders",
@@ -80,8 +80,9 @@
     "type": "html",
     "selector": "article h2 a, .entry-title a, .gen-list li a",
     "home": "https://haryana.gov.in/",
-    "verified": "unverified",
-    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): /notice/, /notices/ and /press-release/ all redirect to the home page. The home page links an events archive at /events/ (e.g. TRACKPDS, relief-fund consent); pointed there, selector to be confirmed on the next run."
+    "enabled": false,
+    "verified": "js-only",
+    "note": "second check 7 Oct 2026 (run 37687124291): /events/ serves only share buttons (the list is rendered by script) and /events/feed/ is 403; /notice/ redirects home. Off."
   },
   {
     "id": "lokbhavan",
@@ -90,8 +91,9 @@
     "type": "html",
     "selector": ".awardListing h3 a, .awardListing h2 a, .awardListing h4 a, .awardListing a",
     "home": "https://lokbhavan.haryana.gov.in/",
-    "verified": "unverified",
-    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): the page is a grid of .awardListing cards each with its own share buttons; the earlier selector matched only a share link. Share links are now filtered; the card heading selector is to be confirmed on the next run."
+    "enabled": false,
+    "verified": "failing",
+    "note": "second check 7 Oct 2026 (run 37687124291): the press-release cards carry only share buttons as links (titles are not anchors) and /feed/ answers 500. Off; low relevance for Gurugram anyway."
   },
   {
     "id": "gmda",
@@ -122,8 +124,9 @@
     "type": "html",
     "selector": "table tr td a, .marquee a, a[href*='pdf']",
     "home": "https://haryanapolice.gov.in/",
-    "verified": "unverified",
-    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): the home page carries the press-release link PressRelease.aspx (/press-release and /news are 404) and a marquee of PDF notices. Pointed at PressRelease.aspx; selector to be confirmed on the next run."
+    "enabled": false,
+    "verified": "js-only",
+    "note": "second check 7 Oct 2026 (run 37687124291): PressRelease.aspx serves the page chrome only; the list comes from an ASP.NET postback. Off; district police news reaches the public through the press."
   },
   {
     "id": "dhbvn",
@@ -144,7 +147,7 @@
     "home": "https://hspcb.gov.in/",
     "enabled": false,
     "verified": "failing",
-    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): TLS handshake fails (UNABLE_TO_VERIFY_LEAF_SIGNATURE) on hspcb.gov.in and hspcb.org.in: the server does not send its intermediate certificate. Browsers paper over this; Node does not. Off until the board fixes its certificate chain (re-check with --only hspcb)."
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): TLS handshake fails (UNABLE_TO_VERIFY_LEAF_SIGNATURE) on hspcb.gov.in and hspcb.org.in: the server does not send its intermediate certificate. Browsers paper over this; Node does not. Off until the board fixes its certificate chain (re-check with --only hspcb). Second check: plain http is refused (ECONNREFUSED)."
   },
   {
     "id": "hrera",
@@ -172,10 +175,10 @@
     "name": "CPCB: important announcements (archive)",
     "url": "https://cpcb.nic.in/archive-important-announcements.php",
     "type": "html",
-    "selector": ".announcement a, #content table td a, .content table td a, table td a",
+    "selector": "table td a",
     "home": "https://cpcb.nic.in/",
-    "verified": "unverified",
-    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): the page answers, but the first 40 anchors are the site menu, so the previous selector returned menu items (Genset Notifications, NAMP bulletin). Menu-like titles are now filtered and the dump is longer; selector to be confirmed on the next run. /notices/ and /press-release/ behave the same."
+    "verified": "2026-10-07",
+    "note": "second check 7 Oct 2026 (run 37687124291): 88 rows parsed from the announcements table. The link text is the file size ('View (2 MB)'), so the fetcher now takes the title and date from the row."
   },
   {
     "id": "pib-rss",
@@ -185,7 +188,7 @@
     "selector": "",
     "home": "https://www.pib.gov.in/",
     "verified": "2026-10-07",
-    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): the RSS directory page times out, but the regional feed (ModId=6, Regid=3 = Chandigarh office, which covers Haryana) returns 20 items. Items are in Hindi (Lang=1); Lang=2 is being probed for the English edition. Mostly national items; low Gurugram relevance."
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): the RSS directory page times out, but the regional feed (ModId=6, Regid=3 = Chandigarh office, which covers Haryana) returns 20 items. Items are in Hindi (Lang=1); Lang=2 is being probed for the English edition. Mostly national items; low Gurugram relevance. Second check: Lang=2 returns the same Hindi items; the other regional/ministry feeds time out. Kept as is."
   },
   {
     "id": "mygov-blog",
