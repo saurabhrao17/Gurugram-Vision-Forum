@@ -49,8 +49,7 @@ test("validate accepts a complete report and normalises fields", () => {
 test("validate names each missing or bad field", () => {
   const { errors } = validate({ ...good, issue_type: "", phone: "123", consent: false, email: "bad", pincode: "12" });
   assert.deepEqual(errors.sort(), ["consent", "email", "issue_type", "phone", "pincode"]);
-  assert.deepEqual(validate({ ...good, email: "", pincode: "" }).errors, []);
-  assert.equal(validate({ ...good, email: "", pincode: "" }).out.pincode, null);
+  assert.deepEqual(validate({ ...good, email: "", pincode: "" }).errors.sort(), ["email", "pincode"]);
   assert.equal(validate({ ...good, visitor_token: "short" }).out.visitor_token, null);
 });
 
