@@ -64,6 +64,10 @@
       "destination": "/:file"
     },
     {
+      "source": "/:view(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix|news|pulse)/:file(styles.css|app.js|data.js|favicon.svg|og.png|manifest.webmanifest|sw.js|icon-192.png|icon-512.png)",
+      "destination": "/:file"
+    },
+    {
       "source": "/:view(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix|news|pulse)",
       "destination": "/index.html"
     },
