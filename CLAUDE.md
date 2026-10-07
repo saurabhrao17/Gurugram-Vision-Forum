@@ -8,7 +8,7 @@ Read HANDOFF.md first; it holds the context, research, design rules and roadmap.
 
 ## Layout
 - `site/` is the website: `index.html`, `styles.css`, `data.js`, `app.js`. Static, hash-routed, no framework, no build step unless we deliberately add one.
-- `api/[...path].js` is the single Vercel function: a router that maps every `/api/*` path to a handler in `lib/handlers/` (`report`, `status`, `join`, `dashboard`, `ward`, `geocode`, `triage/*`). Add a route by adding a handler and one line in the router. The Hobby plan allows 12 functions per deployment, so never add files under `api/`. `lib/` holds shared code. ESM, Node 20+.
+- `api/index.js` is the single Vercel function, reached through the `/api/:path*` rewrite in `vercel.json`: a router that maps every `/api/*` path to a handler in `lib/handlers/` (`report`, `status`, `join`, `dashboard`, `ward`, `geocode`, `triage/*`). Add a route by adding a handler and one line in the router. The Hobby plan allows 12 functions per deployment, so never add files under `api/`. `lib/` holds shared code. ESM, Node 20+.
 - The volunteer desk is the `#/desk` route inside `site/app.js` (English only; internal tool). It talks only to `/api/triage/*` with a Supabase Auth bearer token. `triage.html` is a redirect kept for old links.
 - Maps: MapLibre with OpenStreetMap tiles, lazy-loaded from unpkg only when a map is shown; `/api/geocode` and `/api/ward` do search and ward detection server-side (Google when `GOOGLE_MAPS_KEY` is set). Ward polygons live in `ward_boundaries` (PostGIS), sector names in `area_wards`.
 - `supabase/migrations/` is the schema; `supabase/seed.sql` is generated from `site/data.js` by `npm run seed`. Apply both to a new project in that order.

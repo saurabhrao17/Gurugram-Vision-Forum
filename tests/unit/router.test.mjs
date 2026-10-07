@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { resolve, pathParts } from "../../api/[...path].js";
+import { resolve, pathParts, partsFrom } from "../../api/index.js";
 
 test("router resolves every public and triage route", () => {
   for (const p of [["report"], ["status"], ["join"], ["dashboard"], ["ward"], ["geocode"], ["triage", "login"], ["triage", "refresh"], ["triage", "me"], ["triage", "staff"], ["triage", "wards"], ["triage", "reports"]]) {
@@ -25,4 +25,11 @@ test("pathParts reads the segments from the request URL", () => {
   assert.deepEqual(pathParts("/api/dashboard"), ["dashboard"]);
   assert.deepEqual(pathParts("/api/"), []);
   assert.deepEqual(pathParts("/api/ward?area=Sector%2029"), ["ward"]);
+});
+
+test("partsFrom prefers the rewrite's path query and falls back to the URL", () => {
+  assert.deepEqual(partsFrom({ url: "/api/index?path=triage%2Freports&stage=open", query: { path: "triage/reports", stage: "open" } }), ["triage", "reports"]);
+  assert.deepEqual(partsFrom({ url: "/api/index?path=triage/reports/GVF-2026-ABCDE", query: { path: ["triage", "reports", "GVF-2026-ABCDE"] } }), ["triage", "reports", "GVF-2026-ABCDE"]);
+  assert.deepEqual(partsFrom({ url: "/api/dashboard", query: {} }), ["dashboard"]);
+  assert.deepEqual(partsFrom({ url: "/api/index/ward?area=x", query: { area: "x" } }), ["ward"]);
 });
