@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { resolve, pathParts, partsFrom } from "../../api/index.js";
 
 test("router resolves every public and triage route", () => {
-  for (const p of [["report"], ["status"], ["join"], ["dashboard"], ["ward"], ["geocode"], ["triage", "login"], ["triage", "refresh"], ["triage", "me"], ["triage", "staff"], ["triage", "wards"], ["triage", "reports"]]) {
+  for (const p of [["report"], ["status"], ["join"], ["dashboard"], ["ward"], ["geocode"], ["triage", "login"], ["triage", "refresh"], ["triage", "me"], ["triage", "staff"], ["triage", "wards"], ["triage", "reports"], ["triage", "password"], ["cron", "daily"], ["follow"], ["public", "report"], ["public", "reports"], ["hooks", "whatsapp"], ["hooks", "exotel"]]) {
     assert.ok(resolve(p), p.join("/"));
   }
 });
