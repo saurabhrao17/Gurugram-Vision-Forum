@@ -472,7 +472,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(250);
   const pulseTxt = await page.locator("#pulseBody").innerText();
   check(pulseTxt.includes("Garbage and waterlogging top the week") && pulseTxt.includes("Garbage") && pulseTxt.includes("18") && pulseTxt.includes("Sector cleaning drive") && (await page.locator("#pulseBody a[href='https://www.reddit.com/r/gurgaon/x']").count()) === 1, "pulse page shows the week's topics, an example link and the suggested action");
-  check((await page.locator("#pulseBody .share a[href^='https://wa.me/']").count()) === 1 && (await page.locator("#pulseBody .share [data-copy='https://gurugramvisionforum.org/#/pulse']").count()) === 1, "pulse page carries a share row");
+  check((await page.locator("#pulseBody .share a[href^='https://wa.me/']").count()) === 1 && (await page.locator("#pulseBody .share [data-copy='https://gurugramvisionforum.org/pulse']").count()) === 1, "pulse page carries a share row");
 
   // Public anonymised report page, follow form, share, real URL
   await page.goto(httpUrl + "#/r/GVF-2026-SRV01");
