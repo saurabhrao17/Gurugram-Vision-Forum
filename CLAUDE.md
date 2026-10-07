@@ -8,7 +8,8 @@ Read HANDOFF.md first; it holds the context, research, design rules and roadmap.
 
 ## Layout
 - `site/` is the website: `index.html`, `styles.css`, `data.js`, `app.js`. Static, hash-routed, no framework, no build step unless we deliberately add one.
-- `api/` holds the Vercel serverless functions (`report`, `status`, `join`, `dashboard`); `lib/` holds their shared code. ESM, Node 20+.
+- `api/` holds the Vercel serverless functions (`report`, `status`, `join`, `dashboard`, and `triage/*` for the volunteer desk); `lib/` holds their shared code. ESM, Node 20+.
+- `site/triage.html` + `site/triage.js` is the volunteer desk (English only; internal tool). It shares `styles.css` and `data.js` with the public site and talks only to `/api/triage/*` with a Supabase Auth bearer token.
 - `supabase/migrations/` is the schema; `supabase/seed.sql` is generated from `site/data.js` by `npm run seed`. Apply both to a new project in that order.
 - `archive/` holds the single-file v3 build (what was published as the Claude artifact) and the older v2. Reference only; do not edit.
 - `data/` holds the content exports (JSON and CSVs) that seed the master-data sheet. `site/data.js` is the source of truth until the sheet exists; regenerate the exports from it, not the other way round.
@@ -30,8 +31,8 @@ Read HANDOFF.md first; it holds the context, research, design rules and roadmap.
 - Test before committing: `npm test` (unit) and `node tests/smoke.mjs` (Playwright on 390 px and 1366 px: every route, the 4-step report flow, track, sheets, search, theme and language toggles, the mocked API pass, zero console errors).
 
 ## Next build items (in order)
-1. Triage view for volunteers (`#/triage`, Supabase Auth, `staff` table): list and filter reports, set stage and desk, paste official ticket numbers.
-2. Photo upload from the report form to the `report-photos` bucket (images, 10 MB) through an API function.
-3. Vercel Cron for SLA flags (3 working days unmapped, 21 days filed) and stage-change emails; WhatsApp templates after Meta verification.
-4. "Report on WhatsApp" deep link and helpline number once they exist; WhatsApp and Exotel webhooks creating reports.
-5. Privacy notice page; sector-to-ward lookup from `area_wards`; public anonymised report pages; real URLs and OG tags; 24-month retention job.
+1. Photo upload from the report form to the `report-photos` bucket (images, 10 MB) through an API function.
+2. Vercel Cron for SLA flags (3 working days unmapped, 21 days filed) and stage-change emails; WhatsApp templates after Meta verification.
+3. "Report on WhatsApp" deep link and helpline number once they exist; WhatsApp and Exotel webhooks creating reports.
+4. Privacy notice page; sector-to-ward lookup from `area_wards`; public anonymised report pages; real URLs and OG tags; 24-month retention job.
+5. Clearer geolocation message in the report form (permission denied vs unavailable).

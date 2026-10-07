@@ -11,6 +11,7 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 | Reports, events, joins, master data | Supabase Postgres, schema in `supabase/migrations/` | Row Level Security on every table. Anon key reads master data only. |
 | Photos | Supabase Storage bucket `report-photos` | Private, 10 MB, images only. Upload path is the next build item. |
 | Volunteer logins | Supabase Auth + `staff` table | Rows in `staff` grant access to reporter details. |
+| Volunteer desk | `site/triage.html` + `api/triage/*` | List, filter and update reports; manage accounts. Bearer token from Supabase Auth on every call; the API uses the service role after checking `staff`. |
 
 ## One-time setup
 
@@ -23,7 +24,12 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
    - `IP_HASH_SALT`: any long random string.
    - `TURNSTILE_SECRET` (optional): turns on bot checks for both forms. Needs the matching site key in `site/index.html`.
 4. **Domain.** Vercel → Domains: add `gurugramvisionforum.org` and `www`, follow the DNS records shown at the registrar. Add `gurgaonvisionforum.org` as a redirect to the first.
-5. **First volunteer login.** Invite the coordinator in Supabase → Authentication → Users, then insert their user id into `public.staff` with role `coordinator`.
+5. **Volunteer desk and the first owner.** The desk is `site/triage.html` (linked from the public footer as "Volunteer desk"). Sign-in is Supabase Auth with email and password; the API checks every request against `public.staff`. Bootstrap once: in Supabase → Authentication → Users → Add user → Create new user, enter the owner's email and a password with "Auto Confirm User" ticked. Then run in the SQL editor:
+   ```sql
+   insert into public.staff (user_id, name, role, email)
+   select id, 'Owner name', 'owner', email from auth.users where email = 'owner@example.org';
+   ```
+   From then on, owners and coordinators add volunteers from the desk's Team tab (no email is sent; hand the temporary password over in person). Roles: `owner` (everything, can remove accounts), `coordinator` (triage plus adding triage volunteers), `triage` (reports only).
 
 ## Checks after each deploy
 
@@ -42,10 +48,10 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 
 ## Next build items on this stack
 
-1. Triage view for volunteers (`#/triage`, Supabase Auth): list and filter reports, set stage and desk, paste official ticket numbers.
-2. Photo upload from the report form to the `report-photos` bucket.
-3. Daily cron (Vercel Cron) for SLA flags: unmapped past 3 working days, filed past 21 days; email to the coordinator.
-4. Stage-change notifications by email, then WhatsApp once Meta verification is done.
-5. WhatsApp and Exotel webhooks creating reports with `source` set accordingly.
-6. Public anonymised report pages with follow buttons.
-7. 24-month retention job.
+1. Photo upload from the report form to the `report-photos` bucket.
+2. Daily cron (Vercel Cron) for SLA flags: unmapped past 3 working days, filed past 21 days; email to the coordinator.
+3. Stage-change notifications by email, then WhatsApp once Meta verification is done.
+4. WhatsApp and Exotel webhooks creating reports with `source` set accordingly.
+5. Public anonymised report pages with follow buttons.
+6. 24-month retention job.
+7. Clearer geolocation message in the report form (blocked vs unavailable).
