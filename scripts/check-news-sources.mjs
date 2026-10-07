@@ -2,7 +2,7 @@
 // reports what the fetcher would get: HTTP status, content type, items parsed
 // and the first titles. Run from a machine (or GitHub Actions) that can reach
 // *.gov.in; the sandbox used for development cannot.
-//   node scripts/check-news-sources.mjs [--json out.json] [--timeout=15000]
+//   node scripts/check-news-sources.mjs [--json out.json] [--timeout=15000] [--dump] [--only=id1,id2] [--candidates file.json]
 import { readFile, writeFile } from "node:fs/promises";
 import { parseRss, parseHtmlLinks, stripChrome, USER_AGENT, BROWSER_UA } from "../lib/news-fetch.js";
 
@@ -10,7 +10,8 @@ const args = process.argv.slice(2);
 const jsonOut = args.includes("--json") ? args[args.indexOf("--json") + 1] : null;
 const timeoutMs = Number((args.find((a) => a.startsWith("--timeout=")) || "").split("=")[1]) || 15000;
 const dump = args.includes("--dump");
-const sources = JSON.parse(await readFile(new URL("../data/news-sources.json", import.meta.url), "utf8"));
+const only = (args.find((a) => a.startsWith("--only=")) || "").split("=")[1];
+const sources = JSON.parse(await readFile(new URL("../data/news-sources.json", import.meta.url), "utf8")).filter((s) => !only || only.split(",").includes(s.id));
 let candidates = [];
 if (args.includes("--candidates")) { try { candidates = JSON.parse(await readFile(args[args.indexOf("--candidates") + 1], "utf8")); } catch (e) { console.error("candidates:", e.message); } }
 
@@ -55,7 +56,7 @@ async function probe(s) {
     out.items = items.length;
     out.titles = items.slice(0, 3).map((i) => (i.title || "").slice(0, 90) + (i.published_at ? " (" + String(i.published_at).slice(0, 10) + ")" : ""));
     if (!items.length) out.error = s.type === "rss" ? (/<(rss|feed|rdf:RDF)\b/i.test(body) ? "feed with no items" : "not a feed") : (/<a\b/i.test(body) ? "no links matched" : "no anchors (JS-only page?)");
-    if (dump && s.type !== "rss") out.anchors = anchorsWithChain(stripChrome(body), s.url, 40);
+    if (dump && s.type !== "rss") out.anchors = anchorsWithChain(stripChrome(body), s.url, 160);
     if (dump && s.type === "rss") out.head = body.slice(0, 300).replace(/\s+/g, " ");
   } catch (e) {
     const cause = e?.cause ? " (" + (e.cause.code || e.cause.message || "") + ")" : "";

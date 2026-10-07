@@ -6,8 +6,9 @@
     "type": "rss",
     "selector": "",
     "home": "https://gurugram.gov.in/",
-    "verified": "unverified",
-    "note": "S3WaaS (WordPress) district site; WordPress exposes /feed/ for posts and notice_category feeds such as /notice_category/announcements/feed/. Posts are sparse; notices are the live content. Fetch blocked from this session, confirm the feed returns XML."
+    "enabled": true,
+    "verified": "failing",
+    "note": "S3WaaS (WordPress) district site. checked 7 Oct 2026 from GitHub Actions (run 37684031089): /feed/ answers HTTP 500 (both https and http); /notice/feed/ is 404. Kept enabled so it comes back on its own if the site is fixed; the fetcher logs the error."
   },
   {
     "id": "gurugram-district-notices",
@@ -16,38 +17,39 @@
     "type": "html",
     "selector": "table td a, .notice a, article h2 a",
     "home": "https://gurugram.gov.in/",
-    "verified": "unverified",
-    "note": "S3WaaS notice listing (announcements, orders and advisories, tenders, recruitment). Archive pages /past-notices/announcements-and-notices/ and /orders-and-advisories/ are in the search index with items to Jan 2024. Updates irregularly (orders, section 163 BNSS, AQI advisories). Server-rendered."
+    "enabled": false,
+    "verified": "failing",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): /notice_category/announcements/, /notice_category/notice/, /notice_category/announcement/, /notices/ and /public-notices/ all 404. The notice archive slug must be read from the site's menu by hand; until then this entry is off."
   },
   {
     "id": "ulb-whats-new",
     "name": "Urban Local Bodies, Haryana: What's New",
     "url": "https://www.ulbharyana.gov.in/Home/WhatsNew",
     "type": "html",
-    "selector": "table tr td a",
+    "selector": "#whatsNew tr td a, table tr td a",
     "home": "https://ulbharyana.gov.in/",
-    "verified": "index",
-    "note": "ASP.NET MVC page listing public notices with posted and expiry dates; search index shows Gurugram items dated 07-08-2026 and 11-08-2026 (restaurant and dhaba permissions in residential sectors). Updates weekly. Server-rendered; PDFs under /Website/DynamicUploadContent/."
+    "verified": "2026-10-07",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): 2 items parsed from table#whatsNew (blacklisted architects, Lal Dora possession notice). Best MCG notice source."
   },
   {
     "id": "ulb-notifications",
     "name": "Urban Local Bodies, Haryana: Notifications",
     "url": "https://ulbharyana.gov.in/Home/Notification",
     "type": "html",
-    "selector": "table tr td a",
+    "selector": "#notification-data-table tr td a, table tr td a",
     "home": "https://ulbharyana.gov.in/",
-    "verified": "index",
-    "note": "Gazette notifications for municipal bodies: ward delimitation (Dec 2023 for MCG), Municipal Account Code 2025, colony regularisation, road-cut charge waiver (Oct 2025). Index shows items to 15 Dec 2025. Monthly cadence."
+    "verified": "2026-10-07",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): 2 items (municipal nominations). Gazette notifications, ward delimitation, codes."
   },
   {
     "id": "haryana-assembly",
     "name": "Haryana Vidhan Sabha: news and press releases",
     "url": "https://haryanaassembly.gov.in/news-press-release/",
     "type": "html",
-    "selector": "article h2 a, .entry-title a, .post-title a",
+    "selector": ".article-heading a, article h2 a",
     "home": "https://haryanaassembly.gov.in/",
-    "verified": "index",
-    "note": "WordPress site (?p= URLs). Lists summoning notifications, lists of business, bills, press notes; index shows items to 1 May 2026. Session-driven cadence. Likely also exposes /feed/ (unverified)."
+    "verified": "2026-10-07",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): items parsed; the selector is now the article heading so 'View more' and the attached PDF do not duplicate the title."
   },
   {
     "id": "hsvp-tenders",
@@ -56,8 +58,9 @@
     "type": "html",
     "selector": "table tr td a",
     "home": "https://hsvphry.org.in/",
-    "verified": "index",
-    "note": "Only IT-wing tenders appear (latest closing 08 Jun 2026); civil works go through etenders.hry.nic.in. No public-notices page found in the index. Low value for residents; keep for completeness."
+    "enabled": false,
+    "verified": "js-only",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): the page serves only a 'Skip to Content' anchor; the tender list is rendered by JavaScript. /Home/PublicNotices and /Home/PressRelease are 404. Off."
   },
   {
     "id": "prharyana",
@@ -66,28 +69,29 @@
     "type": "html",
     "selector": ".view-content a, td.views-field a",
     "home": "https://prharyana.gov.in/",
-    "verified": "unverified",
-    "note": "Department of Information, Public Relations and Languages portal; Drupal. Daily state and district press notes in Hindi and English, including Gurugram DC and MCG items. Drupal default RSS at /en/rss.xml (unverified). Not in the search index; fetch blocked from this session."
+    "enabled": false,
+    "verified": "blocked",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): connection timeout on https, http and the bare host from GitHub's US runners; the host most likely answers only Indian IPs. Re-check from an Indian machine (`node scripts/check-news-sources.mjs --only prharyana`) and switch on if it answers."
   },
   {
     "id": "haryana-portal",
     "name": "Haryana state portal: notices",
-    "url": "https://haryana.gov.in/notice/",
+    "url": "https://www.haryana.gov.in/events/",
     "type": "html",
-    "selector": "table td a, .notice a",
+    "selector": "article h2 a, .entry-title a, .gen-list li a",
     "home": "https://haryana.gov.in/",
     "verified": "unverified",
-    "note": "State portal runs on S3WaaS/WordPress (?p= URLs confirmed in index). Notice listing and /feed/ expected but not confirmed. Mostly state-wide items; low Gurugram specificity."
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): /notice/, /notices/ and /press-release/ all redirect to the home page. The home page links an events archive at /events/ (e.g. TRACKPDS, relief-fund consent); pointed there, selector to be confirmed on the next run."
   },
   {
     "id": "lokbhavan",
     "name": "Lok Bhavan (Governor), Haryana: press releases",
     "url": "https://lokbhavan.haryana.gov.in/press-releases/",
     "type": "html",
-    "selector": "article h2 a, .entry-title a",
+    "selector": ".awardListing h3 a, .awardListing h2 a, .awardListing h4 a, .awardListing a",
     "home": "https://lokbhavan.haryana.gov.in/",
-    "verified": "index",
-    "note": "WordPress; paginated press-release category confirmed in index (/press-releases/page/N). Governor's engagements; occasional Gurugram items. /feed/ likely."
+    "verified": "unverified",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): the page is a grid of .awardListing cards each with its own share buttons; the earlier selector matched only a share link. Share links are now filtered; the card heading selector is to be confirmed on the next run."
   },
   {
     "id": "gmda",
@@ -96,8 +100,9 @@
     "type": "html",
     "selector": "a[href*='notice'], a[href*='press'], a[href$='.pdf']",
     "home": "https://www.gmda.gov.in/",
-    "verified": "unverified",
-    "note": "GMDA issues frequent press releases (UNI relayed one dated 9 Sep 2026 on the anti-encroachment portal) but the site's notices and press pages are not in the search index and fetch was blocked. Open the home page, find the Public Notices and Press Release menu links and replace this URL and selector. Also follows GMDA's X handle, which has no fetchable web page."
+    "enabled": false,
+    "verified": "blocked",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): connection timeout on https, http, the bare host and /public-notice from GitHub's US runners; the host most likely answers only Indian IPs. Re-check from India; otherwise GMDA notices come through DIPR and ulb-whats-new."
   },
   {
     "id": "mcg",
@@ -106,28 +111,29 @@
     "type": "html",
     "selector": "a[href*='notice'], a[href*='press'], a[href$='.pdf']",
     "home": "https://www.mcg.gov.in/",
-    "verified": "unverified",
-    "note": "MCG notices surface on ulbharyana.gov.in (What's New) and tenders on etenders.hry.nic.in; mcg.gov.in itself is absent from the search index. Replace with the site's Public Notice page once reachable. Prefer ulb-whats-new as the MCG notice source."
+    "enabled": false,
+    "verified": "js-only",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): home, /public-notice, /press-release, /news and /whats-new return a shell with no anchors (JavaScript app). MCG notices come through ulb-whats-new meanwhile."
   },
   {
     "id": "haryana-police",
     "name": "Haryana Police: press releases",
-    "url": "https://haryanapolice.gov.in/",
+    "url": "https://haryanapolice.gov.in/PressRelease.aspx",
     "type": "html",
-    "selector": "a[href*='press'], a[href*='news']",
+    "selector": "table tr td a, .marquee a, a[href*='pdf']",
     "home": "https://haryanapolice.gov.in/",
     "verified": "unverified",
-    "note": "Daily police press notes exist (relayed by UNI) but the site's press section is not indexed and fetch was blocked. The Gurugram Commissionerate posts mainly on X. Replace URL and selector after a manual check."
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): the home page carries the press-release link PressRelease.aspx (/press-release and /news are 404) and a marquee of PDF notices. Pointed at PressRelease.aspx; selector to be confirmed on the next run."
   },
   {
     "id": "dhbvn",
     "name": "DHBVN: press releases and shutdown notices",
-    "url": "https://dhbvn.org.in/",
+    "url": "https://dhbvn.org.in/web/portal/home",
     "type": "html",
-    "selector": "a[href*='press'], a[href*='notice'], a[href*='shutdown']",
+    "selector": ".journal-content-article a",
     "home": "https://dhbvn.org.in/",
-    "verified": "unverified",
-    "note": "Portal under /web/portal/ (Liferay-style). Tender PDFs live under /staticContent/tender/. Press and planned-shutdown pages not indexed; confirm manually. Shutdown notices are the useful item for residents."
+    "verified": "2026-10-07",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): the Liferay home page lists current notices inside .journal-content-article (PM-KUSUM walk-in, HERC and Director selections, public announcement PDF). /web/portal/notices and /press-release are 404. Shutdown notices are not on a public page; they go out on X."
   },
   {
     "id": "hspcb",
@@ -136,18 +142,19 @@
     "type": "html",
     "selector": "a[href*='notice'], a[href$='.pdf']",
     "home": "https://hspcb.gov.in/",
-    "verified": "unverified",
-    "note": "Site was rebuilt after a reported hack; most operations run on hrocmms.nic.in. Public-hearing and GRAP notices appear on the home page. Not indexed; confirm manually."
+    "enabled": false,
+    "verified": "failing",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): TLS handshake fails (UNABLE_TO_VERIFY_LEAF_SIGNATURE) on hspcb.gov.in and hspcb.org.in: the server does not send its intermediate certificate. Browsers paper over this; Node does not. Off until the board fixes its certificate chain (re-check with --only hspcb)."
   },
   {
     "id": "hrera",
     "name": "HRERA Gurugram: public notices and cause lists",
     "url": "https://haryanarera.gov.in/login/loginview/2",
     "type": "html",
-    "selector": "a[href*='viewPdf'], a[href*='view_uploaded_Document'], a[href*='viewOrderPdf']",
+    "selector": "ul.demo1 li a, a[href*='viewPdf'], a[href*='viewOrderPdf']",
     "home": "https://haryanarera.gov.in/",
-    "verified": "index",
-    "note": "The Gurugram authority landing page lists project-registration public notices and hearing cause lists (index shows items dated 06-08-2026 and 07-08-2026). Server-rendered PHP; weekly cadence. Links are PDFs."
+    "verified": "2026-10-07",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): public notices and orders parsed from ul.demo1 (registration extensions, objection notices). Titles repeat because each notice is a separate PDF."
   },
   {
     "id": "dtcp",
@@ -156,28 +163,29 @@
     "type": "html",
     "selector": "a[href*='Notice'], a[href*='WhatsNew'], a[href$='.pdf']",
     "home": "https://tcpharyana.gov.in/",
-    "verified": "unverified",
-    "note": "ASP.NET site with Public Notices and What's New sections (licence grants, enforcement notices such as DLF Phase 1-5 tenant notices, June 2026). Not indexed; replace with the exact .aspx page after a manual check."
+    "enabled": false,
+    "verified": "blocked",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): connection timeout on https and http from GitHub's US runners; the host most likely answers only Indian IPs. Re-check from India."
   },
   {
     "id": "cpcb-announcements",
     "name": "CPCB: important announcements (archive)",
     "url": "https://cpcb.nic.in/archive-important-announcements.php",
     "type": "html",
-    "selector": "table td a, ul li a[href$='.pdf']",
+    "selector": ".announcement a, #content table td a, .content table td a, table td a",
     "home": "https://cpcb.nic.in/",
-    "verified": "index",
-    "note": "Server-rendered PHP. Index shows dated notices 2022-2024; current items appear on the home page (index.php) and /media-corner-new/. GRAP and NCR items relevant in winter. Monthly cadence."
+    "verified": "unverified",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): the page answers, but the first 40 anchors are the site menu, so the previous selector returned menu items (Genset Notifications, NAMP bulletin). Menu-like titles are now filtered and the dump is longer; selector to be confirmed on the next run. /notices/ and /press-release/ behave the same."
   },
   {
     "id": "pib-rss",
-    "name": "Press Information Bureau: RSS directory",
-    "url": "https://www.pib.gov.in/RssMain.aspx",
+    "name": "Press Information Bureau: Chandigarh region feed",
+    "url": "https://www.pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3",
     "type": "rss",
     "selector": "",
     "home": "https://www.pib.gov.in/",
-    "verified": "unverified",
-    "note": "PIB publishes per-ministry and per-region RSS (RssMain.aspx?ModId=<n>&Lang=1&Regid=<n>). Use the Chandigarh regional feed for Haryana and the MoRTH feed for NHAI releases (NHAI's own site is a JS-only Angular app). Confirm ModId/Regid values on the directory page."
+    "verified": "2026-10-07",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): the RSS directory page times out, but the regional feed (ModId=6, Regid=3 = Chandigarh office, which covers Haryana) returns 20 items. Items are in Hindi (Lang=1); Lang=2 is being probed for the English edition. Mostly national items; low Gurugram relevance."
   },
   {
     "id": "mygov-blog",
@@ -186,8 +194,9 @@
     "type": "rss",
     "selector": "",
     "home": "https://www.mygov.in/",
-    "verified": "unverified",
-    "note": "blog.mygov.in is WordPress (?p= URLs in index), so /feed/ is expected. Central consultations and campaigns; weekly. www.mygov.in itself is Drupal with no confirmed feed."
+    "enabled": false,
+    "verified": "failing",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): /feed/ and /feed return the HTML blog page, not XML. Off; low relevance anyway."
   },
   {
     "id": "eci-press",
@@ -196,8 +205,9 @@
     "type": "html",
     "selector": "",
     "home": "https://www.eci.gov.in/",
-    "verified": "unverified",
-    "note": "JS-only: the 2023 ECI site renders press notes client-side from an API; the fetcher will skip it. Numbered press notes (e.g. No. 119 of 23 Sep 2026). Use PIB's ECI feed instead."
+    "enabled": false,
+    "verified": "blocked",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): connection timeout with both user agents from GitHub's US runners. ECI news reaches the public through PIB; off."
   },
   {
     "id": "nhai",
@@ -206,8 +216,9 @@
     "type": "html",
     "selector": "",
     "home": "https://nhai.gov.in/",
-    "verified": "unverified",
-    "note": "JS-only Angular single-page app (hash routes); the fetcher will skip it. NHAI releases are mirrored on PIB (MoRTH feed)."
+    "enabled": false,
+    "verified": "js-only",
+    "note": "checked 7 Oct 2026 from GitHub Actions (run 37684031089): Angular app, no anchors in the HTML. NHAI news comes through PIB; off."
   },
   {
     "id": "swachh",
@@ -216,7 +227,7 @@
     "type": "none",
     "selector": "",
     "home": "https://swachhbharaturban.gov.in/",
-    "verified": "unverified",
+    "verified": "none",
     "note": "Campaign site; no dated news or notice listing found in the index. Swachh Survekshan results come via PIB (MoHUA feed)."
   },
   {
@@ -226,7 +237,7 @@
     "type": "none",
     "selector": "",
     "home": "https://cmharyanacell.nic.in/",
-    "verified": "unverified",
+    "verified": "none",
     "note": "Grievance filing portal behind login/OTP; no news page."
   },
   {
@@ -236,7 +247,7 @@
     "type": "none",
     "selector": "",
     "home": "https://saralharyana.gov.in/",
-    "verified": "unverified",
+    "verified": "none",
     "note": "Service-delivery portal (ServicePlus); notifications of new services appear only after login. No feed."
   },
   {
@@ -246,7 +257,7 @@
     "type": "none",
     "selector": "",
     "home": "https://pgportal.gov.in/",
-    "verified": "unverified",
+    "verified": "none",
     "note": "Grievance portal; no news or notices page. DARPG monthly CPGRAMS reports are released via PIB."
   },
   {
@@ -256,7 +267,7 @@
     "type": "none",
     "selector": "",
     "home": "https://rtionline.gov.in/",
-    "verified": "unverified",
+    "verified": "none",
     "note": "Filing portal; no news page."
   },
   {
@@ -266,7 +277,7 @@
     "type": "none",
     "selector": "",
     "home": "https://consumerhelpline.gov.in/",
-    "verified": "unverified",
+    "verified": "none",
     "note": "INGRAM portal; occasional banners (e.g. GST complaint category, Sep 2025) but no dated listing. Department of Consumer Affairs releases are on PIB."
   },
   {
@@ -276,7 +287,7 @@
     "type": "none",
     "selector": "",
     "home": "https://cybercrime.gov.in/",
-    "verified": "unverified",
+    "verified": "none",
     "note": "Reporting portal; advisories go out through the CyberDost social handles and PIB, not a notices page."
   },
   {
@@ -286,7 +297,7 @@
     "type": "none",
     "selector": "",
     "home": "https://onemapggm.gmda.gov.in/",
-    "verified": "unverified",
+    "verified": "none",
     "note": "GIS viewer, JS-only; no news."
   },
   {

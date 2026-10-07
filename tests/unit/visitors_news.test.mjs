@@ -33,6 +33,7 @@ function fakeSb({ rpc = {}, tables = {}, counts = {}, errors = {}, storageOk = t
       delete() { q.op = "delete"; return chain; },
       eq(k, v) { q.filters.push(["eq", k, v]); return chain; },
       lt(k, v) { q.filters.push(["lt", k, v]); return chain; },
+      gte(k, v) { q.filters.push(["gte", k, v]); return chain; },
       not(k, op, v) { q.filters.push(["not", k, op, v]); return chain; },
       order(k, o) { q.order = [k, o]; return chain; },
       limit(n) { q.limit = n; return chain; },

@@ -1,8 +1,24 @@
 # News sources: what each official site offers
 
-Companion to `data/news-sources.json`. Compiled 7 October 2026.
+Companion to `data/news-sources.json`. Compiled 7 October 2026; first live check the same evening.
 
-**Verification caveat.** This session's network policy blocked outbound fetches to every government host (`*.gov.in`, `*.nic.in`, `hsvphry.org.in`, `dhbvn.org.in`, `prharyana.gov.in`), so no URL below was fetched. Each entry carries a `verified` field: `index` means the exact URL and its listed items were seen in a search-engine snapshot (the page exists and renders server-side); `unverified` means the URL follows the platform's known pattern but was not confirmed; `none` means no usable page. Before wiring the fetcher, run the check in the last section from a machine that can reach these hosts, and move `unverified` rows to `index` or `none`.
+**How it is checked.** The development sandbox cannot reach any government host, so `.github/workflows/news-sources.yml` runs `scripts/check-news-sources.mjs` on GitHub Actions (manually and every Monday 03:00 UTC). It fetches every source plus the probe list in `data/news-candidates.json`, parses them exactly as the daily cron would, prints a table in the job summary and, with `--dump`, the first 160 anchors of each HTML page with their ancestor chain so a selector can be chosen. Run it on one source with `--only=id1,id2`. The `verified` field in the JSON records the outcome: a date means items were parsed on that day; `unverified` means the URL is set but the selector still has to be confirmed on the next run; `failing`, `blocked` (times out from GitHub's US runners, so the host probably answers only Indian IPs) and `js-only` explain why an entry is switched off (`enabled: false`); `none` means there is no page to fetch.
+
+## Result of the first live check (7 October 2026, run 37684031089)
+
+| Outcome | Sources |
+| --- | --- |
+| Items parsed | ulb-whats-new, ulb-notifications, haryana-assembly, hrera, dhbvn (home-page notices), pib-rss (Chandigarh regional feed) |
+| Page answers, selector to confirm next run | haryana-portal (now /events/), lokbhavan (card grid), haryana-police (now PressRelease.aspx), cpcb-announcements |
+| HTTP error | gurugram-district-feed (500, kept on so it recovers by itself), gurugram-district-notices (404 on five paths, off) |
+| Times out from GitHub runners (likely India-only) | prharyana, gmda, dtcp, eci-press (all off; re-check from an Indian machine) |
+| Broken TLS chain | hspcb (off until the board fixes its certificate) |
+| JavaScript-only page | mcg, nhai, hsvp-tenders (off) |
+| Not a feed | mygov-blog (off) |
+
+11 of the 21 page-bearing entries are on. The parser changes made from this run: a selector now collects every matching container (a grid of cards or several tables), not only the first; share buttons, "View all", login and payment links are treated as navigation; the probe dumps 160 anchors instead of 40.
+
+**Next run to settle:** the gurugram.gov.in notice archive URL (six S3WaaS patterns in the probe list), the English edition of the PIB Chandigarh feed (`Lang=2`), the Lok Bhavan card heading, the Haryana Police press table, the CPCB announcement table and whether `hspcb.gov.in` answers over plain http.
 
 ## Table
 
