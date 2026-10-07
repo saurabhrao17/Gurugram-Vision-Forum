@@ -8,6 +8,8 @@ var STAGES=["Received","Mapped","Filed officially","Escalated","Resolved"];
 var STAGE_TAG=["tag","tag-blue","tag-blue","tag-saffron","tag-green"];
 var CHANNELS=["GMDA portal","Swachhata app","DHBVN 1912","Police or 112","HRERA","DTCP","HSPCB or Sameer","CM Window","CPGRAMS","Consumer helpline 1915","RTI","Other"];
 var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* follow the theme chosen on the public site, if any */
+try{var th=JSON.parse(localStorage.getItem("gvf_theme")||"null");if(th==="dark"||th==="light")document.documentElement.setAttribute("data-theme",th)}catch(e){}
 
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function ic(n,cls){return '<svg class="i'+(cls?' '+cls:'')+'" aria-hidden="true"><use href="#i-'+n+'"/></svg>'}
@@ -61,7 +63,7 @@ function loadReports(reset){if(reset){offset=0;$("tList").innerHTML="";rowsCache
   $("tSummary").textContent="Loading…";
   return api("/triage/reports?"+qs()).then(function(j){total=j.total||0;(j.reports||[]).forEach(function(r){rowsCache[r.ref]=r});
     $("tList").insertAdjacentHTML("beforeend",(j.reports||[]).map(rowHtml).join(""));offset+=(j.reports||[]).length;
-    $("tEmpty").hidden=offset>0;$("tMore").hidden=offset>=total;
+    var got=(j.reports||[]).length;$("tEmpty").hidden=offset>0;$("tMore").hidden=typeof total==="number"?offset>=total:got<LIMIT;
     var s=j.summary;$("tSummary").textContent=s?(s.total+" reports in all · "+s.received+" received · "+s.filed+" filed · "+s.escalated+" escalated · "+s.resolved+" resolved"+((+s.unmapped_past_due||+s.filed_past_due)?" · past due: "+(+s.unmapped_past_due)+" unmapped, "+(+s.filed_past_due)+" filed":"")):(total+" reports");
   },function(err){$("tSummary").textContent=err.status===401||err.status===403?"Signed out.":"Could not load reports. "+(err.message||"");if(err.status===403)signOut(true)})}
 function rowHtml(r){var c=catById(r.issue_type);return '<li class="row" id="row_'+esc(r.ref)+'">'+ic(c?c.ic:"alert")+'<div><b><a href="#" data-open="'+esc(r.ref)+'">'+esc(r.ref)+'</a> '+stageTag(r.stage)+flags(r)+'</b><p class="for">'+esc(r.issue_label||r.issue_type)+' · '+esc(r.area)+(r.ward?', ward '+r.ward:'')+(r.spot?' · '+esc(r.spot):'')+'</p><div class="meta">Sent '+esc(fmt(r.created_at))+' ('+esc(ago(r.created_at))+')'+(r.desk?' · '+esc(r.desk):'')+(r.official_ticket?' · ticket '+esc(r.official_ticket):'')+' · '+(r.events_count||0)+' update'+(r.events_count==1?'':'s')+' · via '+esc(r.source)+'</div></div></li>'}
