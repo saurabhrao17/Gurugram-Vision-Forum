@@ -8,15 +8,67 @@
       "destination": "/api/index?path=:path*"
     },
     {
-      "source": "/:view(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix)/:arg/:file(styles.css|app.js|data.js|favicon.svg|og.png)",
+      "source": "/guides",
+      "destination": "/api/index?path=page/guides"
+    },
+    {
+      "source": "/hi/guides",
+      "destination": "/api/index?path=page/hi/guides"
+    },
+    {
+      "source": "/guide/:slug",
+      "destination": "/api/index?path=page/guide/:slug"
+    },
+    {
+      "source": "/hi/guide/:slug",
+      "destination": "/api/index?path=page/hi/guide/:slug"
+    },
+    {
+      "source": "/ward/:n",
+      "destination": "/api/index?path=page/ward/:n"
+    },
+    {
+      "source": "/hi/ward/:n",
+      "destination": "/api/index?path=page/hi/ward/:n"
+    },
+    {
+      "source": "/blog",
+      "destination": "/api/index?path=page/blog"
+    },
+    {
+      "source": "/hi/blog",
+      "destination": "/api/index?path=page/hi/blog"
+    },
+    {
+      "source": "/blog/:slug",
+      "destination": "/api/index?path=page/blog/:slug"
+    },
+    {
+      "source": "/hi/blog/:slug",
+      "destination": "/api/index?path=page/hi/blog/:slug"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/index?path=sitemap"
+    },
+    {
+      "source": "/indexnow-key.txt",
+      "destination": "/api/index?path=indexnow"
+    },
+    {
+      "source": "/:file(google[0-9a-f]+.html)",
+      "destination": "/api/index?path=gsc&file=:file"
+    },
+    {
+      "source": "/:view(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix|news|pulse)/:arg/:file(styles.css|app.js|data.js|favicon.svg|og.png)",
       "destination": "/:file"
     },
     {
-      "source": "/:view(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix)",
+      "source": "/:view(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix|news|pulse)",
       "destination": "/index.html"
     },
     {
-      "source": "/:view(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix)/:arg",
+      "source": "/:view(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix|news|pulse)/:arg",
       "destination": "/index.html"
     }
   ],
@@ -60,7 +112,8 @@
   ],
   "functions": {
     "api/index.js": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "includeFiles": "{site,data}/**"
     }
   }
 }

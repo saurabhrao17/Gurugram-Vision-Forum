@@ -4,21 +4,20 @@ Companion to `data/news-sources.json`. Compiled 7 October 2026; first live check
 
 **How it is checked.** The development sandbox cannot reach any government host, so `.github/workflows/news-sources.yml` runs `scripts/check-news-sources.mjs` on GitHub Actions (manually and every Monday 03:00 UTC). It fetches every source plus the probe list in `data/news-candidates.json`, parses them exactly as the daily cron would, prints a table in the job summary and, with `--dump`, the first 160 anchors of each HTML page with their ancestor chain so a selector can be chosen. Run it on one source with `--only=id1,id2`. The `verified` field in the JSON records the outcome: a date means items were parsed on that day; `unverified` means the URL is set but the selector still has to be confirmed on the next run; `failing`, `blocked` (times out from GitHub's US runners, so the host probably answers only Indian IPs) and `js-only` explain why an entry is switched off (`enabled: false`); `none` means there is no page to fetch.
 
-## Result of the first live check (7 October 2026, run 37684031089)
+## Result of the live checks (7 October 2026, runs 37684031089 and 37687124291)
 
 | Outcome | Sources |
 | --- | --- |
-| Items parsed | ulb-whats-new, ulb-notifications, haryana-assembly, hrera, dhbvn (home-page notices), pib-rss (Chandigarh regional feed) |
-| Page answers, selector to confirm next run | haryana-portal (now /events/), lokbhavan (card grid), haryana-police (now PressRelease.aspx), cpcb-announcements |
-| HTTP error | gurugram-district-feed (500, kept on so it recovers by itself), gurugram-district-notices (404 on five paths, off) |
-| Times out from GitHub runners (likely India-only) | prharyana, gmda, dtcp, eci-press (all off; re-check from an Indian machine) |
-| Broken TLS chain | hspcb (off until the board fixes its certificate) |
-| JavaScript-only page | mcg, nhai, hsvp-tenders (off) |
-| Not a feed | mygov-blog (off) |
+| Items parsed, on | gurugram-district-notices (the home page's New Updates tab, 31 items), ulb-whats-new, ulb-notifications, haryana-assembly (now the WordPress feed), hrera (23), dhbvn (home-page notices), cpcb-announcements (88, title taken from the row), pib-rss (Chandigarh regional feed, Hindi) |
+| HTTP error, kept on | gurugram-district-feed (500; recovers by itself if the site is fixed) |
+| Off: no linked titles or JavaScript-rendered list | lokbhavan (card titles are not links, feed 500), haryana-portal (events list scripted, feed 403), haryana-police (ASP.NET postback), mcg, nhai, hsvp-tenders |
+| Off: times out from GitHub runners (likely India-only) | prharyana, gmda, dtcp, eci-press (re-check from an Indian machine with `--only=prharyana,gmda,dtcp,eci-press`) |
+| Off: broken TLS chain, http refused | hspcb |
+| Off: not a feed | mygov-blog |
 
-11 of the 21 page-bearing entries are on. The parser changes made from this run: a selector now collects every matching container (a grid of cards or several tables), not only the first; share buttons, "View all", login and payment links are treated as navigation; the probe dumps 160 anchors instead of 40.
+9 of the 21 page-bearing entries are on. Parser changes made from these runs: a selector collects every matching container (card grids, several tables); share, login, payment and "View all" links count as navigation; a link whose text is only "View (2 MB)" or a file size takes its title from the table row, and the date too when it sits in another cell; "Click here ->" prefixes and quotes are stripped from titles; the probe dumps 160 anchors and takes `--only=id`. The probe list `data/news-candidates.json` is empty again; add URLs there to try them on the next run.
 
-**Next run to settle:** the gurugram.gov.in notice archive URL (six S3WaaS patterns in the probe list), the English edition of the PIB Chandigarh feed (`Lang=2`), the Lok Bhavan card heading, the Haryana Police press table, the CPCB announcement table and whether `hspcb.gov.in` answers over plain http.
+**Still open:** DIPR (prharyana.gov.in) is the one source worth chasing, since it carries GMDA, MCG and police press notes; it needs a fetch from India. GMDA's own site likewise.
 
 ## Table
 

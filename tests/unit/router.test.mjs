@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { resolve, pathParts, partsFrom } from "../../api/index.js";
 
 test("router resolves every public and triage route", () => {
-  for (const p of [["report"], ["status"], ["join"], ["dashboard"], ["ward"], ["geocode"], ["triage", "login"], ["triage", "refresh"], ["triage", "me"], ["triage", "staff"], ["triage", "wards"], ["triage", "reports"], ["triage", "password"], ["cron", "daily"], ["follow"], ["public", "report"], ["public", "reports"], ["hooks", "whatsapp"], ["hooks", "exotel"], ["content"], ["triage", "content"], ["triage", "content", "upload-url"], ["triage", "draft"], ["visitor"], ["news"], ["health"], ["triage", "visitors"], ["triage", "translate"], ["pulse"], ["triage", "insights"]]) {
+  for (const p of [["report"], ["status"], ["join"], ["dashboard"], ["ward"], ["geocode"], ["triage", "login"], ["triage", "refresh"], ["triage", "me"], ["triage", "staff"], ["triage", "wards"], ["triage", "reports"], ["triage", "password"], ["cron", "daily"], ["follow"], ["public", "report"], ["public", "reports"], ["hooks", "whatsapp"], ["hooks", "exotel"], ["content"], ["triage", "content"], ["triage", "content", "upload-url"], ["triage", "draft"], ["visitor"], ["news"], ["health"], ["triage", "visitors"], ["triage", "translate"], ["pulse"], ["triage", "insights"], ["sitemap"], ["indexnow"], ["gsc"], ["subscribe"]]) {
     assert.ok(resolve(p), p.join("/"));
   }
 });
@@ -32,4 +32,11 @@ test("partsFrom prefers the rewrite's path query and falls back to the URL", () 
   assert.deepEqual(partsFrom({ url: "/api/index?path=triage/reports/GVF-2026-ABCDE", query: { path: ["triage", "reports", "GVF-2026-ABCDE"] } }), ["triage", "reports", "GVF-2026-ABCDE"]);
   assert.deepEqual(partsFrom({ url: "/api/dashboard", query: {} }), ["dashboard"]);
   assert.deepEqual(partsFrom({ url: "/api/index/ward?area=x", query: { area: "x" } }), ["ward"]);
+});
+
+test("router treats page/* as a prefix route carrying the sub-path", () => {
+  const m = resolve(["page", "hi", "guide", "roads"]);
+  assert.ok(m && m.handler, "page route resolves");
+  assert.equal(m.params.page, "hi/guide/roads");
+  assert.equal(resolve(["page"]), null);
 });

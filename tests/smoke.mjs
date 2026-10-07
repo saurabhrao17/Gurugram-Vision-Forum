@@ -16,9 +16,14 @@ catch { ({ chromium } = require(resolve(execSync("npm root -g").toString().trim(
 const url = pathToFileURL(resolve("site/index.html")).href;
 
 // Serve site/ over http so the API wiring runs (it stays off under file://).
-const MIME = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".svg": "image/svg+xml" };
+const MIME = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".svg": "image/svg+xml", ".png": "image/png", ".webmanifest": "application/manifest+json" };
+// A host page like an RWA site would have, with the embed widget in English and Hindi.
+const EMBED_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>RWA site</title></head><body><h1>Sector 15 RWA</h1>
+<script src="/embed.js" data-ward="15" data-lang="en" async></script>
+<script src="/embed.js" data-lang="hi" async></script></body></html>`;
 const server = http.createServer(async (req, res) => {
   let p = req.url.split("?")[0] === "/" ? "/index.html" : req.url.split("?")[0];
+  if (p === "/embed-test.html") { res.writeHead(200, { "Content-Type": "text/html" }); return res.end(EMBED_PAGE); }
   if (!extname(p) && !p.startsWith("/api/")) p = "/index.html"; else if (extname(p)) p = "/" + p.split("/").pop();
   try {
     const body = await readFile(resolve("site" + p));
@@ -54,6 +59,9 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
 
   await page.goto(url);
   check((await page.locator("#tiles .tile").count()) === 17, "17 issue tiles on home");
+  check((await page.evaluate(() => (document.querySelector("link[rel=manifest]") || {}).getAttribute("href"))) === "/manifest.webmanifest" && (await page.locator("link[rel=apple-touch-icon]").count()) === 1, "page links the web app manifest and the touch icon");
+  check((await page.locator("footer a[href='/guides']").count()) === 1 && (await page.locator("footer a[href='/blog']").count()) === 1 && (await page.locator("footer a[href='/ward/1']").count()) === 1, "footer links to the guides, blog and ward pages");
+  check((await page.locator("#subFooter form[data-sub]").count()) === 1 && (await page.locator("#subFooter").innerText()).includes("One email a week"), "footer carries the weekly digest form");
 
   for (const r of routes) {
     await page.goto(url + "#/" + r);
@@ -66,6 +74,24 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.goto(url + "#/fix/waste");
   await page.waitForTimeout(100);
   check(await page.locator("#panel.show").isVisible(), "#/fix/waste opens the result panel");
+  check((await page.locator("#panel a[href='/guide/waste']").count()) === 1, "result panel links to the full guide page");
+  await page.goto(url + "#/directory");
+  await page.waitForTimeout(60);
+  check((await page.locator("#dGuides a").count()) === 17 && (await page.locator("#dGuides a[href='/guide/waste']").count()) === 1, "directory lists a full guide link per issue");
+  await page.goto(url + "#/wards");
+  await page.waitForTimeout(60);
+  check((await page.locator("#wardBody a[href='/ward/1']").count()) === 1 && (await page.locator("#wardBody a[href='/ward/36']").count()) === 1, "ward rows link to their ward pages");
+  await page.goto(url + "#/updates");
+  await page.waitForTimeout(60);
+  check((await page.locator("#uBody .card .share a[href^='https://wa.me/']").count()) >= 1 && (await page.locator("#uBody .card .share [data-copy]").count()) >= 1, "update cards carry a share row");
+  await page.fill("#suEmail", "nope");
+  await page.click("#subUpdates button[type=submit]");
+  await page.waitForTimeout(60);
+  check(await page.locator("#subUpdates .err.show").isVisible(), "digest form refuses a bad email");
+  await page.fill("#suEmail", "reader@example.org");
+  await page.click("#subUpdates button[type=submit]");
+  await page.waitForTimeout(100);
+  check((await page.locator("#subUpdates .err.show").innerText()).includes("could not be reached"), "digest form explains when the server is unreachable (file://)");
 
   // Report flow to a reference
   await page.goto(url + "#/report/waste");
@@ -93,6 +119,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   const ref = (await page.locator("#confirm .ref").innerText()).trim();
   check(/^GVF-\d{4}-[A-Z2-9]{5}$/.test(ref), `confirmation shows a reference (${ref})`);
   check((await page.locator("#confirm .notice").innerText()).includes("Photo of the garbage"), "confirmation lists what is still needed for the official filing");
+  check((await page.locator("#confirm .share a[href^='https://wa.me/']").count()) === 1 && (await page.locator(`#confirm .share [data-copy='https://gurugramvisionforum.org/track/${ref}']`).count()) === 1, "confirmation offers to share the tracking link");
+  check((await page.locator("#pwaCard").count()) === 0, "no install nudge when the browser offered no install prompt");
 
   // Track the reference
   await page.goto(url + "#/track/" + ref);
@@ -149,6 +177,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     check(DEVANAGARI.test(txt) && latin.length === 0, `#/${r || ""} reads in Hindi` + (latin.length ? " (English left: " + [...new Set(latin)].slice(0, 12).join(", ") + ")" : ""));
   }
   check(await page.evaluate(() => document.title.includes("गुरुग्राम")), "document title is in Hindi");
+  check((await page.locator("footer a[href='/hi/guides']").count()) === 1 && (await page.locator("footer a[href='/hi/blog']").count()) === 1 && (await page.locator("footer a[href='/hi/ward/1']").count()) === 1 && (await page.locator("#dGuides a[href='/hi/guide/waste']").count()) === 1 && (await page.locator("#wardBody a[href='/hi/ward/36']").count()) === 1, "Hindi mode points the guide, blog and ward links at /hi/…");
   await page.goto(url + "#/report");
   await page.waitForTimeout(100);
   check((await page.locator("#areaList option").first().getAttribute("value")) === "सेक्टर 1", "area suggestions are in Hindi");
@@ -177,6 +206,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     check(!DEVANAGARI.test(txt), `#/${r} reads in English again`);
   }
   check((await page.locator("#tiles .tile").first().innerText()).trim() === "Roads, footpaths", "tiles are English again");
+  check((await page.locator("footer a[href='/guides']").count()) === 1 && (await page.locator("footer a[href='/hi/guides']").count()) === 0, "guide links return to English pages");
 
   check(errors.length === 0, "zero console or page errors" + (errors.length ? ": " + errors.join(" | ") : ""));
   await ctx.close();
@@ -254,6 +284,9 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   });
   await page.route("**/api/public/reports**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, reports: [{ ref: "GVF-2026-SRV01", issue_type: "waste", stage: 2, ward: 30, lat: 28.46, lng: 77.07, created_at: "2026-10-07T10:00:00Z" }], counts: { total: 5, with_location: 1 }, computed_at: "2026-10-07T10:00:00Z" }) }));
   await page.route("**/api/ward**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, ward: 30, source: "table" }) }));
+  const subs = [];
+  let subMode = "ok";
+  await page.route("**/api/subscribe", (route) => { subs.push(JSON.parse(route.request().postData() || "{}")); if (subMode === "down") return route.abort(); return route.fulfill({ status: subMode === "ok" ? 200 : 400, contentType: "application/json", body: JSON.stringify(subMode === "ok" ? { ok: true, pending: true } : { ok: false, error: "invalid", fields: ["email"] }) }); });
   await page.route("**/api/geocode**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, results: [{ name: "Sector 29, Gurugram", lat: 28.46, lng: 77.07 }] }) }));
 
   const fillReport = async (withFile) => {
@@ -282,8 +315,21 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     await page.waitForSelector("#confirm.show");
   };
 
+  // The test server is http, not https: the service worker must stay unregistered.
+  await page.goto(httpUrl + "#/");
+  await page.waitForTimeout(200);
+  check((await page.evaluate(() => "serviceWorker" in navigator ? navigator.serviceWorker.getRegistrations().then((r) => r.length) : 0)) === 0, "service worker is not registered on the http test server");
+  check((await page.evaluate(() => fetch("/manifest.webmanifest").then((r) => r.ok ? r.json() : null).then((m) => m && m.short_name + "|" + m.display + "|" + m.icons.length))) === "GVF|standalone|2", "manifest is served and names the app, display mode and icons");
+
+  // Pretend the browser offered an install prompt: the nudge appears only after a successful report.
+  await page.evaluate(() => { window.__prompted = 0; const ev = new Event("beforeinstallprompt"); ev.prompt = () => { window.__prompted++; }; ev.userChoice = Promise.resolve({ outcome: "accepted" }); window.dispatchEvent(ev); });
   await fillReport(true);
   check((await page.locator("#confirm .ref").innerText()).trim() === "GVF-2026-SRV01", "report uses the server reference");
+  check((await page.locator("#pwaCard").count()) === 1 && (await page.locator("#pwaCard").innerText()).includes("Add the Forum to your phone"), "install nudge appears after a successful report");
+  await page.click("#pwaInstall");
+  await page.waitForTimeout(80);
+  check((await page.evaluate(() => window.__prompted)) === 1 && (await page.locator("#pwaCard").count()) === 0, "Install calls the browser prompt and removes the card");
+  check((await page.locator("#confirm .share [data-copy='https://gurugramvisionforum.org/track/GVF-2026-SRV01']").count()) === 1, "confirmation shares the tracking link");
   check(calls[0] && calls[0].extra && calls[0].extra.where === "Street or lane", "portal fields travel with the report as extra");
   await page.waitForFunction(() => /attached/.test((document.getElementById("upStatus") || {}).textContent || ""), null, { timeout: 5000 }).catch(() => {});
   check(uploadCalls.length === 1 && uploadCalls[0].ref === "GVF-2026-SRV01" && uploadCalls[0].token === "a".repeat(48) && uploadCalls[0].files.length === 1 && uploadCalls[0].files[0].kind === "photo", "asks the API for a signed upload URL with the one-hour token");
@@ -337,6 +383,15 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check(hiCall.ward === "30", "ward lookup still works with a Hindi area");
   const confirmTxt = await page.locator("#confirm").innerText();
   check(DEVANAGARI.test(confirmTxt) && latinWords(confirmTxt).length === 0, "confirmation reads in Hindi" + (latinWords(confirmTxt).length ? " (English left: " + [...new Set(latinWords(confirmTxt))].slice(0, 10).join(", ") + ")" : ""));
+  // Hindi mode: post cards point at /hi/blog/…, and the digest form confirms in Hindi
+  await page.goto(httpUrl + "#/updates");
+  await page.waitForTimeout(250);
+  check((await page.locator("#uBody a[href='/hi/blog/sewa-drive-sector-45-ab12c']").count()) >= 1 && (await page.locator("footer a[href='/hi/blog']").count()) === 1, "Hindi mode links post cards and the footer to /hi/blog");
+  check(await page.locator("#subUpdates input[value='hi']").isChecked(), "digest form preselects Hindi in Hindi mode");
+  await page.fill("#suEmail", "hindi@example.org");
+  await page.click("#subUpdates button[type=submit]");
+  await page.waitForTimeout(200);
+  check(subs.length === 1 && subs[0].email === "hindi@example.org" && subs[0].lang === "hi" && (await page.locator("#subUpdates .subok").innerText()).includes("इनबॉक्स"), "Hindi digest subscription posts lang=hi and confirms in Hindi");
   await page.evaluate(() => localStorage.setItem("gvf_lang", JSON.stringify("en")));
   await page.reload();
   await page.waitForTimeout(150);
@@ -386,6 +441,24 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.goto(httpUrl + "#/updates");
   await page.waitForTimeout(250);
   check((await page.locator("#uBody").innerText()).includes("Sewa drive cleans Sector 45 park") && (await page.locator("#uBody").innerText()).includes("The pothole was fixed in a week."), "updates show the team's story and a testimonial");
+  check((await page.locator("#uBody h3 a[href='/blog/sewa-drive-sector-45-ab12c']").count()) === 1 && (await page.locator("#uBody a.btn[href='/blog/sewa-drive-sector-45-ab12c']").count()) === 1, "post card title and Read link go to the server page /blog/{slug}");
+  check((await page.locator("#uBody .card .share [data-copy='https://gurugramvisionforum.org/blog/sewa-drive-sector-45-ab12c']").count()) === 1 && (await page.locator("#uBody .card .share a[href^='https://wa.me/?text=']").first().getAttribute("href")).includes(encodeURIComponent("/blog/sewa-drive-sector-45-ab12c")), "post card shares the canonical post URL");
+  // Weekly digest: subscribe from the Updates page, then the error branch and the footer form
+  await page.fill("#suEmail", "reader@example.org");
+  await page.check("#subUpdates input[value='en']");
+  await page.click("#subUpdates button[type=submit]");
+  await page.waitForTimeout(200);
+  check(subs.length === 2 && subs[1].email === "reader@example.org" && subs[1].lang === "en" && (await page.locator("#subUpdates .subok").innerText()).includes("Check your inbox to confirm.") && visitorCalls.some((c) => c.event === "subscribe"), "digest form posts email and language and confirms");
+  subMode = "fail";
+  await page.fill("#sfEmail", "footer@example.org");
+  await page.click("#subFooter button[type=submit]");
+  await page.waitForTimeout(200);
+  check(subs.length === 3 && (await page.locator("#subFooter .err.show").innerText()).includes("Could not subscribe"), "footer digest form shows the error when the API refuses");
+  subMode = "down";
+  await page.click("#subFooter button[type=submit]");
+  await page.waitForTimeout(300);
+  check((await page.locator("#subFooter .err.show").innerText()).includes("could not be reached"), "digest form explains an unreachable server");
+  subMode = "ok";
   await page.click('[data-utab="social"]');
   await page.waitForTimeout(80);
   check((await page.locator("#uBody a[href='https://x.com/gvf/status/1']").count()) === 1, "social tab links to the post");
@@ -399,6 +472,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(250);
   const pulseTxt = await page.locator("#pulseBody").innerText();
   check(pulseTxt.includes("Garbage and waterlogging top the week") && pulseTxt.includes("Garbage") && pulseTxt.includes("18") && pulseTxt.includes("Sector cleaning drive") && (await page.locator("#pulseBody a[href='https://www.reddit.com/r/gurgaon/x']").count()) === 1, "pulse page shows the week's topics, an example link and the suggested action");
+  check((await page.locator("#pulseBody .share a[href^='https://wa.me/']").count()) === 1 && (await page.locator("#pulseBody .share [data-copy='https://gurugramvisionforum.org/pulse']").count()) === 1, "pulse page carries a share row");
 
   // Public anonymised report page, follow form, share, real URL
   await page.goto(httpUrl + "#/r/GVF-2026-SRV01");
@@ -416,6 +490,16 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(200);
   check(follows.length === 1 && follows[0].ref === "GVF-2026-SRV01" && follows[0].email === "friend@example.org" && !(await page.locator("#fwOk").isHidden()), "follow form posts the reference and email");
   check((await page.locator("#pubBody a[href^='https://wa.me/']").count()) === 1 && (await page.locator("#pubBody a[href='#/report/waste']").count()) === 1, "public page offers WhatsApp share and me-too");
+  check((await page.locator("#pubBody .share [data-copy='https://gurugramvisionforum.org/r/GVF-2026-SRV01']").count()) === 1, "public page share row carries the public URL");
+  // Copy link: stub the clipboard, click, and watch the label flip to Copied and back
+  await page.evaluate(() => { window.__copied = ""; const stub = { writeText: (t) => { window.__copied = t; return Promise.resolve(); } }; try { Object.defineProperty(navigator, "clipboard", { value: stub, configurable: true }); } catch { navigator.clipboard.writeText = stub.writeText; } });
+  const shareEvents = visitorCalls.filter((c) => c.event === "share").length;
+  await page.click("#pubBody .share [data-copy]");
+  await page.waitForTimeout(100);
+  check((await page.evaluate(() => window.__copied)) === "https://gurugramvisionforum.org/r/GVF-2026-SRV01" && (await page.locator("#pubBody .share [data-copy]").innerText()).includes("Copied"), "Copy link writes the URL and shows Copied");
+  check(visitorCalls.filter((c) => c.event === "share").length === shareEvents + 1, "sharing logs a first-party share event");
+  await page.waitForTimeout(2200);
+  check((await page.locator("#pubBody .share [data-copy]").innerText()).includes("Copy link"), "Copied label returns to Copy link after two seconds");
   await page.goto(httpUrl + "#/r/GVF-2026-NOPE1");
   await page.waitForTimeout(200);
   check((await page.locator("#pubBody").innerText()).includes("No report has this reference"), "unknown reference shows a clear message");
@@ -458,6 +542,17 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#dashBody").innerText()).includes("92% on time"), "published dashboard shows commitment actuals");
   check((await page.locator("#dashBody .bar").count()) === 2, "published dashboard draws one bar per cause");
   check((await page.locator("#sampleBtn").count()) === 0, "published dashboard has no sample toggle");
+
+  // Embed widget on a host page (served from the same test server; the dashboard mock is in its published state)
+  await page.goto(httpUrl + "embed-test.html");
+  await page.waitForTimeout(400);
+  check((await page.locator(".gvf-embed").count()) === 2, "embed.js renders one card per script tag");
+  const embedEn = page.locator(".gvf-embed").first().locator(".c"), embedHi = page.locator(".gvf-embed").nth(1).locator(".c");
+  check((await embedEn.innerText()).includes("Civic problem in Gurugram?") && (await embedEn.innerText()).includes("Report it in 2 minutes") && (await embedEn.innerText()).includes("Ward 15"), "embed card shows the invitation and the ward line");
+  check((await embedEn.locator("a.b").getAttribute("href")) === httpUrl.replace(/\/$/, "") + "/report?ref=embed" && (await embedEn.locator("a[href$='/ward/15']").count()) === 1, "embed card links to the report form and the ward page on the script's origin");
+  check((await embedEn.innerText()).includes("61 reports so far"), "embed card shows the published total from /api/dashboard");
+  check((await embedHi.innerText()).includes("नागरिक समस्या") && !(await embedHi.innerText()).includes("Ward"), "Hindi embed reads in Hindi and omits the ward line without data-ward");
+  check((await page.evaluate(() => !!document.querySelector(".gvf-embed").shadowRoot)) && (await page.locator("iframe").count()) === 0, "embed uses a shadow root and no iframe");
 
   // Join posts to the API
   await page.goto(httpUrl + "#/join");
@@ -570,8 +665,12 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#sheetClose");
 
   const contentCalls = [];
-  const deskPosts = [{ id: "p9", kind: "news", slug: "x", title: "Existing draft", published: false, pinned: false, created_at: "2026-10-07T10:00:00Z", created_by: "Coordinator" }];
-  await page.route("**/api/triage/content", (route) => { const mth = route.request().method(); if (mth === "GET") return json(route, 200, { ok: true, posts: deskPosts, settings: { social: { x: "https://x.com/gvf" } } }); const b = JSON.parse(route.request().postData() || "{}"); contentCalls.push({ method: mth, body: b }); return json(route, mth === "POST" ? 201 : 200, { ok: true, post: { id: "p10", ...b } }); });
+  const deskPosts = [{ id: "p9", kind: "news", slug: "x", title: "Existing draft", published: false, pinned: false, created_at: "2026-10-07T10:00:00Z", created_by: "Coordinator" },
+    { id: "p8", kind: "story", slug: "weekly-round-up-week-41", title: "Weekly round-up: week 41", source: "auto:weekly:2026-W41", published: false, pinned: false, tags: ["weekly"], created_at: "2026-10-07T10:00:00Z", created_by: "cron" }];
+  await page.route("**/api/triage/content", (route) => { const mth = route.request().method(); if (mth === "GET") return json(route, 200, { ok: true, posts: deskPosts, settings: { social: { x: "https://x.com/gvf" }, autopost: { enabled: true, weekday: 0, review_hours: 24 } } }); const b = JSON.parse(route.request().postData() || "{}"); contentCalls.push({ method: mth, body: b });
+    if (mth === "PATCH" && Array.isArray(b.tags)) { const dp = deskPosts.find((x) => x.id === b.id); if (dp) dp.tags = b.tags; }
+    if (mth === "PUT") return json(route, 200, { ok: true, settings: b.settings });
+    return json(route, mth === "POST" ? 201 : 200, { ok: true, post: { id: "p10", ...b } }); });
   await page.route("**/api/triage/draft", (route) => json(route, 503, { ok: false, error: "draft_unavailable" }));
   await page.route("**/api/triage/visitors**", (route) => json(route, 200, { ok: true, stats: { visitors_total: 12, visitors_new: 5, events_by_type: { page_view: 340, report_start: 9, report_submit: 4, gate_shown: 20, gate_done: 12 }, top_paths: [{ path: "#/", n: 120 }] }, visitors: [{ name: "Gate Person", phone: "+919811111111", email: "gate@example.org", area: "Sector 45", pincode: "122003", city: "Gurugram", created_at: "2026-10-07T10:00:00Z", visits: 2 }], total: 12 }));
   await page.route("**/api/health", (route) => json(route, 200, { ok: false, checks: { db: { ok: true, ms: 12 }, storage: { ok: true }, cron: { ok: true, last_run_at: "2026-10-07T03:30:00Z", hours_since: 5 }, outbox: { pending: 2, failed: 0 }, links: { checked: 61, broken: [{ url: "https://example.org/dead", status: 404, where_used: "PORTALS" }] }, news: { sources: 20, items: 150, stale_sources: [] } }, version: "0ab1cd3" }));
@@ -618,6 +717,37 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click('[data-tab="insights"]');
   await page.waitForTimeout(200);
   check((await page.locator("#insightsBody").innerText()).includes("Garbage tops the week") && (await page.locator("#insightsBody").innerText()).includes("Sector cleaning drive") && (await page.locator("#insightsBody a[href='https://www.reddit.com/r/gurgaon/x']").count()) === 1, "pulse tab shows the latest scan, actions and top signals");
+
+  // Auto drafts: tag, publish-by line, Hold / Release, and the round-up settings
+  await page.click('[data-tab="content"]');
+  await page.waitForTimeout(250);
+  const autoRow = page.locator("#postList li", { hasText: "Weekly round-up: week 41" });
+  check((await autoRow.innerText()).includes("Auto draft") && /Publishes automatically on .+ unless held/.test(await autoRow.innerText()), "an auto draft is tagged and shows when it publishes itself");
+  check((await autoRow.locator('[data-phold="p8"]').count()) === 1 && (await autoRow.locator('[data-ppub="p8"]').innerText()) === "Publish now", "an unpublished auto draft offers Hold and Publish now");
+  check((await page.locator("#postList li", { hasText: "Existing draft" }).locator("[data-phold],[data-prelease]").count()) === 0, "hand-written drafts get no Hold button");
+  check((await page.locator("#apWeekday").inputValue()) === "0" && (await page.locator("#apHours").inputValue()) === "24" && (await page.locator("#apEnabled").isChecked()) && (await page.locator("#seoIndexnow").isChecked()), "settings panel reads autopost from the API and defaults IndexNow to on");
+  await autoRow.locator('[data-phold="p8"]').click();
+  await page.waitForTimeout(250);
+  let last = contentCalls[contentCalls.length - 1];
+  check(last.method === "PATCH" && last.body.id === "p8" && JSON.stringify(last.body.tags) === JSON.stringify(["weekly", "hold"]), "Hold adds the hold tag through a PATCH");
+  check((await autoRow.innerText()).includes("Held") && (await autoRow.locator('[data-prelease="p8"]').count()) === 1 && (await autoRow.locator('[data-phold="p8"]').count()) === 0, "a held draft shows Held and a Release button");
+  await autoRow.locator('[data-prelease="p8"]').click();
+  await page.waitForTimeout(250);
+  last = contentCalls[contentCalls.length - 1];
+  check(last.method === "PATCH" && last.body.id === "p8" && JSON.stringify(last.body.tags) === JSON.stringify(["weekly"]), "Release removes the hold tag");
+  check((await autoRow.locator('[data-phold="p8"]').count()) === 1, "a released draft offers Hold again");
+  await page.selectOption("#apWeekday", "5");
+  await page.fill("#apHours", "72");
+  await page.uncheck("#seoIndexnow");
+  await page.click("#apSave");
+  await page.waitForTimeout(250);
+  last = contentCalls[contentCalls.length - 1];
+  check(last.method === "PUT" && JSON.stringify(last.body) === JSON.stringify({ settings: { autopost: { enabled: true, weekday: 5, review_hours: 72 }, seo: { indexnow: false } } }), "saving the round-up settings sends autopost and seo through a PUT");
+  check((await autoRow.innerText()).includes("10 Oct"), "the publish-by line follows the new review window");
+  await page.fill("#apHours", "-5");
+  await page.click("#apSave");
+  await page.waitForTimeout(100);
+  check(await page.locator("#apErr.show").isVisible() && contentCalls[contentCalls.length - 1] === last, "an invalid review window is refused locally");
   await page.click('[data-tab="reports"]');
   await page.waitForTimeout(100);
   const pwCalls = [];

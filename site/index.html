@@ -7,6 +7,9 @@
 <meta name="description" content="Find the desk responsible for your civic issue in Gurugram, report it, know your rights and your ward, and see what the Forum is fixing.">
 <link rel="canonical" href="https://gurugramvisionforum.org/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="GVF">
 <meta name="theme-color" content="#0B2545">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Gurugram Vision Forum">
@@ -242,6 +245,9 @@
     <div class="chips" id="dChips" role="group" aria-label="Filter" data-i18n-aria="a.filter"></div>
     <ul class="rows" id="dRows"></ul>
     <p class="src" id="dVerified"></p>
+    <h2 style="margin:2rem 0 .35rem" data-i18n="d.guides">Step-by-step guides</h2>
+    <p data-i18n="d.guidesp">One page per issue: who is responsible, which portal to use, what to attach, and when to escalate.</p>
+    <ul class="guides" id="dGuides"></ul>
   </div></div>
 </section>
 
@@ -306,6 +312,7 @@
     <p id="socialRow" hidden></p>
     <div class="tabs" id="uTabs" role="tablist"></div>
     <div id="uBody"></div>
+    <div id="subUpdates" style="margin-top:2rem"></div>
   </div></div>
 </section>
 <section class="view" id="v-post">
@@ -425,6 +432,20 @@
             <div class="field"><label for="sWhatsapp">WhatsApp channel or community</label><input type="url" id="sWhatsapp" placeholder="https://whatsapp.com/channel/..."></div>
             <p class="err" id="sErr"></p>
             <button class="btn btn-ink btn-sm" type="submit">Save links</button>
+          </form>
+        </div>
+        <div class="form" style="max-width:none;margin-bottom:1rem">
+          <h3 style="margin-bottom:.5rem">Weekly round-up and search engines</h3>
+          <p class="small muted">The cron drafts a weekly civic round-up as a story with source "auto:weekly:…". It waits in the list below for the review window, then publishes itself unless someone holds it.</p>
+          <form id="autoForm" novalidate>
+            <div class="frow">
+              <div class="field"><label class="check"><input type="checkbox" id="apEnabled" checked><span>Weekly round-up enabled</span></label></div>
+              <div class="field"><label for="apWeekday">Weekday it is drafted</label><select id="apWeekday"><option value="0">Sunday</option><option value="1" selected>Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option></select></div>
+              <div class="field"><label for="apHours">Review window (hours)</label><input type="number" id="apHours" value="48" min="-1" step="1" inputmode="numeric"><p class="hint">0 publishes immediately; -1 never auto-publishes.</p></div>
+            </div>
+            <div class="field"><label class="check"><input type="checkbox" id="seoIndexnow" checked><span>Search engines: ping IndexNow on publish</span></label></div>
+            <p class="err" id="apErr"></p>
+            <button class="btn btn-ink btn-sm" type="submit" id="apSave">Save settings</button>
           </form>
         </div>
         <div class="chips" id="postKinds"></div>
@@ -590,9 +611,10 @@
       <div><a class="brand" href="#/"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-mark"/></svg><span data-i18n="brand">Gurugram Vision Forum</span></a><p data-i18n="ft.tag">Citizens and governance in partnership. Collaborate, contribute, change.</p><p><a href="mailto:contact@gurugramvisionforum.org">contact@gurugramvisionforum.org</a><br><a href="tel:+919899375445">+91 98993 75445</a><br><span data-i18n="ft.addr">Sector 29, Gurugram</span></p><p id="ftSocial" hidden></p></div>
       <div><h4 data-i18n="ft.fix">Fix</h4><ul><li><a href="#/" data-i18n="ft.fix1">Who fixes it</a></li><li><a href="#/report" data-i18n="n.report">Report an issue</a></li><li><a href="#/track" data-i18n="n.track">Track a report</a></li><li><a href="#/map" data-i18n="n.map">Live map</a></li></ul></div>
       <div><h4 data-i18n="ft.know">Know</h4><ul><li><a href="#/directory" data-i18n="n.dir">Directory</a></li><li><a href="#/rights" data-i18n="n.rights">Your rights</a></li><li><a href="#/who" data-i18n="n.who">Who's who</a></li><li><a href="#/wards" data-i18n="n.wards">Wards</a></li></ul></div>
-      <div><h4 data-i18n="ft.join">Join</h4><ul><li><a href="#/join" data-i18n="n.join">Join</a></li><li><a href="#/charter" data-i18n="n.charter">Civic charter</a></li><li><a href="#/updates" data-i18n="n.updates">Updates</a></li><li><a href="#/news" data-i18n="n.news">Official news</a></li><li><a href="#/pulse" data-i18n="n.pulse">City pulse</a></li></ul></div>
-      <div><h4 data-i18n="ft.about">About</h4><ul><li><a href="#/about" data-i18n="n.about">About</a></li><li><a href="#/dashboard" data-i18n="n.dash">Dashboard</a></li><li><a href="#/accessibility" data-i18n="n.access">Accessibility statement</a></li><li><a href="#/privacy" data-i18n="n.privacy">Privacy notice</a></li><li><a href="#/desk" data-i18n="n.signin">Volunteer sign-in</a></li></ul></div>
+      <div><h4 data-i18n="ft.join">Join</h4><ul><li><a href="#/join" data-i18n="n.join">Join</a></li><li><a href="#/charter" data-i18n="n.charter">Civic charter</a></li><li><a href="#/updates" data-i18n="n.updates">Updates</a></li><li><a href="/blog" data-srv="/blog" data-i18n="n.blog">Blog</a></li><li><a href="#/news" data-i18n="n.news">Official news</a></li><li><a href="#/pulse" data-i18n="n.pulse">City pulse</a></li></ul></div>
+      <div><h4 data-i18n="ft.about">About</h4><ul><li><a href="#/about" data-i18n="n.about">About</a></li><li><a href="/guides" data-srv="/guides" data-i18n="n.guides">Guides</a></li><li><a href="/ward/1" data-srv="/ward/1" data-i18n="n.wardPages">Ward pages</a></li><li><a href="#/dashboard" data-i18n="n.dash">Dashboard</a></li><li><a href="#/accessibility" data-i18n="n.access">Accessibility statement</a></li><li><a href="#/privacy" data-i18n="n.privacy">Privacy notice</a></li><li><a href="#/desk" data-i18n="n.signin">Volunteer sign-in</a></li></ul></div>
     </div>
+    <div class="fsub" id="subFooter"></div>
     <div class="fnote"><span data-i18n="ft.n1">Not a government website. Emergencies: 112.</span><span data-i18n="ft.n2">Links verified 25 September 2026.</span></div>
   </div>
   <div class="tri" aria-hidden="true"></div>

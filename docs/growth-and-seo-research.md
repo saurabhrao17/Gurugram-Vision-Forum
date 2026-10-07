@@ -1,0 +1,63 @@
+# Growth and search: what the site still needs, and how the automated SEO stays inside the rules
+
+Written 8 October 2026 for the owner. Two questions were asked: what is missing that would make residents start using the site, and whether search visibility can be automated without breaking Google's or anyone else's rules. The second part describes what was built; the first part is a ranked list with what is built now and what is left.
+
+## Part 1: what attracts residents, and what the site is missing
+
+Evidence from the civic-reporting platforms that grew (FixMyStreet in the UK and Brussels, SeeClickFix in the US) and from Indian civic groups (Citizens for Bengaluru, Giving Tuesday India, Civis):
+
+1. **Closing the loop is the growth engine.** People come back and tell others when they see what happened to their report. Brussels' FixMyStreet reached 208,000 reports a year; the feature its operator credits most is status updates and duplicate-report alerts. Built: public report pages with stage and dates, follow-by-email, stage-change emails, the map. Missing: a visible "resolved" story stream with before/after photos (the content desk can post these as stories; a weekly habit of three resolved stories is worth more than any SEO).
+2. **WhatsApp is the channel, the website is the record.** Every Indian civic group that scaled did it through WhatsApp groups and broadcast lists relayed by trusted people (RWA secretaries, society admins). Civis moved its public consultation from a web portal to a WhatsApp bot because the portal "created friction at every step". Built now: WhatsApp share on every report, post and the pulse page; weekly digest email. Missing: the WhatsApp number itself (Meta verification) so people can report by message; a WhatsApp Channel for the Forum (free, one-way broadcast, no API needed) that the content team posts to from a phone.
+3. **Partners multiply reach.** SeeClickFix grew by letting local media and neighbourhood groups embed its map on their sites and by recruiting local ambassadors. Built now: `embed.js`, a card any RWA or local site can paste to get a "Report it" button and its ward link. Missing: a one-page partner kit (PDF) for RWA secretaries and a "ward ambassador" sign-up on the Join page.
+4. **Search is how strangers arrive.** Residents type "how to complain about garbage in Gurgaon", "MCG helpline number", "ward 15 Gurugram councillor". The site answered none of these in a form search engines could read: everything was rendered by JavaScript inside one page. Built now: server-rendered guide pages for all 17 issue types, 36 ward pages and the blog, in English and Hindi, with structured data and a sitemap (Part 2).
+5. **Installable on the phone.** Built now: the site is a Progressive Web App (installable, works offline for the shell) with an install nudge after a report. Push notifications were considered and left out: web push opt-in runs at 5–8 % on content sites and Android 13 halved opt-ins; the email and WhatsApp channels do the same job with less friction.
+6. **Trust signals.** Who runs the Forum, what it has fixed, who the volunteers are (by ward, by first name if they agree), the privacy notice, a byline on every post. Built: About, privacy, counts. Missing: a team page with photos and a short "what we fixed this month" number on the home page once the 50-report threshold is passed.
+7. **Things that do not work, per the research.** Points, badges and leaderboards: a self-determination-theory study of citizen reporting apps found rewards and social-responsibility appeals did not move sustained use; perceived usefulness, anonymity and speed did. Paid social ads before the loop closes: they bring reports nobody answers. A separate app: the PWA covers it.
+
+Ranked list of what is still missing (owner decisions or ongoing team habits, not code):
+
+| Priority | Item | Who | Cost |
+| --- | --- | --- | --- |
+| 1 | Buy the domain and verify it in Google Search Console (DNS TXT record in Vercel) | Owner | USD 9.99/yr |
+| 2 | Three resolved stories a week with photos, posted from the desk | Content team | Time |
+| 3 | WhatsApp Channel "Gurugram Vision Forum" and the digest cross-posted there | Content team | Free |
+| 4 | RWA partner kit and 20 RWA secretaries relaying the weekly digest | Coordinator | Time |
+| 5 | Meta verification for the WhatsApp report number; Exotel helpline | Owner | WhatsApp API fees |
+| 6 | Google Business Profile as a service-area organisation (needs in-person hours, e.g. a weekly help desk at a fixed place) | Owner | Free |
+| 7 | Team page and monthly "fixed" counter once 50 reports are in | Content team | Time |
+| 8 | Backlinks that matter: the councillors' and RWAs' pages linking to their ward page, press coverage of the pulse numbers | Coordinator | Time |
+
+## Part 2: the automated SEO system and why it is inside the rules
+
+### What the rules say
+
+Google's spam policies (Search Central, "Spam policies for Google web search") name the two traps an automated content system can fall into:
+
+- **Scaled content abuse**: "generating many pages for the primary purpose of manipulating search rankings and not helping users", whatever the tool, including "using generative AI to produce many pages without adding value", scraping or rewording other sites, and "stitching together content from different pages".
+- **Doorway abuse**: pages "created to rank for similar queries" that funnel users to one destination; the classic example is one page per city with only the name changed.
+
+Google's guidance on AI content ("Google Search's guidance about AI-generated content", February 2023, unchanged since) says the production method does not matter; the test is whether the content is "helpful, reliable, people-first". Its self-assessment asks three questions: **who** made it (a byline), **how** (disclose automation where a reader would reasonably want to know), and **why** (for people, not for rankings). Pages that only exist to catch queries, read as templates, or repeat each other are what gets a site demoted, and the demotion hits the whole domain, not just the bad pages.
+
+### What was built, and the rule each part satisfies
+
+1. **Server-rendered pages from the Forum's own data, not generated prose.** `/guide/:issue` (17 pages), `/ward/:n` (36), `/blog/:slug`, each in English and Hindi under `/hi/`. Every page is assembled from facts the site already holds: who is responsible, the official portal and phone numbers, the documents the portal asks for, the escalation ladder, the statutory deadlines, the councillor, the sectors in the ward, the week's pulse count for that issue, the public reports in that ward. No two pages share more than the frame. That is the difference Google draws between a doorway page (city name swapped) and a location page with "real local data, real differences a visitor cares about". The pages link to the report form with the issue pre-selected, so they are the natural landing page for the query, not a detour.
+2. **One weekly article, with a human review window.** The cron drafts one "Gurugram civic week" round-up a week from the pulse (public posts and news classified by issue), the official notices collected that week, the Forum's own counts (only once 50 reports exist), and the suggested actions. The model, when a free key is set, writes the prose in both languages from those facts only; without a key a template writes it. The draft sits unpublished for 48 hours (configurable in the desk: 0 publishes at once, -1 never auto-publishes, "Hold" stops a particular draft), the coordinator gets an email, then it publishes itself. Volume is one page a week, each with different numbers, links and topics; it skips a week with nothing to say rather than publish a thin page.
+3. **Disclosure and byline.** Every automated post carries the byline "Gurugram Vision Forum data desk" and the line "compiled automatically from public posts, official notices and the Forum's own data, and checked by the Forum team before publication", with a corrections address. This is the "how" disclosure Google's self-assessment asks for.
+4. **Technical SEO done once, then automatic.** Canonical URLs, hreflang pairs (en-IN, hi-IN, x-default), Open Graph and Twitter cards, JSON-LD (Organization, WebSite, BreadcrumbList, HowTo and FAQPage on guides, BlogPosting/NewsArticle on posts), a sitemap with alternates and last-modified dates, robots.txt, the Progressive Web App manifest. Google's own JavaScript-SEO guidance says not to rely on hash fragments for content; these pages are plain HTML.
+5. **Telling search engines about changes.** Google accepts no ping for ordinary pages (its Indexing API is limited to job postings and livestreams; the sitemap ping endpoint was retired), so for Google the sitemap plus Search Console is the whole mechanism. Bing, Yandex, Naver and Seznam accept IndexNow: the cron submits every page published in the last day, with the key served at `/indexnow-key.txt`. Both are free and both are the officially supported routes.
+6. **Not built, on purpose.** Programmatic "issue × sector" pages (17 × 150 = 2,550 pages) would be doorway abuse: the sector adds no facts that the guide and ward pages do not already carry. Keyword-stuffed titles. AI rewrites of news items (scraping with rewording is named in the policy). Buying links. "AI Overview" bait.
+
+### What to expect
+
+Search visibility for a new domain builds over months, not days. The order of events: the domain is bought and verified (Search Console shows which pages are indexed and which queries bring people); the guide pages start appearing for long-tail questions within a few weeks of indexing; ward pages pick up councillor-name and sector queries; the weekly round-up earns links when the pulse numbers are quoted by RWAs and local press. Hindi pages matter: a large share of Gurugram's residents search in Hindi or in Hindi-in-Latin-script, and almost no civic site answers them.
+
+What the team should watch in Search Console each month: pages indexed versus submitted, the queries with impressions but few clicks (rewrite that page's title and description), and the "Why pages aren't indexed" report. Nothing else needs doing by hand.
+
+## Sources
+
+- Google Search Central, "Spam policies for Google web search" (sections: scaled content abuse, doorway abuse, site reputation abuse); "Google Search's guidance about AI-generated content" (Feb 2023); "Creating helpful, reliable, people-first content" (Who, How, Why); "Understand the JavaScript SEO basics" (History API, no fragments); Indexing API scope (JobPosting, BroadcastEvent).
+- IndexNow documentation (indexnow.org): key 8–128 characters, key file at the root or `keyLocation`, POST `api.indexnow.org/indexnow`, participants Bing, Yandex, Naver, Seznam, Yep.
+- be.brussels, "2023: a record year for FixMyStreet" and the FixMyStreet users' club review; mySociety, "FixMyStreet Pro 2019 in review"; SeeClickFix coverage (Ecosistema Urbano, Fueled, Poynter); Westfield News on low sign-ups.
+- IDR, "Making chatbots work for nonprofits" (Civis, Glific); Deccan Herald on Bengaluru WhatsApp civic groups; Beth Kanter on Giving Tuesday India broadcast lists.
+- SAI Conference paper 29, "Motivational factors impacting the use of citizen reporting" (self-determination theory); Batch.com push benchmark (Android opt-in 85 → 67 %); Gravitec web-push opt-in figures.
+- ThePrint and The Tribune, September 2026, on Gurugram waste dumping protests, potholes and Ardee City RWA escalation.
