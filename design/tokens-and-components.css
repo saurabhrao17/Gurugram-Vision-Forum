@@ -118,6 +118,8 @@ body{padding-bottom:calc(var(--bbar) + env(safe-area-inset-bottom,0px))}
 /* views */
 .view{display:none}
 .view.on{display:block}
+/* boot.js sets data-boot=home on the English home URL so the home view paints before app.js arrives; route() removes it */
+html[data-boot="home"] #v-home{display:block}
 .sec{padding:clamp(3rem,6vw,5rem) 0}
 .sec-tight{padding:clamp(2rem,4vw,3rem) 0}
 .head{margin-bottom:1.5rem; max-width:64ch}
@@ -143,6 +145,11 @@ body{padding-bottom:calc(var(--bbar) + env(safe-area-inset-bottom,0px))}
 @media (min-width:480px){ .tiles{grid-template-columns:repeat(4,minmax(0,1fr))} }
 @media (min-width:768px){ .tiles{grid-template-columns:repeat(6,minmax(0,1fr)); gap:.6rem} }
 .hero-grid>*{min-width:0}
+/* Room for the 17 issue tiles (rows of 92 px tiles plus gaps) while app.js is still loading, so the page does not jump when they appear; html[data-boot=home] paints the home view before the tiles exist */
+.tiles:empty{min-height:calc(6 * 92px + 5 * .5rem)}
+@media (min-width:480px){ .tiles:empty{min-height:calc(5 * 92px + 4 * .5rem)} }
+@media (min-width:768px){ .tiles:empty{min-height:calc(3 * 92px + 2 * .6rem)} }
+@media (min-width:1024px){ .tiles:empty{min-height:calc(3 * 106px + 2 * .6rem)} }
 .tile{min-width:0; display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:.6rem; min-height:92px; padding:.7rem .7rem .6rem; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); cursor:pointer; text-align:left; font:inherit; transition:border-color .15s, background .15s, transform .15s}
 .tile .i{width:26px; height:26px; color:var(--blue)}
 .tile span{font-family:var(--head); font-weight:600; font-size:.92rem; line-height:1.15; color:var(--ink); overflow-wrap:anywhere}

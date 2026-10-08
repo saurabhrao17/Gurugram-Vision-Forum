@@ -122,7 +122,7 @@ $("cmdList").addEventListener("click",function(e){if(e.target.closest("a"))close
 var VIEWS={desk:"v-desk",pulse:"v-pulse",news:"v-news",private:"v-private",privacy:"v-privacy",home:"v-home",report:"v-report",track:"v-track",directory:"v-directory",rights:"v-rights",who:"v-who",wards:"v-wards",charter:"v-charter",dashboard:"v-dashboard",updates:"v-updates",post:"v-post",join:"v-join",about:"v-about",access:"v-access"};
 var TITLES={desk:"Volunteer desk",pulse:"What Gurugram is talking about",news:"What's new from the authorities",private:"Reports are private",privacy:"Privacy notice",home:"Who fixes my problem?",report:"Report an issue",track:"Track a report",directory:"Official channels",rights:"Your rights",who:"Who is responsible",wards:"Your ward",charter:"The civic charter",dashboard:"Accountability dashboard",updates:"Updates",post:"Updates",join:"Join the Forum",about:"About the Forum",access:"Accessibility statement"};
 var curView=null;
-function route(){
+function route(){document.documentElement.removeAttribute("data-boot");
   var h=location.hash.replace(/^#\/?/,""); var parts=h.split("/"); var name=parts[0]||"home"; var arg=parts[1]?decodeURIComponent(parts[1]):"";
   var map={"":"home",home:"home",fix:"home",desk:"desk",pulse:"pulse",news:"news",map:"private",r:"private",privacy:"privacy",report:"report",track:"track",directory:"directory",rights:"rights",who:"who",wards:"wards",charter:"charter",dashboard:"dashboard",updates:"updates",join:"join",about:"about",accessibility:"access"};
   var v=map[name]; if(!v){location.hash="#/";return}

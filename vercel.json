@@ -63,11 +63,11 @@
       "destination": "/api/index?path=gsc&file=:file"
     },
     {
-      "source": "/:view(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix|news|pulse)/:arg/:file(styles.css|app.js|data.js|favicon.svg|og.png)",
+      "source": "/:view(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix|news|pulse)/:arg/:file(styles.css|app.js|data.js|boot.js|favicon.svg|og.png)",
       "destination": "/:file"
     },
     {
-      "source": "/:view(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix|news|pulse)/:file(styles.css|app.js|data.js|favicon.svg|og.png|manifest.webmanifest|sw.js|icon-192.png|icon-512.png)",
+      "source": "/:view(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix|news|pulse)/:file(styles.css|app.js|data.js|boot.js|favicon.svg|og.png|manifest.webmanifest|sw.js|icon-192.png|icon-512.png)",
       "destination": "/:file"
     },
     {
