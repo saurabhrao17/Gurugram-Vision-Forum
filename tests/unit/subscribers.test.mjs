@@ -89,11 +89,15 @@ test("pushContact creates the contact on /contacts, re-subscribes one that exist
   const r3 = fakeResend({ "POST /audiences/aud_1/contacts": { status: 201, json: { id: "c_1" } } });
   await pushContact({ ...ENV, RESEND_AUDIENCE_ID: "aud_1" }, { email: "b@example.org" }, r3.fetchImpl);
   assert.equal(r3.calls[0].path, "/audiences/aud_1/contacts");
-  // Unknown property on an older account: retried with the address alone.
-  const r4 = fakeResend({ "POST /contacts": { status: 422, json: { message: "properties is not allowed" } } });
+  // Unknown property: retried with the address alone, and "does not exist" is never read as "already exists".
+  let n4 = 0;
+  const r4 = fakeResend();
+  r4.fetchImpl = async (url, init) => { n4++; const body = JSON.parse(init.body); r4.calls.push({ method: init.method, path: url.replace("https://api.resend.com", ""), body });
+    if (n4 === 1) return { status: 422, json: async () => ({ message: "The property `lang` does not exist" }) };
+    return { status: 201, json: async () => ({ id: "c_4" }) }; };
   const out = await pushContact(ENV, { email: "c@example.org", lang: "en" }, r4.fetchImpl);
-  assert.equal(out.ok, false);
-  assert.equal(r4.calls.length, 2);
+  assert.deepEqual(out, { ok: true, id: "c_4" });
+  assert.deepEqual(r4.calls.map((c) => c.method + " " + c.path), ["POST /contacts", "POST /contacts"], "no PATCH on a contact that was never created");
   assert.deepEqual(r4.calls[1].body, { email: "c@example.org", unsubscribed: false });
   assert.deepEqual(await pushContact({}, { email: "x@example.org" }, r1.fetchImpl), { ok: false, skipped: "no_key" });
 });
