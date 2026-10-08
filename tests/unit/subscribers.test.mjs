@@ -62,6 +62,8 @@ function fakeSb(rows = []) {
           else if (q.op === "select") data = q.single ? (hit[0] || null) : hit;
           else data = null;
         }
+        if (q.op === "insert" && q.single) { data = { id: 999, ...(Array.isArray(q.row) ? q.row[0] : q.row) };
+        }
         return Promise.resolve({ data, error: null }).then(resolve, reject);
       }
     };
@@ -234,7 +236,7 @@ test("desk subscribers: owner only; list with counts and search; CSV; actions mi
 
   // Stop emails: the row is stopped and Resend told.
   const r = fakeResend({ "PATCH /contacts/a%40example.org": { status: 200, json: { id: "c_1" } }, "POST /contacts": { status: 201, json: { id: "c_3" } }, "DELETE /contacts/b%40example.org": { status: 200, json: {} } });
-  const h = makeSubs({ auth: authAs("owner"), sb, env: ENV, fetchImpl: r.fetchImpl });
+  const h = makeSubs({ auth: authAs("owner"), sb, env: ENV, fetchImpl: r.fetchImpl, mailImpl: async () => { throw new Error("mail down"); } });
   const stop = fakeRes();
   await h({ method: "PATCH", query: { id: "1" }, body: { action: "unsubscribe" } }, stop);
   assert.equal(stop.statusCode, 200, JSON.stringify(stop.body));
@@ -269,7 +271,7 @@ test("desk subscribers: owner only; list with counts and search; CSV; actions mi
   // Add from the desk: upsert with a fresh token and the confirmation mail in the outbox; never confirmed silently.
   const add = fakeRes();
   await h({ method: "POST", body: { email: "New@Example.org", lang: "hi" } }, add);
-  assert.deepEqual(add.body, { ok: true, status: "check_email" });
+  assert.deepEqual(add.body, { ok: true, status: "check_email", sent: false }, "mail down: the row waits in the outbox for the cron");
   const up = sb.calls.find((q) => q.table === "subscribers" && q.op === "upsert");
   assert.equal(up.row.email, "new@example.org");
   assert.equal(up.row.source, "desk");
@@ -279,6 +281,19 @@ test("desk subscribers: owner only; list with counts and search; CSV; actions mi
   assert.equal(mail.row.kind, "subscribe_confirm");
   assert.equal(mail.row.to_email, "new@example.org");
   assert.ok(mail.row.body_text.includes("https://gvf.test/api/subscribe?confirm=" + up.row.token));
+  // With a key the confirmation goes out at once and the outbox row is marked sent; a failure leaves it pending for the cron.
+  const sbNow = fakeSb(rows());
+  const mails = [];
+  const hNow = makeSubs({ auth: authAs("owner"), sb: sbNow, env: ENV, fetchImpl: r.fetchImpl, mailImpl: async (row) => { mails.push(row.to_email); } });
+  const now = fakeRes();
+  await hNow({ method: "POST", body: { email: "now@example.org" } }, now);
+  assert.deepEqual(now.body, { ok: true, status: "check_email", sent: true });
+  assert.deepEqual(mails, ["now@example.org"]);
+  const sbFail = fakeSb(rows());
+  const hFail = makeSubs({ auth: authAs("owner"), sb: sbFail, env: ENV, fetchImpl: r.fetchImpl, mailImpl: async () => { throw new Error("resend 500"); } });
+  const fail = fakeRes();
+  await hFail({ method: "POST", body: { email: "later@example.org" } }, fail);
+  assert.deepEqual(fail.body, { ok: true, status: "check_email", sent: false }, "the page never fails on the mail provider");
   const dup = fakeRes();
   await h({ method: "POST", body: { email: "c@example.org" } }, dup);
   assert.deepEqual(dup.body, { ok: true, status: "already_subscribed" });
