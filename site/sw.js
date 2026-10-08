@@ -3,7 +3,7 @@
    index.html; other same-origin static files are served stale-while-revalidate.
    Nothing under /api/ and nothing cross-origin is ever cached: the API carries reporter data and
    must always be live. Bump CACHE when the shell changes so old copies are dropped. */
-var CACHE = "gvf-shell-v3";
+var CACHE = "gvf-shell-v4";
 var SHELL = ["/", "/index.html", "/styles.css", "/app.js", "/data.js", "/favicon.svg"];
 
 self.addEventListener("install", function (e) {
