@@ -147,7 +147,8 @@ test("guide page: title, canonical, hreflang, JSON-LD, FAQ, live box, CTA", asyn
   assert.equal(res.statusCode, 200);
   const h = res.body;
   cleanOutput(h, "guide/roads");
-  assert.equal(titleOf(h), "Who fixes Roads, footpaths in Gurugram (Gurgaon): how to complain, documents, deadlines | Gurugram Vision Forum");
+  assert.equal(titleOf(h), "Roads, footpaths in Gurugram: who fixes it, how to complain");
+  assert.ok(h.includes("<h1>Who fixes Roads, footpaths in Gurugram (Gurgaon): how to complain, documents, deadlines</h1>"), "the H1 keeps the full question");
   assert.equal(canonicalOf(h), "https://gurugramvisionforum.org/guide/roads");
   assert.deepEqual(alternates(h), { "en-IN": "https://gurugramvisionforum.org/guide/roads", "hi-IN": "https://gurugramvisionforum.org/hi/guide/roads", "x-default": "https://gurugramvisionforum.org/guide/roads" });
   const d = /<meta name="description" content="([^"]*)">/.exec(h)[1];
@@ -245,7 +246,7 @@ test("ward page: councillor, party, areas and report counts; never one report", 
   assert.equal(res.statusCode, 200);
   const h = res.body;
   cleanOutput(h, "ward/5");
-  assert.equal(titleOf(h), "Ward 5, Gurugram: councillor, sectors and report counts | Gurugram Vision Forum");
+  assert.equal(titleOf(h), "Ward 5, Gurugram: councillor, sectors and report counts");
   assert.equal(canonicalOf(h), "https://gurugramvisionforum.org/ward/5");
   assert.equal(alternates(h)["hi-IN"], "https://gurugramvisionforum.org/hi/ward/5");
   assert.deepEqual(lds(h).map((x) => x["@type"]), ["Organization", "WebSite", "BreadcrumbList", "WebPage"]);
@@ -311,7 +312,7 @@ test("blog post: static, live news with auto disclosure, Hindi fallback, 404", a
   assert.equal(res.statusCode, 200);
   let h = res.body;
   cleanOutput(h, "static post");
-  assert.equal(titleOf(h), "How to file a civic complaint that gets acted on | Gurugram Vision Forum");
+  assert.equal(titleOf(h), "How to file a civic complaint that gets acted on");
   const art = lds(h).find((x) => x["@type"] === "BlogPosting");
   assert.equal(art.author.name, "Gurugram Vision Forum");
   assert.equal(art.datePublished.slice(0, 10), "2026-09-25");
