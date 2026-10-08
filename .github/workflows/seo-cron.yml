@@ -37,7 +37,17 @@ jobs:
           if [ -z "$TOKEN" ]; then echo "CRON_SECRET repository secret is not set"; exit 1; fi
           echo "::add-mask::$TOKEN"
           ok=1
-          for step in seo vitals mentions geo gsc bing; do
+          steps="seo vitals mentions geo gsc bing"
+          # The GEO and search-data steps exist only once the live site runs
+          # the code that serves /llms.txt; until a deploy lands, ask only for
+          # the steps every version knows (an older deploy treated unknown
+          # step names as "run everything").
+          llms=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' "$BASE_URL/llms.txt" || echo 000)
+          if [ "$llms" != "200" ]; then
+            steps="seo vitals mentions"
+            echo "::notice::$BASE_URL/llms.txt answered $llms, so the live deploy predates the GEO and search-data steps; running seo, vitals and mentions only."
+          fi
+          for step in $steps; do
             code=$(curl -sS -m 90 -o out.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/cron/daily?steps=$step")
             echo "$step: HTTP $code"
             if command -v jq >/dev/null && jq . out.json >/dev/null 2>&1; then jq ".$step, .errors" out.json; else cat out.json; echo; fi
