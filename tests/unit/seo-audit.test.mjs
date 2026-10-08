@@ -122,7 +122,7 @@ test("checklist: automatic items follow the audit rows, manual ones the settings
   const good = { kind: "guide", status: 200, issues: [] };
   const c1 = checklist({ env: { INDEXNOW_KEY: "k" }, settings: { seo: { indexnow: true, gsc_verified: true }, autopost: { enabled: true } }, pages: [good, { kind: "app", status: 200, issues: [{ code: "viewport_missing" }] }], vitals: { url: "u", performance: 92, lcp_ms: 1800 }, links: { total: 36, broken: 0, checked_at: "2026-10-08T00:00:00Z" }, autopost: { enabled: true }, mentions: 2 });
   const by = Object.fromEntries(c1.map((i) => [i.key, i]));
-  assert.equal(c1.length, 17);
+  assert.equal(c1.length, 30);
   assert.ok(by.mobile.ok, "the app shell's row does not count against the rendered pages");
   assert.ok(by.canonical.ok && by.hreflang.ok && by.schema.ok && by.og.ok && by.thin.ok && by.indexnow.ok && by.links.ok && by.content.ok && by.vitals.ok && by.gsc.ok && by.mentions.ok);
   assert.equal(by.bing.ok, false);
