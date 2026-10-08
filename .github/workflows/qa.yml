@@ -46,10 +46,15 @@ jobs:
         run: node tests/smoke.mjs 2>&1 | tee smoke.log
         shell: bash
 
-      - name: Link check
+      - name: Link check from this runner (informational: India-only hosts refuse foreign IPs)
         id: links
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: node scripts/check-links.mjs 2>&1 | tee links.log
+        run: node scripts/check-links.mjs 2>&1 | tee links.log || true
+        shell: bash
+
+      - name: Production upkeep check (the midnight-IST link run from Mumbai, cron freshness, database)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: node scripts/check-health.mjs https://gurugramvisionforum.org 2>&1 | tee health.log
         shell: bash
 
       - name: Upload logs
@@ -61,6 +66,7 @@ jobs:
             unit.log
             smoke.log
             links.log
+            health.log
           if-no-files-found: ignore
           retention-days: 14
 

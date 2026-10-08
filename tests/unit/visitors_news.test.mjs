@@ -516,8 +516,8 @@ test("runDaily records a cron_runs row, fetches news and checks links with the i
   assert.equal(r.ok, true, JSON.stringify(r.errors));
   assert.deepEqual(r.news, { sources: 2, fetched: 1, new_items: 2, failed: ["dead"] });
   assert.ok(r.links.total > 30, String(r.links.total));
-  assert.equal(r.links.checked, Math.min(15, r.links.total));
-  assert.equal(r.links.remaining, Math.max(0, r.links.total - 15));
+  assert.equal(r.links.checked, r.links.total, "every link is checked every run");
+  assert.equal(r.links.remaining, 0);
   assert.ok(r.links.broken > 0);
 
   const ins = sb.calls.queries.find((q) => q.table === "news_items" && q.op === "upsert");
@@ -533,7 +533,7 @@ test("runDaily records a cron_runs row, fetches news and checks links with the i
   const stored = sb.calls.queries.find((q) => q.table === "link_status" && q.op === "upsert");
   assert.deepEqual(stored.opts, { onConflict: "url" });
   assert.equal(stored.row.length, r.links.checked);
-  assert.ok(!stored.row.some((x) => x.url === "https://services.gmda.gov.in/"), "an already checked URL queues behind the unchecked ones and waits for a later run");
+  assert.ok(stored.row.some((x) => x.url === "https://services.gmda.gov.in/"), "an already checked URL is checked again: every link, every night");
   assert.ok(stored.row.some((row) => row.ok === true), "working links are recorded as ok");
   assert.ok(stored.row.every((row) => "ok" in row && "where_used" in row && row.checked_at));
 

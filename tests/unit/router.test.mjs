@@ -3,13 +3,14 @@ import assert from "node:assert/strict";
 import { resolve, pathParts, partsFrom } from "../../api/index.js";
 
 test("router resolves every public and triage route", () => {
-  for (const p of [["report"], ["status"], ["join"], ["dashboard"], ["ward"], ["geocode"], ["triage", "login"], ["triage", "refresh"], ["triage", "me"], ["triage", "staff"], ["triage", "wards"], ["triage", "reports"], ["triage", "password"], ["cron", "daily"], ["cron", "fetch"], ["cron", "analyse"], ["hooks", "whatsapp"], ["hooks", "exotel"], ["content"], ["triage", "content"], ["triage", "content", "upload-url"], ["triage", "draft"], ["visitor"], ["news"], ["health"], ["triage", "visitors"], ["triage", "translate"], ["pulse"], ["triage", "insights"], ["sitemap"], ["indexnow"], ["gsc"], ["subscribe"]]) {
+  for (const p of [["report"], ["status"], ["join"], ["dashboard"], ["ward"], ["geocode"], ["triage", "login"], ["triage", "refresh"], ["triage", "me"], ["triage", "staff"], ["triage", "wards"], ["triage", "reports"], ["triage", "password"], ["cron", "daily"], ["cron", "fetch"], ["cron", "analyse"], ["hooks", "whatsapp"], ["hooks", "exotel"], ["content"], ["triage", "content"], ["triage", "content", "upload-url"], ["triage", "draft"], ["visitor"], ["news"], ["health"], ["triage", "visitors"], ["triage", "joins"], ["triage", "translate"], ["pulse"], ["triage", "insights"], ["sitemap"], ["indexnow"], ["gsc"], ["subscribe"]]) {
     assert.ok(resolve(p), p.join("/"));
   }
 });
 
 test("router passes the reference of a single report as a param", () => {
   const m = resolve(["triage", "reports", "GVF-2026-ABCDE"]);
+  { const r = resolve(["triage", "joins", "11111111-1111-4111-8111-111111111111"]); assert.ok(r && r.handler); assert.deepEqual(r.params, { id: "11111111-1111-4111-8111-111111111111" }); }
   assert.ok(m);
   assert.equal(m.params.ref, "GVF-2026-ABCDE");
 });

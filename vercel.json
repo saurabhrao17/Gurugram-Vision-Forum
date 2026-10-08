@@ -1,6 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
+  "regions": [
+    "bom1"
+  ],
   "outputDirectory": "site",
   "rewrites": [
     {
@@ -123,11 +126,11 @@
   "crons": [
     {
       "path": "/api/cron/fetch",
-      "schedule": "30 3 * * *"
+      "schedule": "30 18 * * *"
     },
     {
       "path": "/api/cron/analyse",
-      "schedule": "50 3 * * *"
+      "schedule": "50 18 * * *"
     }
   ],
   "functions": {
