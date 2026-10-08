@@ -177,7 +177,9 @@ test("GET ?confirm= sets confirmed_at once and shows the subscribed page; an unk
   res = fakeRes();
   await makeHandler({ sb, env: ENV })({ method: "GET", query: { confirm: TOK } }, res);
   assert.equal(res.statusCode, 200);
-  assert.deepEqual(sb.calls.queries.find((q) => q.op === "update").row, { unsubscribed_at: null }, "the first confirmation date is kept");
+  const again = sb.calls.queries.find((q) => q.op === "update").row;
+  assert.equal(again.confirmed_at, undefined, "the first confirmation date is kept");
+  assert.equal(again.synced_at, null, "the change is queued for the newsletter mirror");
 
   sb = fakeSb();
   res = fakeRes();
@@ -211,7 +213,8 @@ test("GET ?unsubscribe= sets unsubscribed_at and shows the unsubscribed page; un
   res = fakeRes();
   await makeHandler({ sb, env: ENV })({ method: "GET", query: { unsubscribe: TOK } }, res);
   assert.equal(res.statusCode, 200);
-  assert.equal(sb.calls.queries.find((q) => q.op === "update").row.unsubscribed_at, "2026-09-02T00:00:00Z", "the first date is kept");
+  assert.ok(!sb.calls.queries.some((q) => q.op === "update"), "already stopped: nothing to change, the page still answers");
+  assert.ok(res.body.includes("Unsubscribed."));
 
   res = fakeRes();
   await makeHandler({ sb: fakeSb(), env: ENV })({ method: "GET", query: { unsubscribe: "e".repeat(32) } }, res);

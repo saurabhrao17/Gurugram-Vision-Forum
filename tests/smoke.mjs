@@ -704,7 +704,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#tList .tag-danger").count()) === 1, "overdue report carries a past-due flag");
   check((await page.locator("#tSummary").innerText()).includes("past due: 1 unmapped"), "summary line shows the counts");
   check(!(await page.locator("#rolesTab").isHidden()) && !(await page.locator("#inboxTab").isHidden()) && !(await page.locator("#performanceTab").isHidden()), "coordinator sees the Inbox, Roles and Performance tabs");
-  check((await page.locator("#visitorsTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()) && !(await page.locator("#contentTab").isHidden()), "coordinator sees content and pulse but not the visitors' data");
+  check((await page.locator("#visitorsTab").isHidden()) && (await page.locator("#subscribersTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()) && !(await page.locator("#contentTab").isHidden()), "coordinator sees content and pulse but not the visitors' or subscribers' data");
 
   // Desk map: the list has loaded two rows, so its offset is 2; the map query must carry the filters only, never offset or limit
   await page.click('[data-tab="map"]');
@@ -743,6 +743,19 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     if (mth === "PUT") return json(route, 200, { ok: true, settings: b.settings });
     return json(route, mth === "POST" ? 201 : 200, { ok: true, post: { id: "p10", ...b } }); });
   await page.route("**/api/triage/draft", (route) => json(route, 503, { ok: false, error: "draft_unavailable" }));
+  const subscriberPatches = [], subscriberPosts = [];
+  await page.route("**/api/triage/subscribers**", (route) => {
+    const req = route.request();
+    if (req.method() === "PATCH") { subscriberPatches.push({ url: req.url(), body: req.postDataJSON() }); return json(route, 200, { ok: true, item: { id: 1, status: "unsubscribed" }, sync: { ok: true } }); }
+    if (req.method() === "POST") { subscriberPosts.push(req.postDataJSON()); return json(route, 200, { ok: true, status: "check_email" }); }
+    if (req.url().includes("export=csv")) return route.fulfill({ status: 200, contentType: "text/csv", body: "email\n" });
+    return json(route, 200, { ok: true, status: "all", q: "", sync: { enabled: true, provider: "resend" }, counts: { total: 4, confirmed: 2, pending: 1, unsubscribed: 1, synced: 2, sync_failed: 0 }, items: [
+      { id: 1, email: "reader@example.org", lang: "en", source: "site", status: "confirmed", created_at: "2026-10-01T10:00:00Z", confirmed_at: "2026-10-01T10:05:00Z", unsubscribed_at: null, synced_at: "2026-10-01T10:05:01Z", sync_error: null },
+      { id: 2, email: "hindi@example.org", lang: "hi", source: "site", status: "confirmed", created_at: "2026-10-02T10:00:00Z", confirmed_at: "2026-10-02T10:05:00Z", unsubscribed_at: null, synced_at: null, sync_error: null },
+      { id: 3, email: "pending@example.org", lang: "en", source: "desk", status: "pending", created_at: "2026-10-03T10:00:00Z", confirmed_at: null, unsubscribed_at: null, synced_at: null, sync_error: null },
+      { id: 4, email: "gone@example.org", lang: "en", source: "site", status: "unsubscribed", created_at: "2026-10-04T10:00:00Z", confirmed_at: "2026-10-04T10:05:00Z", unsubscribed_at: "2026-10-06T10:00:00Z", synced_at: "2026-10-06T10:00:01Z", sync_error: null }
+    ] });
+  });
   await page.route("**/api/triage/visitors**", (route) => json(route, 200, { ok: true, stats: { visitors_total: 12, visitors_new: 5, events_by_type: { page_view: 340, report_start: 9, report_submit: 4, gate_shown: 20, gate_done: 12 }, top_paths: [{ path: "#/", n: 120 }] }, visitors: [{ name: "Gate Person", phone: "+919811111111", email: "gate@example.org", area: "Sector 45", pincode: "122003", city: "Gurugram", created_at: "2026-10-07T10:00:00Z", visits: 2 }], total: 12 }));
   await page.route("**/api/health", (route) => json(route, 200, { ok: false, checks: { db: { ok: true, ms: 12 }, storage: { ok: true }, cron: { ok: true, last_run_at: "2026-10-07T03:30:00Z", hours_since: 5 }, outbox: { pending: 2, failed: 0 }, links: { checked: 61, broken: [{ url: "https://example.org/dead", status: 404, where_used: "PORTALS" }] }, news: { sources: 20, items: 150, stale_sources: [] } }, version: "0ab1cd3" }));
   await page.click('[data-tab="content"]');
@@ -976,7 +989,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#lBtn");
   await page.waitForSelector("#deskMain:not([hidden])");
   await page.waitForTimeout(250);
-  check((await page.locator("#reportsTab").isHidden()) && (await page.locator("#mapTab").isHidden()) && (await page.locator("#rolesTab").isHidden()) && (await page.locator("#inboxTab").isHidden()) && (await page.locator("#performanceTab").isHidden()) && (await page.locator("#visitorsTab").isHidden()) && (await page.locator("#healthTab").isHidden()) && !(await page.locator("#contentTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()), "content team sees only the Content and Pulse tabs");
+  check((await page.locator("#reportsTab").isHidden()) && (await page.locator("#mapTab").isHidden()) && (await page.locator("#rolesTab").isHidden()) && (await page.locator("#inboxTab").isHidden()) && (await page.locator("#performanceTab").isHidden()) && (await page.locator("#visitorsTab").isHidden()) && (await page.locator("#subscribersTab").isHidden()) && (await page.locator("#healthTab").isHidden()) && !(await page.locator("#contentTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()), "content team sees only the Content and Pulse tabs");
   check((await page.locator("#joinsTab").isHidden()) && joinCalls.length === joinCallsBeforeContent && inboxCalls.length === inboxCallsBeforeContent, "content team does not see Join requests or the Inbox and the desk does not ask for them");
   check(!(await page.locator("#tContent").isHidden()) && (await page.locator("#tReports").isHidden()), "content team lands on the Content tab");
   await page.click("#signOut");
@@ -998,8 +1011,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#lBtn");
   await page.waitForSelector("#deskMain:not([hidden])");
   await page.waitForTimeout(250);
-  for (const t of ["reports", "inbox", "map", "roles", "joins", "performance", "content", "visitors", "insights", "health"]) check(!(await page.locator("#" + t + "Tab").isHidden()), "owner sees the " + t + " tab");
-  check((await page.locator("#tTabs .tab:not([hidden])").allInnerTexts()).map((t) => t.replace(/\s*·.*$/, "").trim()).join("|") === "Reports|Inbox|Map|Roles|Join requests|Performance|Content|Visitors|Pulse|Health", "owner's tabs run Reports, Inbox, Map, Roles, Join requests, Performance, Content, Visitors, Pulse, Health");
+  for (const t of ["reports", "inbox", "map", "roles", "joins", "performance", "content", "visitors", "subscribers", "insights", "health"]) check(!(await page.locator("#" + t + "Tab").isHidden()), "owner sees the " + t + " tab");
+  check((await page.locator("#tTabs .tab:not([hidden])").allInnerTexts()).map((t) => t.replace(/\s*·.*$/, "").trim()).join("|") === "Reports|Inbox|Map|Roles|Join requests|Performance|Content|Visitors|Subscribers|Pulse|Health", "owner's tabs run Reports, Inbox, Map, Roles, Join requests, Performance, Content, Visitors, Subscribers, Pulse, Health");
   await page.click('[data-tab="roles"]');
   await page.waitForTimeout(250);
   const ownerRoles = await page.evaluate(() => ({ removes: document.querySelectorAll("#rosterBody [data-remove]").length, coordHidden: document.getElementById("sRoleCoord").hidden }));
@@ -1010,6 +1023,19 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click('[data-tab="visitors"]');
   await page.waitForTimeout(200);
   check((await page.locator("#visitorStats").innerText()).includes("12 registered visitors") && (await page.locator("#visitorList").innerText()).includes("Gate Person"), "owner's visitors tab shows the registration count and the list");
+  await page.click('[data-tab="subscribers"]');
+  await page.waitForTimeout(250);
+  check((await page.locator("#subCounts").innerText()).replace(/\s+/g, " ").includes("2 Confirmed 1 Pending 1 Unsubscribed 4 Total 2 Mirrored"), "owner's subscribers tab shows the counts");
+  check((await page.locator("#subSync").innerText()).includes("Mirrored to Resend contacts"), "subscribers tab says the list is mirrored to Resend");
+  check((await page.locator("#subList .row").count()) === 4 && (await page.locator("#subList").innerText()).includes("reader@example.org") && (await page.locator('#subList [data-sact="unsubscribe"]').count()) === 2 && (await page.locator('#subList [data-sact="resubscribe"]').count()) === 1 && (await page.locator('#subList [data-sact="sync"]').count()) === 1, "subscriber rows carry Stop, Put back and Sync where they apply");
+  await page.click('#subList [data-sact="unsubscribe"]');
+  await page.waitForTimeout(250);
+  check(subscriberPatches.length === 1 && subscriberPatches[0].url.endsWith("/api/triage/subscribers/1") && subscriberPatches[0].body.action === "unsubscribe", "Stop emails PATCHes the subscriber with action unsubscribe (" + JSON.stringify(subscriberPatches) + ")");
+  await page.fill("#subEmail", "new@example.org");
+  await page.selectOption("#subLang", "hi");
+  await page.click("#subAddBtn");
+  await page.waitForTimeout(250);
+  check(subscriberPosts.length === 1 && subscriberPosts[0].email === "new@example.org" && subscriberPosts[0].lang === "hi", "adding an address from the desk POSTs email and language for a confirmation mail (" + JSON.stringify(subscriberPosts) + ")");
 
   check(errors.length === 0, "zero console or page errors" + (errors.length ? ": " + errors.join(" | ") : ""));
   await ctx.close();

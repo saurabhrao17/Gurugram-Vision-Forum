@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { ROLES, CONTENT_ROLES, REPORT_ROLES, MANAGER_ROLES, isOwner, isManager, canContent, canReports, HttpError } from "../../lib/auth.js";
 import { makeHandler as makeContent } from "../../lib/handlers/triage/content.js";
 import { makeHandler as makeVisitors } from "../../lib/handlers/triage/visitors.js";
+import { makeHandler as makeSubscribers } from "../../lib/handlers/triage/subscribers.js";
 import { makeHandler as makeJoins, validateJoinPatch, STATUSES } from "../../lib/handlers/triage/joins.js";
 import { joinMail } from "../../lib/handlers/join.js";
 import { makeHandler as makeReports } from "../../lib/handlers/triage/reports.js";
@@ -106,6 +107,15 @@ test("visitors is owner only: a coordinator is refused", async () => {
   const content = fakeRes();
   await makeVisitors({ auth: authAs("content"), sb: fakeSb() })({ method: "GET", query: {} }, content);
   assert.equal(content.statusCode, 403);
+});
+
+test("subscribers is owner only: coordinator, content and triage are refused", async () => {
+  for (const role of ["coordinator", "content", "triage"]) {
+    const res = fakeRes();
+    await makeSubscribers({ auth: authAs(role), sb: fakeSb() })({ method: "GET", query: {} }, res);
+    assert.equal(res.statusCode, 403, role);
+    assert.deepEqual(res.body, { ok: false, error: "forbidden" });
+  }
 });
 
 test("reports list and detail refuse the content team", async () => {
