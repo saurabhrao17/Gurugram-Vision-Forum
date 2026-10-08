@@ -582,3 +582,41 @@ body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
 .row .jnotes textarea{min-height:56px; font-size:1rem; padding:.5rem .7rem}
 .row .jnotes .btn{justify-self:start}
 .row .acts select[data-jstatus]{width:auto; min-width:150px; min-height:44px; padding:.45rem 2.2rem .45rem .7rem; font-size:.95rem}
+/* desk: inbox, roles and performance tabs */
+.jcounts-3{grid-template-columns:repeat(3,1fr)}
+.row .ibody{margin:.5rem 0 0; white-space:pre-wrap; font-size:.98rem; max-width:720px; overflow-wrap:anywhere}
+.row .ibody.clip{display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
+.row .ibody+.btn{margin-top:.4rem}
+.row .acts select[data-istatus]{width:auto; min-width:130px; min-height:44px; padding:.45rem 2.2rem .45rem .7rem; font-size:.95rem}
+.secrow{display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin:0 0 .5rem}
+.wchips{display:inline-flex; flex-wrap:wrap; gap:.35rem}
+.wchip{display:inline-flex; align-items:center; gap:.1rem; min-height:36px; padding:0 .3rem 0 .6rem; border-radius:6px; font-family:var(--head); font-weight:600; font-size:.88rem; background:var(--blue-50); color:var(--blue); white-space:nowrap}
+.wchip-lead{background:var(--green-50); color:var(--green)}
+.wchip-support{background:var(--surface-2); color:var(--ink)}
+.wchip button{font:inherit; font-size:1.2rem; line-height:1; background:none; border:0; color:inherit; cursor:pointer; min-width:36px; min-height:36px; margin:0; padding:0; border-radius:4px}
+.wchip button:hover{background:rgba(0,0,0,.08)}
+.wchip:not(:has(button)){padding-right:.6rem}
+.roster td{vertical-align:middle}
+.roster input[type=text],.roster input[type=tel]{min-height:44px; font-size:.95rem; padding:.45rem .6rem; min-width:150px}
+.roster td.email{font-size:.92rem}
+.roster td.email{overflow-wrap:anywhere}
+.roster .chk{display:inline-flex; align-items:center; gap:.5rem; min-height:44px; cursor:pointer}
+.roster .chk input{width:22px; height:22px; margin:0; accent-color:var(--blue)}
+.assign{display:grid; grid-template-columns:1fr; gap:.4rem; align-items:center; min-width:200px}
+@media (min-width:1024px){ .assign{grid-template-columns:minmax(110px,1fr) auto auto} }
+.assign select{min-height:44px; padding:.45rem 2.2rem .45rem .7rem; font-size:.95rem; width:auto}
+.assign .btn{min-height:44px}
+.roster .acts{display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.5rem}
+.roster .acts .btn{min-height:44px}
+.cover td a{color:var(--muted); text-decoration:none}
+.cover td a:hover{text-decoration:underline}
+.perf{font-size:.95rem}
+.perf th,.perf td{padding:.55rem .6rem}
+.tbl td.num{font-variant-numeric:tabular-nums; text-align:right}
+.perf td.age-warn{background:var(--warn-50); color:var(--warn); font-weight:700}
+.perf td.age-bad{background:var(--danger-50); color:var(--danger); font-weight:700}
+.sortbtn{font:inherit; font-family:var(--head); font-weight:600; background:none; border:0; padding:0; color:inherit; cursor:pointer; min-height:44px; text-decoration:underline dotted; text-underline-offset:3px}
+.sortbtn[aria-pressed="true"]{color:var(--ink); text-decoration:underline solid}
+.sortbtn[aria-pressed="true"]::after{content:" ↓"}
+.brief{white-space:pre-wrap; font-family:var(--body); font-size:.98rem; line-height:1.55; background:var(--surface-2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:1rem; margin:0 0 .75rem; overflow-wrap:anywhere; max-width:760px}
+@media (max-width:639px){ .tbl td.num{text-align:left} .wchip{white-space:normal} .roster td[data-l="Assign"]::before{display:block} }
