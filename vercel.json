@@ -59,6 +59,14 @@
       "destination": "/api/index?path=indexnow"
     },
     {
+      "source": "/llms.txt",
+      "destination": "/api/index?path=llms"
+    },
+    {
+      "source": "/llms-full.txt",
+      "destination": "/api/index?path=llms-full"
+    },
+    {
       "source": "/:file(google[0-9a-f]+.html)",
       "destination": "/api/index?path=gsc&file=:file"
     },
