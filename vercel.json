@@ -79,6 +79,10 @@
       "destination": "/:file"
     },
     {
+      "source": "/:view(report|directory|rights|wards|charter|dashboard|updates|join|about|privacy|news|pulse)",
+      "destination": "/api/index?path=shell&view=:view"
+    },
+    {
       "source": "/:view(report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix|news|pulse)",
       "destination": "/index.html"
     },

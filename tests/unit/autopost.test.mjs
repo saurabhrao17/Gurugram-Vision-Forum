@@ -309,11 +309,11 @@ test("checkAiBody, allowedNumbers and allowedLinks guard the model's text", () =
 // Cron: settings, autopost step
 // ---------------------------------------------------------------------------
 test("loadSettings merges defaults with the site_settings rows and rejects nonsense", async () => {
-  assert.deepEqual(await loadSettings(fakeSb()), { autopost: AUTOPOST_DEFAULTS, seo: SEO_DEFAULTS });
+  assert.deepEqual(await loadSettings(fakeSb()), { autopost: AUTOPOST_DEFAULTS, seo: SEO_DEFAULTS, topics: { enabled: true, per_week: 3 } });
   assert.deepEqual(AUTOPOST_DEFAULTS, { enabled: true, weekday: 1, review_hours: 48 });
   assert.deepEqual(SEO_DEFAULTS, { indexnow: true, gsc_verified: false, bing_verified: false });
   const s = await loadSettings(fakeSb({ tables: { site_settings: [{ key: "autopost", value: { enabled: false, weekday: 9, review_hours: -1 } }, { key: "seo", value: { indexnow: false } }, { key: "social", value: {} }] } }));
-  assert.deepEqual(s, { autopost: { enabled: false, weekday: 1, review_hours: -1 }, seo: { indexnow: false, gsc_verified: false, bing_verified: false } });
+  assert.deepEqual(s, { autopost: { enabled: false, weekday: 1, review_hours: -1 }, seo: { indexnow: false, gsc_verified: false, bing_verified: false }, topics: { enabled: true, per_week: 3 } });
   await assert.rejects(loadSettings(fakeSb({ errors: { site_settings: "gone" } })), /site_settings select: gone/);
 });
 
@@ -578,7 +578,7 @@ test("runDaily runs autopost, digest and indexnow between insights and sla, with
   const fetchImpl = async () => ({ ok: false, status: 503, text: async () => "", json: async () => null, body: null });
   const r = await runDaily(sb, { INDEXNOW_KEY: "k" }, { fetch: fetchImpl, now: MONDAY });
   assert.equal(r.ok, true, JSON.stringify(r.errors));
-  assert.deepEqual(Object.keys(r), ["ok", "news", "links", "signals", "insights", "autopost", "digest", "audience", "social", "indexnow", "sla", "brief", "outbox", "retention", "seo", "vitals", "mentions", "geo", "gsc", "bing"]);
+  assert.deepEqual(Object.keys(r), ["ok", "news", "links", "signals", "insights", "autopost", "digest", "audience", "social", "indexnow", "sla", "brief", "outbox", "retention", "seo", "vitals", "mentions", "geo", "gsc", "bing", "topics"]);
   // The insights step saw no signals, so the autopost step had nothing from this run and did not reach for the table.
   assert.deepEqual(r.insights, { topics: 0, ai: false, stored: false });
   assert.equal(r.autopost.skipped, null);

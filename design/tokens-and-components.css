@@ -335,6 +335,7 @@ input[aria-invalid="true"],select[aria-invalid="true"],textarea[aria-invalid="tr
   .tbl tr{border-bottom:1px solid var(--line); padding:.5rem 0}
   .tbl td{border:0; padding:.25rem .85rem}
   .tbl td.n::before{content:"Ward "}
+  .seotbl td.n::before{content:none}
   .tbl td[data-l]::before{content:attr(data-l) ": "; color:var(--muted); font-size:.9rem}
 }
 
