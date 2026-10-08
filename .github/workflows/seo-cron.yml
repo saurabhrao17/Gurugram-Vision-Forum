@@ -5,8 +5,10 @@ name: Nightly SEO audit
 # Insights run (vitals) and the news search for the Forum's name (mentions).
 # Each step is its own call because the Vercel function has 60 seconds and
 # PageSpeed alone can use most of it. The Hobby plan allows two Vercel crons
-# (fetch, analyse), so this one lives here. Needs the repository secret
-# CRON_SECRET; the results show on the desk's SEO tab.
+# (fetch, analyse), so this one lives here; the audit and the mentions
+# search also ride the midnight fetch cron, so only the Core Web Vitals
+# step depends on this workflow. Needs the repository secret CRON_SECRET
+# (the same value as in Vercel); the results show on the desk's SEO tab.
 on:
   schedule:
     - cron: "30 21 * * *"
