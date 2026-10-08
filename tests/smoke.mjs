@@ -584,6 +584,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     window.maplibregl = { Map, NavigationControl: function () {}, Marker, Popup, LngLatBounds };
   });
   await ctx.addInitScript(() => { try { if (!localStorage.getItem("gvf_visitor")) localStorage.setItem("gvf_visitor", JSON.stringify({ token: "smoke_visitor_token_0001", done: true, views: 9 })); } catch {} });
+  // Clipboard stand-in: the Performance tab's Copy button writes the brief here.
+  await ctx.addInitScript(() => { Object.defineProperty(navigator, "clipboard", { value: { writeText: (t) => { window.__copied = t; return Promise.resolve(); } } }); });
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
@@ -613,6 +615,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   const reportListCalls = [];
   await page.route("**/api/triage/reports?**", (route) => { reportListCalls.push(route.request().url()); if (!authed(route)) return json(route, 401, { ok: false, error: "unauthenticated" });
     if (route.request().url().includes("fields=map")) return json(route, 200, { ok: true, reports: [{ ref: "GVF-2026-OLD02", issue_type: "waste", issue_label: "Garbage", area: "Sector 29", ward: 30, stage: 0, lat: 28.4595, lng: 77.0266 }], total: 1 });
+    if (/[?&]stage=0\b/.test(route.request().url())) { const rows = [state, report({ ref: "GVF-2026-OLD02", stage: 0, created_at: "2026-09-20T10:00:00Z", unmapped_overdue: true })].filter((r) => r.stage === 0); return json(route, 200, { ok: true, reports: rows, total: rows.length, offset: 0, limit: 20 }); }
     return json(route, 200, { ok: true, reports: [state, report({ ref: "GVF-2026-OLD02", stage: 0, created_at: "2026-09-20T10:00:00Z", unmapped_overdue: true })], total: 2, offset: 0, limit: 50,
     summary: { total: 2, received: 2, filed: 0, escalated: 0, resolved: 0, unmapped_past_due: 1, filed_past_due: 0 } }); });
   await page.route("**/api/triage/reports/GVF-2026-SRV01", (route) => {
@@ -624,7 +627,42 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     }
     return json(route, 200, { ok: true, report: state, events, volunteers: { lead_name: "Vol One", lead_email: "vol@example.org", support_name: null, support_email: null }, filing });
   });
-  await page.route("**/api/triage/staff", (route) => json(route, 200, { ok: true, staff: [{ ...staff, wards: [] }, { user_id: "u2", name: "Vol One", role: "triage", email: "vol@example.org", wards: [{ ward: 10, role: "lead" }] }] }));
+  const staffPosts = [];
+  await page.route("**/api/triage/staff", (route) => { if (route.request().method() === "POST") { const b = JSON.parse(route.request().postData() || "{}"); staffPosts.push(b); return json(route, 201, { ok: true, staff: { user_id: "u9", name: b.name, email: b.email, role: b.role, phone: b.phone || null } }); } return json(route, 405, { ok: false, error: "method" }); });
+  // Roster (GET/PUT /api/triage/team): a coordinator over wards 1-6 who also leads ward 7, a ward volunteer leading ward 10, a content person; 36 ward rows derived from it
+  const people = [
+    { user_id: "u1", name: "Coordinator", email: "coord@example.org", phone: "+919800000001", role: "coordinator", active: true, created_at: "2026-09-01T00:00:00Z", wards: [1, 2, 3, 4, 5, 6].map((w) => ({ ward: w, role: "coordinator" })).concat([{ ward: 7, role: "lead" }]) },
+    { user_id: "u2", name: "Vol One", email: "vol@example.org", phone: "+919800000002", role: "triage", active: true, created_at: "2026-09-02T00:00:00Z", wards: [{ ward: 10, role: "lead" }] },
+    { user_id: "u3", name: "Content Person", email: "content@example.org", phone: null, role: "content", active: true, created_at: "2026-09-03T00:00:00Z", wards: [] }];
+  const teamWards = () => Array.from({ length: 36 }, (_, i) => { const w = i + 1, row = { ward: w, councillor: w === 10 ? "Mahabir" : w === 30 ? "Madhu Batra" : "Councillor " + w };
+    for (const r of ["coordinator", "lead", "support"]) { const p = people.find((x) => x.wards.some((y) => y.ward === w && y.role === r)); row[r + "_user_id"] = p ? p.user_id : null; row[r + "_name"] = p ? p.name : null; row[r + "_phone"] = p ? p.phone : null; }
+    return row; });
+  const teamPuts = [];
+  await page.route("**/api/triage/team", (route) => { if (!authed(route)) return json(route, 401, { ok: false, error: "unauthenticated" });
+    if (route.request().method() === "PUT") { const b = JSON.parse(route.request().postData() || "{}"); teamPuts.push(b); const p = people.find((x) => x.user_id === b.user_id); if (!p) return json(route, 404, { ok: false, error: "not_found" });
+      if (typeof b.name === "string") p.name = b.name; if (typeof b.phone === "string") p.phone = b.phone; if (typeof b.active === "boolean") p.active = b.active; if (Array.isArray(b.wards)) p.wards = b.wards; return json(route, 200, { ok: true, person: p }); }
+    return json(route, 200, { ok: true, people, wards: teamWards() }); });
+  // Metrics (GET /api/triage/metrics): ward 10 has an old report, ward 30 is quiet, ward 3 has fresh ones; Vol One has not acted in 7 days
+  const brief = "Good morning. 6 open reports, 2 overdue.\nWard 10: 4 open, oldest 25 days, 2 overdue.\nWard 3: 2 open.\nVol One has not acted in 7 days.";
+  await page.route("**/api/triage/metrics", (route) => { if (!authed(route)) return json(route, 401, { ok: false, error: "unauthenticated" }); return json(route, 200, { ok: true, generated_at: "2026-10-08T03:30:00Z",
+    totals: { open: 6, unmapped: 2, overdue: 2, received_7d: 3, resolved_7d: 1 },
+    wards: [{ ward: 3, councillor: "Councillor 3", open: 2, a0_3: 2, a4_7: 0, a8_21: 0, a22p: 0, unmapped: 1, overdue: 0, received_7d: 2, resolved_7d: 0, oldest_open_days: 2, last_activity_at: "2026-10-07T10:00:00Z" },
+      { ward: 10, councillor: "Mahabir", open: 4, a0_3: 1, a4_7: 1, a8_21: 1, a22p: 1, unmapped: 1, overdue: 2, received_7d: 1, resolved_7d: 1, oldest_open_days: 25, last_activity_at: "2026-10-01T10:00:00Z" },
+      { ward: 30, councillor: "Madhu Batra", open: 0, a0_3: 0, a4_7: 0, a8_21: 0, a22p: 0, unmapped: 0, overdue: 0, received_7d: 0, resolved_7d: 0, oldest_open_days: 0, last_activity_at: null }],
+    people: [{ user_id: "u1", name: "Coordinator", email: "coord@example.org", phone: "+919800000001", role: "coordinator", active: true, wards: [1, 2, 3, 4, 5, 6].map((w) => ({ ward: w, role: "coordinator" })).concat([{ ward: 7, role: "lead" }]), actions_7d: 5, actions_30d: 12, last_action_at: "2026-10-07T10:00:00Z", open_in_wards: 2, overdue_in_wards: 0 },
+      { user_id: "u2", name: "Vol One", email: "vol@example.org", phone: "+919800000002", role: "triage", active: true, wards: [{ ward: 10, role: "lead" }], actions_7d: 0, actions_30d: 3, last_action_at: "2026-09-25T10:00:00Z", open_in_wards: 4, overdue_in_wards: 2 }],
+    brief: { text: brief, line: "6 open, 2 overdue" } }); });
+  // Inbox (table inbox): mail to the Forum; the list carries counts, the per-id route takes PATCH {status} or {notes}
+  const inboxRows = [
+    { id: "e1", source: "email", from_email: "asha@example.org", from_name: "Asha Verma", subject: "Streetlight out in Sector 45", body_text: "The light near the park gate has been out for a week.\nLine two.\nLine three.\nLine four.\nLine five, which makes this long enough to clip.", received_at: "2026-10-08T05:00:00Z", status: "new", notes: "", handled_by: null },
+    { id: "e2", source: "email", from_email: "rohit@example.org", from_name: "Rohit Mehra", subject: "Thanks for the camp", body_text: "Short note.", received_at: "2026-10-05T05:00:00Z", status: "done", notes: "Replied by phone.", handled_by: "Coordinator" }];
+  const inboxCalls = [], inboxPatches = [];
+  const inboxCounts = () => ({ new: inboxRows.filter((r) => r.status === "new").length, read: inboxRows.filter((r) => r.status === "read").length, done: inboxRows.filter((r) => r.status === "done").length, total: inboxRows.length });
+  await page.route("**/api/triage/inbox?**", (route) => { const u = new URL(route.request().url()); inboxCalls.push(u.search); if (!authed(route)) return json(route, 401, { ok: false, error: "unauthenticated" });
+    const st = u.searchParams.get("status") || "new"; return json(route, 200, { ok: true, items: inboxRows.filter((r) => st === "all" || r.status === st), counts: inboxCounts() }); });
+  await page.route("**/api/triage/inbox/*", (route) => { if (!authed(route)) return json(route, 401, { ok: false, error: "unauthenticated" }); const id = route.request().url().split("/").pop().split("?")[0]; const r = inboxRows.find((x) => x.id === id); if (!r) return json(route, 404, { ok: false, error: "not_found" });
+    if (route.request().method() === "PATCH") { const b = JSON.parse(route.request().postData() || "{}"); inboxPatches.push({ id, body: b }); if (b.status) r.status = b.status; if (typeof b.notes === "string") r.notes = b.notes; r.handled_by = "Coordinator"; }
+    return json(route, 200, { ok: true, item: r }); });
   // Join requests (table joins): owners and coordinators only; the list carries counts, the per-id route takes PATCH {status} or {notes}
   const joinRows = [
     { id: "j1", name: "Asha Verma", phone: "+919811122233", email: "asha@example.org", role: "Ward volunteer", area: "Sector 56", note: "Weekends only, can help with camps.", status: "new", notes: "", handled_by: null, created_at: "2026-10-08T06:00:00Z", updated_at: "2026-10-08T06:00:00Z" },
@@ -640,11 +678,6 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.route("**/api/triage/joins/*", (route) => { if (!authed(route)) return json(route, 401, { ok: false, error: "unauthenticated" }); const id = route.request().url().split("/").pop().split("?")[0]; const r = joinRows.find((x) => x.id === id); if (!r) return json(route, 404, { ok: false, error: "not_found" });
     if (route.request().method() === "PATCH") { const b = JSON.parse(route.request().postData() || "{}"); joinPatches.push({ id, body: b }); if (b.status) r.status = b.status; if (typeof b.notes === "string") r.notes = b.notes; r.handled_by = "Coordinator"; r.updated_at = "2026-10-08T07:00:00Z"; }
     return json(route, 200, { ok: true, join: r }); });
-  const wardPuts = [];
-  await page.route("**/api/triage/wards", (route) => {
-    if (route.request().method() === "PUT") { wardPuts.push(JSON.parse(route.request().postData() || "{}")); return json(route, 200, { ok: true, ward: { ward: wardPuts[wardPuts.length - 1].ward } }); }
-    return json(route, 200, { ok: true, wards: [{ ward: 10, councillor: "Mahabir", lead_user_id: "u2", lead_name: "Vol One", support_user_id: null, support_name: null }, { ward: 30, councillor: "Madhu Batra", lead_user_id: null, lead_name: null, support_user_id: null, support_name: null }] });
-  });
 
   await page.goto(httpUrl + "#/desk");
   await page.waitForTimeout(150);
@@ -670,7 +703,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#tList .row").count()) === 2, "list shows two reports");
   check((await page.locator("#tList .tag-danger").count()) === 1, "overdue report carries a past-due flag");
   check((await page.locator("#tSummary").innerText()).includes("past due: 1 unmapped"), "summary line shows the counts");
-  check(!(await page.locator("#teamTab").isHidden()), "coordinator sees the Team tab");
+  check(!(await page.locator("#rolesTab").isHidden()) && !(await page.locator("#inboxTab").isHidden()) && !(await page.locator("#performanceTab").isHidden()), "coordinator sees the Inbox, Roles and Performance tabs");
   check((await page.locator("#visitorsTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()) && !(await page.locator("#contentTab").isHidden()), "coordinator sees content and pulse but not the visitors' data");
 
   // Desk map: the list has loaded two rows, so its offset is 2; the map query must carry the filters only, never offset or limit
@@ -802,19 +835,83 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(200);
   check(pwCalls.length === 1 && pwCalls[0].password === "gurugram2026x" && (await page.locator("#pwForm").isHidden()), "password change posts to the API and closes the form");
 
-  await page.click('[data-tab="team"]');
+  // Roles tab: one roster with ward chips per person, an Assign control that stages wards and one Save per row, inline name/mobile, the derived cover matrix
+  await page.click('[data-tab="roles"]');
   await page.waitForTimeout(250);
-  check((await page.locator("#staffList .row").count()) === 2, "team tab lists the accounts");
-  check((await page.locator("#staffList [data-remove]").count()) === 0, "coordinator cannot remove accounts");
-  check((await page.locator("#wardBody2 tr").count()) === 2, "ward grid lists the wards");
-  check((await page.locator('#wardBody2 select[data-ward="10"][data-role="lead"]').inputValue()) === "u2", "ward grid shows the current lead");
-  await page.selectOption('#wardBody2 select[data-ward="30"][data-role="support"]', "u2");
-  await page.waitForTimeout(150);
-  check(wardPuts.length === 1 && wardPuts[0].ward === 30 && wardPuts[0].role === "support" && wardPuts[0].user_id === "u2", "changing a ward select saves the assignment");
+  check((await page.locator("#rosterBody tr").count()) === 3, "roles tab lists the three accounts");
+  check((await page.locator("#rosterBody [data-remove]").count()) === 0, "coordinator cannot remove accounts");
+  const coordChips = (await page.locator('#rosterBody tr[data-person="u1"] .wchip').allInnerTexts()).map((t) => t.replace(/\s*×\s*$/, "").trim());
+  check(coordChips.length === 2 && coordChips[0] === "C 1–6" && coordChips[1] === "Lead 7", "coordinator's Wards cell compresses wards 1-6 into a C 1–6 chip plus Lead 7" + (coordChips.length ? " (" + coordChips.join(", ") + ")" : ""));
+  check((await page.locator('#rosterBody tr[data-person="u1"] .tag').innerText()) === "coordinator" && (await page.locator('#rosterBody tr[data-person="u2"] .tag').innerText()) === "ward volunteer", "desk role tags name the role");
+  check((await page.locator('#rosterBody input[data-pphone="u1"]').inputValue()) === "+919800000001", "mobile is shown in an editable field");
+  check((await page.locator("#coverBody tr").count()) === 36, "cover matrix has 36 ward rows");
+  const ward3 = await page.locator("#coverBody tr").nth(2).innerText();
+  check(/^3\b/.test(ward3.trim()) && ward3.includes("Coordinator") && ward3.includes("+919800000001") && (await page.locator("#coverBody tr").nth(9).innerText()).includes("Vol One"), "ward 3 names the coordinator with mobile and ward 10 names its lead");
+  check((await page.locator('#rosterBody [data-asave="u2"]').isDisabled()), "Save is disabled until wards change");
+  await page.fill('#rosterBody input[data-aw="u2"]', "8-9, 12");
+  await page.selectOption('#rosterBody select[data-ar="u2"]', "lead");
+  await page.click('#rosterBody [data-aadd="u2"]');
+  await page.waitForTimeout(100);
+  const volChips = (await page.locator('#rosterBody tr[data-person="u2"] .wchip').allInnerTexts()).map((t) => t.replace(/\s*×\s*$/, "").trim());
+  check(volChips.join("|") === "Lead 8–10|Lead 12" && teamPuts.length === 0, "Add parses 8-9, 12 into staged chips without saving yet (" + volChips.join(", ") + ")");
+  await page.click('#rosterBody [data-asave="u2"]');
+  await page.waitForTimeout(300);
+  const wardsPut = teamPuts[0] || {};
+  check(teamPuts.length === 1 && wardsPut.user_id === "u2" && !("name" in wardsPut) && !("phone" in wardsPut) && JSON.stringify(wardsPut.wards) === JSON.stringify([{ ward: 8, role: "lead" }, { ward: 9, role: "lead" }, { ward: 10, role: "lead" }, { ward: 12, role: "lead" }]), "Save PUTs the full ward list: 8, 9, 12 as lead plus the existing 10");
+  check((await page.locator("#coverBody tr").nth(11).innerText()).includes("Vol One"), "cover matrix refreshes after the save (ward 12 now names Vol One)");
+  await page.click('#rosterBody tr[data-person="u2"] .wchip button[data-wfrom="12"]');
+  await page.waitForTimeout(100);
+  check(!(await page.locator('#rosterBody [data-asave="u2"]').isDisabled()) && (await page.locator('#rosterBody tr[data-person="u2"] .wchip').count()) === 1, "the chip's × removes that ward and re-enables Save");
+  await page.fill('#rosterBody input[data-pphone="u2"]', "+919811100000");
+  await page.press('#rosterBody input[data-pphone="u2"]', "Tab");
+  await page.waitForTimeout(250);
+  check(teamPuts.length === 2 && teamPuts[1].user_id === "u2" && teamPuts[1].phone === "+919811100000" && !("wards" in teamPuts[1]), "leaving the mobile field PUTs {user_id, phone}");
+  await page.fill('#rosterBody input[data-pname="u1"]', "Coordinator Two");
+  await page.press('#rosterBody input[data-pname="u1"]', "Tab");
+  await page.waitForTimeout(250);
+  check(teamPuts.length === 3 && teamPuts[2].user_id === "u1" && teamPuts[2].name === "Coordinator Two", "leaving the name field PUTs {user_id, name}");
+  check(await page.evaluate(() => document.getElementById("sRoleCoord").hidden), "coordinator cannot create coordinators");
+  await page.fill("#sName", "New Vol");
+  await page.fill("#sEmail", "newvol@example.org");
+  await page.fill("#sPhone", "+919811199999");
+  await page.fill("#sPass", "temp-pass-2026");
+  await page.selectOption("#sRole", "triage");
+  await page.click("#staffForm button[type=submit]");
+  await page.waitForTimeout(300);
+  check(staffPosts.length === 1 && staffPosts[0].phone === "+919811199999" && staffPosts[0].role === "triage" && staffPosts[0].email === "newvol@example.org", "Add a volunteer POSTs name, email, password, role and phone");
 
   // Join requests tab: coordinator sees it with a badge for the new ones; status and notes PATCH the row; "Create desk account" prefills the Team form
   check(!(await page.locator("#joinsTab").isHidden()) && (await page.locator("#joinsTab").innerText()).replace(/\s+/g, " ").includes("Join requests · 1"), "coordinator sees the Join requests tab with the new-count badge from desk boot");
   check(joinCalls.length === 1 && joinCalls[0].includes("status=new"), "desk boot asks the joins endpoint once for the new count");
+  // Inbox tab: three streams in one list with a badge summing emails new + join requests new + unmapped reports; emails take a status select and notes
+  check((await page.locator("#inboxTab").innerText()).replace(/\s+/g, " ").includes("Inbox · 4") && inboxCalls.length === 1 && inboxCalls[0].includes("status=new"), "Inbox badge sums 1 new email + 1 new join request + 2 unmapped reports from one call each at boot");
+  await page.click('[data-tab="inbox"]');
+  await page.waitForTimeout(300);
+  // SRV01 was filed (stage 2) by the PATCH above, so only OLD02 is still unmapped here; the join request (06:00) is newer than the email (05:00)
+  check(!(await page.locator("#tInbox").isHidden()) && (await page.locator("#inboxList .row").count()) === 4, "Inbox lists 2 emails, 1 join request and the 1 unmapped report");
+  check((await page.locator("#inboxCounts").innerText()).replace(/\s+/g, " ").includes("1 Emails new 1 Join requests new 1 Reports unmapped") && (await page.locator("#inboxTab").innerText()).replace(/\s+/g, " ").includes("Inbox · 3"), "Inbox count strip shows the three streams and the badge follows the fresh counts");
+  const inboxTags = await page.locator("#inboxList .row > div:nth-child(2) > b > .tag:first-of-type").allInnerTexts();
+  check(inboxTags.join("|") === "Join request|Email|Email|Report", "rows are tagged by type and sorted newest first (" + inboxTags.join(", ") + ")");
+  check((await page.locator('#inboxList a[href="#/desk/GVF-2026-OLD02"]').count()) === 1 && (await page.locator("#inboxList .row").last().locator(".tag-danger").count()) === 1 && (await page.locator('#inboxList [data-ijoin="j1"]').count()) === 1, "report rows link to the desk ticket with their flags and join rows offer Open in Join requests");
+  const emailRowText = await page.locator('#inboxList li[data-iid="e1"]').innerText();
+  check(emailRowText.includes("Asha Verma") && emailRowText.includes("asha@example.org") && emailRowText.includes("Streetlight out in Sector 45") && emailRowText.includes("8 Oct"), "email row shows from, subject and received time");
+  check((await page.locator("#ib_e1.clip").count()) === 1 && (await page.locator('#inboxList [data-imore="e1"]').innerText()) === "Show more", "a long body is collapsed with Show more");
+  await page.click('#inboxList [data-imore="e1"]');
+  check((await page.locator("#ib_e1.clip").count()) === 0 && (await page.locator('#inboxList [data-imore="e1"]').innerText()) === "Show less", "Show more expands the body");
+  await page.selectOption('#inboxList select[data-istatus="e1"]', "read");
+  await page.waitForTimeout(200);
+  check(inboxPatches.length === 1 && inboxPatches[0].id === "e1" && inboxPatches[0].body.status === "read" && !("notes" in inboxPatches[0].body), "changing the email status PATCHes {status} to /api/triage/inbox/e1");
+  check((await page.locator("#inboxTab").innerText()).replace(/\s+/g, " ").includes("Inbox · 2") && (await page.locator('#inboxList li[data-iid="e1"] [data-itag]').innerText()) === "Read", "badge and tag update after the status change");
+  await page.fill('#inboxList textarea[data-inotes="e1"]', "Asked MCG lighting cell.");
+  await page.click('#inboxList [data-isave="e1"]');
+  await page.waitForTimeout(200);
+  check(inboxPatches.length === 2 && inboxPatches[1].id === "e1" && inboxPatches[1].body.notes === "Asked MCG lighting cell." && !("status" in inboxPatches[1].body), "saving notes PATCHes {notes} for that email");
+  await page.click('#inboxChips [data-istage="done"]');
+  await page.waitForTimeout(300);
+  check(inboxCalls[inboxCalls.length - 1].includes("status=done") && (await page.locator('#inboxList li[data-iid]').count()) === 1 && (await page.locator("#inboxList .row").count()) === 3, "the Done chip narrows the mail stream only");
+  await page.click('#inboxList [data-ijoin="j1"]');
+  await page.waitForTimeout(250);
+  check(!(await page.locator("#tJoins").isHidden()) && (await page.locator("#joinList").innerText()).includes("Asha Verma"), "Open in Join requests switches to that tab");
   await page.click('[data-tab="joins"]');
   await page.waitForTimeout(250);
   check(!(await page.locator("#tJoins").isHidden()) && (await page.locator("#joinList .row").count()) === 1 && (await page.locator("#joinList").innerText()).includes("Asha Verma"), "Join requests tab lists the new request by default");
@@ -842,7 +939,29 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check(joinCalls.length === csvCalls + 1 && joinCalls[joinCalls.length - 1].includes("format=csv") && joinCalls[joinCalls.length - 1].includes("status=all"), "Export CSV asks for the csv format with the current status filter");
   await page.click('#joinList [data-jaccount="j1"]');
   await page.waitForTimeout(250);
-  check(!(await page.locator("#tTeam").isHidden()) && (await page.locator("#sName").inputValue()) === "Asha Verma" && (await page.locator("#sEmail").inputValue()) === "asha@example.org", "Create desk account opens the Team tab with name and email prefilled");
+  check(!(await page.locator("#tRoles").isHidden()) && (await page.locator("#sName").inputValue()) === "Asha Verma" && (await page.locator("#sEmail").inputValue()) === "asha@example.org" && (await page.locator("#sPhone").inputValue()) === "+919811122233", "Create desk account opens the Roles tab with name, email and mobile prefilled");
+
+  // Performance tab: ward ageing with amber/red cells, sortable headers, quiet wards folded; people with an idle flag; the morning brief with Copy
+  await page.click('[data-tab="performance"]');
+  await page.waitForTimeout(300);
+  check((await page.locator("#perfTotals").innerText()).replace(/\s+/g, " ").includes("6 Open 2 Unmapped 2 Overdue 3 Received 7d 1 Resolved 7d"), "performance totals strip shows the five counts");
+  check((await page.locator("#perfWardBody tr").count()) === 2 && !(await page.locator("#perfWardBody").innerText()).includes("Madhu Batra"), "quiet ward 30 is folded away by default");
+  const w10 = page.locator("#perfWardBody tr").nth(1);
+  check((await w10.locator("td.age-bad").count()) === 2 && (await w10.locator('td[data-l="22+ d"]').innerText()) === "1" && (await w10.locator('td[data-l="22+ d"]').getAttribute("class")).includes("age-bad") && (await w10.locator('td[data-l="8–21 d"]').getAttribute("class")).includes("age-warn"), "ward 10 shows the 22+ cell in red and the 8–21 cell in amber");
+  check((await w10.locator('td[data-l="Oldest open"]').innerText()) === "25 d" && (await w10.locator('td[data-l="Last activity"]').innerText()).includes("days ago"), "oldest open and last activity read as days");
+  await page.click('#perfWards .sortbtn[data-sort="overdue"]');
+  await page.waitForTimeout(50);
+  check((await page.locator("#perfWardBody tr").first().innerText()).includes("Mahabir") && (await page.locator('#perfWards .sortbtn[data-sort="overdue"]').getAttribute("aria-pressed")) === "true", "clicking Overdue sorts ward 10 first");
+  await page.click("#perfQuiet");
+  await page.waitForTimeout(50);
+  check((await page.locator("#perfWardBody tr").count()) === 3 && (await page.locator("#perfQuiet").innerText()) === "Hide quiet wards", "Show quiet wards reveals ward 30");
+  const peopleRows = await page.locator("#perfPeopleBody tr").allInnerTexts();
+  check(peopleRows.length === 2 && peopleRows[0].includes("Coordinator") && peopleRows[0].includes("C 1–6") && !peopleRows[0].includes("No activity"), "people table shows the coordinator's ward chips without a flag");
+  check(peopleRows[1].includes("Vol One") && peopleRows[1].includes("No activity in 7 days") && peopleRows[1].includes("Lead 10"), "the idle ward lead is flagged No activity in 7 days");
+  check((await page.locator("#briefText").innerText()).includes("Ward 10: 4 open, oldest 25 days, 2 overdue."), "the brief box shows the morning text");
+  await page.click("#briefCopy");
+  await page.waitForTimeout(100);
+  check((await page.evaluate(() => window.__copied)) === brief, "Copy puts the brief text on the clipboard");
 
   await page.click("#signOut");
   await page.waitForTimeout(100);
@@ -850,15 +969,15 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.evaluate(() => localStorage.getItem("gvf_staff"))) === null, "sign out clears the stored session");
 
   // A content-team account sees only content and the pulse; a ward volunteer only reports and the map
-  const joinCallsBeforeContent = joinCalls.length;
+  const joinCallsBeforeContent = joinCalls.length, inboxCallsBeforeContent = inboxCalls.length;
   page._joinRole = "content";
   await page.fill("#lEmail", "content@example.org");
   await page.fill("#lPass", "secret-pass");
   await page.click("#lBtn");
   await page.waitForSelector("#deskMain:not([hidden])");
   await page.waitForTimeout(250);
-  check((await page.locator("#reportsTab").isHidden()) && (await page.locator("#mapTab").isHidden()) && (await page.locator("#teamTab").isHidden()) && (await page.locator("#visitorsTab").isHidden()) && (await page.locator("#healthTab").isHidden()) && !(await page.locator("#contentTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()), "content team sees only the Content and Pulse tabs");
-  check((await page.locator("#joinsTab").isHidden()) && joinCalls.length === joinCallsBeforeContent, "content team does not see Join requests and the desk does not ask for them");
+  check((await page.locator("#reportsTab").isHidden()) && (await page.locator("#mapTab").isHidden()) && (await page.locator("#rolesTab").isHidden()) && (await page.locator("#inboxTab").isHidden()) && (await page.locator("#performanceTab").isHidden()) && (await page.locator("#visitorsTab").isHidden()) && (await page.locator("#healthTab").isHidden()) && !(await page.locator("#contentTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()), "content team sees only the Content and Pulse tabs");
+  check((await page.locator("#joinsTab").isHidden()) && joinCalls.length === joinCallsBeforeContent && inboxCalls.length === inboxCallsBeforeContent, "content team does not see Join requests or the Inbox and the desk does not ask for them");
   check(!(await page.locator("#tContent").isHidden()) && (await page.locator("#tReports").isHidden()), "content team lands on the Content tab");
   await page.click("#signOut");
   await page.waitForTimeout(100);
@@ -868,7 +987,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#lBtn");
   await page.waitForSelector("#deskMain:not([hidden])");
   await page.waitForTimeout(250);
-  check(!(await page.locator("#reportsTab").isHidden()) && !(await page.locator("#mapTab").isHidden()) && (await page.locator("#contentTab").isHidden()) && (await page.locator("#teamTab").isHidden()) && (await page.locator("#insightsTab").isHidden()) && (await page.locator("#joinsTab").isHidden()), "ward volunteer sees only Reports and Map, not Join requests");
+  check(!(await page.locator("#reportsTab").isHidden()) && !(await page.locator("#mapTab").isHidden()) && (await page.locator("#contentTab").isHidden()) && (await page.locator("#rolesTab").isHidden()) && (await page.locator("#inboxTab").isHidden()) && (await page.locator("#performanceTab").isHidden()) && (await page.locator("#insightsTab").isHidden()) && (await page.locator("#joinsTab").isHidden()), "ward volunteer sees only Reports and Map, not Inbox, Roles, Performance or Join requests");
+  check(inboxCalls.length === inboxCallsBeforeContent, "ward volunteer's desk does not ask for the inbox streams");
   check((await page.locator("#whoAmI").innerText()).includes("wards 10"), "ward volunteer's header names the allotted ward");
   await page.click("#signOut");
   await page.waitForTimeout(100);
@@ -878,7 +998,12 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#lBtn");
   await page.waitForSelector("#deskMain:not([hidden])");
   await page.waitForTimeout(250);
-  for (const t of ["reports", "map", "team", "joins", "content", "visitors", "insights", "health"]) check(!(await page.locator("#" + t + "Tab").isHidden()), "owner sees the " + t + " tab");
+  for (const t of ["reports", "inbox", "map", "roles", "joins", "performance", "content", "visitors", "insights", "health"]) check(!(await page.locator("#" + t + "Tab").isHidden()), "owner sees the " + t + " tab");
+  check((await page.locator("#tTabs .tab:not([hidden])").allInnerTexts()).map((t) => t.replace(/\s*·.*$/, "").trim()).join("|") === "Reports|Inbox|Map|Roles|Join requests|Performance|Content|Visitors|Pulse|Health", "owner's tabs run Reports, Inbox, Map, Roles, Join requests, Performance, Content, Visitors, Pulse, Health");
+  await page.click('[data-tab="roles"]');
+  await page.waitForTimeout(250);
+  const ownerRoles = await page.evaluate(() => ({ removes: document.querySelectorAll("#rosterBody [data-remove]").length, coordHidden: document.getElementById("sRoleCoord").hidden }));
+  check(ownerRoles.removes === 3 && !ownerRoles.coordHidden, "owner can remove every other account and create coordinators (" + JSON.stringify(ownerRoles) + ")");
   await page.click('[data-tab="joins"]');
   await page.waitForTimeout(250);
   check((await page.locator("#joinList .row").count()) === 0 && !(await page.locator("#joinEmpty").isHidden()) && (await page.locator("#joinEmpty").innerText()).includes("No join requests yet."), "owner's Join requests tab shows the empty state when nothing is new");

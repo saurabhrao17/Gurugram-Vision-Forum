@@ -350,3 +350,136 @@ test("the coordinator's join mail names the person and role, never phone or emai
   assert.ok(m.body_text.includes("Sector 45") && m.body_text.includes("Weekends only") && m.body_text.includes("https://gvf.test/#/desk"));
   assert.ok(!/@example|\+91|\d{10}/.test(m.body_text.replace("coord@example.org", "")));
 });
+
+// ---------------------------------------------------------------------------
+// Team roster, metrics, inbox: owner and coordinator only.
+// ---------------------------------------------------------------------------
+import { makeHandler as makeTeam, validateTeamPatch, WARD_ROLES } from "../../lib/handlers/triage/team.js";
+import { makeHandler as makeMetrics } from "../../lib/handlers/triage/metrics.js";
+import { makeHandler as makeInbox, validateInboxPatch } from "../../lib/handlers/triage/inbox.js";
+import { buildBrief, idlePeople } from "../../lib/brief.js";
+
+function teamSb({ staff = [], wv = [], assignments = [], ageing = [], activity = [], inbox = [] } = {}) {
+  const calls = [];
+  const tables = { staff, ward_volunteers: wv, ward_assignments: assignments, inbox };
+  const from = (table) => {
+    const q = { table, op: "select", filters: [], row: null };
+    const chain = {
+      select: () => chain, order: () => chain, limit: () => chain,
+      eq: (k, v) => { q.filters.push(["eq", k, v]); return chain; },
+      update: (row) => { q.op = "update"; q.row = row; return chain; },
+      maybeSingle: async () => { calls.push(q); const rows = (tables[table] || []).filter((r) => q.filters.every((f) => r[f[1]] === f[2])); return { data: rows[0] ? { ...rows[0], ...(q.op === "update" ? q.row : {}) } : null, error: null }; },
+      then: (ok) => { calls.push(q); const rows = (tables[table] || []).filter((r) => q.filters.every((f) => r[f[1]] === f[2])); return ok({ data: rows, error: null }); }
+    };
+    return chain;
+  };
+  const rpc = async (name, args) => { calls.push({ rpc: name, args }); if (name === "ward_ageing") return { data: ageing, error: null }; if (name === "staff_activity") return { data: activity, error: null }; if (name === "set_staff_wards") return { data: args.p_wards, error: null }; return { data: null, error: null }; };
+  return { from, rpc, calls };
+}
+const U1 = "11111111-1111-4111-8111-111111111111", U2 = "22222222-2222-4222-8222-222222222222";
+const STAFF = [
+  { user_id: U1, name: "Asha", role: "coordinator", email: "asha@gvf.test", phone: "+919899999999", active: true, created_at: "2026-10-01T00:00:00Z" },
+  { user_id: U2, name: "Ravi", role: "triage", email: "ravi@gvf.test", phone: null, active: true, created_at: "2026-10-02T00:00:00Z" }
+];
+const WV = [{ user_id: U1, ward: 1, role: "coordinator" }, { user_id: U1, ward: 2, role: "coordinator" }, { user_id: U2, ward: 1, role: "lead" }];
+
+test("team roster: managers see people with their wards; others are refused", async () => {
+  for (const role of ["content", "triage"]) {
+    const res = fakeRes();
+    await makeTeam({ auth: authAs(role), sb: teamSb({ staff: STAFF, wv: WV }) })({ method: "GET", query: {} }, res);
+    assert.equal(res.statusCode, 403, role);
+  }
+  const res = fakeRes();
+  await makeTeam({ auth: authAs("coordinator"), sb: teamSb({ staff: STAFF, wv: WV, assignments: [{ ward: 1, councillor: "X" }] }) })({ method: "GET", query: {} }, res);
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body.people.find((p) => p.user_id === U1).wards, [{ ward: 1, role: "coordinator" }, { ward: 2, role: "coordinator" }]);
+  assert.equal(res.body.people.find((p) => p.user_id === U2).phone, null);
+  assert.equal(res.body.wards.length, 1);
+});
+
+test("team PUT validates and replaces a person's wards through set_staff_wards", async () => {
+  assert.deepEqual(WARD_ROLES, ["coordinator", "lead", "support"]);
+  assert.deepEqual(validateTeamPatch({ phone: "98993 75445" }).value, { phone: "+919899375445" });
+  assert.deepEqual(validateTeamPatch({ phone: "12" }).errors, ["phone"]);
+  assert.deepEqual(validateTeamPatch({ wards: [{ ward: 7, role: "lead" }, { ward: 7, role: "lead" }, { ward: 8, role: "support" }] }).wards, [{ ward: 7, role: "lead" }, { ward: 8, role: "support" }]);
+  assert.deepEqual(validateTeamPatch({ wards: [{ ward: 40, role: "lead" }] }).errors, ["wards"]);
+  assert.deepEqual(validateTeamPatch({ wards: [{ ward: 3, role: "boss" }] }).errors, ["wards"]);
+  assert.deepEqual(validateTeamPatch({}).errors, ["empty"]);
+  const sb = teamSb({ staff: STAFF, wv: WV });
+  const res = fakeRes();
+  await makeTeam({ auth: authAs("owner"), sb })({ method: "PUT", query: {}, body: { user_id: U2, phone: "9888888888", wards: [{ ward: 8, role: "lead" }, { ward: 9, role: "lead" }] } }, res);
+  assert.equal(res.statusCode, 200, JSON.stringify(res.body));
+  const up = sb.calls.find((q) => q.table === "staff" && q.op === "update");
+  assert.deepEqual(up.row, { phone: "+919888888888" });
+  const rpc = sb.calls.find((q) => q.rpc === "set_staff_wards");
+  assert.equal(rpc.args.p_user, U2);
+  assert.deepEqual(rpc.args.p_wards, [{ ward: 8, role: "lead" }, { ward: 9, role: "lead" }]);
+  assert.equal(rpc.args.p_by, "T <owner@gvf.test>");
+  assert.deepEqual(res.body.person.wards, [{ ward: 8, role: "lead" }, { ward: 9, role: "lead" }]);
+  const missing = fakeRes();
+  await makeTeam({ auth: authAs("owner"), sb })({ method: "PUT", query: {}, body: { user_id: "33333333-3333-4333-8333-333333333333", phone: "9888888888" } }, missing);
+  assert.equal(missing.statusCode, 404);
+  const denied = fakeRes();
+  await makeTeam({ auth: authAs("triage"), sb })({ method: "PUT", query: {}, body: { user_id: U2, active: false } }, denied);
+  assert.equal(denied.statusCode, 403);
+});
+
+const AGEING = [
+  { ward: 1, councillor: "Mahabir", open: 3, a0_3: 1, a4_7: 0, a8_21: 1, a22p: 1, unmapped: 1, overdue: 2, received_7d: 1, resolved_7d: 1, oldest_open_days: 30, last_activity_at: "2026-10-07T00:00:00Z" },
+  { ward: 2, councillor: "Y", open: 0, a0_3: 0, a4_7: 0, a8_21: 0, a22p: 0, unmapped: 0, overdue: 0, received_7d: 0, resolved_7d: 2, oldest_open_days: 0, last_activity_at: null }
+];
+const ACTIVITY = [
+  { user_id: U1, name: "Asha", email: "asha@gvf.test", phone: "+919899999999", role: "coordinator", active: true, wards: [{ ward: 1, role: "coordinator" }, { ward: 2, role: "coordinator" }], actions_7d: 0, actions_30d: 4, last_action_at: "2026-09-20T00:00:00Z", open_in_wards: 3, overdue_in_wards: 2 },
+  { user_id: U2, name: "Ravi", email: "ravi@gvf.test", phone: null, role: "triage", active: true, wards: [{ ward: 1, role: "lead" }], actions_7d: 3, actions_30d: 5, last_action_at: "2026-10-07T00:00:00Z", open_in_wards: 3, overdue_in_wards: 2 }
+];
+
+test("metrics: totals, ageing, people and the brief; managers only", async () => {
+  const denied = fakeRes();
+  await makeMetrics({ auth: authAs("content"), sb: teamSb({ ageing: AGEING, activity: ACTIVITY }) })({ method: "GET", query: {} }, denied);
+  assert.equal(denied.statusCode, 403);
+  const res = fakeRes();
+  await makeMetrics({ auth: authAs("owner"), sb: teamSb({ ageing: AGEING, activity: ACTIVITY }) })({ method: "GET", query: {} }, res);
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body.totals, { open: 3, unmapped: 1, overdue: 2, received_7d: 1, resolved_7d: 3, a22p: 1 });
+  assert.equal(res.body.wards.length, 2);
+  assert.equal(res.body.people.length, 2);
+  assert.ok(res.body.brief.text.includes("Ward 1 (Mahabir): 3 open, 2 overdue, 1 older than 21 d, oldest 30 d · coord Asha, lead Ravi"));
+  assert.ok(res.body.brief.text.includes("No desk activity in 7 days (1): Asha (wards 1, 2)"));
+  assert.deepEqual(res.body.brief.idle, [U1]);
+});
+
+test("buildBrief: the one-line version fits a WhatsApp template parameter and names idle people", () => {
+  const b = buildBrief({ wards: AGEING, people: ACTIVITY, now: Date.parse("2026-10-08T02:30:00Z"), siteUrl: "https://gvf.test" });
+  assert.equal(b.date, "8 Oct 2026");
+  assert.ok(!/[\n\t]/.test(b.line) && b.line.length < 1000, b.line);
+  assert.ok(b.line.startsWith("GVF 8 Oct 2026: open 3, unmapped 1, overdue 2, 21d+ 1; 7 days: 1 new, 3 resolved. Wards: W1 3 open/2 overdue. Idle 7 d: Asha."), b.line);
+  assert.ok(b.text.endsWith("Full tracker: https://gvf.test/#/desk (Performance tab)."));
+  assert.deepEqual(idlePeople(ACTIVITY).map((p) => p.name), ["Asha"]);
+  const empty = buildBrief({ wards: [], people: [], now: 0 });
+  assert.ok(empty.text.includes("No open reports in any ward.") && empty.line.includes("No open reports."));
+});
+
+test("inbox: list with counts, PATCH status and notes, managers only", async () => {
+  const items = [
+    { id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", source: "email", from_email: "r@example.org", from_name: "R", subject: "Pothole", body_text: "Hi", received_at: "2026-10-08T01:00:00Z", status: "new", notes: null, handled_by: null, updated_at: "2026-10-08T01:00:00Z" },
+    { id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", source: "email", from_email: "s@example.org", from_name: null, subject: "Thanks", body_text: "Done", received_at: "2026-10-07T01:00:00Z", status: "done", notes: "x", handled_by: "T", updated_at: "2026-10-07T02:00:00Z" }
+  ];
+  const denied = fakeRes();
+  await makeInbox({ auth: authAs("triage"), sb: teamSb({ inbox: items }) })({ method: "GET", query: {} }, denied);
+  assert.equal(denied.statusCode, 403);
+  const res = fakeRes();
+  await makeInbox({ auth: authAs("coordinator"), sb: teamSb({ inbox: items }) })({ method: "GET", query: { status: "new" } }, res);
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body.items.map((i) => i.subject), ["Pothole"]);
+  assert.deepEqual(res.body.counts, { new: 1, read: 0, done: 1, total: 2 });
+  assert.deepEqual(validateInboxPatch({ status: "read" }).value, { status: "read" });
+  assert.deepEqual(validateInboxPatch({ status: "spam" }).errors, ["status"]);
+  const sb = teamSb({ inbox: items });
+  const p = fakeRes();
+  await makeInbox({ auth: authAs("owner"), sb })({ method: "PATCH", query: { id: items[0].id }, body: { status: "done", notes: "Called back" } }, p);
+  assert.equal(p.statusCode, 200);
+  assert.equal(p.body.item.status, "done");
+  const up = sb.calls.find((q) => q.table === "inbox" && q.op === "update");
+  assert.equal(up.row.notes, "Called back");
+  assert.equal(up.row.handled_by, "T <owner@gvf.test>");
+});
