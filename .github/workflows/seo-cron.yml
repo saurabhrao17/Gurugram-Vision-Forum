@@ -4,7 +4,9 @@ name: Nightly SEO audit
 # (21:30 UTC): the on-page audit, link crawl and site checks (seo), one
 # PageSpeed Insights run (vitals), the news search for the Forum's name
 # (mentions), the AI answer check (geo), and the Search Console (gsc) and
-# Bing Webmaster (bing) data pulls.
+# Bing Webmaster (bing) data pulls, then the topic pipeline (topics: drafts
+# one post a night for the most discussed uncovered topic, within the weekly
+# limit; it publishes after the review window unless held).
 # Each step is its own call because the Vercel function has 60 seconds and
 # PageSpeed alone can use most of it. The Hobby plan allows two Vercel crons
 # (fetch, analyse), so this one lives here; the audit and the mentions
@@ -37,7 +39,7 @@ jobs:
           if [ -z "$TOKEN" ]; then echo "CRON_SECRET repository secret is not set"; exit 1; fi
           echo "::add-mask::$TOKEN"
           ok=1
-          steps="seo vitals mentions geo gsc bing"
+          steps="seo vitals mentions geo gsc bing topics"
           # The GEO and search-data steps exist only once the live site runs
           # the code that serves /llms.txt; until a deploy lands, ask only for
           # the steps every version knows (an older deploy treated unknown

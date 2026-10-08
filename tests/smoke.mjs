@@ -894,12 +894,21 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     pages: [{ url: "https://gurugramvisionforum.org/guide/rti", path: "/guide/rti", lang: "en", kind: "guide", status: 200, ms: 320, title: "Right to information in Gurugram: who fixes it, how to complain, documents", description: "d", words: 900, score: 92, issues: [{ code: "title_long", level: "warn", detail: "74 characters" }], checked_at: "2026-10-08T21:40:00Z" }, { url: "https://gurugramvisionforum.org/ward/9", path: "/ward/9", lang: "en", kind: "ward", status: 500, ms: 8000, title: null, score: 0, issues: [{ code: "status", level: "error", detail: "HTTP 500" }], checked_at: "2026-10-08T21:40:00Z" }, { url: "https://gurugramvisionforum.org/guide/roads", path: "/guide/roads", lang: "en", kind: "guide", status: 200, ms: 210, title: "Roads, footpaths in Gurugram: who fixes it, how to complain", description: "d", words: 930, score: 100, issues: [], checked_at: "2026-10-08T21:40:00Z" }],
     vitals: { latest: [{ url: "https://gurugramvisionforum.org/", strategy: "mobile", performance: 94, seo: 100, accessibility: 97, best_practices: 96, lcp_ms: 1710, cls: 0.004, tbt_ms: 40, checked_at: "2026-10-08T21:41:00Z" }], history: [], tracked: [] },
     mentions: [{ url: "https://www.tribuneindia.com/forum-maps-potholes", title: "Residents' forum maps every pothole in Gurugram", source: "The Tribune", published_at: "2026-10-06T08:00:00Z" }],
-    opportunities: [{ issue_type: "waste", area: "Sector 45", mentions: 6, title: "Garbage in Sector 45: what residents are reporting and where to file it", target: "/guide/waste", why: "6 public posts in 14 days, nothing published on it", examples: [{ title: "Garbage piling up near Sector 45 market", url: "https://www.reddit.com/r/gurgaon/x" }] }],
+    opportunities: [{ issue_type: "waste", area: "Sector 45", mentions: 6, title: "Garbage in Sector 45: what residents are reporting and where to file it", target: "/guide/waste", why: "6 public posts in 14 days, nothing published on it", examples: [{ title: "Garbage piling up near Sector 45 market", url: "https://www.reddit.com/r/gurgaon/x" }], auto: { state: "queued", position: 2, eta_days: 0 } }],
+    topics: { enabled: true, per_week: 3, review_hours: 48, posts: [] },
+    agent: { schedule: { plan: "09:00", work: "13:00", report: "19:00" }, repo: "https://github.com/saurabhrao17/Gurugram-Vision-Forum/tree/seo-agent-log", last_run: "2026-10-09T07:30:05Z",
+      open: [{ key: "page:canonical_other", area: "pages", severity: "medium", owner: "code", title: "Canonical points elsewhere on 2 pages", detail: "/about, /join", action: "A change to the site's code or data.", status: "open", first_seen: "2026-10-08T03:30:00Z", last_action_at: "2026-10-09T07:30:02Z", last_result: null },
+        { key: "index:unknown", area: "index", severity: "medium", owner: "auto", title: "5 pages Google does not know yet", detail: "/guides, /hi/guides", action: "Ping IndexNow with these pages and resubmit the sitemap.", status: "open", first_seen: "2026-10-08T03:30:00Z", last_action_at: "2026-10-09T03:30:02Z", last_result: "Pinged IndexNow (Bing and others) with 5 pages Google does not know yet" }],
+      fixed: [{ key: "link:/hi/wards", title: "Broken internal link: /hi/wards (HTTP 404)", resolved_at: "2026-10-09T07:30:03Z" }],
+      log: [{ at: "2026-10-09T07:30:03Z", day: "2026-10-09", phase: "work", kind: "check", text: "Fixed: Broken internal link: /hi/wards (HTTP 404)", ok: true },
+        { at: "2026-10-09T03:30:01Z", day: "2026-10-09", phase: "plan", kind: "plan", text: "Plan for today: 2 open tasks: 1 the agent handles, 0 waiting on search engines, 1 need a code change, 0 need a person", ok: null }],
+      reports: [{ id: "weekly:2026-W41", kind: "weekly", day: "2026-10-09", summary: {}, markdown: "# SEO agent: plan for 2026-W41\n\n## This week\n\n### Content (topic pipeline, up to 3 posts)\n\n1. Garbage: 27 public posts in 14 days\n\n### Needs a code change (1)\n\n- **Canonical points elsewhere on 2 pages** — fix the head" },
+        { id: "daily:2026-10-08", kind: "daily", day: "2026-10-08", summary: { fixed: 1, opened: 2, open: 2 }, markdown: "# SEO agent: daily report, 8 Oct 2026\n\n## Fixed today (1)\n\n- Broken internal link: /hi/wards\n\n<script>alert(1)</script>" }] },
     activity: [{ at: "2026-10-08T21:42:00Z", step: "seo", text: "Audited 40 of 131 pages, average score 97", ok: true }, { at: "2026-10-08T02:31:00Z", step: "indexnow", text: "Pinged IndexNow with 6 URLs", ok: true }],
     settings: { indexnow: true, gsc_verified: false, bing_verified: false }, labels: { title_long: "Title too long", status: "The page did not answer 200" } };
   Object.assign(seoFixture, {
-    clusters: [{ id: "roads", label: "Roads, footpaths", pillar: "/guide/roads", pillar_score: 100, members: 0, latest: null, age_days: null, demand: 4, status: "gap", action: "Write the first post: 4 public mentions in 14 days and nothing published yet.", posts: [] },
-      { id: "waste", label: "Garbage", pillar: "/guide/waste", pillar_score: 100, members: 2, latest: "2026-10-01T00:00:00Z", age_days: 7, demand: 1, status: "ok", action: "Nothing to do; the cluster is covered and fresh.", posts: [] }],
+    clusters: [{ id: "roads", label: "Roads, footpaths", pillar: "/guide/roads", pillar_score: 100, members: 0, latest: null, age_days: null, demand: 4, status: "gap", action: "Write the first post: 4 public mentions in 14 days and nothing published yet.", posts: [], auto: { state: "queued", position: 1, eta_days: 0 } },
+      { id: "waste", label: "Garbage", pillar: "/guide/waste", pillar_score: 100, members: 2, latest: "2026-10-01T00:00:00Z", age_days: 7, demand: 1, status: "ok", action: "Nothing to do; the cluster is covered and fresh.", posts: [], auto: { state: "published", slug: "waste-gurugram-2026-10" } }],
     geo: { pages: 2, avg: 93, missing: [{ key: "dated", count: 1, label: "Dated, so freshness is visible" }], asked: 2, cited: 1,
       questions: [{ key: "issue:roads", question: "Who is responsible for roads, footpaths problems in Gurugram, and how do I file a complaint that gets acted on?", cited: true, position: 2, sources: [{ title: "mcg.gov.in" }, { title: "gurugramvisionforum.org" }], checked_at: "2026-10-08T21:45:00Z" },
         { key: "issue:waste", question: "Who is responsible for garbage problems in Gurugram, and how do I file a complaint that gets acted on?", cited: false, sources: [{ title: "hindustantimes.com" }], checked_at: "2026-10-08T21:45:00Z" },
@@ -915,9 +924,9 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(200);
   const seoCounts = (await page.locator("#seoCounts").innerText()).replace(/\s+/g, " ");
   check(seoCounts.includes("96 Site health") && seoCounts.includes("2 open issues") && seoCounts.includes("93 GEO readiness") && seoCounts.includes("cited in 1 of 2 AI answers") && seoCounts.includes("3 Search clicks") && seoCounts.includes("1/2 Indexed") && seoCounts.includes("94 Mobile speed"), "SEO counts: site health, GEO readiness with AI citations, search clicks, indexed pages, mobile speed");
-  check((await page.locator("#seoTabs .stab").allInnerTexts()).join("|") === "Overview|Pages|Clusters|GEO|Search data|Speed" && !(await page.locator('#seoBody [data-cpane="overview"]').isHidden()) && (await page.locator('#seoBody [data-cpane="pages"]').isHidden()), "six sub-tabs, Overview open first");
+  check((await page.locator("#seoTabs .stab").allInnerTexts()).join("|") === "Overview|Agent|Pages|Clusters|GEO|Search data|Speed" && !(await page.locator('#seoBody [data-cpane="overview"]').isHidden()) && (await page.locator('#seoBody [data-cpane="pages"]').isHidden()), "six sub-tabs, Overview open first");
   check((await page.locator("#seoChecklist tbody tr").count()) === 17 && (await page.locator("#seoBody [data-seo-manual]").count()) === 2 && (await page.locator("#seoChecklist .tag-danger").count()) === 1 && (await page.locator("#seoChecklist .tag-warn").count()) === 2, "checklist lists the checks, one in red, the two manual ones as To do with a checkbox");
-  check((await page.locator("#seoBody .seolog .row").count()) === 2 && (await page.locator('#seoBody [data-cpane="overview"]').innerText()).includes("Audited 40 of 131 pages, average score 97"), "activity log shows what the cron did");
+  check((await page.locator('#seoBody [data-cpane="overview"] .seolog .row').count()) === 2 && (await page.locator('#seoBody [data-cpane="overview"]').innerText()).includes("Audited 40 of 131 pages, average score 97"), "activity log shows what the cron did");
   check((await page.locator("#seoConn .row").count()) === 4 && (await page.locator("#seoConn").innerText()).includes("Add BING_WEBMASTER_API_KEY in Vercel") && (await page.locator("#seoConn .tag-green").count()) === 3, "connections show what is set up and what to add");
   await page.click('#seoTabs [data-ctab="pages"]');
   await page.waitForTimeout(150);
@@ -928,7 +937,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#seoBroken").innerText()).includes("/guide/old") && (await page.locator("#seoBroken").innerText()).includes("HTTP 404") && (await page.locator("#seoSite .tag-danger").count()) === 1, "link crawl lists the broken link with the page carrying it; site checks flag the missing header");
   await page.click('#seoTabs [data-ctab="clusters"]');
   await page.waitForTimeout(150);
-  check((await page.locator("#seoClusters tbody tr").count()) === 2 && (await page.locator("#seoClusters .tag-danger").innerText()) === "Gap" && (await page.locator("#seoClusters [data-seo-cdraft]").count()) === 1, "clusters list each topic with its state; a gap offers a Draft button");
+  check((await page.locator("#seoClusters tbody tr").count()) === 2 && (await page.locator("#seoClusters .tag-danger").innerText()) === "Gap" && (await page.locator("#seoClusters [data-seo-cdraft]").count()) === 1 && (await page.locator("#seoClusters").innerText()).includes("Queued #1") && (await page.locator('#seoClusters a[href$="/blog/waste-gurugram-2026-10"]').count()) === 1, "clusters show what the topic pipeline does with each: queued gap (with Write it now), published post");
+  check(await page.evaluate(() => getComputedStyle(document.querySelector("#seoClusters td.n"), "::before").content) !== '"Ward "', "SEO tables never borrow the wards table's phone label");
   await page.click('#seoTabs [data-ctab="geo"]');
   await page.waitForTimeout(150);
   check((await page.locator("#seoGeo tbody tr").count()) === 3 && (await page.locator("#seoGeo").innerText()).includes("Cited #2") && (await page.locator("#seoGeo").innerText()).includes("Not cited") && (await page.locator("#seoGeo").innerText()).includes("Not asked yet") && (await page.locator('#seoBody [data-cpane="geo"] .geoavg').innerText()) === "93" && (await page.locator('#seoBody [data-cpane="geo"] a[href="https://gurugramvisionforum.org/llms.txt"]').count()) === 1, "GEO tab: readiness, the llms.txt link and each AI answer cited or not");
@@ -936,6 +946,13 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(150);
   const searchTxt = await page.locator('#seoBody [data-cpane="search"]').innerText();
   check(searchTxt.includes("who fixes potholes gurugram") && searchTxt.includes("2.1%") && searchTxt.includes("Discovered - currently not indexed") && searchTxt.includes("Not connected. Add BING_WEBMASTER_API_KEY in Vercel."), "Search data: Google queries and pages, index status, and Bing's missing key");
+  await page.click('#seoTabs [data-ctab="agent"]');
+  await page.waitForTimeout(150);
+  const agentTxt = await page.locator('#seoBody [data-cpane="agent"]').innerText();
+  check(agentTxt.includes("Plan for today: 2 open tasks") && agentTxt.includes("Fixed: Broken internal link") && (await page.locator("#agentTasks tbody tr").count()) === 2 && (await page.locator("#agentWeek ol.mdl li").count()) === 1 && (await page.locator('#agentStatus a[href$="/tree/seo-agent-log"]').count()) === 1 && agentTxt.includes("Fixed this week"), "Agent tab: today's timeline, the open tasks with who acts, the week's plan and the GitHub link");
+  await page.click('[data-agent-report="0"]');
+  await page.waitForTimeout(100);
+  check((await page.locator('[data-agent-body="0"]').innerText()).includes("Broken internal link: /hi/wards") && (await page.locator('[data-agent-body="0"] script').count()) === 0, "a daily report opens on Read, rendered and escaped");
   await page.click('#seoTabs [data-ctab="speed"]');
   await page.waitForTimeout(150);
   check((await page.locator("#seoBody .vital").count()) === 1 && (await page.locator("#seoBody .vital").innerText()).includes("1.7 s"), "Speed tab shows the Core Web Vitals card");
@@ -947,7 +964,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check(contentCalls[contentCalls.length - 1].method === "PUT" && contentCalls[contentCalls.length - 1].body.settings.seo.gsc_verified === true && !(await page.locator('#seoBody [data-cpane="overview"]').isHidden()), "ticking Search Console saves settings.seo.gsc_verified and the reload keeps the Overview open");
   await page.click('[data-seo-draft="0"]');
   await page.waitForTimeout(200);
-  check(!(await page.locator("#tContent").isHidden()) && !(await page.locator("#composer").isHidden()) && (await page.locator("#pTitle").inputValue()) === "Garbage in Sector 45: what residents are reporting and where to file it" && (await page.locator("#pKind").inputValue()) === "story" && (await page.locator("#pTags").inputValue()) === "waste, sector 45", "Draft this opens the composer with the suggested title, kind and tags");
+  check(!(await page.locator("#tContent").isHidden()) && !(await page.locator("#composer").isHidden()) && (await page.locator("#pTitle").inputValue()) === "Garbage in Sector 45: what residents are reporting and where to file it" && (await page.locator("#pKind").inputValue()) === "story" && (await page.locator("#pTags").inputValue()) === "waste, sector 45", "Write it now opens the composer with the suggested title, kind and tags");
   await page.click('[data-tab="seo"]');
   await page.waitForTimeout(200);
   await page.click('#seoTabs [data-ctab="clusters"]');
@@ -999,10 +1016,11 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.selectOption("#apWeekday", "5");
   await page.fill("#apHours", "72");
   await page.uncheck("#seoIndexnow");
+  await page.selectOption("#tpPerWeek", "2");
   await page.click("#apSave");
   await page.waitForTimeout(250);
   last = contentCalls[contentCalls.length - 1];
-  check(last.method === "PUT" && JSON.stringify(last.body) === JSON.stringify({ settings: { autopost: { enabled: true, weekday: 5, review_hours: 72 }, seo: { indexnow: false } } }), "saving the round-up settings sends autopost and seo through a PUT");
+  check(last.method === "PUT" && JSON.stringify(last.body) === JSON.stringify({ settings: { autopost: { enabled: true, weekday: 5, review_hours: 72 }, seo: { indexnow: false }, topics: { enabled: true, per_week: 2 } } }), "saving the settings sends autopost, seo and the topic pipeline through a PUT");
   check((await autoRow.innerText()).includes("10 Oct"), "the publish-by line follows the new review window");
   await page.fill("#apHours", "-5");
   await page.click("#apSave");

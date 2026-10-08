@@ -210,8 +210,8 @@ test("mentionsStep searches Google News for the Forum's name and skips the site'
 });
 
 test("cron: the seo group holds the three steps and runDaily reports them", async () => {
-  assert.deepEqual(STEP_GROUPS.seo, ["seo", "vitals", "mentions", "geo", "gsc", "bing"]);
-  assert.deepEqual([...new Set([...STEP_GROUPS.fetch, ...STEP_GROUPS.analyse, ...STEP_GROUPS.seo])].sort(), [...STEP_NAMES].sort());
+  assert.deepEqual(STEP_GROUPS.seo, ["seo", "vitals", "mentions", "geo", "gsc", "bing", "topics"]);
+  assert.deepEqual([...new Set([...STEP_GROUPS.fetch, ...STEP_GROUPS.analyse, ...STEP_GROUPS.seo, ...STEP_GROUPS.agent])].sort(), [...STEP_NAMES].sort());
   const r = await runDaily(fakeSb(), {}, {}, { only: ["seo", "vitals", "mentions"] });
   assert.equal(r.ok, true);
   assert.equal(r.seo.skipped, "no_fetch");

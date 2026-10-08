@@ -19,7 +19,7 @@ test("parseSteps keeps known step names and rejects the rest", () => {
   assert.deepEqual(parseSteps("news, links,bogus"), ["news", "links"]);
   assert.deepEqual(parseSteps("bogus"), [], "only unknown names: an empty list, which the handler refuses");
   assert.equal(parseSteps(""), null);
-  assert.deepEqual([...new Set([...STEP_GROUPS.fetch, ...STEP_GROUPS.analyse, ...STEP_GROUPS.seo])].sort(), [...STEP_NAMES].sort());
+  assert.deepEqual([...new Set([...STEP_GROUPS.fetch, ...STEP_GROUPS.analyse, ...STEP_GROUPS.seo, ...STEP_GROUPS.agent])].sort(), [...STEP_NAMES].sort());
   assert.deepEqual(STEP_GROUPS.fetch, ["news", "links", "seo", "mentions"], "the quick SEO steps ride the midnight fetch run");
   assert.ok(!STEP_GROUPS.analyse.includes("vitals") && !STEP_GROUPS.fetch.includes("vitals"), "PageSpeed only runs from the workflow");
 });

@@ -49,6 +49,7 @@ import sitemap from "../lib/handlers/sitemap.js";
 import indexnowKey from "../lib/handlers/indexnow-key.js";
 import gsc from "../lib/handlers/gsc.js";
 import llms, { full as llmsFull } from "../lib/handlers/llms.js";
+import shell from "../lib/handlers/shell.js";
 import subscribe from "../lib/handlers/subscribe.js";
 import { send } from "../lib/http.js";
 
@@ -60,7 +61,7 @@ const ROUTES = {
   "hooks/whatsapp": hooksWhatsapp, "hooks/exotel": hooksExotel,
   "content": content, "triage/content": triageContent, "triage/content/upload-url": triageContentUpload, "triage/draft": triageDraft,
   "visitor": visitor, "news": news, "health": health, "triage/visitors": triageVisitors, "triage/joins": triageJoins, "triage/team": triageTeam, "triage/metrics": triageMetrics, "triage/inbox": triageInbox, "triage/subscribers": triageSubscribers, "triage/newsletter": triageNewsletter, "hooks/email": hookEmail, "triage/translate": triageTranslate, "triage/social": triageSocial, "pulse": pulse, "triage/insights": triageInsights, "triage/seo": triageSeo,
-  "sitemap": sitemap, "indexnow": indexnowKey, "gsc": gsc, "llms": llms, "llms-full": llmsFull, "subscribe": subscribe
+  "sitemap": sitemap, "indexnow": indexnowKey, "gsc": gsc, "llms": llms, "llms-full": llmsFull, "shell": shell, "subscribe": subscribe
 };
 
 export function resolve(parts) {

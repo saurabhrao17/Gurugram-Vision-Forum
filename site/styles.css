@@ -335,6 +335,7 @@ input[aria-invalid="true"],select[aria-invalid="true"],textarea[aria-invalid="tr
   .tbl tr{border-bottom:1px solid var(--line); padding:.5rem 0}
   .tbl td{border:0; padding:.25rem .85rem}
   .tbl td.n::before{content:"Ward "}
+  .seotbl td.n::before{content:none}
   .tbl td[data-l]::before{content:attr(data-l) ": "; color:var(--muted); font-size:.9rem}
 }
 
@@ -909,3 +910,12 @@ body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
 .geoavg{font-family:var(--head); font-size:2rem; line-height:1; margin-right:.25rem}
 #seoTabs{margin-top:.25rem}
 .seotbl td.small{max-width:28rem}
+
+/* desk v2e: SEO agent page (reports rendered from Markdown) */
+.mdbody{font-size:.98rem}
+.mdbody p{margin:.4rem 0}
+.mdh{font-family:var(--head);color:var(--ink);margin:1rem 0 .35rem}
+h4.mdh{font-size:1.1rem}
+h5.mdh{font-size:1rem}
+.mdl{margin:.25rem 0 .75rem;padding-left:1.25rem}
+.mdl li{margin:.2rem 0}

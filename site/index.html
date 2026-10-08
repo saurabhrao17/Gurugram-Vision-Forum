@@ -31,6 +31,7 @@
 <script src="boot.js"></script>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Anek+Latin:wght@500;600;700&family=Anek+Devanagari:wght@600;700&family=Noto+Sans:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="styles.css">
+<script type="application/ld+json" id="ld-site">[{"@context":"https://schema.org","@type":"Organization","name":"Gurugram Vision Forum","url":"https://gurugramvisionforum.org/","logo":"https://gurugramvisionforum.org/og.png","address":{"@type":"PostalAddress","addressLocality":"Gurugram","addressRegion":"Haryana","addressCountry":"IN"}},{"@context":"https://schema.org","@type":"WebSite","name":"Gurugram Vision Forum","url":"https://gurugramvisionforum.org/","inLanguage":"en-IN"}]</script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -529,13 +530,17 @@
             </form>
           </div>
           <div class="form">
-            <h3>Weekly round-up and search engines</h3>
-            <p class="small muted">The cron drafts a weekly civic round-up as a story with source "auto:weekly:…". It waits in the posts list for the review window, then publishes itself unless someone holds it.</p>
+            <h3>Automatic posts and search engines</h3>
+            <p class="small muted">The cron drafts a weekly civic round-up (source "auto:weekly:…") and, for the SEO desk's content gaps, topic posts (source "auto:topic:…"). Each waits in the posts list for the review window, then publishes itself unless someone holds it.</p>
             <form id="autoForm" novalidate>
               <div class="frow frow-3">
                 <div class="field"><label class="check"><input type="checkbox" id="apEnabled" checked><span>Weekly round-up enabled</span></label></div>
                 <div class="field"><label for="apWeekday">Weekday it is drafted</label><select id="apWeekday"><option value="0">Sunday</option><option value="1" selected>Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option></select></div>
                 <div class="field"><label for="apHours">Review window (hours)</label><input type="number" id="apHours" value="48" min="-1" step="1" inputmode="numeric"><p class="hint">0 publishes immediately; -1 never auto-publishes.</p></div>
+              </div>
+              <div class="frow frow-3">
+                <div class="field"><label class="check"><input type="checkbox" id="tpEnabled" checked><span>Topic posts from the SEO desk</span></label></div>
+                <div class="field"><label for="tpPerWeek">Topic posts a week, at most</label><select id="tpPerWeek"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select><p class="hint">Drafted at 03:00 IST for the most discussed uncovered topic; same review window.</p></div>
               </div>
               <div class="field"><label class="check"><input type="checkbox" id="seoIndexnow" checked><span>Search engines: ping IndexNow on publish</span></label></div>
               <p class="err" id="apErr"></p>
@@ -609,7 +614,7 @@
       <div id="tSeo" class="dpanel" hidden>
         <div class="dhead"><div><h2>SEO</h2><p>How the site gets found on Google, Bing and AI answer engines, run entirely by the nightly cron: the page audit and link crawl, topic clusters, GEO readiness and AI citations, Search Console and Bing data, mobile speed and what to write next.</p></div><div class="dact"><button class="btn btn-line btn-sm" type="button" id="seoRefresh">Refresh</button></div></div>
         <div class="jcounts jcounts-5" id="seoCounts" aria-live="polite"></div>
-        <div class="stabs ctabs" role="tablist" aria-label="SEO sections" id="seoTabs"><button class="stab" type="button" data-ctab="overview" aria-selected="true">Overview</button><button class="stab" type="button" data-ctab="pages" aria-selected="false">Pages</button><button class="stab" type="button" data-ctab="clusters" aria-selected="false">Clusters</button><button class="stab" type="button" data-ctab="geo" aria-selected="false">GEO</button><button class="stab" type="button" data-ctab="search" aria-selected="false">Search data</button><button class="stab" type="button" data-ctab="speed" aria-selected="false">Speed</button></div>
+        <div class="stabs ctabs" role="tablist" aria-label="SEO sections" id="seoTabs"><button class="stab" type="button" data-ctab="overview" aria-selected="true">Overview</button><button class="stab" type="button" data-ctab="agent" aria-selected="false">Agent</button><button class="stab" type="button" data-ctab="pages" aria-selected="false">Pages</button><button class="stab" type="button" data-ctab="clusters" aria-selected="false">Clusters</button><button class="stab" type="button" data-ctab="geo" aria-selected="false">GEO</button><button class="stab" type="button" data-ctab="search" aria-selected="false">Search data</button><button class="stab" type="button" data-ctab="speed" aria-selected="false">Speed</button></div>
         <div id="seoBody"></div>
       </div>
       <div id="tHealth" class="dpanel" hidden>
