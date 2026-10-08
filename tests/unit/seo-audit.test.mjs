@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { pageList, auditHtml, scoreOf, duplicates, parseVitals, sourceOf, opportunities, checklist, seoStep, vitalsStep, mentionsStep, RULES, ISSUE_TEXT, VITALS_PAGES } from "../../lib/seo/audit.js";
-import { makeHandler, summarise, activityOf, ROLES } from "../../lib/handlers/triage/seo.js";
+import { makeHandler, summarise, activityOf, lastVitalsReason, ROLES } from "../../lib/handlers/triage/seo.js";
 import { renderGuide } from "../../lib/seo/guides.js";
 import { renderWard, wardById } from "../../lib/seo/wards.js";
 import { gvf } from "../../lib/site-data.js";
@@ -188,7 +188,11 @@ test("vitalsStep calls PageSpeed for the page not checked longest and stores the
   assert.equal(ins.data.performance, 80);
   assert.equal(ins.data.lcp_ms, 2000);
   const bad = await vitalsStep(fakeSb(), { SITE_URL: SITE }, { fetch: async () => ({ ok: false, status: 429, json: async () => ({ error: { message: "quota" } }) }) });
-  assert.deepEqual(bad, { checked: 0, failed: 1 });
+  assert.deepEqual(bad, { checked: 0, failed: 1, reason: "no_key_quota" }, "a 429 without a key says the key is missing");
+  const spent = await vitalsStep(fakeSb(), { SITE_URL: SITE, PAGESPEED_API_KEY: "K" }, { fetch: async () => ({ ok: false, status: 429, json: async () => ({}) }) });
+  assert.equal(spent.reason, "quota");
+  const down = await vitalsStep(fakeSb(), { SITE_URL: SITE }, { fetch: async () => ({ ok: false, status: 500, json: async () => ({}) }) });
+  assert.equal(down.reason, "http_500");
 });
 
 test("mentionsStep searches Google News for the Forum's name and skips the site's own pages", async () => {
@@ -263,4 +267,19 @@ test("GET /api/triage/seo: content team and coordinators allowed, ward volunteer
   const coord = res();
   await makeHandler({ auth: authAs("coordinator"), sb: fakeSb(), env: {} })({ method: "GET", query: {} }, coord);
   assert.equal(coord.statusCode, 200);
+});
+
+test("a refused PageSpeed call reaches the desk: activity line and checklist say to add the key", () => {
+  const runs = [{ started_at: "s", finished_at: "f", result: { vitals: { checked: 0, failed: 1, reason: "no_key_quota" } } }, { result: { vitals: { checked: 1, failed: 0 } } }];
+  const a = activityOf(runs, SITE);
+  assert.equal(a[0].ok, false);
+  assert.match(a[0].text, /add the free PAGESPEED_API_KEY in Vercel/);
+  assert.equal(lastVitalsReason(runs), "no_key_quota");
+  assert.equal(lastVitalsReason([{ result: { vitals: { skipped: "not_in_run" } } }, ...runs.slice(1)]), null, "a run that skipped the step is passed over, and a success clears it");
+  const item = (r, env = {}) => checklist({ env, vitalsReason: r }).find((i) => i.key === "vitals");
+  assert.match(item("no_key_quota").detail, /add the free PAGESPEED_API_KEY/);
+  assert.match(item("quota", { PAGESPEED_API_KEY: "K" }).detail, /quota spent/);
+  assert.match(item(null).detail, /add the free PAGESPEED_API_KEY/);
+  assert.equal(item(null, { PAGESPEED_API_KEY: "K" }).detail, "Waiting for the first PageSpeed run");
+  assert.equal(item("no_key_quota").ok, null);
 });
