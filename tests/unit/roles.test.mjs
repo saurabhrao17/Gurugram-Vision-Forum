@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { ROLES, CONTENT_ROLES, REPORT_ROLES, MANAGER_ROLES, isOwner, isManager, canContent, canReports, HttpError } from "../../lib/auth.js";
 import { makeHandler as makeContent } from "../../lib/handlers/triage/content.js";
 import { makeHandler as makeVisitors } from "../../lib/handlers/triage/visitors.js";
+import { makeHandler as makeJoins, validateJoinPatch, STATUSES } from "../../lib/handlers/triage/joins.js";
+import { joinMail } from "../../lib/handlers/join.js";
 import { makeHandler as makeReports } from "../../lib/handlers/triage/reports.js";
 import { makeHandler as makeReport } from "../../lib/handlers/triage/report.js";
 import { makeHandler as makeDraft } from "../../lib/handlers/triage/draft.js";
@@ -266,4 +268,85 @@ test("reports with fields=map ignore offset and limit; the list keeps them", asy
   await makeReports({ auth: authAs("owner"), sb: sbRec })({ method: "GET", query: { stage: "open", offset: "2", limit: "50" } }, res);
   q = calls.find((c) => c.table === "triage_reports");
   assert.deepEqual(q.range, [2, 51], "list: paged as asked");
+});
+
+// Join requests: owner and coordinator work them; the content team and ward
+// volunteers never see who asked to join.
+function joinsSb(rows) {
+  const calls = [];
+  const from = (table) => {
+    const q = { table, op: "select", filters: [], row: null };
+    const chain = {
+      select: () => chain, order: () => chain, limit: () => chain,
+      eq: (k, v) => { q.filters.push(["eq", k, v]); return chain; },
+      or: (v) => { q.filters.push(["or", v]); return chain; },
+      update: (row) => { q.op = "update"; q.row = row; return chain; },
+      maybeSingle: async () => { calls.push(q); const r = rows.find((x) => q.filters.some((f) => f[0] === "eq" && f[1] === "id" && f[2] === x.id)); return { data: r ? { ...r, ...q.row } : null, error: null }; },
+      then: (ok) => { calls.push(q); let out = rows; for (const f of q.filters) if (f[0] === "eq") out = out.filter((r) => r[f[1]] === f[2]); return ok({ data: out, error: null }); }
+    };
+    return chain;
+  };
+  return { from, calls };
+}
+const JOINS = [
+  { id: "11111111-1111-4111-8111-111111111111", name: "Asha", phone: "+919899999999", email: "asha@example.org", role: "Volunteer", area: "Sector 45", note: "Weekends", status: "new", notes: null, handled_by: null, created_at: "2026-10-08T05:00:00Z", updated_at: "2026-10-08T05:00:00Z" },
+  { id: "22222222-2222-4222-8222-222222222222", name: "Ravi", phone: "+919888888888", email: "ravi@example.org", role: "Youth fellow", area: null, note: null, status: "contacted", notes: "Called", handled_by: "T <owner@gvf.test>", created_at: "2026-10-07T05:00:00Z", updated_at: "2026-10-07T06:00:00Z" }
+];
+
+test("join requests: managers list them with counts, the rest are refused", async () => {
+  for (const role of ["content", "triage"]) {
+    const res = fakeRes();
+    await makeJoins({ auth: authAs(role), sb: joinsSb(JOINS) })({ method: "GET", query: {} }, res);
+    assert.equal(res.statusCode, 403, role);
+  }
+  for (const role of ["owner", "coordinator"]) {
+    const res = fakeRes();
+    await makeJoins({ auth: authAs(role), sb: joinsSb(JOINS) })({ method: "GET", query: {} }, res);
+    assert.equal(res.statusCode, 200, role);
+    assert.equal(res.body.joins.length, 2);
+    assert.deepEqual(res.body.counts, { new: 1, contacted: 1, onboarded: 0, declined: 0, total: 2 });
+  }
+  const res = fakeRes();
+  await makeJoins({ auth: authAs("owner"), sb: joinsSb(JOINS) })({ method: "GET", query: { status: "new" } }, res);
+  assert.deepEqual(res.body.joins.map((j) => j.name), ["Asha"]);
+  assert.equal(res.body.counts.total, 2, "counts cover every status");
+  const csv = fakeRes();
+  await makeJoins({ auth: authAs("coordinator"), sb: joinsSb(JOINS) })({ method: "GET", query: { format: "csv" } }, csv);
+  assert.equal(csv.headers["Content-Type"], "text/csv; charset=utf-8");
+  assert.ok(String(csv.body).includes('"Asha","+919899999999"'));
+});
+
+test("join requests: PATCH sets status and notes and records who did it", async () => {
+  assert.deepEqual(STATUSES, ["new", "contacted", "onboarded", "declined"]);
+  assert.deepEqual(validateJoinPatch({ status: "contacted" }), { value: { status: "contacted" }, errors: [] });
+  assert.deepEqual(validateJoinPatch({ status: "lost" }).errors, ["status"]);
+  assert.deepEqual(validateJoinPatch({}).errors, ["empty"]);
+  assert.deepEqual(validateJoinPatch({ notes: "  " }), { value: { notes: null }, errors: [] });
+  const sb = joinsSb(JOINS);
+  const res = fakeRes();
+  await makeJoins({ auth: authAs("coordinator"), sb })({ method: "PATCH", query: { id: JOINS[0].id }, body: { status: "contacted", notes: "Spoke on phone" } }, res);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.join.status, "contacted");
+  const up = sb.calls.find((q) => q.op === "update");
+  assert.equal(up.row.status, "contacted");
+  assert.equal(up.row.notes, "Spoke on phone");
+  assert.equal(up.row.handled_by, "T <coordinator@gvf.test>");
+  const missing = fakeRes();
+  await makeJoins({ auth: authAs("owner"), sb })({ method: "PATCH", query: { id: "33333333-3333-4333-8333-333333333333" }, body: { status: "declined" } }, missing);
+  assert.equal(missing.statusCode, 404);
+  const bad = fakeRes();
+  await makeJoins({ auth: authAs("owner"), sb })({ method: "PATCH", query: { id: JOINS[0].id }, body: { status: "nope" } }, bad);
+  assert.equal(bad.statusCode, 400);
+  const denied = fakeRes();
+  await makeJoins({ auth: authAs("triage"), sb })({ method: "PATCH", query: { id: JOINS[0].id }, body: { status: "declined" } }, denied);
+  assert.equal(denied.statusCode, 403);
+});
+
+test("the coordinator's join mail names the person and role, never phone or email", () => {
+  const m = joinMail({ name: "Asha Verma", role: "Volunteer", area: "Sector 45", note: "Weekends only" }, "coord@example.org", { SITE_URL: "https://gvf.test" });
+  assert.equal(m.to_email, "coord@example.org");
+  assert.equal(m.kind, "join");
+  assert.equal(m.subject, "New join request: Asha Verma (Volunteer)");
+  assert.ok(m.body_text.includes("Sector 45") && m.body_text.includes("Weekends only") && m.body_text.includes("https://gvf.test/#/desk"));
+  assert.ok(!/@example|\+91|\d{10}/.test(m.body_text.replace("coord@example.org", "")));
 });

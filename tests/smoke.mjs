@@ -62,6 +62,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.evaluate(() => (document.querySelector("link[rel=manifest]") || {}).getAttribute("href"))) === "/manifest.webmanifest" && (await page.locator("link[rel=apple-touch-icon]").count()) === 1, "page links the web app manifest and the touch icon");
   check((await page.locator("footer a[href='/guides']").count()) === 1 && (await page.locator("footer a[href='/blog']").count()) === 1 && (await page.locator("footer a[href='/ward/1']").count()) === 1, "footer links to the guides, blog and ward pages");
   check((await page.locator("#subFooter form[data-sub]").count()) === 1 && (await page.locator("#subFooter").innerText()).includes("One email a week"), "footer carries the weekly digest form");
+  check((await page.locator("#ftLinks").innerText()) === "Links checked daily.", "footer shows the static link-check line under file:// (no API, no stale date)");
 
   for (const r of routes) {
     await page.goto(url + "#/" + r);
@@ -267,6 +268,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   // Counts only, always published: the API has no 50-report threshold any more
   await page.route("**/api/dashboard", async (route) => {
     return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, published: true, total: 61, updated_at: "2026-11-01T10:00:00Z", source: "Gurugram Vision Forum case system",
+      links: { checked_at: "2026-10-08T18:30:00Z", total: 36, broken: 0 },
       summary: { total: 61, received: 10, filed: 30, escalated: 6, resolved: 15, mapped_in_3_days_pct: 92, acted_in_21_days_pct: 71, computed_at: "2026-11-01T10:00:00Z" },
       by_issue: [{ issue_type: "waste", label: "Garbage", received: 4, filed: 12, escalated: 3, resolved: 8, total: 27 }, { issue_type: "roads", label: "Roads, footpaths", received: 6, filed: 18, escalated: 3, resolved: 7, total: 34 }],
       by_ward: [{ ward: 30, councillor: "Madhu Batra", received: 4, filed: 12, escalated: 3, resolved: 8, total: 27, median_days_to_resolve: 9 }, { ward: 10, councillor: "Mahabir", received: 6, filed: 18, escalated: 3, resolved: 7, total: 34, median_days_to_resolve: null }] }) });
@@ -294,9 +296,14 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.route("**/api/subscribe", (route) => { subs.push(JSON.parse(route.request().postData() || "{}")); if (subMode === "down") return route.abort(); return route.fulfill({ status: subMode === "ok" ? 200 : 400, contentType: "application/json", body: JSON.stringify(subMode === "ok" ? { ok: true, pending: true } : { ok: false, error: "invalid", fields: ["email"] }) }); });
   await page.route("**/api/geocode**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, results: [{ name: "Sector 29, Gurugram", lat: 28.46, lng: 77.07 }] }) }));
 
+  let linkDay = "";
   const fillReport = async (withFile) => {
     await page.goto(httpUrl + "#/report");
     await page.waitForTimeout(100);
+    if (!linkDay) {
+      linkDay = await page.evaluate(() => new Date("2026-10-08T18:30:00Z").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }));
+      check((await page.locator("#ftLinks").innerText()) === "Links verified " + linkDay + ".", "footer shows the live link-check date from /api/dashboard after boot (" + linkDay + ")");
+    }
     await page.selectOption("#fCat", "waste");
     await page.selectOption("#fScope", { index: 1 });
     await page.click('[data-go="2"]');
@@ -410,6 +417,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check(!(await page.locator("#gate.open").isVisible()), "first page view shows no gate");
   await page.goto(httpUrl + "#/directory");
   await page.waitForTimeout(150);
+  check((await page.locator("#dVerified").innerText()).startsWith("Links and numbers verified " + linkDay + "."), "Directory line prefers the live link-check date over the static one");
   check(await page.locator("#gate.open").isVisible(), "second page view opens the visitor gate");
   await page.click("#gateSkip");
   await page.waitForTimeout(80);
@@ -617,6 +625,21 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     return json(route, 200, { ok: true, report: state, events, volunteers: { lead_name: "Vol One", lead_email: "vol@example.org", support_name: null, support_email: null }, filing });
   });
   await page.route("**/api/triage/staff", (route) => json(route, 200, { ok: true, staff: [{ ...staff, wards: [] }, { user_id: "u2", name: "Vol One", role: "triage", email: "vol@example.org", wards: [{ ward: 10, role: "lead" }] }] }));
+  // Join requests (table joins): owners and coordinators only; the list carries counts, the per-id route takes PATCH {status} or {notes}
+  const joinRows = [
+    { id: "j1", name: "Asha Verma", phone: "+919811122233", email: "asha@example.org", role: "Ward volunteer", area: "Sector 56", note: "Weekends only, can help with camps.", status: "new", notes: "", handled_by: null, created_at: "2026-10-08T06:00:00Z", updated_at: "2026-10-08T06:00:00Z" },
+    { id: "j2", name: "Rohit Mehra", phone: "+919811144455", email: "rohit@example.org", role: "Research", area: "DLF Phase 3", note: "RTI drafting.", status: "contacted", notes: "Called 7 Oct.", handled_by: "Coordinator", created_at: "2026-10-06T06:00:00Z", updated_at: "2026-10-07T06:00:00Z" }];
+  const joinCalls = [], joinPatches = [];
+  const joinCounts = () => ({ new: joinRows.filter((r) => r.status === "new").length, contacted: joinRows.filter((r) => r.status === "contacted").length, onboarded: joinRows.filter((r) => r.status === "onboarded").length, declined: joinRows.filter((r) => r.status === "declined").length, total: joinRows.length });
+  await page.route("**/api/triage/joins?**", (route) => { const u = new URL(route.request().url()); joinCalls.push(u.search); if (!authed(route)) return json(route, 401, { ok: false, error: "unauthenticated" });
+    const role = (page._joinRole || "coordinator"); if (role !== "owner" && role !== "coordinator") return json(route, 403, { ok: false, error: "forbidden" });
+    const st = u.searchParams.get("status") || "new", q = (u.searchParams.get("q") || "").toLowerCase();
+    const rows = joinRows.filter((r) => (st === "all" || r.status === st) && (!q || [r.name, r.phone, r.email, r.area].join(" ").toLowerCase().includes(q)));
+    if (u.searchParams.get("format") === "csv") return route.fulfill({ status: 200, contentType: "text/csv", body: "name,phone,email,role,area,note,status,notes,created_at\n" + rows.map((r) => [r.name, r.phone, r.email, r.role, r.area, r.note, r.status, r.notes, r.created_at].join(",")).join("\n") });
+    return json(route, 200, { ok: true, joins: rows, counts: joinCounts() }); });
+  await page.route("**/api/triage/joins/*", (route) => { if (!authed(route)) return json(route, 401, { ok: false, error: "unauthenticated" }); const id = route.request().url().split("/").pop().split("?")[0]; const r = joinRows.find((x) => x.id === id); if (!r) return json(route, 404, { ok: false, error: "not_found" });
+    if (route.request().method() === "PATCH") { const b = JSON.parse(route.request().postData() || "{}"); joinPatches.push({ id, body: b }); if (b.status) r.status = b.status; if (typeof b.notes === "string") r.notes = b.notes; r.handled_by = "Coordinator"; r.updated_at = "2026-10-08T07:00:00Z"; }
+    return json(route, 200, { ok: true, join: r }); });
   const wardPuts = [];
   await page.route("**/api/triage/wards", (route) => {
     if (route.request().method() === "PUT") { wardPuts.push(JSON.parse(route.request().postData() || "{}")); return json(route, 200, { ok: true, ward: { ward: wardPuts[wardPuts.length - 1].ward } }); }
@@ -789,36 +812,76 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(150);
   check(wardPuts.length === 1 && wardPuts[0].ward === 30 && wardPuts[0].role === "support" && wardPuts[0].user_id === "u2", "changing a ward select saves the assignment");
 
+  // Join requests tab: coordinator sees it with a badge for the new ones; status and notes PATCH the row; "Create desk account" prefills the Team form
+  check(!(await page.locator("#joinsTab").isHidden()) && (await page.locator("#joinsTab").innerText()).replace(/\s+/g, " ").includes("Join requests · 1"), "coordinator sees the Join requests tab with the new-count badge from desk boot");
+  check(joinCalls.length === 1 && joinCalls[0].includes("status=new"), "desk boot asks the joins endpoint once for the new count");
+  await page.click('[data-tab="joins"]');
+  await page.waitForTimeout(250);
+  check(!(await page.locator("#tJoins").isHidden()) && (await page.locator("#joinList .row").count()) === 1 && (await page.locator("#joinList").innerText()).includes("Asha Verma"), "Join requests tab lists the new request by default");
+  check((await page.locator("#joinCounts").innerText()).replace(/\s+/g, " ").includes("1 New 1 Contacted 0 Onboarded 0 Declined 2 Total"), "count strip shows new, contacted, onboarded, declined and total");
+  check((await page.locator('#joinList a[href="tel:+919811122233"]').count()) === 1 && (await page.locator('#joinList a[href="mailto:asha@example.org"]').count()) === 1 && (await page.locator("#joinList").innerText()).includes("Weekends only, can help with camps."), "row shows the phone as tel:, the email as mailto: and the note in full");
+  await page.click('#joinChips [data-jstage="all"]');
+  await page.waitForTimeout(250);
+  check((await page.locator("#joinList .row").count()) === 2 && (await page.locator("#joinList").innerText()).includes("Rohit Mehra"), "the All chip lists both requests");
+  await page.fill("#jQ", "rohit");
+  await page.waitForTimeout(600);
+  check(joinCalls[joinCalls.length - 1].includes("q=rohit") && (await page.locator("#joinList .row").count()) === 1, "search sends q and narrows the list");
+  await page.fill("#jQ", "");
+  await page.waitForTimeout(600);
+  await page.selectOption('#joinList select[data-jstatus="j1"]', "contacted");
+  await page.waitForTimeout(200);
+  check(joinPatches.length === 1 && joinPatches[0].id === "j1" && joinPatches[0].body.status === "contacted" && !("notes" in joinPatches[0].body), "changing the status select PATCHes {status} for that row");
+  check((await page.locator("#joinsTab").innerText()).replace(/\s+/g, " ").trim() === "Join requests" && (await page.locator("#joinCounts").innerText()).replace(/\s+/g, " ").includes("0 New 2 Contacted"), "badge and count strip update after the status change");
+  await page.fill('#joinList textarea[data-jnotes="j2"]', "Onboarding call fixed for Friday.");
+  await page.click('#joinList [data-jsave="j2"]');
+  await page.waitForTimeout(200);
+  check(joinPatches.length === 2 && joinPatches[1].id === "j2" && joinPatches[1].body.notes === "Onboarding call fixed for Friday." && !("status" in joinPatches[1].body), "saving notes PATCHes {notes} for that row");
+  const csvCalls = joinCalls.length;
+  await page.click("#joinsCsv");
+  await page.waitForTimeout(200);
+  check(joinCalls.length === csvCalls + 1 && joinCalls[joinCalls.length - 1].includes("format=csv") && joinCalls[joinCalls.length - 1].includes("status=all"), "Export CSV asks for the csv format with the current status filter");
+  await page.click('#joinList [data-jaccount="j1"]');
+  await page.waitForTimeout(250);
+  check(!(await page.locator("#tTeam").isHidden()) && (await page.locator("#sName").inputValue()) === "Asha Verma" && (await page.locator("#sEmail").inputValue()) === "asha@example.org", "Create desk account opens the Team tab with name and email prefilled");
+
   await page.click("#signOut");
   await page.waitForTimeout(100);
   check(!(await page.locator("#deskLogin").isHidden()) && (await page.locator("#deskMain").isHidden()), "sign out returns to the sign-in form");
   check((await page.evaluate(() => localStorage.getItem("gvf_staff"))) === null, "sign out clears the stored session");
 
   // A content-team account sees only content and the pulse; a ward volunteer only reports and the map
+  const joinCallsBeforeContent = joinCalls.length;
+  page._joinRole = "content";
   await page.fill("#lEmail", "content@example.org");
   await page.fill("#lPass", "secret-pass");
   await page.click("#lBtn");
   await page.waitForSelector("#deskMain:not([hidden])");
   await page.waitForTimeout(250);
   check((await page.locator("#reportsTab").isHidden()) && (await page.locator("#mapTab").isHidden()) && (await page.locator("#teamTab").isHidden()) && (await page.locator("#visitorsTab").isHidden()) && (await page.locator("#healthTab").isHidden()) && !(await page.locator("#contentTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()), "content team sees only the Content and Pulse tabs");
+  check((await page.locator("#joinsTab").isHidden()) && joinCalls.length === joinCallsBeforeContent, "content team does not see Join requests and the desk does not ask for them");
   check(!(await page.locator("#tContent").isHidden()) && (await page.locator("#tReports").isHidden()), "content team lands on the Content tab");
   await page.click("#signOut");
   await page.waitForTimeout(100);
+  page._joinRole = "triage";
   await page.fill("#lEmail", "vol@example.org");
   await page.fill("#lPass", "secret-pass");
   await page.click("#lBtn");
   await page.waitForSelector("#deskMain:not([hidden])");
   await page.waitForTimeout(250);
-  check(!(await page.locator("#reportsTab").isHidden()) && !(await page.locator("#mapTab").isHidden()) && (await page.locator("#contentTab").isHidden()) && (await page.locator("#teamTab").isHidden()) && (await page.locator("#insightsTab").isHidden()), "ward volunteer sees only Reports and Map");
+  check(!(await page.locator("#reportsTab").isHidden()) && !(await page.locator("#mapTab").isHidden()) && (await page.locator("#contentTab").isHidden()) && (await page.locator("#teamTab").isHidden()) && (await page.locator("#insightsTab").isHidden()) && (await page.locator("#joinsTab").isHidden()), "ward volunteer sees only Reports and Map, not Join requests");
   check((await page.locator("#whoAmI").innerText()).includes("wards 10"), "ward volunteer's header names the allotted ward");
   await page.click("#signOut");
   await page.waitForTimeout(100);
+  page._joinRole = "owner";
   await page.fill("#lEmail", "owner@example.org");
   await page.fill("#lPass", "secret-pass");
   await page.click("#lBtn");
   await page.waitForSelector("#deskMain:not([hidden])");
   await page.waitForTimeout(250);
-  for (const t of ["reports", "map", "team", "content", "visitors", "insights", "health"]) check(!(await page.locator("#" + t + "Tab").isHidden()), "owner sees the " + t + " tab");
+  for (const t of ["reports", "map", "team", "joins", "content", "visitors", "insights", "health"]) check(!(await page.locator("#" + t + "Tab").isHidden()), "owner sees the " + t + " tab");
+  await page.click('[data-tab="joins"]');
+  await page.waitForTimeout(250);
+  check((await page.locator("#joinList .row").count()) === 0 && !(await page.locator("#joinEmpty").isHidden()) && (await page.locator("#joinEmpty").innerText()).includes("No join requests yet."), "owner's Join requests tab shows the empty state when nothing is new");
   await page.click('[data-tab="visitors"]');
   await page.waitForTimeout(200);
   check((await page.locator("#visitorStats").innerText()).includes("12 registered visitors") && (await page.locator("#visitorList").innerText()).includes("Gate Person"), "owner's visitors tab shows the registration count and the list");
