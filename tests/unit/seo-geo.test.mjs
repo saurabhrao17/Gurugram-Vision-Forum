@@ -176,8 +176,9 @@ test("askGemini asks with the Google Search tool and, when the model is retired,
   assert.match(calls[1].url, /\/v1beta\/models\?pageSize=200&key=K$/);
   assert.match(calls[2].url, /gemini-3-flash:generateContent/);
   assert.equal(r.cited, false); assert.equal(r.model, "gemini-3-flash");
-  const q = await askGemini({ GEMINI_API_KEY: "K" }, "x", async () => ({ ok: false, status: 429, json: async () => ({ error: { status: "RESOURCE_EXHAUSTED" } }) }), "h");
-  assert.equal(q.error, "http_429_RESOURCE_EXHAUSTED");
+  const q = await askGemini({ GEMINI_API_KEY: "K" }, "x", async () => ({ ok: false, status: 429, json: async () => ({ error: { status: "RESOURCE_EXHAUSTED", message: "Quota exceeded for metric: search_grounding_free_tier, limit: 0 (key=abc)" } }) }), "h");
+  assert.equal(q.error, "http_429_RESOURCE_EXHAUSTED: Quota exceeded for metric: search_grounding_free_tier, limit: 0 (key=…)");
+  assert.equal(q.status, 429);
   resetGeminiDiscovery();
 });
 
@@ -218,6 +219,12 @@ test("geoStep asks the questions not asked longest, stores each answer, and skip
   assert.equal(ins.length, 2);
   assert.equal(ins[0].data.cited, true); assert.equal(ins[0].data.position, 1); assert.equal(ins[0].data.engine, "gemini-search");
   assert.equal((await geoStep(fakeSb(), ENV, { fetch: fetchImpl })).skipped, "no_key");
+  // Out of quota: one failed row, the rest wait for the next night.
+  let n = 0;
+  const sb2 = fakeSb();
+  const out2 = await geoStep(sb2, { ...ENV, GEMINI_API_KEY: "K" }, { fetch: async () => { n++; return { ok: false, status: 429, json: async () => ({ error: { status: "RESOURCE_EXHAUSTED", message: "Quota exceeded" } }) }; }, now: Date.UTC(2026, 9, 8), limit: 3 });
+  assert.deepEqual([out2.failed, out2.stopped, n], [1, "quota", 1]);
+  assert.match(sb2.writes.find((w) => w.op === "insert").data.error, /^http_429_RESOURCE_EXHAUSTED: Quota exceeded$/);
 });
 
 // ---------------------------------------------------------------- clusters
