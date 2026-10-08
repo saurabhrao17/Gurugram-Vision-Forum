@@ -6,10 +6,15 @@ its own whatever is safe, and brings the rest to the owner in plain language
 twice a day, so that the website keeps working from every angle without
 anyone having to watch it.
 
-The agent is a Claude Code routine. It starts a fresh Claude Code session in
-this repository at **08:56 and 20:56 IST** every day; each session is the full
-log of that run and stays in Claude Code. The owner reads the result and
-answers in that same session at **10:00 and 22:00 IST**.
+The agent lives in one Claude Code session, **"Website upkeep agent"**, which
+has this repository attached (a routine cannot attach a repository to the
+sessions it starts, so the routine wakes this session instead). The routine
+"Website upkeep agent" sends it a run message at **08:56 and 20:56 IST** every
+day; the whole history of runs is that session, in Claude Code. The owner
+reads the result and answers in the same session at **10:00 and 22:00 IST**.
+The session's git access can push branches but not delete them; finished
+`upkeep/` branches stay until GitHub's "Automatically delete head branches"
+setting (repository Settings, General) or a person removes them.
 
 This document is the agent's standing instruction. It is protected: the agent
 may not change it, nor `scripts/upkeep-guard.mjs`, without the owner.
