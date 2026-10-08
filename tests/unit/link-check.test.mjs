@@ -12,9 +12,9 @@ test("a bot-limited answer (401/403/405/429) counts as reachable; a dead page do
   assert.equal(r403.error, "bot_limited");
   const r404 = await checkLink("https://dead.example/", async () => answer(404), { timeoutMs: 100 });
   assert.equal(r404.ok, false);
-  assert.equal(r404.error, undefined);
+  assert.equal(r404.error, null);
   const r200 = await checkLink("https://ok.example/", async () => answer(200), { timeoutMs: 100 });
-  assert.deepEqual([r200.ok, r200.status, r200.error], [true, 200, undefined]);
+  assert.deepEqual([r200.ok, r200.status, r200.error], [true, 200, null]);
 });
 
 test("a host that gives no answer is retried once with a longer timeout", async () => {
