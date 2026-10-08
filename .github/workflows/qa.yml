@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   schedule:
     # Nightly at 22:30 UTC (04:00 IST): the same checks plus the external link check.
     - cron: "30 22 * * *"
@@ -18,6 +19,34 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  upkeep-guard:
+    # The website upkeep agent works on upkeep/ branches. A change that touches
+    # a protected area (database, sign-in, secrets, mail, residents' data,
+    # security headers, automation, the agent's own rules) or adds contact
+    # details, party names, secrets or consent changes fails here until the
+    # owner adds the label "owner-approved". See docs/upkeep-agent.md.
+    name: Upkeep guard
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'upkeep/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check the change against the upkeep rules
+        env:
+          APPROVED: ${{ contains(github.event.pull_request.labels.*.name, 'owner-approved') }}
+        run: |
+          set +e
+          node scripts/upkeep-guard.mjs "origin/${{ github.base_ref }}" | tee guard.json
+          code=${PIPESTATUS[0]}
+          { echo "## Upkeep guard"; echo; echo '```json'; cat guard.json; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$code" = "0" ]; then echo "May go live without the owner."; exit 0; fi
+          if [ "$APPROVED" = "true" ]; then echo "Needs the owner, and the owner approved it (label owner-approved)."; exit 0; fi
+          echo "::error::This change needs the owner's approval (see the reasons above). Add the label owner-approved to let it through."
+          exit 1
+        shell: bash
+
   checks:
     name: Unit, smoke${{ github.event_name == 'schedule' && ' and links' || '' }}
     runs-on: ubuntu-latest
