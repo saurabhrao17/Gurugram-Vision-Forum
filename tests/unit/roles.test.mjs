@@ -210,11 +210,11 @@ test("translate handler sends the Gemini shape and returns the parsed reply", as
   assert.equal(res.body.from, "en");
   assert.equal(res.body.to, "hi");
   assert.equal(res.body.provider, "gemini");
-  assert.equal(res.body.model, "gemini-2.0-flash");
+  assert.equal(res.body.model, "gemini-flash-latest");
   assert.deepEqual(Object.keys(res.body.fields).sort(), ["body", "summary", "title"]);
   assert.equal(res.body.fields.title, "सेक्टर 29 में नाला साफ");
   assert.equal(res.body.fields.body, "<p>निवासियों ने <b>MCG</b> को 1 अक्टूबर 2026 को सूचित किया।</p>");
-  assert.match(captured.url, /generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.0-flash:generateContent\?key=free-key$/);
+  assert.match(captured.url, /generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-flash-latest:generateContent\?key=free-key$/);
   assert.equal(captured.headers.authorization, undefined);
   assert.match(captured.body.systemInstruction.parts[0].text, /Gurugram Vision Forum/);
   assert.equal(captured.body.generationConfig.responseMimeType, "application/json");

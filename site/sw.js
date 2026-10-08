@@ -1,9 +1,10 @@
 /* Gurugram Vision Forum service worker.
    Shell files are cached on install; navigations go network-first and fall back to the cached
-   index.html; other same-origin static files are served stale-while-revalidate.
+   index.html; scripts and styles also go network-first (cache only when offline); images and
+   fonts are served stale-while-revalidate.
    Nothing under /api/ and nothing cross-origin is ever cached: the API carries reporter data and
    must always be live. Bump CACHE when the shell changes so old copies are dropped. */
-var CACHE = "gvf-shell-v15";
+var CACHE = "gvf-shell-v16";
 var SHELL = ["/", "/index.html", "/styles.css", "/app.js", "/data.js", "/boot.js", "/favicon.svg"];
 
 self.addEventListener("install", function (e) {
@@ -16,8 +17,14 @@ self.addEventListener("activate", function (e) {
   }).then(function () { return self.clients.claim(); }));
 });
 
+// Scripts and styles go network-first like the page itself: a cached copy
+// served first would pair last week's app.js with this week's index.html
+// after every deploy. The cache is only the offline fallback for them.
+function isCode(url) {
+  return /\.(css|js|webmanifest)$/.test(url.pathname);
+}
 function isStatic(url) {
-  return /\.(css|js|svg|png|webmanifest|woff2?)$/.test(url.pathname);
+  return /\.(svg|png|woff2?)$/.test(url.pathname);
 }
 
 self.addEventListener("fetch", function (e) {
@@ -34,6 +41,16 @@ self.addEventListener("fetch", function (e) {
       return r;
     }).catch(function () {
       return caches.match("/index.html").then(function (m) { return m || Response.error(); });
+    }));
+    return;
+  }
+
+  if (isCode(url)) {
+    e.respondWith(fetch(req).then(function (r) {
+      if (r && r.ok) { var copy = r.clone(); caches.open(CACHE).then(function (c) { c.put(req, copy); }); }
+      return r;
+    }).catch(function () {
+      return caches.match(req).then(function (m) { return m || Response.error(); });
     }));
     return;
   }

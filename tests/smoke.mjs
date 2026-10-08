@@ -921,6 +921,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#seoConn .row").count()) === 4 && (await page.locator("#seoConn").innerText()).includes("Add BING_WEBMASTER_API_KEY in Vercel") && (await page.locator("#seoConn .tag-green").count()) === 3, "connections show what is set up and what to add");
   await page.click('#seoTabs [data-ctab="pages"]');
   await page.waitForTimeout(150);
+  check((await page.locator('#seoBody [data-cpane="overview"]').isHidden()) && !(await page.locator('#seoBody [data-cpane="pages"]').isHidden()), "a sub-tab shows its own pane and hides the Overview");
   check((await page.locator("#seoPages tbody tr").count()) === 2 && (await page.locator("#seoPages").innerText()).includes("Title too long") && (await page.locator("#seoPages").innerText()).includes("HTTP 500") && (await page.locator("#seoPages thead").innerText()).includes("GEO"), "page audit shows the pages with issues first, with a GEO column");
   await page.click('[data-seo-pages="all"]');
   check((await page.locator("#seoPages tbody tr").count()) === 3 && (await page.locator("#seoPages .tag-green").count()) >= 2, "All pages lists the clean page too");
