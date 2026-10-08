@@ -1,0 +1,114 @@
+name: SEO agent
+
+# The SEO agent's working day (IST): 09:00 plan, 13:00 work, 19:00 report.
+# Each run calls the cron step `agent` on production with the phase; the agent
+# reads every nightly audit result, keeps its task list, does the fixes it can
+# (re-audits, IndexNow, sitemap resubmission) and answers with:
+#   retry      steps that failed and should run again (called here, one by one)
+#   report_md  the daily report (19:00) -> daily/YYYY/MM/YYYY-MM-DD.md
+#   weekly_md  the week's plan (Monday 09:00, or the first run of a week)
+#              -> weekly/YYYY-Www.md
+#   issue_md   the code fixes the agent cannot do itself -> one GitHub issue,
+#              "SEO agent: code fixes needed", edited in place, closed when empty.
+# Reports are committed to the seo-agent-log branch (never main, so no deploy
+# and no QA run). Needs the repository secret CRON_SECRET.
+on:
+  schedule:
+    - cron: "30 3 * * *"    # 09:00 IST plan
+    - cron: "30 7 * * *"    # 13:00 IST work
+    - cron: "30 13 * * *"   # 19:00 IST report
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: "plan, work or report"
+        required: false
+        default: "work"
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: seo-agent
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TOKEN: ${{ secrets.CRON_SECRET }}
+      BASE_URL: https://gurugramvisionforum.org
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Pick the phase
+        id: phase
+        run: |
+          case "${{ github.event.schedule }}" in
+            "30 3 * * *") p=plan ;;
+            "30 13 * * *") p=report ;;
+            "30 7 * * *") p=work ;;
+            *) p="${{ github.event.inputs.phase || 'work' }}" ;;
+          esac
+          case "$p" in plan|work|report) ;; *) p=work ;; esac
+          echo "phase=$p" >> "$GITHUB_OUTPUT"
+          echo "Phase: $p"
+
+      - name: Run the agent
+        run: |
+          if [ -z "$TOKEN" ]; then echo "CRON_SECRET repository secret is not set"; exit 1; fi
+          echo "::add-mask::$TOKEN"
+          code=$(curl -sS -m 120 -o "$RUNNER_TEMP/agent.json" -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/cron/daily?steps=agent&phase=${{ steps.phase.outputs.phase }}")
+          echo "agent: HTTP $code"
+          jq '.agent | del(.report_md, .weekly_md, .issue_md), .errors' "$RUNNER_TEMP/agent.json" || cat "$RUNNER_TEMP/agent.json"
+          { echo "## SEO agent (${{ steps.phase.outputs.phase }})"; echo; echo "HTTP $code"; echo; echo '```json'; jq '.agent | del(.report_md, .weekly_md, .issue_md)' "$RUNNER_TEMP/agent.json" || cat "$RUNNER_TEMP/agent.json"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          [ "$code" = "200" ]
+
+      - name: Re-run the steps the agent asked for
+        run: |
+          for step in $(jq -r '.agent.retry[]?' "$RUNNER_TEMP/agent.json"); do
+            code=$(curl -sS -m 90 -o "$RUNNER_TEMP/retry.json" -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/cron/daily?steps=$step")
+            echo "retry $step: HTTP $code"
+            jq ".$step, .errors" "$RUNNER_TEMP/retry.json" || cat "$RUNNER_TEMP/retry.json"
+          done
+
+      - name: Commit the reports to the seo-agent-log branch
+        run: |
+          has() { jq -e "$1 // empty" "$RUNNER_TEMP/agent.json" >/dev/null; }
+          if ! has '.agent.report_md' && ! has '.agent.weekly_md'; then echo "No report in this phase"; exit 0; fi
+          git config user.name "seo-agent[bot]"
+          git config user.email "seo-agent@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin seo-agent-log >/dev/null; then
+            git fetch --depth=1 origin seo-agent-log
+            git checkout -B seo-agent-log FETCH_HEAD
+          else
+            git checkout --orphan seo-agent-log
+            git rm -rf --quiet . || true
+            printf '# SEO agent log\n\nDaily reports (daily/) and weekly plans (weekly/) written by the SEO agent of gurugramvisionforum.org. Generated; do not edit.\n' > README.md
+            # Never deployed: this branch holds reports only.
+            printf '{\n  "git": { "deploymentEnabled": false }\n}\n' > vercel.json
+          fi
+          if has '.agent.report_md'; then p=$(jq -r '.agent.report.path' "$RUNNER_TEMP/agent.json"); mkdir -p "$(dirname "$p")"; jq -r '.agent.report_md' "$RUNNER_TEMP/agent.json" > "$p"; fi
+          if has '.agent.weekly_md'; then p=$(jq -r '.agent.weekly.path' "$RUNNER_TEMP/agent.json"); mkdir -p "$(dirname "$p")"; jq -r '.agent.weekly_md' "$RUNNER_TEMP/agent.json" > "$p"; fi
+          git add -A
+          git diff --cached --quiet && { echo "Nothing new"; exit 0; }
+          git commit -q -m "SEO agent: ${{ steps.phase.outputs.phase }} $(date -u +%F)"
+          git push -q origin seo-agent-log
+
+      - name: Keep the code-fix issue current
+        if: always()
+        run: |
+          [ -f "$RUNNER_TEMP/agent.json" ] || { echo "No agent answer"; exit 0; }
+          title=$(jq -r '.agent.issue_title // "SEO agent: code fixes needed"' "$RUNNER_TEMP/agent.json")
+          jq -r '.agent.issue_md // ""' "$RUNNER_TEMP/agent.json" > "$RUNNER_TEMP/issue.md"
+          num=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
+          if [ -s "$RUNNER_TEMP/issue.md" ]; then
+            printf '\n\n---\n_Generated by the SEO agent_\n' >> "$RUNNER_TEMP/issue.md"
+            if [ -n "$num" ]; then gh issue edit "$num" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/issue.md"; else gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file "$RUNNER_TEMP/issue.md"; fi
+          elif [ -n "$num" ]; then
+            gh issue close "$num" --repo "$GITHUB_REPOSITORY" --comment "Every code fix the SEO agent listed is confirmed live. Closing."
+          fi

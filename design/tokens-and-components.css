@@ -911,3 +911,12 @@ body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
 .geoavg{font-family:var(--head); font-size:2rem; line-height:1; margin-right:.25rem}
 #seoTabs{margin-top:.25rem}
 .seotbl td.small{max-width:28rem}
+
+/* desk v2e: SEO agent page (reports rendered from Markdown) */
+.mdbody{font-size:.98rem}
+.mdbody p{margin:.4rem 0}
+.mdh{font-family:var(--head);color:var(--ink);margin:1rem 0 .35rem}
+h4.mdh{font-size:1.1rem}
+h5.mdh{font-size:1rem}
+.mdl{margin:.25rem 0 .75rem;padding-left:1.25rem}
+.mdl li{margin:.2rem 0}

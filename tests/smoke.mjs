@@ -896,6 +896,14 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     mentions: [{ url: "https://www.tribuneindia.com/forum-maps-potholes", title: "Residents' forum maps every pothole in Gurugram", source: "The Tribune", published_at: "2026-10-06T08:00:00Z" }],
     opportunities: [{ issue_type: "waste", area: "Sector 45", mentions: 6, title: "Garbage in Sector 45: what residents are reporting and where to file it", target: "/guide/waste", why: "6 public posts in 14 days, nothing published on it", examples: [{ title: "Garbage piling up near Sector 45 market", url: "https://www.reddit.com/r/gurgaon/x" }], auto: { state: "queued", position: 2, eta_days: 0 } }],
     topics: { enabled: true, per_week: 3, review_hours: 48, posts: [] },
+    agent: { schedule: { plan: "09:00", work: "13:00", report: "19:00" }, repo: "https://github.com/saurabhrao17/Gurugram-Vision-Forum/tree/seo-agent-log", last_run: "2026-10-09T07:30:05Z",
+      open: [{ key: "page:canonical_other", area: "pages", severity: "medium", owner: "code", title: "Canonical points elsewhere on 2 pages", detail: "/about, /join", action: "A change to the site's code or data.", status: "open", first_seen: "2026-10-08T03:30:00Z", last_action_at: "2026-10-09T07:30:02Z", last_result: null },
+        { key: "index:unknown", area: "index", severity: "medium", owner: "auto", title: "5 pages Google does not know yet", detail: "/guides, /hi/guides", action: "Ping IndexNow with these pages and resubmit the sitemap.", status: "open", first_seen: "2026-10-08T03:30:00Z", last_action_at: "2026-10-09T03:30:02Z", last_result: "Pinged IndexNow (Bing and others) with 5 pages Google does not know yet" }],
+      fixed: [{ key: "link:/hi/wards", title: "Broken internal link: /hi/wards (HTTP 404)", resolved_at: "2026-10-09T07:30:03Z" }],
+      log: [{ at: "2026-10-09T07:30:03Z", day: "2026-10-09", phase: "work", kind: "check", text: "Fixed: Broken internal link: /hi/wards (HTTP 404)", ok: true },
+        { at: "2026-10-09T03:30:01Z", day: "2026-10-09", phase: "plan", kind: "plan", text: "Plan for today: 2 open tasks: 1 the agent handles, 0 waiting on search engines, 1 need a code change, 0 need a person", ok: null }],
+      reports: [{ id: "weekly:2026-W41", kind: "weekly", day: "2026-10-09", summary: {}, markdown: "# SEO agent: plan for 2026-W41\n\n## This week\n\n### Content (topic pipeline, up to 3 posts)\n\n1. Garbage: 27 public posts in 14 days\n\n### Needs a code change (1)\n\n- **Canonical points elsewhere on 2 pages** — fix the head" },
+        { id: "daily:2026-10-08", kind: "daily", day: "2026-10-08", summary: { fixed: 1, opened: 2, open: 2 }, markdown: "# SEO agent: daily report, 8 Oct 2026\n\n## Fixed today (1)\n\n- Broken internal link: /hi/wards\n\n<script>alert(1)</script>" }] },
     activity: [{ at: "2026-10-08T21:42:00Z", step: "seo", text: "Audited 40 of 131 pages, average score 97", ok: true }, { at: "2026-10-08T02:31:00Z", step: "indexnow", text: "Pinged IndexNow with 6 URLs", ok: true }],
     settings: { indexnow: true, gsc_verified: false, bing_verified: false }, labels: { title_long: "Title too long", status: "The page did not answer 200" } };
   Object.assign(seoFixture, {
@@ -916,9 +924,9 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(200);
   const seoCounts = (await page.locator("#seoCounts").innerText()).replace(/\s+/g, " ");
   check(seoCounts.includes("96 Site health") && seoCounts.includes("2 open issues") && seoCounts.includes("93 GEO readiness") && seoCounts.includes("cited in 1 of 2 AI answers") && seoCounts.includes("3 Search clicks") && seoCounts.includes("1/2 Indexed") && seoCounts.includes("94 Mobile speed"), "SEO counts: site health, GEO readiness with AI citations, search clicks, indexed pages, mobile speed");
-  check((await page.locator("#seoTabs .stab").allInnerTexts()).join("|") === "Overview|Pages|Clusters|GEO|Search data|Speed" && !(await page.locator('#seoBody [data-cpane="overview"]').isHidden()) && (await page.locator('#seoBody [data-cpane="pages"]').isHidden()), "six sub-tabs, Overview open first");
+  check((await page.locator("#seoTabs .stab").allInnerTexts()).join("|") === "Overview|Agent|Pages|Clusters|GEO|Search data|Speed" && !(await page.locator('#seoBody [data-cpane="overview"]').isHidden()) && (await page.locator('#seoBody [data-cpane="pages"]').isHidden()), "six sub-tabs, Overview open first");
   check((await page.locator("#seoChecklist tbody tr").count()) === 17 && (await page.locator("#seoBody [data-seo-manual]").count()) === 2 && (await page.locator("#seoChecklist .tag-danger").count()) === 1 && (await page.locator("#seoChecklist .tag-warn").count()) === 2, "checklist lists the checks, one in red, the two manual ones as To do with a checkbox");
-  check((await page.locator("#seoBody .seolog .row").count()) === 2 && (await page.locator('#seoBody [data-cpane="overview"]').innerText()).includes("Audited 40 of 131 pages, average score 97"), "activity log shows what the cron did");
+  check((await page.locator('#seoBody [data-cpane="overview"] .seolog .row').count()) === 2 && (await page.locator('#seoBody [data-cpane="overview"]').innerText()).includes("Audited 40 of 131 pages, average score 97"), "activity log shows what the cron did");
   check((await page.locator("#seoConn .row").count()) === 4 && (await page.locator("#seoConn").innerText()).includes("Add BING_WEBMASTER_API_KEY in Vercel") && (await page.locator("#seoConn .tag-green").count()) === 3, "connections show what is set up and what to add");
   await page.click('#seoTabs [data-ctab="pages"]');
   await page.waitForTimeout(150);
@@ -938,6 +946,13 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(150);
   const searchTxt = await page.locator('#seoBody [data-cpane="search"]').innerText();
   check(searchTxt.includes("who fixes potholes gurugram") && searchTxt.includes("2.1%") && searchTxt.includes("Discovered - currently not indexed") && searchTxt.includes("Not connected. Add BING_WEBMASTER_API_KEY in Vercel."), "Search data: Google queries and pages, index status, and Bing's missing key");
+  await page.click('#seoTabs [data-ctab="agent"]');
+  await page.waitForTimeout(150);
+  const agentTxt = await page.locator('#seoBody [data-cpane="agent"]').innerText();
+  check(agentTxt.includes("Plan for today: 2 open tasks") && agentTxt.includes("Fixed: Broken internal link") && (await page.locator("#agentTasks tbody tr").count()) === 2 && (await page.locator("#agentWeek ol.mdl li").count()) === 1 && (await page.locator('#agentStatus a[href$="/tree/seo-agent-log"]').count()) === 1 && agentTxt.includes("Fixed this week"), "Agent tab: today's timeline, the open tasks with who acts, the week's plan and the GitHub link");
+  await page.click('[data-agent-report="0"]');
+  await page.waitForTimeout(100);
+  check((await page.locator('[data-agent-body="0"]').innerText()).includes("Broken internal link: /hi/wards") && (await page.locator('[data-agent-body="0"] script').count()) === 0, "a daily report opens on Read, rendered and escaped");
   await page.click('#seoTabs [data-ctab="speed"]');
   await page.waitForTimeout(150);
   check((await page.locator("#seoBody .vital").count()) === 1 && (await page.locator("#seoBody .vital").innerText()).includes("1.7 s"), "Speed tab shows the Core Web Vitals card");

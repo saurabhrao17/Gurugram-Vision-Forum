@@ -578,7 +578,7 @@ test("runDaily runs autopost, digest and indexnow between insights and sla, with
   const fetchImpl = async () => ({ ok: false, status: 503, text: async () => "", json: async () => null, body: null });
   const r = await runDaily(sb, { INDEXNOW_KEY: "k" }, { fetch: fetchImpl, now: MONDAY });
   assert.equal(r.ok, true, JSON.stringify(r.errors));
-  assert.deepEqual(Object.keys(r), ["ok", "news", "links", "signals", "insights", "autopost", "digest", "audience", "social", "indexnow", "sla", "brief", "outbox", "retention", "seo", "vitals", "mentions", "geo", "gsc", "bing", "topics"]);
+  assert.deepEqual(Object.keys(r), ["ok", "news", "links", "signals", "insights", "autopost", "digest", "audience", "social", "indexnow", "sla", "brief", "outbox", "retention", "seo", "vitals", "mentions", "geo", "gsc", "bing", "topics", "agent"]);
   // The insights step saw no signals, so the autopost step had nothing from this run and did not reach for the table.
   assert.deepEqual(r.insights, { topics: 0, ai: false, stored: false });
   assert.equal(r.autopost.skipped, null);
