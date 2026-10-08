@@ -708,6 +708,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(80);
   check(await page.locator("#deskMain").isVisible(), "returning to the desk keeps the session");
   check((await page.locator("#whoAmI").innerText()).includes("Coordinator"), "header shows who is signed in");
+  const shot = async (name) => { if (process.env.SHOTS) await page.screenshot({ path: process.env.SHOTS + "/" + name + ".png", fullPage: false }); };
+  await shot("desk-reports");
   check((await page.locator("#tList .row").count()) === 2, "list shows two reports");
   check((await page.locator("#tList .tag-danger").count()) === 1, "overdue report carries a past-due flag");
   check((await page.locator("#tSummary").innerText()).includes("past due: 1 unmapped"), "summary line shows the counts");
@@ -725,10 +727,12 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
 
   await page.click('[data-open="GVF-2026-SRV01"]');
   await page.waitForSelector("#editForm");
+  if (process.env.SHOTS) await page.waitForTimeout(350);
+  await shot("desk-ticket");
   check((await page.locator("#sheetBody").innerText()).includes("Test Reporter"), "detail shows the reporter to signed-in staff");
   check((await page.locator("#sheetBody").innerText()).includes("Lead: Vol One"), "detail shows the ward's lead volunteer");
   check((await page.locator("#sheetBody .tl li").count()) === 1, "detail shows the event timeline");
-  check((await page.locator("#sheetBody").innerText()).includes("Filing checklist: GMDA"), "detail shows the filing checklist for the portal");
+  check((await page.locator("#sheetBody").innerText()).includes("Filing checklist · GMDA"), "detail shows the filing checklist for the portal");
   check((await page.locator("#sheetBody .chk .tag-danger").count()) === 1 && (await page.locator("#askMissing").count()) === 1, "checklist flags the missing photo and offers to ask the reporter");
   check((await page.locator("#sheetBody").innerText()).includes("Emails asha@example.org from the desk"), "ask button says the mail goes from the desk");
   check((await page.locator("#sheetBody .replies").count()) === 0, "no replies yet");
@@ -937,27 +941,31 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   // SRV01 was filed (stage 2) by the PATCH above, so only OLD02 is still unmapped here; the join request (06:00) is newer than the email (05:00)
   check(!(await page.locator("#tInbox").isHidden()) && (await page.locator("#inboxList .row").count()) === 4, "Inbox lists 2 emails, 1 join request and the 1 unmapped report");
   check((await page.locator("#inboxCounts").innerText()).replace(/\s+/g, " ").includes("1 Emails new 1 Join requests new 1 Reports unmapped") && (await page.locator("#inboxTab").innerText()).replace(/\s+/g, " ").includes("Inbox · 3"), "Inbox count strip shows the three streams and the badge follows the fresh counts");
-  const inboxTags = await page.locator("#inboxList .row > div:nth-child(2) > b > span.tag:first-of-type").allInnerTexts();
+  const inboxTags = await page.locator("#inboxList .row .mfrom > span.tag:first-of-type").allInnerTexts();
   check(inboxTags.join("|") === "Join request|Email|Email|Report", "rows are tagged by type and sorted newest first (" + inboxTags.join(", ") + ")");
-  check((await page.locator('#inboxList a[href="#/desk/GVF-2026-OLD02"]').count()) === 1 && (await page.locator("#inboxList .row").last().locator(".tag-danger").count()) === 1 && (await page.locator('#inboxList [data-ijoin="j1"]').count()) === 1, "report rows link to the desk ticket with their flags and join rows offer Open in Join requests");
-  check((await page.locator('#inboxList li[data-iid="e2"] a[data-open="GVF-2026-SRV01"]').innerText()).includes("Reply on GVF-2026-SRV01") && (await page.locator('#inboxList li[data-iid="e1"] a[data-open]').count()) === 0, "an email linked to a report carries a tag that opens the ticket");
-  const emailRowText = await page.locator('#inboxList li[data-iid="e1"]').innerText();
-  check(emailRowText.includes("Asha Verma") && emailRowText.includes("asha@example.org") && emailRowText.includes("Streetlight out in Sector 45") && emailRowText.includes("8 Oct"), "email row shows from, subject and received time");
-  check((await page.locator("#ib_e1.clip").count()) === 1 && (await page.locator('#inboxList [data-imore="e1"]').innerText()) === "Show more", "a long body is collapsed with Show more");
-  await page.click('#inboxList [data-imore="e1"]');
-  check((await page.locator("#ib_e1.clip").count()) === 0 && (await page.locator('#inboxList [data-imore="e1"]').innerText()) === "Show less", "Show more expands the body");
-  await page.selectOption('#inboxList select[data-istatus="e1"]', "read");
+  check((await page.locator('#inboxList a[href="#/desk/GVF-2026-OLD02"]').count()) === 1 && (await page.locator("#inboxList .row").last().locator(".tag-danger").count()) === 1 && (await page.locator("#inboxList .row.unread").count()) === 3, "report rows link to the desk ticket with their flags; new items read as unread");
+  check((await page.locator("#mail.reading").count()) === 0 && (await page.locator("#inboxRead .mread-empty").count()) === 1, "the reading pane starts empty");
+  await page.click('#inboxList li[data-iid="e2"]');
+  check((await page.locator('#inboxRead a[data-open="GVF-2026-SRV01"]').innerText()).includes("Reply on GVF-2026-SRV01") && (await page.locator('#inboxList li[data-iid="e2"].sel').count()) === 1 && (await page.locator('#inboxList li[data-iid="e2"] .mfrom').innerText()).includes("GVF-2026-SRV01") && !(await page.locator('#inboxList li[data-iid="e1"] .mfrom').innerText()).includes("GVF-"), "an email linked to a report carries its reference and the reading pane opens the ticket");
+  await page.click('#inboxList li[data-iid="e1"]');
+  await shot("desk-inbox");
+  const emailRead = await page.locator("#inboxRead").innerText();
+  check(emailRead.includes("Asha Verma") && emailRead.includes("asha@example.org") && emailRead.includes("Streetlight out in Sector 45") && emailRead.includes("8 Oct") && emailRead.includes("Line five, which makes this long enough to clip."), "the reading pane shows from, subject, time and the whole body");
+  check((await page.locator('#inboxList li[data-iid="e1"] .msnip').innerText()).startsWith("The light near the park gate") && !(await page.locator('#inboxList li[data-iid="e1"]').innerText()).includes("enough to clip."), "the list row shows a one-line snippet");
+  await page.selectOption('#inboxRead select[data-istatus="e1"]', "read");
   await page.waitForTimeout(200);
   check(inboxPatches.length === 1 && inboxPatches[0].id === "e1" && inboxPatches[0].body.status === "read" && !("notes" in inboxPatches[0].body), "changing the email status PATCHes {status} to /api/triage/inbox/e1");
-  check((await page.locator("#inboxTab").innerText()).replace(/\s+/g, " ").includes("Inbox · 2") && (await page.locator('#inboxList li[data-iid="e1"] [data-itag]').innerText()) === "Read", "badge and tag update after the status change");
-  await page.fill('#inboxList textarea[data-inotes="e1"]', "Asked MCG lighting cell.");
-  await page.click('#inboxList [data-isave="e1"]');
+  check((await page.locator("#inboxTab").innerText()).replace(/\s+/g, " ").includes("Inbox · 2") && (await page.locator('#inboxList li[data-iid="e1"] [data-itag]').innerText()) === "Read" && (await page.locator('#inboxList li[data-iid="e1"].unread').count()) === 0, "badge, tag and unread state update after the status change");
+  await page.fill('#inboxRead textarea[data-inotes="e1"]', "Asked MCG lighting cell.");
+  await page.click('#inboxRead [data-isave="e1"]');
   await page.waitForTimeout(200);
   check(inboxPatches.length === 2 && inboxPatches[1].id === "e1" && inboxPatches[1].body.notes === "Asked MCG lighting cell." && !("status" in inboxPatches[1].body), "saving notes PATCHes {notes} for that email");
   await page.click('#inboxChips [data-istage="done"]');
   await page.waitForTimeout(300);
   check(inboxCalls[inboxCalls.length - 1].includes("status=done") && (await page.locator('#inboxList li[data-iid]').count()) === 1 && (await page.locator("#inboxList .row").count()) === 3, "the Done chip narrows the mail stream only");
-  await page.click('#inboxList [data-ijoin="j1"]');
+  await page.click('#inboxList [data-ikey="join:j1"]');
+  check((await page.locator("#inboxRead").innerText()).includes("Weekends only") && (await page.locator('#inboxRead [data-ijoin="j1"]').count()) === 1, "a join request reads in the pane with its note and the button to work it");
+  await page.click('#inboxRead [data-ijoin="j1"]');
   await page.waitForTimeout(250);
   check(!(await page.locator("#tJoins").isHidden()) && (await page.locator("#joinList").innerText()).includes("Asha Verma"), "Open in Join requests switches to that tab");
   await page.click('[data-tab="joins"]');
@@ -990,7 +998,9 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check(!(await page.locator("#tRoles").isHidden()) && (await page.locator("#sName").inputValue()) === "Asha Verma" && (await page.locator("#sEmail").inputValue()) === "asha@example.org" && (await page.locator("#sPhone").inputValue()) === "+919811122233", "Create desk account opens the Roles tab with name, email and mobile prefilled");
 
   // Performance tab: ward ageing with amber/red cells, sortable headers, quiet wards folded; people with an idle flag; the morning brief with Copy
+  if (process.env.SHOTS) { await page.setViewportSize({ width: 390, height: 844 }); await page.click('[data-tab="reports"]'); await page.waitForTimeout(200); await shot("desk-reports-390"); await page.click('[data-tab="inbox"]'); await page.waitForTimeout(400); await page.click('#inboxChips [data-istage="all"]'); await page.waitForTimeout(400); await shot("desk-inbox-390"); await page.click('#inboxList li[data-iid="e1"]'); await shot("desk-inbox-read-390"); await page.click('[data-open="GVF-2026-SRV01"]').catch(() => {}); await page.setViewportSize({ width: 1366, height: 860 }); await page.click('[data-tab="joins"]'); await page.waitForTimeout(300); }
   await page.click('[data-tab="performance"]');
+  await page.waitForTimeout(300); await shot("desk-performance");
   await page.waitForTimeout(300);
   check((await page.locator("#perfTotals").innerText()).replace(/\s+/g, " ").includes("6 Open 2 Unmapped 2 Overdue 3 Received 7d 1 Resolved 7d"), "performance totals strip shows the five counts");
   check((await page.locator("#perfWardBody tr").count()) === 2 && !(await page.locator("#perfWardBody").innerText()).includes("Madhu Batra"), "quiet ward 30 is folded away by default");
