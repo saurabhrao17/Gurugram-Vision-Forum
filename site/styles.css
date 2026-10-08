@@ -649,14 +649,14 @@ body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
 .dme .who b{display:block; color:var(--ink); font-family:var(--head); font-size:1rem}
 .dnav{display:flex; flex-direction:row; gap:.25rem; margin:0; border:0; overflow:auto; padding-bottom:.25rem; scrollbar-width:thin}
 .dnav .dgrp{display:none}
-.dnav .tab{display:inline-flex; align-items:center; gap:.5rem; padding:.45rem .7rem; border:1.5px solid transparent; border-radius:8px; min-height:40px; font-size:.95rem; color:var(--muted); white-space:nowrap; flex:none}
+.dnav .tab{display:inline-flex; align-items:center; gap:.5rem; padding:.35rem .7rem; border:1.5px solid transparent; border-radius:8px; min-height:38px; font-size:.95rem; color:var(--muted); white-space:nowrap; flex:none}
 .dnav .tab .i{width:20px; height:20px; stroke-width:2}
 .dnav .tab:hover{background:var(--surface-2); color:var(--ink)}
 .dnav .tab[aria-selected="true"]{background:var(--blue-50); color:var(--blue); border-color:transparent; box-shadow:none}
 .dnav .tab .tcount{margin-left:auto; font-size:.8rem; padding:.05rem .45rem; border-radius:999px; background:var(--saffron); color:#0B2545}
 @media (min-width:1024px){
   .dnav{flex-direction:column; overflow:visible; padding-bottom:0}
-  .dnav .dgrp{display:block; font-family:var(--head); font-weight:700; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:.6rem .7rem .2rem}
+  .dnav .dgrp{display:block; font-family:var(--head); font-weight:700; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:.45rem .7rem .15rem}
   .dnav .dgrp:first-child{margin-top:.1rem}
   .dnav .tab{width:100%; justify-content:flex-start}
 }
@@ -859,7 +859,12 @@ body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
 .cover .who a{display:block; font-weight:400; font-size:.82rem; color:var(--muted); text-decoration:none}
 .cover td.empty-slot .who{color:var(--muted); font-weight:400}
 .cover tr.gap td{background:var(--warn-50)}
-.assign td.wards{min-width:220px}
+.assigntbl td.wards{min-width:220px}
+.assigntbl td[data-l="Assign"]{min-width:300px}
+.assigntbl .assign{grid-template-columns:minmax(120px,1fr) auto auto}
+.composer form.cpad{padding:1rem 1.1rem}
+/* Short windows: the sidebar scrolls with the page instead of clipping its own list */
+@media (max-height:820px){ .dside{position:static; max-height:none} }
 @media (max-width:639px){ .roster .person{min-width:0} }
 .label-like{font-family:var(--head); font-weight:600; font-size:.92rem; color:var(--ink)}
 .sharebox{display:flex; gap:.5rem; flex-wrap:wrap; margin:.3rem 0}

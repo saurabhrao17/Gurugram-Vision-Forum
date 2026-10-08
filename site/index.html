@@ -401,7 +401,7 @@
         <div class="jcounts jcounts-4" id="teamCounts" aria-live="polite"></div>
         <div class="composer form" id="staffComposer" hidden>
           <div class="chead"><h3>Add a person</h3><button class="btn btn-line btn-sm" type="button" id="staffClose">Close</button></div>
-          <form id="staffForm" novalidate>
+          <form id="staffForm" class="cpad" novalidate>
             <div class="err" id="sErr" role="alert">Check the highlighted fields.</div>
             <div class="frow frow-3">
               <div class="field"><label for="sName">Name</label><input type="text" id="sName" required></div>
@@ -425,7 +425,7 @@
         </div>
         <div class="cpane" data-cpane="byperson">
           <p class="small muted">Type wards like "1-6, 9, 12", choose the role, press Add, then Save on that row. The × on a chip removes that ward.</p>
-          <table class="tbl roster assign" id="assignTbl"><thead><tr><th scope="col">Person</th><th scope="col">Wards</th><th scope="col">Assign</th></tr></thead><tbody id="assignBody"></tbody></table>
+          <table class="tbl roster assigntbl" id="assignTbl"><thead><tr><th scope="col">Person</th><th scope="col">Wards</th><th scope="col">Assign</th></tr></thead><tbody id="assignBody"></tbody></table>
         </div>
       </div>
       <div id="tJoins" class="dpanel" hidden>

@@ -1104,6 +1104,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#lBtn");
   await page.waitForSelector("#deskMain:not([hidden])");
   await page.waitForTimeout(250);
+  if (process.env.SHOTS) { for (const vp of [[1366, 860], [1366, 700], [1100, 700], [390, 844]]) { await page.setViewportSize({ width: vp[0], height: vp[1] }); for (const t of ["reports", "inbox", "map", "roles", "assign", "joins", "performance", "content", "newsletter", "visitors", "subscribers", "insights", "health"]) { await page.click('[data-tab="' + t + '"]'); await page.waitForTimeout(350); await shot("sweep-" + vp[0] + "x" + vp[1] + "-" + t); } } await page.setViewportSize({ width: 1366, height: 860 }); }
   for (const t of ["reports", "inbox", "map", "roles", "assign", "joins", "performance", "content", "newsletter", "visitors", "subscribers", "insights", "health"]) check(!(await page.locator("#" + t + "Tab").isHidden()), "owner sees the " + t + " tab");
   check((await page.locator("#tTabs .tab:not([hidden])").allInnerTexts()).map((t) => t.replace(/\s*·.*$/, "").trim()).join("|") === "Reports|Inbox|Map|Team|Ward assignments|Join requests|Performance|Content|Newsletter|Visitors|Subscribers|Pulse|Health", "owner's tabs run Reports, Inbox, Map, Roles, Join requests, Performance, Content, Newsletter, Visitors, Subscribers, Pulse, Health");
   await page.click('[data-tab="roles"]');
