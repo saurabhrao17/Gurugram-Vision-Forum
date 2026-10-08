@@ -219,6 +219,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#tiles .tile").first().innerText()).trim() === "Roads, footpaths", "tiles are English again");
   check((await page.locator("footer a[href='/guides']").count()) === 1 && (await page.locator("footer a[href='/hi/guides']").count()) === 0, "guide links return to English pages");
 
+  { const html = await page.content(); check(!/mailto:|tel:\+91|contact@|98993 75445|Sidharth/.test(html), "no contact email, phone or name anywhere in the shell: the forms are the only channel"); }
   check(errors.length === 0, "zero console or page errors" + (errors.length ? ": " + errors.join(" | ") : ""));
   await ctx.close();
 }
