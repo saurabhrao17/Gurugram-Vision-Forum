@@ -1,8 +1,10 @@
 name: Nightly SEO audit
 
 # Runs the SEO steps of the daily cron against production at 03:00 IST
-# (21:30 UTC): the on-page audit of the sitemap's pages (seo), one PageSpeed
-# Insights run (vitals) and the news search for the Forum's name (mentions).
+# (21:30 UTC): the on-page audit, link crawl and site checks (seo), one
+# PageSpeed Insights run (vitals), the news search for the Forum's name
+# (mentions), the AI answer check (geo), and the Search Console (gsc) and
+# Bing Webmaster (bing) data pulls.
 # Each step is its own call because the Vercel function has 60 seconds and
 # PageSpeed alone can use most of it. The Hobby plan allows two Vercel crons
 # (fetch, analyse), so this one lives here; the audit and the mentions
@@ -35,7 +37,7 @@ jobs:
           if [ -z "$TOKEN" ]; then echo "CRON_SECRET repository secret is not set"; exit 1; fi
           echo "::add-mask::$TOKEN"
           ok=1
-          for step in seo vitals mentions; do
+          for step in seo vitals mentions geo gsc bing; do
             code=$(curl -sS -m 90 -o out.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/cron/daily?steps=$step")
             echo "$step: HTTP $code"
             if command -v jq >/dev/null && jq . out.json >/dev/null 2>&1; then jq ".$step, .errors" out.json; else cat out.json; echo; fi

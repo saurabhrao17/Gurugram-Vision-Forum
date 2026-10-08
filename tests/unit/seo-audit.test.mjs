@@ -10,7 +10,7 @@ import { runDaily, STEP_GROUPS, STEP_NAMES } from "../../lib/handlers/cron.js";
 
 const SITE = "https://gurugramvisionforum.org";
 const GOOD = (over = {}) => {
-  const o = { title: "Roads, footpaths in Gurugram: who fixes it, how to complain", desc: "A guide to reporting potholes and broken roads in Gurugram to the right authority, with the portal, the fields it asks for and the timelines.", url: `${SITE}/guide/roads`, hi: `${SITE}/hi/guide/roads`, lang: "en", h1: "<h1>Who fixes roads, footpaths in Gurugram: how to complain</h1>", ld: '<script type="application/ld+json">{"@type":"FAQPage"}</script>', og: '<meta property="og:title" content="x"><meta property="og:description" content="y"><meta property="og:image" content="z">', viewport: '<meta name="viewport" content="width=device-width">', words: 200, links: '<a href="/a">a</a><a href="/b">b</a><a href="/guides">c</a>', ...over };
+  const o = { title: "Roads, footpaths in Gurugram: who fixes it, how to complain", desc: "A guide to reporting potholes and broken roads in Gurugram to the right authority, with the portal, the fields it asks for and the timelines.", url: `${SITE}/guide/roads`, hi: `${SITE}/hi/guide/roads`, lang: "en", h1: "<h1>Who fixes roads, footpaths in Gurugram: how to complain</h1>", ld: '<script type="application/ld+json">{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Who fixes roads?","acceptedAnswer":{"@type":"Answer","text":"GMDA and MCG."}}]}</script>', og: '<meta property="og:title" content="x"><meta property="og:description" content="y"><meta property="og:image" content="z">', viewport: '<meta name="viewport" content="width=device-width">', words: 200, links: '<a href="/a">a</a><a href="/b">b</a><a href="/guides">c</a>', ...over };
   return `<html lang="${o.lang}"><head><title>${o.title}</title><meta name="description" content="${o.desc}"><link rel="canonical" href="${o.url}"><link rel="alternate" hreflang="en-IN" href="${SITE}/guide/roads"><link rel="alternate" hreflang="hi-IN" href="${o.hi}"><link rel="alternate" hreflang="x-default" href="${SITE}/guide/roads">${o.og}${o.viewport}${o.ld}</head><body>${o.h1}<p>${"word ".repeat(o.words)}</p>${o.links}${o.extra || ""}</body></html>`;
 };
 
@@ -122,7 +122,7 @@ test("checklist: automatic items follow the audit rows, manual ones the settings
   const good = { kind: "guide", status: 200, issues: [] };
   const c1 = checklist({ env: { INDEXNOW_KEY: "k" }, settings: { seo: { indexnow: true, gsc_verified: true }, autopost: { enabled: true } }, pages: [good, { kind: "app", status: 200, issues: [{ code: "viewport_missing" }] }], vitals: { url: "u", performance: 92, lcp_ms: 1800 }, links: { total: 36, broken: 0, checked_at: "2026-10-08T00:00:00Z" }, autopost: { enabled: true }, mentions: 2 });
   const by = Object.fromEntries(c1.map((i) => [i.key, i]));
-  assert.equal(c1.length, 17);
+  assert.equal(c1.length, 30);
   assert.ok(by.mobile.ok, "the app shell's row does not count against the rendered pages");
   assert.ok(by.canonical.ok && by.hreflang.ok && by.schema.ok && by.og.ok && by.thin.ok && by.indexnow.ok && by.links.ok && by.content.ok && by.vitals.ok && by.gsc.ok && by.mentions.ok);
   assert.equal(by.bing.ok, false);
@@ -210,7 +210,7 @@ test("mentionsStep searches Google News for the Forum's name and skips the site'
 });
 
 test("cron: the seo group holds the three steps and runDaily reports them", async () => {
-  assert.deepEqual(STEP_GROUPS.seo, ["seo", "vitals", "mentions"]);
+  assert.deepEqual(STEP_GROUPS.seo, ["seo", "vitals", "mentions", "geo", "gsc", "bing"]);
   assert.deepEqual([...new Set([...STEP_GROUPS.fetch, ...STEP_GROUPS.analyse, ...STEP_GROUPS.seo])].sort(), [...STEP_NAMES].sort());
   const r = await runDaily(fakeSb(), {}, {}, { only: ["seo", "vitals", "mentions"] });
   assert.equal(r.ok, true);

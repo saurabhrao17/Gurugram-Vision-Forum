@@ -903,3 +903,9 @@ body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
 .seotbl td .tag{font-size:.75rem; padding:.2rem .45rem; margin:.1rem .15rem .1rem 0}
 .seotbl td.n input{vertical-align:middle; margin-right:.4rem; width:18px; height:18px}
 .seotbl td.n .meta{font-size:.8rem; color:var(--muted)}
+
+/* ---------- desk v2d: SEO sub-tabs (clusters, GEO, search data) ---------- */
+.seoh{font-family:var(--head); font-size:.85rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:.4rem 0 .5rem}
+.geoavg{font-family:var(--head); font-size:2rem; line-height:1; margin-right:.25rem}
+#seoTabs{margin-top:.25rem}
+.seotbl td.small{max-width:28rem}
