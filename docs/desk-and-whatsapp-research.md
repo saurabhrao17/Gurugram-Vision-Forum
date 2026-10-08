@@ -93,6 +93,36 @@ Role-scoped sign-in (owner, coordinator, ward volunteer, content); a reports lis
 
 Each step is a day or two of work, tests included, and none of them needs a paid service. The only money in this plan is Meta's per-message charge, around ₹1,000 a year at the volumes the Forum will see in its first year.
 
+## Part 4: the weekly-digest list and a newsletter tool (added 8 Oct 2026)
+
+The owner asked where the footer's "Weekly digest" sign-ups can be seen, for subscribe and unsubscribe to run by themselves, and for a link to a free or cheapest tool with rich features.
+
+### What the Forum already had
+
+`POST /api/subscribe` with double opt-in (a confirmation mail with a token link; nothing is sent until it is clicked), an unsubscribe link with the same token in every digest, and the weekly round-up mailed to confirmed addresses through the outbox. Missing: a desk view, and any editor or send tool beyond the automated round-up.
+
+### Tools compared (free tiers as published in October 2026; the sandbox could not open the vendors' own pricing pages, so confirm before relying on a number)
+
+| Tool | Free tier | Rich features on free | Fit |
+|---|---|---|---|
+| **Resend (Contacts + Broadcasts)** | 1,000 contacts, unlimited broadcast sends, 1 domain; transactional stays 3,000 mails a month. Next tier about $40 a month for 5,000 contacts. | Broadcast editor, templates, unsubscribe link and page, contact webhooks (`contact.created/updated/deleted`), API for contacts. Audiences are deprecated in favour of global contacts with segments and topics. | **Chosen.** Already the site's mail provider: one account, one API key, one webhook endpoint, no new vendor and no data in a third place. |
+| Brevo | 300 mails a day, unlimited contacts (some sources say 100,000), Brevo branding on mails, automation to 2,000 contacts. | Drag-and-drop editor, templates, segmentation, basic CRM. | Best fallback once the list passes 1,000: unlimited contacts, but a second account and branding. |
+| Kit (ConvertKit) | Up to 10,000 subscribers, unlimited broadcasts, forms and landing pages; one basic automation; Kit branding. | Tagging, segmentation, editor. | Good at scale; creator-oriented; a second account. |
+| MailerLite | Cut in 2026 to 250 subscribers and 2,500 mails a month. | Editor, 3 automations. | Too small now. |
+| Mailchimp | 500 contacts, 1,000 sends a month. | Editor. | Smaller than Resend's free tier. |
+| Listmonk (self-hosted) | Free software, needs a server (about ₹400 a month) and SMTP (Resend). | Full featured. | More to run than the Forum should carry. |
+
+### What was built
+
+- Desk → Subscribers (owner only, like Visitors: it is personal data): counts, status chips, search, CSV, Stop emails / Put back / Erase, Sync, and "add an address", which only sends the confirmation mail.
+- `lib/audience.js`: confirmed addresses are pushed to Resend contacts (address and language only, never a name); a stop pushes `unsubscribed: true`; an erasure deletes the contact; the nightly cron step `audience` retries whatever failed.
+- `/api/hooks/email` also takes Resend's contact webhooks, so an unsubscribe through a Broadcast's own link stops the Forum's digest too. A contact re-subscribed on Resend's side is put back only if it had once confirmed here; double opt-in is never bypassed.
+- Env: a full-access `RESEND_API_KEY` (the current key may be sending-only), the webhook endpoint subscribed to the contact events with its secret in `RESEND_WEBHOOK_SECRET`.
+
+### Why not a second tool now
+
+The list is small, the round-up already goes out automatically, and every extra vendor is another place personal data lives and another login to keep. Resend's free tier carries the Forum to 1,000 subscribers at no cost; the CSV export moves the list to Brevo or Kit in a minute when that day comes.
+
 ## Sources
 
 - WhatsApp pricing (India, October 2026): [MyOperator](https://myoperator.com/blog/whatsapp-business-api-pricing-india-2026), [ChatMaxima](https://chatmaxima.com/whatsapp-api-pricing/india/), [Flowcall rate card](https://www.flowcall.co/blog/whatsapp-business-api-pricing), [Blueticks](https://blueticks.co/blog/whatsapp-business-pricing-marketing-messages-2026), [2Factor](https://2factor.in/v3/lp/whatsapp-business-api-pricing.php), [ChatLivo](https://blog.chatlivo.com/whatsapp-business-api-pricing/).
@@ -101,3 +131,4 @@ Each step is a day or two of work, tests included, and none of them needs a paid
 - Inbox software: [Chatwoot pricing (eesel)](https://www.eesel.ai/blog/chatwoot-pricing), [Chatwoot pricing (Featurebase)](https://www.featurebase.app/blog/chatwoot-pricing), [Chatwoot: all channels on every plan](https://www.chatwoot.com/compare/intercom).
 - WhatsApp Flows: [ChatDaddy guide](https://chatdaddy.tech/blog/whatsapp-flows), [Kanal guide](https://getkanal.com/blog/whatsapp-flows-guide-ecommerce), [baat.ai](https://baat.ai/knowledge-base/what-are-whatsapp-flows).
 - Civic CRM benchmarks: [SocietyWorks FixMyStreet Pro features](https://www.societyworks.org/category/features/), [FixMyStreet Pro dashboard](https://www.societyworks.org/2018/02/09/how-to-use-the-fixmystreet-pro-dashboard-to-get-insights-on-your-service-levels/), [FixMyStreet Pro user guide](https://fixmystreet.org/pro-manual/print/), [G-Cloud 15 pricing document](https://assets.applytosupply.digitalmarketplace.service.gov.uk/g-cloud-15/documents/586634/617647349179126-pricing-document-2026-01-27-1603.pdf), [SeeClickFix 311 CRM](https://www.civicplus.com/?p=25805), [Capterra SeeClickFix reviews](https://www.capterra.in/software/202342/seeclickfix).
+- Resend: blog "Manage subscribers using Resend Audiences" (1,000 contacts free, $40/month for 5,000), changelog "New contact webhooks", docs "Migrating from audiences to segments" (via search summaries; resend.com itself was not reachable from the sandbox). Brevo, Kit, MailerLite free tiers from 2026 reviews (sendx.io, costbench.com, dreamlit.ai, mailmodo.com, skillscouter.com).
