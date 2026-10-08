@@ -119,6 +119,10 @@ The owner asked where the footer's "Weekly digest" sign-ups can be seen, for sub
 - `/api/hooks/email` also takes Resend's contact webhooks, so an unsubscribe through a Broadcast's own link stops the Forum's digest too. A contact re-subscribed on Resend's side is put back only if it had once confirmed here; double opt-in is never bypassed.
 - Env: a full-access `RESEND_API_KEY` (the current key may be sending-only), the webhook endpoint subscribed to the contact events with its secret in `RESEND_WEBHOOK_SECRET`.
 
+### Operated from the desk (added later the same day)
+
+The owner's answer to "do I operate at Resend or at our own desk?" was the desk. So the desk now has a Newsletter tab: compose (English and Hindi, plain text, Translate button, start from a published post), Preview, Send me a test, Send to subscribers (owner and coordinator). The server decides the channel: one Resend Broadcast to the mirrored contacts when a segment id is set (no daily cap; this is the normal way), otherwise one outbox mail per subscriber with the Forum's own stop link at Resend's free transactional cap of 100 a day. Resend's dashboard is never needed; the mirror exists only so a Broadcast has a list to go to and so stops made through Resend's link flow back. The Broadcast API fields (`segment_id`, `from`, `subject`, `html`, `text`, `send: true`, the `{{{RESEND_UNSUBSCRIBE_URL}}}` placeholder, and the separate `/broadcasts/{id}/send` call as a fallback) come from Resend's changelog and SDK examples as summarised by search; resend.com itself was not reachable from the sandbox, so the first live send should be a test to the team's own addresses.
+
 ### Why not a second tool now
 
 The list is small, the round-up already goes out automatically, and every extra vendor is another place personal data lives and another login to keep. Resend's free tier carries the Forum to 1,000 subscribers at no cost; the CSV export moves the list to Brevo or Kit in a minute when that day comes.

@@ -705,7 +705,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#tList .tag-danger").count()) === 1, "overdue report carries a past-due flag");
   check((await page.locator("#tSummary").innerText()).includes("past due: 1 unmapped"), "summary line shows the counts");
   check(!(await page.locator("#rolesTab").isHidden()) && !(await page.locator("#inboxTab").isHidden()) && !(await page.locator("#performanceTab").isHidden()), "coordinator sees the Inbox, Roles and Performance tabs");
-  check((await page.locator("#visitorsTab").isHidden()) && (await page.locator("#subscribersTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()) && !(await page.locator("#contentTab").isHidden()), "coordinator sees content and pulse but not the visitors' or subscribers' data");
+  check((await page.locator("#visitorsTab").isHidden()) && (await page.locator("#subscribersTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()) && !(await page.locator("#contentTab").isHidden()) && !(await page.locator("#newsletterTab").isHidden()), "coordinator sees content, newsletter and pulse but not the visitors' or subscribers' data");
 
   // Desk map: the list has loaded two rows, so its offset is 2; the map query must carry the filters only, never offset or limit
   await page.click('[data-tab="map"]');
@@ -744,6 +744,17 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     if (mth === "PUT") return json(route, 200, { ok: true, settings: b.settings });
     return json(route, mth === "POST" ? 201 : 200, { ok: true, post: { id: "p10", ...b } }); });
   await page.route("**/api/triage/draft", (route) => json(route, 503, { ok: false, error: "draft_unavailable" }));
+  const newsletterSaves = [], newsletterPreviews = [], newsletterActions = [];
+  const NL_SENT = { id: 7, subject: "September round-up", subject_hi: null, body: "x".repeat(40), body_hi: null, status: "sent", channel: "outbox", recipients: 120, sent: 120, failed: 0, sent_at: "2026-10-01T03:00:00Z", sent_by: "Owner <owner@example.org>", created_at: "2026-09-30T10:00:00Z", updated_at: "2026-10-01T03:00:00Z", test_sent_at: "2026-09-30T11:00:00Z" };
+  const NL_DRAFT = { id: 8, subject: "Draft about drains", subject_hi: null, body: "y".repeat(40), body_hi: null, status: "draft", channel: null, recipients: 0, sent: 0, failed: 0, created_at: "2026-10-07T10:00:00Z", updated_at: "2026-10-07T10:00:00Z", created_by: "Content <c@example.org>" };
+  await page.route("**/api/triage/newsletter**", (route) => {
+    const req = route.request(), url = req.url();
+    if (req.method() === "POST" && url.endsWith("/newsletter/preview")) { const b = req.postDataJSON(); newsletterPreviews.push(b); return json(route, 200, { ok: true, subject: b.subject, html: "<html><body><h1>" + b.subject + "</h1><p>" + b.body.split("\n")[2] + "</p></body></html>", subject_hi: null, html_hi: null }); }
+    if (req.method() === "POST" && /\/newsletter\/\d+$/.test(url)) { const b = req.postDataJSON(); newsletterActions.push({ url, body: b }); return json(route, 200, b.action === "test" ? { ok: true, to: "owner@example.org", test_sent_at: "2026-10-08T07:00:00Z" } : { ok: true, channel: "outbox", recipients: 4, sent: 4, failed: 0, remaining: 0, campaign: { id: 9, status: "sent" } }); }
+    if (req.method() === "POST") { const b = req.postDataJSON(); newsletterSaves.push(b); return json(route, 200, { ok: true, campaign: { ...NL_DRAFT, ...b, id: 9 } }); }
+    if (req.method() === "DELETE") return json(route, 200, { ok: true, deleted: true });
+    return json(route, 200, { ok: true, confirmed: 4, channel: { mode: "outbox", flush_now: 100, daily_cap: 100 }, campaigns: [NL_DRAFT, NL_SENT] });
+  });
   const subscriberPatches = [], subscriberPosts = [];
   await page.route("**/api/triage/subscribers**", (route) => {
     const req = route.request();
@@ -990,7 +1001,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#lBtn");
   await page.waitForSelector("#deskMain:not([hidden])");
   await page.waitForTimeout(250);
-  check((await page.locator("#reportsTab").isHidden()) && (await page.locator("#mapTab").isHidden()) && (await page.locator("#rolesTab").isHidden()) && (await page.locator("#inboxTab").isHidden()) && (await page.locator("#performanceTab").isHidden()) && (await page.locator("#visitorsTab").isHidden()) && (await page.locator("#subscribersTab").isHidden()) && (await page.locator("#healthTab").isHidden()) && !(await page.locator("#contentTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()), "content team sees only the Content and Pulse tabs");
+  check((await page.locator("#reportsTab").isHidden()) && (await page.locator("#mapTab").isHidden()) && (await page.locator("#rolesTab").isHidden()) && (await page.locator("#inboxTab").isHidden()) && (await page.locator("#performanceTab").isHidden()) && (await page.locator("#visitorsTab").isHidden()) && (await page.locator("#subscribersTab").isHidden()) && (await page.locator("#healthTab").isHidden()) && !(await page.locator("#contentTab").isHidden()) && !(await page.locator("#newsletterTab").isHidden()) && !(await page.locator("#insightsTab").isHidden()), "content team sees only the Content, Newsletter and Pulse tabs");
   check((await page.locator("#joinsTab").isHidden()) && joinCalls.length === joinCallsBeforeContent && inboxCalls.length === inboxCallsBeforeContent, "content team does not see Join requests or the Inbox and the desk does not ask for them");
   check(!(await page.locator("#tContent").isHidden()) && (await page.locator("#tReports").isHidden()), "content team lands on the Content tab");
   await page.click("#signOut");
@@ -1012,8 +1023,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#lBtn");
   await page.waitForSelector("#deskMain:not([hidden])");
   await page.waitForTimeout(250);
-  for (const t of ["reports", "inbox", "map", "roles", "joins", "performance", "content", "visitors", "subscribers", "insights", "health"]) check(!(await page.locator("#" + t + "Tab").isHidden()), "owner sees the " + t + " tab");
-  check((await page.locator("#tTabs .tab:not([hidden])").allInnerTexts()).map((t) => t.replace(/\s*·.*$/, "").trim()).join("|") === "Reports|Inbox|Map|Roles|Join requests|Performance|Content|Visitors|Subscribers|Pulse|Health", "owner's tabs run Reports, Inbox, Map, Roles, Join requests, Performance, Content, Visitors, Subscribers, Pulse, Health");
+  for (const t of ["reports", "inbox", "map", "roles", "joins", "performance", "content", "newsletter", "visitors", "subscribers", "insights", "health"]) check(!(await page.locator("#" + t + "Tab").isHidden()), "owner sees the " + t + " tab");
+  check((await page.locator("#tTabs .tab:not([hidden])").allInnerTexts()).map((t) => t.replace(/\s*·.*$/, "").trim()).join("|") === "Reports|Inbox|Map|Roles|Join requests|Performance|Content|Newsletter|Visitors|Subscribers|Pulse|Health", "owner's tabs run Reports, Inbox, Map, Roles, Join requests, Performance, Content, Newsletter, Visitors, Subscribers, Pulse, Health");
   await page.click('[data-tab="roles"]');
   await page.waitForTimeout(250);
   const ownerRoles = await page.evaluate(() => ({ removes: document.querySelectorAll("#rosterBody [data-remove]").length, coordHidden: document.getElementById("sRoleCoord").hidden }));
@@ -1037,6 +1048,27 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#subAddBtn");
   await page.waitForTimeout(250);
   check(subscriberPosts.length === 1 && subscriberPosts[0].email === "new@example.org" && subscriberPosts[0].lang === "hi", "adding an address from the desk POSTs email and language for a confirmation mail (" + JSON.stringify(subscriberPosts) + ")");
+  await page.click('[data-tab="newsletter"]');
+  await page.waitForTimeout(300);
+  check((await page.locator("#nlChannel").innerText()).includes("one mail per subscriber") && (await page.locator("#nlChannel").innerText()).includes("4 confirmed subscribers"), "newsletter tab explains the outbox channel and the subscriber count");
+  check((await page.locator("#nlList .row").count()) === 2 && (await page.locator("#nlList").innerText()).includes("Sent to 120") && (await page.locator('#nlList [data-nldel]').count()) === 1, "newsletter list shows the sent campaign and one deletable draft");
+  check((await page.locator("#nlSend").isDisabled()) && (await page.locator("#nlTest").isDisabled()), "Send and Test stay disabled until a draft is saved");
+  await page.fill("#nlSubject", "October drive");
+  await page.fill("#nlBody", "## Thank you\n\nForty volunteers cleared the Sector 45 park.\n\n- Next drive 20 October\n- Bring gloves\n\nDetails: https://gurugramvisionforum.org/blog/x");
+  await page.click("#nlPreview");
+  await page.waitForTimeout(250);
+  check(newsletterPreviews.length === 1 && newsletterPreviews[0].subject === "October drive" && !(await page.locator("#nlPreviewBox").isHidden()) && (await page.locator("#nlPreviewBody").innerText()).includes("Forty volunteers"), "Preview POSTs the draft and shows the rendered mail");
+  await page.click("#nlSave");
+  await page.waitForTimeout(300);
+  check(newsletterSaves.length === 1 && newsletterSaves[0].subject === "October drive" && newsletterSaves[0].body.startsWith("## Thank you") && (await page.locator("#nlId").inputValue()) === "9", "Save draft POSTs subject and body and keeps the new id");
+  check(!(await page.locator("#nlSend").isDisabled()) && !(await page.locator("#nlTest").isDisabled()), "owner can test and send once the draft is saved");
+  await page.click("#nlTest");
+  await page.waitForTimeout(250);
+  check(newsletterActions.length === 1 && newsletterActions[0].url.endsWith("/api/triage/newsletter/9") && newsletterActions[0].body.action === "test", "Send me a test POSTs action test for the saved draft");
+  page.once("dialog", (d) => d.accept());
+  await page.click("#nlSend");
+  await page.waitForTimeout(300);
+  check(newsletterActions.length === 2 && newsletterActions[1].body.action === "send" && (await page.locator("#nlMsg").innerText()).includes("4 sent now"), "Send to subscribers confirms, POSTs action send and reports the outcome");
 
   check(errors.length === 0, "zero console or page errors" + (errors.length ? ": " + errors.join(" | ") : ""));
   await ctx.close();
