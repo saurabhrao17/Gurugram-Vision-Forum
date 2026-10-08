@@ -504,7 +504,9 @@
       <div><b data-i18n="a.t4">Not a government site</b><span data-i18n="a.t4p">The Forum is independent and non-partisan. Emergencies: call 112.</span></div>
     </div>
     <h2 style="margin-top:2rem" data-i18n="a.contact">Contact</h2>
-    <p><span data-i18n="ab.founder">Sidharth Yadav</span>, <span data-i18n="a.lead">project lead</span><br><a href="tel:+919899375445">+91 98993 75445</a><br><a href="mailto:contact@gurugramvisionforum.org">contact@gurugramvisionforum.org</a><br><span data-i18n="ab.addr">Sector 29, Gurugram, Haryana</span></p>
+    <p data-i18n="a.reach">The forms are the Forum's only channel. To report a civic problem use the Report form; to volunteer or write to the team use the Join form. The Forum replies on the mobile number or email you give there.</p>
+    <p class="btns"><a class="btn btn-primary" href="#/report" data-i18n="a.reachReport">Report a problem</a> <a class="btn btn-line" href="#/join" data-i18n="a.reachJoin">Join the Forum</a></p>
+    <p><span data-i18n="ab.addr">Sector 29, Gurugram, Haryana</span></p>
   </div></div>
 </section>
 
@@ -537,7 +539,7 @@
     <p><b data-i18n="pv.h3">Who sees your details.</b> <span data-i18n="pv.p3">Only the Forum's signed-in volunteers for your ward and its coordinators, each of whom agrees in writing to use them for the report alone.</span></p>
     <p><b data-i18n="pv.h4">Messages.</b> <span data-i18n="pv.p4">We message you only about your report, on the channel you used.</span></p>
     <p><b data-i18n="pv.h5">Retention.</b> <span data-i18n="pv.p5">Reports are deleted 24 months after they close, with their attachments. To limit abuse we keep a salted hash of your connection address for one hour, never the address itself.</span></p>
-    <p><b data-i18n="pv.h6">Your choices.</b> <span data-i18n="pv.p6">Write to</span> <a href="mailto:contact@gurugramvisionforum.org">contact@gurugramvisionforum.org</a> <span data-i18n="pv.p6b">to see, correct or delete what we hold, quoting your reference number.</span></p>
+    <p><b data-i18n="pv.h6">Your choices.</b> <span data-i18n="pv.p6">To see, correct or delete what we hold, send a request through the Join form: write "Data request" and your reference number in the note. The team acts within 30 days.</span> <a href="#/join" data-i18n="a.reachJoin">Join the Forum</a></p>
     <p class="small muted" data-i18n="pv.upd">Last updated 8 October 2026.</p>
   </div></div>
 </section>
@@ -546,7 +548,7 @@
     <h1 data-i18n="ac.h">Accessibility statement</h1>
     <p data-i18n="ac.p1">This site aims to meet WCAG 2.2 level AA: keyboard access, visible focus, 44px tap targets, text at 16px or larger, colour never used alone, and reduced motion respected.</p>
     <p data-i18n="ac.p2">Known gaps: the ward map lookup depends on an external site, and the maps need an internet connection.</p>
-    <p data-i18n="ac.p3">Tell us what does not work for you:</p><p><a href="mailto:contact@gurugramvisionforum.org">contact@gurugramvisionforum.org</a></p>
+    <p data-i18n="ac.p3">Tell us what does not work for you through the Join form (write it in the note).</p><p><a class="btn btn-line btn-sm" href="#/join" data-i18n="a.reachJoin">Join the Forum</a></p>
   </div></div>
 </section>
 </main>
@@ -590,7 +592,7 @@
       <div class="field"><label for="gPin" data-i18n="g.pin">PIN code (optional)</label><input type="text" id="gPin" inputmode="numeric" maxlength="6" autocomplete="postal-code"></div>
     </div>
     <div class="field"><label for="gCity" data-i18n="g.city">City</label><input type="text" id="gCity" value="Gurugram" autocomplete="address-level2"></div>
-    <div class="field"><label class="check"><input type="checkbox" id="gConsent" required><span data-i18n="g.consent">I agree that the Forum keeps these details to run this service and contact me about it. I can ask for them to be corrected or deleted at contact@gurugramvisionforum.org.</span></label></div>
+    <div class="field"><label class="check"><input type="checkbox" id="gConsent" required><span data-i18n="g.consent">I agree that the Forum keeps these details to run this service and contact me about it. I can ask for them to be corrected or deleted through the Join form (write "Data request" in the note).</span></label></div>
     <p class="err" id="gErr"></p>
     <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center"><button class="btn btn-primary" type="submit" data-i18n="g.go">Continue</button><button class="btn btn-line" type="button" id="gateSkip" data-i18n="g.skip">Not now</button></div>
   </form>
@@ -606,7 +608,7 @@
 <footer class="ftr">
   <div class="wrap">
     <div class="fgrid">
-      <div><a class="brand" href="#/"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-mark"/></svg><span data-i18n="brand">Gurugram Vision Forum</span></a><p data-i18n="ft.tag">Citizens and governance in partnership. Collaborate, contribute, change.</p><p><a href="mailto:contact@gurugramvisionforum.org">contact@gurugramvisionforum.org</a><br><a href="tel:+919899375445">+91 98993 75445</a><br><span data-i18n="ft.addr">Sector 29, Gurugram</span></p><p id="ftSocial" hidden></p></div>
+      <div><a class="brand" href="#/"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-mark"/></svg><span data-i18n="brand">Gurugram Vision Forum</span></a><p data-i18n="ft.tag">Citizens and governance in partnership. Collaborate, contribute, change.</p><p><a href="#/report" data-i18n="a.reachReport">Report a problem</a><br><a href="#/join" data-i18n="a.reachJoin">Join the Forum</a><br><span data-i18n="ft.addr">Sector 29, Gurugram</span></p><p id="ftSocial" hidden></p></div>
       <div><h4 data-i18n="ft.fix">Fix</h4><ul><li><a href="#/" data-i18n="ft.fix1">Who fixes it</a></li><li><a href="#/report" data-i18n="n.report">Report an issue</a></li><li><a href="#/track" data-i18n="n.track">Track a report</a></li></ul></div>
       <div><h4 data-i18n="ft.know">Know</h4><ul><li><a href="#/directory" data-i18n="n.dir">Directory</a></li><li><a href="#/rights" data-i18n="n.rights">Your rights</a></li><li><a href="#/who" data-i18n="n.who">Who's who</a></li><li><a href="#/wards" data-i18n="n.wards">Wards</a></li></ul></div>
       <div><h4 data-i18n="ft.join">Join</h4><ul><li><a href="#/join" data-i18n="n.join">Join</a></li><li><a href="#/charter" data-i18n="n.charter">Civic charter</a></li><li><a href="#/updates" data-i18n="n.updates">Updates</a></li><li><a href="/blog" data-srv="/blog" data-i18n="n.blog">Blog</a></li><li><a href="#/news" data-i18n="n.news">Official news</a></li><li><a href="#/pulse" data-i18n="n.pulse">City pulse</a></li></ul></div>

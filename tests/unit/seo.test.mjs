@@ -156,7 +156,7 @@ test("guide page: title, canonical, hreflang, JSON-LD, FAQ, live box, CTA", asyn
   const types = ld.map((x) => x["@type"]);
   assert.deepEqual(types, ["Organization", "WebSite", "BreadcrumbList", "HowTo", "FAQPage"]);
   assert.deepEqual(ld[0].sameAs, ["https://x.com/gvf"]);
-  assert.equal(ld[0].email, "contact@gurugramvisionforum.org");
+  assert.ok(!("email" in ld[0]) && !("telephone" in ld[0]), "no contact email or phone in the organisation data: the forms are the only channel");
   assert.equal(ld[3].step.length, gvf().CATS.find((c) => c.id === "roads").ladder.length);
   assert.equal(ld[4].mainEntity.length, 4);
   assert.ok(ld[4].mainEntity.every((q) => q.name && q.acceptedAnswer.text));
@@ -261,6 +261,7 @@ test("ward page: councillor, party, areas and report counts; never one report", 
   assert.ok(!sb.calls.some((q) => q.table === "reports" || q.table === "public_reports"), "the page never reads report rows");
   assert.ok(h.includes('href="/ward/4"') && h.includes('href="/ward/6"'));
   assert.ok(h.includes('href="/report"'));
+  assert.ok(!/mailto:|tel:\+|@gurugramvisionforum\.org|\+91 ?\d/.test(h), "no contact email or phone on the page: the forms are the only channel");
 
   const hi = await render("hi/ward/5", sb);
   assert.equal(hi.statusCode, 200);
