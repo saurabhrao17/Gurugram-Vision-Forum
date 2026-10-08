@@ -4,6 +4,7 @@ import { ROLES, CONTENT_ROLES, REPORT_ROLES, MANAGER_ROLES, isOwner, isManager, 
 import { makeHandler as makeContent } from "../../lib/handlers/triage/content.js";
 import { makeHandler as makeVisitors } from "../../lib/handlers/triage/visitors.js";
 import { makeHandler as makeSubscribers } from "../../lib/handlers/triage/subscribers.js";
+import { makeHandler as makeNewsletter } from "../../lib/handlers/triage/newsletter.js";
 import { makeHandler as makeJoins, validateJoinPatch, STATUSES } from "../../lib/handlers/triage/joins.js";
 import { joinMail } from "../../lib/handlers/join.js";
 import { makeHandler as makeReports } from "../../lib/handlers/triage/reports.js";
@@ -116,6 +117,18 @@ test("subscribers is owner only: coordinator, content and triage are refused", a
     assert.equal(res.statusCode, 403, role);
     assert.deepEqual(res.body, { ok: false, error: "forbidden" });
   }
+});
+
+test("newsletter: triage is refused; the content team may draft but only owner and coordinator may send", async () => {
+  const res = fakeRes();
+  await makeNewsletter({ auth: authAs("triage"), sb: fakeSb(), env: {} })({ method: "GET", query: {} }, res);
+  assert.equal(res.statusCode, 403);
+  const draft = fakeRes();
+  await makeNewsletter({ auth: authAs("content"), sb: fakeSb(), env: {} })({ method: "POST", query: {}, body: { subject: "x", body: "y" } }, draft);
+  assert.equal(draft.statusCode, 400, "allowed in, refused only on validation");
+  const sendRes = fakeRes();
+  await makeNewsletter({ auth: authAs("content"), sb: fakeSb(), env: {} })({ method: "POST", query: { id: "1" }, body: { action: "send" } }, sendRes);
+  assert.equal(sendRes.statusCode, 403);
 });
 
 test("reports list and detail refuse the content team", async () => {

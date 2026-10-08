@@ -620,3 +620,9 @@ body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
 .sortbtn[aria-pressed="true"]::after{content:" ↓"}
 .brief{white-space:pre-wrap; font-family:var(--body); font-size:.98rem; line-height:1.55; background:var(--surface-2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:1rem; margin:0 0 .75rem; overflow-wrap:anywhere; max-width:760px}
 @media (max-width:639px){ .tbl td.num{text-align:left} .wchip{white-space:normal} .roster td[data-l="Assign"]::before{display:block} }
+
+/* desk: newsletter preview (the mail as it will arrive, rendered from the server's own escaped HTML) */
+.nl-preview{border:1px solid var(--line); border-radius:8px; padding:1rem; margin-top:.6rem; background:var(--surface); max-height:460px; overflow:auto; font-size:.95rem}
+.nl-preview h1{font-size:1.25rem; margin:0 0 .75rem}
+.nl-preview h2{font-size:1.1rem}
+.nl-preview p{margin:0 0 .75rem}

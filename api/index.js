@@ -35,6 +35,7 @@ import triageTeam from "../lib/handlers/triage/team.js";
 import triageMetrics from "../lib/handlers/triage/metrics.js";
 import triageInbox from "../lib/handlers/triage/inbox.js";
 import triageSubscribers from "../lib/handlers/triage/subscribers.js";
+import triageNewsletter from "../lib/handlers/triage/newsletter.js";
 import hookEmail from "../lib/handlers/hooks/email.js";
 import triageTranslate from "../lib/handlers/triage/translate.js";
 import pulse from "../lib/handlers/pulse.js";
@@ -53,7 +54,7 @@ const ROUTES = {
   "cron/daily": cron,
   "hooks/whatsapp": hooksWhatsapp, "hooks/exotel": hooksExotel,
   "content": content, "triage/content": triageContent, "triage/content/upload-url": triageContentUpload, "triage/draft": triageDraft,
-  "visitor": visitor, "news": news, "health": health, "triage/visitors": triageVisitors, "triage/joins": triageJoins, "triage/team": triageTeam, "triage/metrics": triageMetrics, "triage/inbox": triageInbox, "triage/subscribers": triageSubscribers, "hooks/email": hookEmail, "triage/translate": triageTranslate, "pulse": pulse, "triage/insights": triageInsights,
+  "visitor": visitor, "news": news, "health": health, "triage/visitors": triageVisitors, "triage/joins": triageJoins, "triage/team": triageTeam, "triage/metrics": triageMetrics, "triage/inbox": triageInbox, "triage/subscribers": triageSubscribers, "triage/newsletter": triageNewsletter, "hooks/email": hookEmail, "triage/translate": triageTranslate, "pulse": pulse, "triage/insights": triageInsights,
   "sitemap": sitemap, "indexnow": indexnowKey, "gsc": gsc, "subscribe": subscribe
 };
 
@@ -64,6 +65,7 @@ export function resolve(parts) {
   if (parts && parts.length === 3 && parts[0] === "triage" && parts[1] === "joins") return { handler: triageJoins, params: { id: parts[2] } };
   if (parts && parts.length === 3 && parts[0] === "triage" && parts[1] === "inbox") return { handler: triageInbox, params: { id: parts[2] } };
   if (parts && parts.length === 3 && parts[0] === "triage" && parts[1] === "subscribers") return { handler: triageSubscribers, params: { id: parts[2] } };
+  if (parts && parts.length === 3 && parts[0] === "triage" && parts[1] === "newsletter") return { handler: triageNewsletter, params: { id: parts[2] } };
   if (parts && parts.length === 2 && parts[0] === "cron" && (parts[1] === "fetch" || parts[1] === "analyse")) return { handler: cron, params: { group: parts[1] } };
   // Server-rendered pages (/guides, /guide/:issue, /ward/:n, /blog/:slug, with a /hi prefix) are a prefix route.
   if (parts && parts.length >= 2 && parts[0] === "page") return { handler: page, params: { page: parts.slice(1).join("/") } };
