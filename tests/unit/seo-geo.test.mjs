@@ -15,6 +15,7 @@ import { renderWard, wardById } from "../../lib/seo/wards.js";
 import { staticPosts } from "../../lib/seo/data.js";
 import { gvf } from "../../lib/site-data.js";
 import { HttpError } from "../../lib/auth.js";
+import { aiComplete, bestGeminiModel, resetGeminiDiscovery } from "../../lib/ai.js";
 
 const SITE = "https://gurugramvisionforum.org";
 const ENV = { SITE_URL: SITE };
@@ -158,17 +159,49 @@ test("parseGrounded finds the Forum among the grounding sources, by domain title
   assert.equal(parseGrounded({}, "x"), null);
 });
 
-test("askGemini asks with the Google Search tool and falls back to the drafting model when the first is not found", async () => {
+test("askGemini asks with the Google Search tool and, when the model is retired, uses the newest Flash model the key can list", async () => {
+  resetGeminiDiscovery();
   const calls = [];
-  const fetchImpl = async (url, init) => { calls.push({ url, body: JSON.parse(init.body) }); if (calls.length === 1) return { ok: false, status: 404, json: async () => ({}) }; return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: "ok" }] }, groundingMetadata: { groundingChunks: [] } }] }) }; };
+  const ok = { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: "ok" }] }, groundingMetadata: { groundingChunks: [] } }] }) };
+  const fetchImpl = async (url, init) => {
+    calls.push({ url, body: init && init.body ? JSON.parse(init.body) : null });
+    if (/\/models\?/.test(url)) return { ok: true, status: 200, json: async () => ({ models: [{ name: "models/gemini-3-flash", supportedGenerationMethods: ["generateContent"] }] }) };
+    if (/gemini-flash-latest/.test(url)) return { ok: false, status: 404, json: async () => ({}) };
+    return ok;
+  };
   const r = await askGemini({ GEMINI_API_KEY: "K" }, "Who fixes roads?", fetchImpl, "gurugramvisionforum.org");
-  assert.equal(calls.length, 2);
-  assert.match(calls[0].url, /gemini-2\.5-flash:generateContent\?key=K/);
+  assert.equal(calls.length, 3);
+  assert.match(calls[0].url, /gemini-flash-latest:generateContent\?key=K/);
   assert.deepEqual(calls[0].body.tools, [{ google_search: {} }]);
-  assert.match(calls[1].url, /gemini-2\.0-flash/);
-  assert.equal(r.cited, false);
+  assert.match(calls[1].url, /\/v1beta\/models\?pageSize=200&key=K$/);
+  assert.match(calls[2].url, /gemini-3-flash:generateContent/);
+  assert.equal(r.cited, false); assert.equal(r.model, "gemini-3-flash");
   const q = await askGemini({ GEMINI_API_KEY: "K" }, "x", async () => ({ ok: false, status: 429, json: async () => ({ error: { status: "RESOURCE_EXHAUSTED" } }) }), "h");
   assert.equal(q.error, "http_429_RESOURCE_EXHAUSTED");
+  resetGeminiDiscovery();
+});
+
+test("bestGeminiModel prefers the -latest alias, then the newest stable Flash, never lite or image variants", () => {
+  const list = (...n) => ({ models: n.map((x) => ({ name: "models/" + x, supportedGenerationMethods: ["generateContent"] })) });
+  assert.equal(bestGeminiModel(list("gemini-2.5-flash", "gemini-flash-latest")), "gemini-flash-latest");
+  assert.equal(bestGeminiModel(list("gemini-2.5-flash", "gemini-3-flash-preview", "gemini-3-flash-lite", "gemini-2.5-flash-image")), "gemini-3-flash-preview");
+  assert.equal(bestGeminiModel(list("gemini-3-flash-preview", "gemini-3-flash")), "gemini-3-flash");
+  assert.equal(bestGeminiModel({ models: [{ name: "models/gemini-3-flash", supportedGenerationMethods: ["embedContent"] }] }), null);
+  assert.equal(bestGeminiModel(null), null);
+});
+
+test("aiComplete retries a retired Gemini model once with the discovered one", async () => {
+  resetGeminiDiscovery();
+  const urls = [];
+  const fetchImpl = async (url) => {
+    urls.push(url);
+    if (/\/models\?/.test(url)) return { ok: true, status: 200, json: async () => ({ models: [{ name: "models/gemini-3-flash", supportedGenerationMethods: ["generateContent"] }] }) };
+    if (/gemini-flash-latest/.test(url)) return { ok: false, status: 404, json: async () => ({ error: { status: "NOT_FOUND" } }) };
+    return { ok: true, status: 200, json: async () => ({ candidates: [{ finishReason: "STOP", content: { parts: [{ text: "{}" }] } }] }) };
+  };
+  const r = await aiComplete({ GEMINI_API_KEY: "K" }, { system: "s", user: "u" }, fetchImpl);
+  assert.equal(r.ok, true); assert.equal(r.model, "gemini-3-flash"); assert.equal(urls.length, 3);
+  resetGeminiDiscovery();
 });
 
 test("geoStep asks the questions not asked longest, stores each answer, and skips without a key", async () => {
@@ -274,6 +307,17 @@ test("gscStep: token, two analytics queries, sitemaps and the inspections, each 
   assert.deepEqual(sb.writes.map((w) => w.table), ["seo_search", "seo_search", "seo_site", "seo_index", "seo_index"]);
   assert.equal((await gscStep(fakeSb(), ENV, { fetch: fetchImpl })).skipped, "no_key");
   assert.equal((await gscStep(fakeSb(), { GSC_SERVICE_ACCOUNT: "{" }, { fetch: fetchImpl })).skipped, "bad_key");
+  // Out of time: no new inspection starts; the rest wait for the next night.
+  let t = 0;
+  const late = await gscStep(fakeSb(), { ...ENV, GSC_SERVICE_ACCOUNT: SA }, { fetch: fetchImpl, now: Date.UTC(2026, 9, 8), urls: [`${SITE}/`, `${SITE}/guide/roads`], budgetMs: 1000, clock: () => (t++ ? 5000 : 0) });
+  assert.deepEqual([late.queries, late.inspected, late.deferred], [1, 0, 2]);
+});
+
+test("ward pages link to the app's /wards in both languages, never a /hi/wards that does not exist", () => {
+  const hi = renderWard(wardById(5), { lang: "hi" });
+  assert.ok(!hi.includes('href="/hi/wards"'), "no /hi/wards link");
+  assert.ok(hi.includes('href="/wards"'));
+  assert.ok(hi.includes('href="/hi/guides"'), "pages the server renders in Hindi keep the prefix");
 });
 
 // ---------------------------------------------------------------- Bing

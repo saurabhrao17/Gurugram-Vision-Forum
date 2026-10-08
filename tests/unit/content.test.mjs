@@ -245,7 +245,7 @@ test("draft provider: free keys are preferred and DRAFT_PROVIDER can force one",
   assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a", GROQ_API_KEY: "g", GEMINI_API_KEY: "x" }), "gemini");
   assert.equal(pickProvider({ GEMINI_API_KEY: "x", GROQ_API_KEY: "g", DRAFT_PROVIDER: "groq" }), "groq");
   assert.equal(pickProvider({ GEMINI_API_KEY: "x", DRAFT_PROVIDER: "groq" }), "gemini");
-  assert.equal(PROVIDERS.gemini.model, "gemini-2.0-flash");
+  assert.equal(PROVIDERS.gemini.model, "gemini-flash-latest");
 });
 
 test("draft handler talks to Gemini's free API and reads its reply", async () => {
@@ -257,10 +257,10 @@ test("draft handler talks to Gemini's free API and reads its reply", async () =>
   await handler({ method: "POST", body: { brief: "Sewa drive in Sector 45 park with forty volunteers", kind: "news" } }, res);
   assert.equal(res.statusCode, 200, JSON.stringify(res.body));
   assert.equal(res.body.provider, "gemini");
-  assert.equal(res.body.model, "gemini-2.0-flash");
+  assert.equal(res.body.model, "gemini-flash-latest");
   assert.equal(res.body.draft.title, "Park cleaned");
   assert.equal(res.body.draft.title_hi, "पार्क साफ़");
-  assert.match(captured.url, /generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2\.0-flash:generateContent\?key=free-key$/);
+  assert.match(captured.url, /generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-flash-latest:generateContent\?key=free-key$/);
   assert.equal(captured.headers.authorization, undefined);
   assert.match(captured.body.systemInstruction.parts[0].text, /non-partisan/);
   assert.equal(captured.body.generationConfig.responseMimeType, "application/json");
