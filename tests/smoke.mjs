@@ -595,7 +595,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   const staff = { user_id: "u1", name: "Coordinator", role: "coordinator", email: "coord@example.org" };
   const report = (over) => Object.assign({ ref: "GVF-2026-SRV01", issue_type: "waste", issue_label: "Garbage", affects: "My society or RWA", area: "Sector 29", ward: 30, councillor: "Madhu Batra", spot: "Near the gate", lat: null, lng: null,
     stage: 0, desk: null, official_channel: null, official_ticket: null, official_filed_at: null, escalated_to: null, resolved_at: null, resolution_note: null, source: "web",
-    reporter_name: "Test Reporter", reporter_phone: "+919899999999", reporter_email: null, consent_at: "2026-10-07T10:00:00Z", description: "Garbage not collected.",
+    reporter_name: "Test Reporter", reporter_phone: "+919899999999", reporter_email: "asha@example.org", consent_at: "2026-10-07T10:00:00Z", description: "Garbage not collected.",
     created_at: "2026-10-07T10:00:00Z", updated_at: "2026-10-07T10:00:00Z", unmapped_overdue: false, filed_overdue: false, events_count: 1, last_event_at: "2026-10-07T10:00:00Z", extra: { where: "Street or lane" }, attachments: [] }, over);
   const filing = { portal: "GMDA integrated grievance portal or Swachhata app", url: "https://services.gmda.gov.in/", note: "A geo-tagged photo routes the complaint.",
     fields: [{ key: "where", label: "Type of place", required: true, value: "Street or lane", missing: false }, { key: "since", label: "Since when", required: false, value: "", missing: false }],
@@ -603,6 +603,12 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   let events = [{ stage: 0, note: "Report received", actor: "system", created_at: "2026-10-07T10:00:00Z" }];
   let state = report();
   const patches = [];
+  let askedAt = null, replies = [];
+  const askCalls = [], extractCalls = [];
+  await page.route("**/api/triage/reports/GVF-2026-SRV01/ask", (route) => { askCalls.push(route.request().method()); askedAt = "2026-10-08T09:00:00Z";
+    replies = [{ id: "11111111-1111-4111-8111-111111111111", from_email: "asha@example.org", subject: "Re: [GVF-2026-SRV01] A few details needed for your report", body_text: "Since 1 October. Photo attached.", attachments: [{ name: "spot.jpg", type: "image/jpeg", stored: true, kind: "photo" }], received_at: "2026-10-08T10:00:00Z", status: "new" }];
+    return json(route, 200, { ok: true, sent: true, to: "asha@example.org", asked_at: askedAt, missing: ["Photo of the garbage"] }); });
+  await page.route("**/api/triage/reports/GVF-2026-SRV01/extract", (route) => { extractCalls.push(JSON.parse(route.request().postData() || "{}")); return json(route, 200, { ok: true, fields: { since: "2026-10-01" }, provider: "gemini", model: "x" }); });
   const authed = (route) => (route.request().headers()["authorization"] || "") === "Bearer tok";
   const json = (route, status, body) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
   await page.route("**/api/triage/login", (route) => {
@@ -623,10 +629,11 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     if (!authed(route)) return json(route, 401, { ok: false, error: "unauthenticated" });
     if (route.request().method() === "PATCH") {
       const p = JSON.parse(route.request().postData() || "{}"); patches.push(p);
-      state = report({ stage: p.official_ticket ? 2 : (p.stage ?? state.stage), desk: p.desk ?? state.desk, official_ticket: p.official_ticket ?? state.official_ticket, official_channel: p.official_channel ?? state.official_channel, events_count: 3 });
-      events = events.concat([{ stage: 2, note: "Filed officially, ticket " + p.official_ticket, actor: "Coordinator <coord@example.org>", created_at: "2026-10-08T10:00:00Z" }, { stage: 2, note: p.note, actor: "Coordinator <coord@example.org>", created_at: "2026-10-08T10:00:01Z" }]);
+      state = report({ stage: p.official_ticket ? 2 : (p.stage ?? state.stage), desk: p.desk ?? state.desk, official_ticket: p.official_ticket ?? state.official_ticket, official_channel: p.official_channel ?? state.official_channel, events_count: 3, extra: Object.assign({}, state.extra, p.extra || {}) });
+      events = events.concat(p.official_ticket ? [{ stage: 2, note: "Filed officially, ticket " + p.official_ticket, actor: "Coordinator <coord@example.org>", created_at: "2026-10-08T10:00:00Z" }, { stage: 2, note: p.note, actor: "Coordinator <coord@example.org>", created_at: "2026-10-08T10:00:01Z" }] : [{ stage: state.stage, note: p.note, actor: "Coordinator <coord@example.org>", created_at: "2026-10-08T10:00:01Z" }]);
     }
-    return json(route, 200, { ok: true, report: state, events, volunteers: { lead_name: "Vol One", lead_email: "vol@example.org", support_name: null, support_email: null }, filing });
+    const fc = Object.assign({}, filing, { fields: filing.fields.map((f) => Object.assign({}, f, { value: (state.extra || {})[f.key] || "" })) });
+    return json(route, 200, { ok: true, report: Object.assign({ asked_at: askedAt }, state), events, volunteers: { lead_name: "Vol One", lead_email: "vol@example.org", support_name: null, support_email: null }, filing: fc, replies });
   });
   const staffPosts = [];
   await page.route("**/api/triage/staff", (route) => { if (route.request().method() === "POST") { const b = JSON.parse(route.request().postData() || "{}"); staffPosts.push(b); return json(route, 201, { ok: true, staff: { user_id: "u9", name: b.name, email: b.email, role: b.role, phone: b.phone || null } }); } return json(route, 405, { ok: false, error: "method" }); });
@@ -656,7 +663,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   // Inbox (table inbox): mail to the Forum; the list carries counts, the per-id route takes PATCH {status} or {notes}
   const inboxRows = [
     { id: "e1", source: "email", from_email: "asha@example.org", from_name: "Asha Verma", subject: "Streetlight out in Sector 45", body_text: "The light near the park gate has been out for a week.\nLine two.\nLine three.\nLine four.\nLine five, which makes this long enough to clip.", received_at: "2026-10-08T05:00:00Z", status: "new", notes: "", handled_by: null },
-    { id: "e2", source: "email", from_email: "rohit@example.org", from_name: "Rohit Mehra", subject: "Thanks for the camp", body_text: "Short note.", received_at: "2026-10-05T05:00:00Z", status: "done", notes: "Replied by phone.", handled_by: "Coordinator" }];
+    { id: "e2", source: "email", from_email: "rohit@example.org", from_name: "Rohit Mehra", subject: "Thanks for the camp", body_text: "Short note.", received_at: "2026-10-05T05:00:00Z", status: "done", notes: "Replied by phone.", handled_by: "Coordinator", report_id: "r-1", report_ref: "GVF-2026-SRV01", attachments: [] }];
   const inboxCalls = [], inboxPatches = [];
   const inboxCounts = () => ({ new: inboxRows.filter((r) => r.status === "new").length, read: inboxRows.filter((r) => r.status === "read").length, done: inboxRows.filter((r) => r.status === "done").length, total: inboxRows.length });
   await page.route("**/api/triage/inbox?**", (route) => { const u = new URL(route.request().url()); inboxCalls.push(u.search); if (!authed(route)) return json(route, 401, { ok: false, error: "unauthenticated" });
@@ -723,16 +730,31 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#sheetBody .tl li").count()) === 1, "detail shows the event timeline");
   check((await page.locator("#sheetBody").innerText()).includes("Filing checklist: GMDA"), "detail shows the filing checklist for the portal");
   check((await page.locator("#sheetBody .chk .tag-danger").count()) === 1 && (await page.locator("#askMissing").count()) === 1, "checklist flags the missing photo and offers to ask the reporter");
+  check((await page.locator("#sheetBody").innerText()).includes("Emails asha@example.org from the desk"), "ask button says the mail goes from the desk");
+  check((await page.locator("#sheetBody .replies").count()) === 0, "no replies yet");
+  await page.click("#askMissing");
+  await page.waitForSelector("#askedAt");
+  check(askCalls.length === 1 && askCalls[0] === "POST", "asking the reporter POSTs to the ask endpoint, no mail app");
+  check((await page.locator("#askedAt").innerText()).includes("Asked by email on"), "ticket shows when the reporter was asked");
+  check((await page.locator("#sheetBody .replies .reply").count()) === 1 && (await page.locator("#sheetBody .replies").innerText()).includes("Since 1 October") && (await page.locator("#sheetBody .replies").innerText()).includes("spot.jpg"), "the reporter's reply and its file show on the ticket");
+  await page.click("#sheetBody [data-fill]");
+  await page.waitForSelector("#sheetBody [data-apply]");
+  check(extractCalls.length === 1 && extractCalls[0].inbox_id === "11111111-1111-4111-8111-111111111111", "reading the reply POSTs its inbox id to the extract endpoint");
+  check((await page.locator("#sheetBody .fillbox").innerText()).includes("Since when") && (await page.locator("#sheetBody .fillbox").innerText()).includes("2026-10-01"), "the proposal names the field and the value found");
+  await page.click("#sheetBody [data-apply]");
+  await page.waitForFunction(() => document.querySelectorAll("#sheetBody .tl li").length === 2);
+  check(patches.length === 1 && patches[0].extra && patches[0].extra.since === "2026-10-01" && /Filled from the reporter's reply/.test(patches[0].note), "applying the proposal PATCHes the filing field with a timeline note");
+  check((await page.locator("#ex_since").inputValue()) === "2026-10-01", "the applied value is in the form");
   check((await page.locator("#ex_where").inputValue()) === "Street or lane", "filing details are editable at the desk");
-  await page.fill("#ex_since", "2026-10-01");
+  await page.fill("#ex_since", "2026-10-02");
   await page.fill("#eDesk", "MCG sanitation wing");
   await page.selectOption("#eChan", "GMDA portal");
   await page.fill("#eTicket", "GMDA-4471");
   await page.fill("#eNote", "Filed on the portal.");
   await page.click("#eSave");
   await page.waitForTimeout(250);
-  check(patches.length === 1 && patches[0].desk === "MCG sanitation wing" && patches[0].official_ticket === "GMDA-4471" && patches[0].official_channel === "GMDA portal" && patches[0].note === "Filed on the portal." && !("stage" in patches[0]) && patches[0].extra && patches[0].extra.since === "2026-10-01" && !("where" in patches[0].extra), "save sends only the changed fields, including the filing detail");
-  check((await page.locator("#sheetBody .tl li").count()) === 3, "timeline refreshes after saving");
+  check(patches.length === 2 && patches[1].desk === "MCG sanitation wing" && patches[1].official_ticket === "GMDA-4471" && patches[1].official_channel === "GMDA portal" && patches[1].note === "Filed on the portal." && !("stage" in patches[1]) && patches[1].extra && patches[1].extra.since === "2026-10-02" && !("where" in patches[1].extra), "save sends only the changed fields, including the filing detail");
+  check((await page.locator("#sheetBody .tl li").count()) === 4, "timeline refreshes after saving");
   check((await page.locator("#row_GVF-2026-SRV01 .tag").first().innerText()).includes("Filed officially"), "list row updates to the new stage");
   await page.click("#sheetClose");
 
@@ -915,9 +937,10 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   // SRV01 was filed (stage 2) by the PATCH above, so only OLD02 is still unmapped here; the join request (06:00) is newer than the email (05:00)
   check(!(await page.locator("#tInbox").isHidden()) && (await page.locator("#inboxList .row").count()) === 4, "Inbox lists 2 emails, 1 join request and the 1 unmapped report");
   check((await page.locator("#inboxCounts").innerText()).replace(/\s+/g, " ").includes("1 Emails new 1 Join requests new 1 Reports unmapped") && (await page.locator("#inboxTab").innerText()).replace(/\s+/g, " ").includes("Inbox · 3"), "Inbox count strip shows the three streams and the badge follows the fresh counts");
-  const inboxTags = await page.locator("#inboxList .row > div:nth-child(2) > b > .tag:first-of-type").allInnerTexts();
+  const inboxTags = await page.locator("#inboxList .row > div:nth-child(2) > b > span.tag:first-of-type").allInnerTexts();
   check(inboxTags.join("|") === "Join request|Email|Email|Report", "rows are tagged by type and sorted newest first (" + inboxTags.join(", ") + ")");
   check((await page.locator('#inboxList a[href="#/desk/GVF-2026-OLD02"]').count()) === 1 && (await page.locator("#inboxList .row").last().locator(".tag-danger").count()) === 1 && (await page.locator('#inboxList [data-ijoin="j1"]').count()) === 1, "report rows link to the desk ticket with their flags and join rows offer Open in Join requests");
+  check((await page.locator('#inboxList li[data-iid="e2"] a[data-open="GVF-2026-SRV01"]').innerText()).includes("Reply on GVF-2026-SRV01") && (await page.locator('#inboxList li[data-iid="e1"] a[data-open]').count()) === 0, "an email linked to a report carries a tag that opens the ticket");
   const emailRowText = await page.locator('#inboxList li[data-iid="e1"]').innerText();
   check(emailRowText.includes("Asha Verma") && emailRowText.includes("asha@example.org") && emailRowText.includes("Streetlight out in Sector 45") && emailRowText.includes("8 Oct"), "email row shows from, subject and received time");
   check((await page.locator("#ib_e1.clip").count()) === 1 && (await page.locator('#inboxList [data-imore="e1"]').innerText()) === "Show more", "a long body is collapsed with Show more");

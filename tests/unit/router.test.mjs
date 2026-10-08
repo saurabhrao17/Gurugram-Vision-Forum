@@ -12,6 +12,8 @@ test("router passes the reference of a single report as a param", () => {
   const m = resolve(["triage", "reports", "GVF-2026-ABCDE"]);
   { const r = resolve(["triage", "joins", "11111111-1111-4111-8111-111111111111"]); assert.ok(r && r.handler); assert.deepEqual(r.params, { id: "11111111-1111-4111-8111-111111111111" }); }
   { const r = resolve(["triage", "inbox", "11111111-1111-4111-8111-111111111111"]); assert.ok(r && r.handler); assert.deepEqual(r.params, { id: "11111111-1111-4111-8111-111111111111" }); }
+  { const r = resolve(["triage", "reports", "GVF-2026-ABCDE", "ask"]); assert.ok(r && r.handler); assert.deepEqual(r.params, { ref: "GVF-2026-ABCDE" }); }
+  { const r = resolve(["triage", "reports", "GVF-2026-ABCDE", "extract"]); assert.ok(r && r.handler); assert.deepEqual(r.params, { ref: "GVF-2026-ABCDE" }); }
   assert.ok(m);
   assert.equal(m.params.ref, "GVF-2026-ABCDE");
 });

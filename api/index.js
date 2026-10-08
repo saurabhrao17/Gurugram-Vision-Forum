@@ -36,6 +36,8 @@ import triageMetrics from "../lib/handlers/triage/metrics.js";
 import triageInbox from "../lib/handlers/triage/inbox.js";
 import triageSubscribers from "../lib/handlers/triage/subscribers.js";
 import triageNewsletter from "../lib/handlers/triage/newsletter.js";
+import triageAsk from "../lib/handlers/triage/ask.js";
+import triageExtract from "../lib/handlers/triage/extract.js";
 import hookEmail from "../lib/handlers/hooks/email.js";
 import triageTranslate from "../lib/handlers/triage/translate.js";
 import pulse from "../lib/handlers/pulse.js";
@@ -62,6 +64,8 @@ export function resolve(parts) {
   const path = (parts || []).join("/");
   if (ROUTES[path]) return { handler: ROUTES[path], params: {} };
   if (parts && parts.length === 3 && parts[0] === "triage" && parts[1] === "reports") return { handler: triageReport, params: { ref: parts[2] } };
+  if (parts && parts.length === 4 && parts[0] === "triage" && parts[1] === "reports" && parts[3] === "ask") return { handler: triageAsk, params: { ref: parts[2] } };
+  if (parts && parts.length === 4 && parts[0] === "triage" && parts[1] === "reports" && parts[3] === "extract") return { handler: triageExtract, params: { ref: parts[2] } };
   if (parts && parts.length === 3 && parts[0] === "triage" && parts[1] === "joins") return { handler: triageJoins, params: { id: parts[2] } };
   if (parts && parts.length === 3 && parts[0] === "triage" && parts[1] === "inbox") return { handler: triageInbox, params: { id: parts[2] } };
   if (parts && parts.length === 3 && parts[0] === "triage" && parts[1] === "subscribers") return { handler: triageSubscribers, params: { id: parts[2] } };
