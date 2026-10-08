@@ -17,7 +17,7 @@ function fakeSb() {
 
 test("parseSteps keeps known step names and rejects the rest", () => {
   assert.deepEqual(parseSteps("news, links,bogus"), ["news", "links"]);
-  assert.equal(parseSteps("bogus"), null);
+  assert.deepEqual(parseSteps("bogus"), [], "only unknown names: an empty list, which the handler refuses");
   assert.equal(parseSteps(""), null);
   assert.deepEqual([...new Set([...STEP_GROUPS.fetch, ...STEP_GROUPS.analyse, ...STEP_GROUPS.seo])].sort(), [...STEP_NAMES].sort());
   assert.deepEqual(STEP_GROUPS.fetch, ["news", "links", "seo", "mentions"], "the quick SEO steps ride the midnight fetch run");
@@ -44,4 +44,17 @@ test("fetchSources fetches every source at once, not one after another", async (
   assert.equal(out.length, 3);
   assert.ok(Date.now() - t0 < 110, "three 40 ms fetches finished in parallel");
   assert.ok(Math.max(...started) - Math.min(...started) < 30, "all three started together");
+});
+
+test("the cron refuses a request that names only unknown steps instead of running everything", async () => {
+  const { default: handler } = await import("../../lib/handlers/cron.js");
+  const prev = process.env.CRON_SECRET;
+  process.env.CRON_SECRET = "s3cret-for-test";
+  const res = { statusCode: 0, body: null, status(c) { this.statusCode = c; return this; }, setHeader() {}, end(b) { this.body = JSON.parse(b); } };
+  try {
+    await handler({ method: "GET", headers: { authorization: "Bearer s3cret-for-test" }, query: { steps: "nosuchstep" } }, res);
+  } finally { if (prev === undefined) delete process.env.CRON_SECRET; else process.env.CRON_SECRET = prev; }
+  assert.equal(res.statusCode, 400);
+  assert.equal(res.body.error, "unknown_steps");
+  assert.ok(res.body.known.includes("geo"));
 });
