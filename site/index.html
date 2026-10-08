@@ -498,6 +498,7 @@
               </div>
               <div class="csec cpub"><h4>Publish</h4>
                 <div class="frow"><div class="field"><label class="check"><input type="checkbox" id="pPublished"><span>Published (visible on the site)</span></label></div><div class="field"><label class="check"><input type="checkbox" id="pPinned"><span>Pinned to the top</span></label></div></div>
+                <div class="field"><span class="label-like">Also share to</span><div class="sharebox" id="pShare"></div><p class="hint">Sent from the Forum's own accounts when the post is saved as published. Connect accounts under Settings → Social publishing.</p></div>
                 <p class="err" id="pErr"></p>
                 <div class="acts-inline" style="display:flex"><button class="btn btn-primary" type="submit" id="pSave">Save post</button> <button class="btn btn-line" type="button" id="pReset">Clear</button></div>
               </div>
@@ -508,6 +509,13 @@
           <div class="empty" id="postEmpty" hidden>No posts yet. Press New post to write the first one, or let the weekly round-up draft itself.</div>
         </div>
         <div class="cpane" data-cpane="settings">
+          <div class="form">
+            <h3>Social publishing</h3>
+            <p class="small muted">Published posts can go out to the Forum's own accounts from here, through each platform's official API and nothing in between. Each account is connected once by adding its keys in Vercel; the desk only ever sees whether it is connected. The step-by-step guide is <code>docs/social-publishing-research.md</code> in the repository.</p>
+            <ul class="rows" id="socialChannels"></ul>
+            <h4 style="margin:1rem 0 .4rem">Recent shares</h4>
+            <ul class="rows" id="socialLog"></ul>
+          </div>
           <div class="form">
             <h3>Social accounts</h3>
             <p class="small muted">Links appear in the footer and on the Updates page once set.</p>

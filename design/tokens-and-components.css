@@ -861,3 +861,12 @@ body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
 .cover tr.gap td{background:var(--warn-50)}
 .assign td.wards{min-width:220px}
 @media (max-width:639px){ .roster .person{min-width:0} }
+@media (max-width:639px){ .roster .person{min-width:0} }
+.label-like{font-family:var(--head); font-weight:600; font-size:.92rem; color:var(--ink)}
+.sharebox{display:flex; gap:.5rem; flex-wrap:wrap; margin:.3rem 0}
+.sharechk{display:inline-flex; align-items:center; gap:.4rem; min-height:36px; padding:.2rem .7rem .2rem .5rem; border:1.5px solid var(--line); border-radius:var(--r-pill); font-size:.9rem; cursor:pointer; margin:0}
+.sharechk.done{opacity:.6}
+.sharechk input{margin:0}
+.prows .pshares{grid-column:2; display:flex; gap:.3rem; flex-wrap:wrap; margin-top:.3rem}
+.prows .pshares .tag{font-size:.75rem; padding:.2rem .45rem; text-decoration:none}
+.prows .sharerow{grid-column:1/-1; display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; padding:.6rem .75rem; margin-top:.4rem; border:1px dashed var(--line); border-radius:8px; background:var(--surface-2)}

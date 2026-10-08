@@ -764,7 +764,14 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
 
   const contentCalls = [];
   const deskPosts = [{ id: "p9", kind: "news", slug: "x", title: "Existing draft", published: false, pinned: false, created_at: "2026-10-07T10:00:00Z", created_by: "Coordinator" },
-    { id: "p8", kind: "story", slug: "weekly-round-up-week-41", title: "Weekly round-up: week 41", source: "auto:weekly:2026-W41", published: false, pinned: false, tags: ["weekly"], created_at: "2026-10-07T10:00:00Z", created_by: "cron" }];
+    { id: "p8", kind: "story", slug: "weekly-round-up-week-41", title: "Weekly round-up: week 41", source: "auto:weekly:2026-W41", published: false, pinned: false, tags: ["weekly"], created_at: "2026-10-07T10:00:00Z", created_by: "cron" },
+    { id: "p7", kind: "news", slug: "camp-on-sunday", title: "Camp on Sunday", summary: "Property tax camp at the community centre.", published: true, published_at: "2026-10-06T10:00:00Z", pinned: false, tags: ["camp"], created_at: "2026-10-06T09:00:00Z", created_by: "Owner" }];
+  // Social publishing: Telegram and Bluesky connected, Facebook, Instagram and X not; one earlier share of p7 to Telegram
+  const socialCalls = [], socialShares = [{ id: 1, post_id: "p7", platform: "telegram", status: "sent", external_url: "https://t.me/gvf/5", attempts: 1, created_at: "2026-10-06T10:01:00Z", sent_at: "2026-10-06T10:01:00Z" }];
+  const socialChannels = [{ platform: "facebook", label: "Facebook Page", configured: false, image: "optional", needs: ["META_PAGE_ID", "META_PAGE_TOKEN"] }, { platform: "instagram", label: "Instagram", configured: false, image: "required", needs: ["META_IG_USER_ID", "META_PAGE_TOKEN"] }, { platform: "telegram", label: "Telegram channel", configured: true, image: "optional", needs: [] }, { platform: "bluesky", label: "Bluesky", configured: true, image: "optional", needs: [] }, { platform: "x", label: "X (Twitter)", configured: false, image: "none", needs: ["X_API_KEY"] }];
+  await page.route("**/api/triage/social", (route) => { if (route.request().method() === "GET") return json(route, 200, { ok: true, channels: socialChannels, shares: socialShares });
+    const b = JSON.parse(route.request().postData() || "{}"); socialCalls.push(b); const results = (b.platforms || []).map((pl) => { const row = { id: socialShares.length + 1, post_id: b.post_id, platform: pl, status: "sent", external_url: pl === "bluesky" ? "https://bsky.app/profile/gvf/post/abc" : "https://t.me/gvf/9", attempts: 1, created_at: "2026-10-08T10:00:00Z", sent_at: "2026-10-08T10:00:00Z" }; socialShares.unshift(row); return { platform: pl, status: "sent", url: row.external_url }; });
+    return json(route, 200, { ok: true, results, sent: results.length, failed: 0, skipped: 0 }); });
   await page.route("**/api/triage/content", (route) => { const mth = route.request().method(); if (mth === "GET") return json(route, 200, { ok: true, posts: deskPosts, settings: { social: { x: "https://x.com/gvf" }, autopost: { enabled: true, weekday: 0, review_hours: 24 } } }); const b = JSON.parse(route.request().postData() || "{}"); contentCalls.push({ method: mth, body: b });
     if (mth === "PATCH" && Array.isArray(b.tags)) { const dp = deskPosts.find((x) => x.id === b.id); if (dp) dp.tags = b.tags; }
     if (mth === "PUT") return json(route, 200, { ok: true, settings: b.settings });
@@ -801,8 +808,11 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#postList").innerText()).includes("Existing draft") && (await page.locator("#sX").inputValue()) === "https://x.com/gvf", "content tab lists posts and loads the social links");
   check((await page.locator("#composer").isHidden()) && (await page.locator("#contentCounts").innerText()).replace(/\s+/g, " ").includes("2 Drafts"), "the composer stays closed until New post; counts strip reads the posts");
   await shot("desk-content");
+  check((await page.locator('#postList li[data-pid="p7"] .pshares .tag-green').innerText()).includes("TG") && (await page.locator('#postList li[data-pid="p7"] [data-pshare]').count()) === 1 && (await page.locator('#postList li[data-pid="p9"] [data-pshare]').count()) === 0, "a published post shows its share chips and a Share button; a draft does not");
   await page.click("#postNew");
   check(!(await page.locator("#composer").isHidden()), "New post opens the composer");
+  check((await page.locator('#pShare input[data-share="new"]').count()) === 2 && (await page.locator('#pShare input[value="telegram"]').count()) === 1 && (await page.locator('#pShare input[value="facebook"]').count()) === 0, "the composer offers only the connected accounts");
+  await page.check('#pShare input[value="telegram"]');
   await shot("desk-content-composer");
   await page.click("#draftBtn");
   await page.waitForTimeout(60);
@@ -818,6 +828,13 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#pSave");
   await page.waitForTimeout(250);
   check(contentCalls.length === 1 && contentCalls[0].method === "POST" && contentCalls[0].body.kind === "story" && contentCalls[0].body.title === "Sewa drive cleans Sector 45 park" && contentCalls[0].body.published === true, "saving a post sends it to the content API");
+  check(socialCalls.length === 1 && socialCalls[0].post_id === "p10" && JSON.stringify(socialCalls[0].platforms) === JSON.stringify(["telegram"]), "saving a published post with a ticked account POSTs the share (" + JSON.stringify(socialCalls) + ")");
+  await page.click('#postList li[data-pid="p7"] [data-pshare]');
+  check(!(await page.locator("#share_p7").isHidden()) && (await page.locator('#share_p7 input[value="telegram"]').isDisabled()) && !(await page.locator('#share_p7 input[value="bluesky"]').isDisabled()), "Share opens the chooser with the already-shared account disabled");
+  await page.check('#share_p7 input[value="bluesky"]');
+  await page.click('#share_p7 [data-sharego="p7"]');
+  await page.waitForTimeout(300);
+  check(socialCalls.length === 2 && socialCalls[1].post_id === "p7" && JSON.stringify(socialCalls[1].platforms) === JSON.stringify(["bluesky"]) && (await page.locator('#postList li[data-pid="p7"] .pshares a[href="https://bsky.app/profile/gvf/post/abc"]').count()) === 1, "Share now POSTs the chosen account and the new chip links to the live post");
   await page.click('#postList [data-ppub="p9"]');
   await page.waitForTimeout(150);
   check(contentCalls.length === 2 && contentCalls[1].method === "PATCH" && contentCalls[1].body.id === "p9" && contentCalls[1].body.published === true, "publish toggles through a PATCH");
@@ -866,6 +883,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await autoRow.locator('[data-phold="p8"]').count()) === 1, "a released draft offers Hold again");
   await page.click('#tContent [data-ctab="settings"]');
   check(!(await page.locator("#autoForm").isHidden()) && (await page.locator("#postList").isHidden()), "the Settings view shows the round-up form in place of the posts");
+  check((await page.locator("#socialChannels .tag-green").count()) === 2 && (await page.locator("#socialChannels").innerText()).includes("META_PAGE_ID") && (await page.locator("#socialLog .row").count()) >= 2, "Social publishing lists connected accounts, what the others need, and the recent shares");
   await shot("desk-content-settings");
   await page.selectOption("#apWeekday", "5");
   await page.fill("#apHours", "72");
