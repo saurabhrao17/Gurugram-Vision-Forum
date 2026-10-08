@@ -124,14 +124,16 @@ test("agentStep: plan, act, store, report; the workflow gets the retries, the re
   const tables = { seo_tasks: [{ key: "link:/old", status: "open", owner: "code", area: "links", severity: "high", title: "Broken internal link: /old", first_seen: "2026-10-01T00:00:00Z" }], seo_agent_log: [], seo_agent_reports: [], seo_pages: [] };
   const sb = fakeSb(tables);
   const calls = [];
-  const fetchImpl = async (url, init = {}) => { calls.push({ url, method: init.method || "GET" }); return { ok: true, status: 200, json: async () => ({}), text: async () => "<html></html>", headers: { get: () => null } }; };
+  const fetchImpl = async (url, init = {}) => { calls.push({ url, method: init.method || "GET" }); return { ok: true, status: 200, json: async () => (url.startsWith("https://oauth2") ? { access_token: "T" } : {}), text: async () => "<html></html>", headers: { get: () => null } }; };
   const state = { ...STATE, pages: [], crawl: { broken: [] }, run_errors: { gsc: { error: "timeout" } } };
-  const env = { SITE_URL: SITE, INDEXNOW_KEY: "k" };
+  const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 1024 });
+  const env = { SITE_URL: SITE, INDEXNOW_KEY: "k", GSC_SERVICE_ACCOUNT: JSON.stringify({ client_email: "a@b.iam.gserviceaccount.com", private_key: privateKey.export({ type: "pkcs8", format: "pem" }) }) };
   const plan = await agentStep(sb, env, { fetch: fetchImpl, now: Date.UTC(2026, 9, 9, 3, 30), phase: "plan", loadState: async () => state });
   assert.deepEqual(plan.retry, ["gsc"]);
   assert.equal(plan.fixed, 1, "the broken link is gone from the state");
   assert.ok(plan.opened > 5);
   assert.ok(calls.some((c) => c.url.includes("indexnow")), "IndexNow pinged for the unknown pages");
+  assert.equal(calls.filter((c) => c.url.includes("/sitemaps/") && c.method === "PUT").length, 1, "the sitemap resubmitted once");
   assert.ok(plan.weekly && plan.weekly_md.includes("plan for 2026-W41"), "the first run of a week writes the week's plan");
   assert.equal(plan.report, undefined);
   assert.ok(tables.seo_agent_log.some((l) => l.kind === "plan" && /^Plan for today/.test(l.text)));
@@ -140,9 +142,13 @@ test("agentStep: plan, act, store, report; the workflow gets the retries, the re
   assert.equal(tables.seo_tasks.find((t) => t.key === "index:unknown").last_result.startsWith("Pinged IndexNow"), true);
   assert.match(plan.issue_md, /Site check failing: headers/);
 
+  const kinds = tables.seo_agent_log.map((l) => l.kind);
+  assert.equal(kinds[0], "plan", "the day's plan opens the timeline");
+  assert.ok(kinds.indexOf("action") < kinds.lastIndexOf("check"));
   const n = calls.length;
   const report = await agentStep(sb, env, { fetch: fetchImpl, now: NOW, phase: "report", loadState: async () => state });
   assert.equal(calls.slice(n).filter((c) => c.url.includes("indexnow")).length, 0, "IndexNow at most once a day");
+  assert.equal(calls.slice(n).filter((c) => c.url.includes("/sitemaps/")).length, 0, "the sitemap is resubmitted at most once a day");
   assert.equal(report.report.path, "daily/2026/10/2026-10-09.md");
   assert.match(report.report_md, /## Timeline \(IST\)/);
   assert.match(report.report_md, /- 09:00 Plan for today/);
