@@ -19,7 +19,7 @@ test("parseSteps keeps known step names and rejects the rest", () => {
   assert.deepEqual(parseSteps("news, links,bogus"), ["news", "links"]);
   assert.equal(parseSteps("bogus"), null);
   assert.equal(parseSteps(""), null);
-  assert.deepEqual([...STEP_GROUPS.fetch, ...STEP_GROUPS.analyse].sort(), [...STEP_NAMES].sort());
+  assert.deepEqual([...STEP_GROUPS.fetch, ...STEP_GROUPS.analyse, ...STEP_GROUPS.seo].sort(), [...STEP_NAMES].sort());
 });
 
 test("runDaily with `only` runs those steps and marks the rest as not in the run", async () => {

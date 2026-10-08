@@ -874,3 +874,25 @@ body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
 .prows .pshares{grid-column:2; display:flex; gap:.3rem; flex-wrap:wrap; margin-top:.3rem}
 .prows .pshares .tag{font-size:.75rem; padding:.2rem .45rem; text-decoration:none}
 .prows .sharerow{grid-column:1/-1; display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; padding:.6rem .75rem; margin-top:.4rem; border:1px dashed var(--line); border-radius:8px; background:var(--surface-2)}
+
+/* ---------- desk v2c: SEO desk ---------- */
+.jcounts-5{grid-template-columns:repeat(2,1fr)}
+@media (min-width:640px){ .jcounts-5{grid-template-columns:repeat(5,1fr)} }
+.jcount .jsub{display:block; font-size:.78rem; color:var(--muted); margin-top:.1rem}
+.seogrid{display:grid; gap:1rem; margin:0 0 1rem}
+@media (min-width:1000px){ .seogrid{grid-template-columns:1fr 1fr} }
+.seogrid .tcard{margin:0; min-width:0}
+.tcard .note{font-size:.9rem; color:var(--muted); margin:0 0 .75rem}
+.seolog .row b{font-weight:600}
+.vitals{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:.75rem}
+.vital{border:1px solid var(--line); border-radius:10px; padding:.8rem .9rem; background:var(--surface-2); min-width:0}
+.vital .vurl{font-family:var(--head); font-weight:700; word-break:break-all}
+.vital .vbig{display:flex; align-items:center; gap:.5rem; margin:.4rem 0}
+.vital .vbig .tag{font-size:1.25rem; padding:.3rem .6rem}
+.vital .vbig span:last-child{font-size:.85rem; color:var(--muted)}
+.vital dl{display:grid; grid-template-columns:repeat(5,1fr); gap:.3rem; margin:0}
+.vital dt{font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.vital dd{margin:0; font-weight:600; font-variant-numeric:tabular-nums; font-size:.9rem}
+.seotbl td .tag{font-size:.75rem; padding:.2rem .45rem; margin:.1rem .15rem .1rem 0}
+.seotbl td.n input{vertical-align:middle; margin-right:.4rem; width:18px; height:18px}
+.seotbl td.n .meta{font-size:.8rem; color:var(--muted)}
