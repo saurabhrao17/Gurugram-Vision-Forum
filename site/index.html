@@ -357,7 +357,7 @@
     <div id="deskMain" hidden class="desk" data-tab="reports">
       <aside class="dside">
         <div class="dme" id="userBar"><span class="avatar" id="deskAvatar" aria-hidden="true"></span><span class="who" id="whoAmI"></span></div>
-        <nav class="tabs dnav" id="tTabs" role="tablist" aria-label="Desk sections"><span class="dgrp">Work</span><button class="tab" role="tab" type="button" data-tab="reports" aria-selected="true" id="reportsTab"><svg class="i" aria-hidden="true"><use href="#i-track"/></svg><span>Reports</span></button><button class="tab" role="tab" type="button" data-tab="inbox" aria-selected="false" id="inboxTab" hidden><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg><span>Inbox</span><span class="tcount" id="inboxNew" hidden></span></button><button class="tab" role="tab" type="button" data-tab="map" aria-selected="false" id="mapTab"><svg class="i" aria-hidden="true"><use href="#i-map"/></svg><span>Map</span></button><span class="dgrp">Team</span><button class="tab" role="tab" type="button" data-tab="roles" aria-selected="false" id="rolesTab" hidden><svg class="i" aria-hidden="true"><use href="#i-who"/></svg><span>Roles</span></button><button class="tab" role="tab" type="button" data-tab="joins" aria-selected="false" id="joinsTab" hidden><svg class="i" aria-hidden="true"><use href="#i-join"/></svg><span>Join requests</span><span class="tcount" id="joinsNew" hidden></span></button><button class="tab" role="tab" type="button" data-tab="performance" aria-selected="false" id="performanceTab" hidden><svg class="i" aria-hidden="true"><use href="#i-dash"/></svg><span>Performance</span></button><span class="dgrp">Publish</span><button class="tab" role="tab" type="button" data-tab="content" aria-selected="false" id="contentTab" hidden><svg class="i" aria-hidden="true"><use href="#i-news"/></svg><span>Content</span></button><button class="tab" role="tab" type="button" data-tab="newsletter" aria-selected="false" id="newsletterTab" hidden><svg class="i" aria-hidden="true"><use href="#i-chat"/></svg><span>Newsletter</span></button><span class="dgrp">Audience</span><button class="tab" role="tab" type="button" data-tab="visitors" aria-selected="false" id="visitorsTab" hidden><svg class="i" aria-hidden="true"><use href="#i-home"/></svg><span>Visitors</span></button><button class="tab" role="tab" type="button" data-tab="subscribers" aria-selected="false" id="subscribersTab" hidden><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg><span>Subscribers</span></button><span class="dgrp">Watch</span><button class="tab" role="tab" type="button" data-tab="insights" aria-selected="false" id="insightsTab" hidden><svg class="i" aria-hidden="true"><use href="#i-globe"/></svg><span>Pulse</span></button><button class="tab" role="tab" type="button" data-tab="health" aria-selected="false" id="healthTab" hidden><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span>Health</span></button></nav>
+        <nav class="tabs dnav" id="tTabs" role="tablist" aria-label="Desk sections"><span class="dgrp">Work</span><button class="tab" role="tab" type="button" data-tab="reports" aria-selected="true" id="reportsTab"><svg class="i" aria-hidden="true"><use href="#i-track"/></svg><span>Reports</span></button><button class="tab" role="tab" type="button" data-tab="inbox" aria-selected="false" id="inboxTab" hidden><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg><span>Inbox</span><span class="tcount" id="inboxNew" hidden></span></button><button class="tab" role="tab" type="button" data-tab="map" aria-selected="false" id="mapTab"><svg class="i" aria-hidden="true"><use href="#i-map"/></svg><span>Map</span></button><span class="dgrp">Team</span><button class="tab" role="tab" type="button" data-tab="roles" aria-selected="false" id="rolesTab" hidden><svg class="i" aria-hidden="true"><use href="#i-who"/></svg><span>Team</span></button><button class="tab" role="tab" type="button" data-tab="assign" aria-selected="false" id="assignTab" hidden><svg class="i" aria-hidden="true"><use href="#i-wards"/></svg><span>Ward assignments</span></button><button class="tab" role="tab" type="button" data-tab="joins" aria-selected="false" id="joinsTab" hidden><svg class="i" aria-hidden="true"><use href="#i-join"/></svg><span>Join requests</span><span class="tcount" id="joinsNew" hidden></span></button><button class="tab" role="tab" type="button" data-tab="performance" aria-selected="false" id="performanceTab" hidden><svg class="i" aria-hidden="true"><use href="#i-dash"/></svg><span>Performance</span></button><span class="dgrp">Publish</span><button class="tab" role="tab" type="button" data-tab="content" aria-selected="false" id="contentTab" hidden><svg class="i" aria-hidden="true"><use href="#i-news"/></svg><span>Content</span></button><button class="tab" role="tab" type="button" data-tab="newsletter" aria-selected="false" id="newsletterTab" hidden><svg class="i" aria-hidden="true"><use href="#i-chat"/></svg><span>Newsletter</span></button><span class="dgrp">Audience</span><button class="tab" role="tab" type="button" data-tab="visitors" aria-selected="false" id="visitorsTab" hidden><svg class="i" aria-hidden="true"><use href="#i-home"/></svg><span>Visitors</span></button><button class="tab" role="tab" type="button" data-tab="subscribers" aria-selected="false" id="subscribersTab" hidden><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg><span>Subscribers</span></button><span class="dgrp">Watch</span><button class="tab" role="tab" type="button" data-tab="insights" aria-selected="false" id="insightsTab" hidden><svg class="i" aria-hidden="true"><use href="#i-globe"/></svg><span>Pulse</span></button><button class="tab" role="tab" type="button" data-tab="health" aria-selected="false" id="healthTab" hidden><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span>Health</span></button></nav>
         <div class="dside-foot"><button class="btn btn-line btn-sm" type="button" id="pwBtn">Change password</button><button class="btn btn-line btn-sm" type="button" id="signOut">Sign out</button></div>
       </aside>
       <div class="dmain">
@@ -397,25 +397,36 @@
       
       </div>
       <div id="tRoles" class="dpanel" hidden>
-        <div class="dhead"><div><h2>Roles</h2><p>Coordinators cover clusters of 5–6 wards; each ward has a main lead and a support lead. Assign wards per person, then press Save on that row. Name and mobile save as you leave the field.</p></div></div>
-                <table class="tbl roster" id="rosterTbl"><thead><tr><th scope="col">Person</th><th scope="col">Mobile</th><th scope="col">Email</th><th scope="col">Desk role</th><th scope="col">Active</th><th scope="col">Wards</th><th scope="col">Assign</th></tr></thead><tbody id="rosterBody"></tbody></table>
-        <h3 style="margin-top:2rem">Who covers which ward</h3>
-        <p class="small muted">Derived from the roster above: the coordinator, main lead and support lead for each of the 36 wards, with mobile numbers for the team's use only.</p>
-        <table class="tbl cover" id="coverTbl"><thead><tr><th scope="col">Ward</th><th scope="col">Councillor</th><th scope="col">Coordinator</th><th scope="col">Main lead</th><th scope="col">Support lead</th></tr></thead><tbody id="coverBody"></tbody></table>
-        <h3 style="margin-top:2rem">Add a volunteer</h3>
-        <form class="form" id="staffForm" novalidate>
-          <div class="err" id="sErr" role="alert">Check the highlighted fields.</div>
-          <div class="frow">
-            <div class="field"><label for="sName">Name</label><input type="text" id="sName" required></div>
-            <div class="field"><label for="sEmail">Email</label><input type="email" id="sEmail" required autocomplete="off"></div>
-            <div class="field"><label for="sPhone">Mobile</label><input type="tel" id="sPhone" autocomplete="off" inputmode="tel" placeholder="+91 98xxx xxxxx"></div>
-            <div class="field"><label for="sPass">Temporary password (10+ characters)</label><input type="text" id="sPass" required autocomplete="off"></div>
-            <div class="field"><label for="sRole">Role</label><select id="sRole"><option value="triage">Ward volunteer (sees only their wards)</option><option value="content">Content team (content only)</option><option value="coordinator" id="sRoleCoord">Coordinator (all reports, roles, content)</option></select></div>
-          </div>
-          <button class="btn btn-primary" type="submit">Create account</button>
-          <p class="hint" style="margin-top:.75rem">Hand the password over in person or by phone, not by email. Then assign wards in the roster above. Only owners can remove accounts.</p>
-        </form>
-      
+        <div class="dhead"><div><h2>Team</h2><p>Everyone with a desk account: name and mobile save as you leave the field; the desk role decides what they see. Wards are given on the Ward assignments page.</p></div><div class="dact"><button class="btn btn-primary btn-sm" type="button" id="staffNew"><svg class="i i-s" aria-hidden="true"><use href="#i-join"/></svg>Add a person</button></div></div>
+        <div class="jcounts jcounts-4" id="teamCounts" aria-live="polite"></div>
+        <div class="composer form" id="staffComposer" hidden>
+          <div class="chead"><h3>Add a person</h3><button class="btn btn-line btn-sm" type="button" id="staffClose">Close</button></div>
+          <form id="staffForm" novalidate>
+            <div class="err" id="sErr" role="alert">Check the highlighted fields.</div>
+            <div class="frow frow-3">
+              <div class="field"><label for="sName">Name</label><input type="text" id="sName" required></div>
+              <div class="field"><label for="sEmail">Email</label><input type="email" id="sEmail" required autocomplete="off"></div>
+              <div class="field"><label for="sPhone">Mobile</label><input type="tel" id="sPhone" autocomplete="off" inputmode="tel" placeholder="+91 98xxx xxxxx"></div>
+              <div class="field"><label for="sPass">Temporary password (10+ characters)</label><input type="text" id="sPass" required autocomplete="off"></div>
+              <div class="field"><label for="sRole">Desk role</label><select id="sRole"><option value="triage">Ward volunteer (sees only their wards)</option><option value="content">Content team (content only)</option><option value="coordinator" id="sRoleCoord">Coordinator (all reports, roles, content)</option></select></div>
+            </div>
+            <div class="acts-inline" style="display:flex;align-items:center"><button class="btn btn-primary" type="submit">Create account</button><span class="hint">Hand the password over in person or by phone, not by email. Then give wards on the Ward assignments page.</span></div>
+          </form>
+        </div>
+        <table class="tbl roster" id="rosterTbl"><thead><tr><th scope="col">Person</th><th scope="col">Mobile</th><th scope="col">Desk role</th><th scope="col">Active</th><th scope="col">Wards</th><th scope="col"></th></tr></thead><tbody id="rosterBody"></tbody></table>
+      </div>
+      <div id="tAssign" class="dpanel" hidden>
+        <div class="dhead"><div><h2>Ward assignments</h2><p>Who covers which ward. A coordinator covers a cluster of 5–6 wards; every ward has a main lead and a support lead. Change a ward's holder below, or give a person several wards at once.</p></div></div>
+        <div class="jcounts jcounts-4" id="assignCounts" aria-live="polite"></div>
+        <div class="stabs ctabs" role="tablist" aria-label="Assignment views"><button class="stab" type="button" data-ctab="byward" aria-selected="true">By ward</button><button class="stab" type="button" data-ctab="byperson" aria-selected="false">By person</button></div>
+        <div class="cpane on" data-cpane="byward">
+          <p class="small muted">Pick a person for each role; the change saves at once and moves the ward from whoever held it. Mobile numbers are for the team's use only.</p>
+          <table class="tbl cover" id="coverTbl"><thead><tr><th scope="col">Ward</th><th scope="col">Councillor</th><th scope="col">Coordinator</th><th scope="col">Main lead</th><th scope="col">Support lead</th></tr></thead><tbody id="coverBody"></tbody></table>
+        </div>
+        <div class="cpane" data-cpane="byperson">
+          <p class="small muted">Type wards like "1-6, 9, 12", choose the role, press Add, then Save on that row. The × on a chip removes that ward.</p>
+          <table class="tbl roster assign" id="assignTbl"><thead><tr><th scope="col">Person</th><th scope="col">Wards</th><th scope="col">Assign</th></tr></thead><tbody id="assignBody"></tbody></table>
+        </div>
       </div>
       <div id="tJoins" class="dpanel" hidden>
         <div class="dhead"><div><h2>Join requests</h2><p>Sign-ups from the public Join form. Contact details are for the team's own use only. Mark each request as you work it; notes stay on the desk.</p></div></div>
@@ -444,105 +455,118 @@
       
       </div>
       <div id="tContent" class="dpanel" hidden>
-        <div class="dhead"><div><h2>Content</h2><p>Stories, news, photos, videos, social posts, testimonials and pop-ups. Published items appear on the site within two minutes.</p></div></div>
-                <div class="form" style="max-width:none;margin-bottom:1rem">
-          <h3 style="margin-bottom:.5rem" id="postFormTitle">New post</h3>
-          <form id="postForm" novalidate>
-            <input type="hidden" id="pId">
-            <div class="frow">
-              <div class="field"><label for="pKind">Kind</label><select id="pKind"><option value="news">News</option><option value="story">Story (blog post)</option><option value="photo">Photo</option><option value="video">Video</option><option value="social">Social post</option><option value="testimonial">Testimonial</option><option value="popup">Pop-up announcement</option></select></div>
-              <div class="field"><label for="pTags">Tags (comma separated)</label><input type="text" id="pTags"></div>
-            </div>
-            <div class="rbox"><b>Draft with AI</b><p class="note">Describe what happened in a few lines; the draft fills the fields below for you to edit before publishing. Uses the free Gemini or Groq key set in Vercel; Claude is only a paid fallback.</p><textarea id="draftBrief" style="min-height:70px" placeholder="e.g. Sewa drive in Sector 45 park on Sunday: 40 volunteers, 2 tonnes of waste cleared with MCG's truck, next drive 20 October"></textarea><p style="margin:.5rem 0 0"><button class="btn btn-line btn-sm" type="button" id="draftBtn">Draft with AI</button> <span class="small muted" id="draftMsg"></span></p></div>
-            <p class="small" style="margin:.25rem 0 .75rem"><button class="btn btn-line btn-sm" type="button" id="trBtn">Translate English ↔ Hindi</button> <label class="check" style="display:inline-flex;margin-left:.6rem"><input type="checkbox" id="trAuto" checked><span>Fill the other language automatically when I leave a field</span></label> <span class="small muted" id="trMsg"></span></p>
-            <div class="frow">
-              <div class="field"><label for="pTitle">Title</label><input type="text" id="pTitle" required maxlength="200"></div>
-              <div class="field"><label for="pTitleHi">Title (Hindi)</label><input type="text" id="pTitleHi" maxlength="200"></div>
-            </div>
-            <div class="frow">
-              <div class="field"><label for="pSummary">Summary</label><textarea id="pSummary" style="min-height:70px" maxlength="500"></textarea></div>
-              <div class="field"><label for="pSummaryHi">Summary (Hindi)</label><textarea id="pSummaryHi" style="min-height:70px" maxlength="500"></textarea></div>
-            </div>
-            <div class="frow">
-              <div class="field"><label for="pBody">Body (plain text or simple HTML: p, b, i, ul, li, h2, a)</label><textarea id="pBody" style="min-height:140px"></textarea></div>
-              <div class="field"><label for="pBodyHi">Body (Hindi)</label><textarea id="pBodyHi" style="min-height:140px"></textarea></div>
-            </div>
-            <div class="frow">
-              <div class="field"><label for="pLink">Link (news article, event page)</label><input type="url" id="pLink" placeholder="https://"></div>
-              <div class="field"><label for="pEmbed">Social post URL (x.com, facebook.com, instagram.com, youtube.com)</label><input type="url" id="pEmbed" placeholder="https://"></div>
-            </div>
-            <div class="frow">
-              <div class="field"><label for="pSource">Source or handle</label><input type="text" id="pSource" maxlength="120"></div>
-              <div class="field"><label for="pAuthor">Author / quoted by</label><input type="text" id="pAuthor" maxlength="120"></div>
-            </div>
-            <div class="frow">
-              <div class="field"><label for="pMedia">Photo, video or PDF (up to 20 MB)</label><input type="file" id="pMedia" accept="image/*,video/mp4,video/webm,application/pdf"><p class="hint" id="pMediaStatus"></p><input type="hidden" id="pMediaPath"><input type="hidden" id="pMediaType"></div>
-              <div class="field"><label for="pStarts">Pop-up shows from / until</label><div class="frow"><input type="datetime-local" id="pStarts"><input type="datetime-local" id="pEnds"></div></div>
-            </div>
-            <div class="frow">
-              <div class="field"><label class="check"><input type="checkbox" id="pPublished"><span>Published (visible on the site)</span></label></div>
-              <div class="field"><label class="check"><input type="checkbox" id="pPinned"><span>Pinned to the top</span></label></div>
-            </div>
-            <p class="err" id="pErr"></p>
-            <button class="btn btn-ink" type="submit" id="pSave">Save post</button> <button class="btn btn-line" type="button" id="pReset">Clear</button>
-          </form>
+        <div class="dhead"><div><h2>Content</h2><p>Stories, news, photos, videos, social posts, testimonials and pop-ups. Published items appear on the site within two minutes.</p></div><div class="dact"><button class="btn btn-primary btn-sm" type="button" id="postNew"><svg class="i i-s" aria-hidden="true"><use href="#i-news"/></svg>New post</button></div></div>
+        <div class="jcounts jcounts-4" id="contentCounts" aria-live="polite"></div>
+        <div class="stabs ctabs" role="tablist" aria-label="Content sections"><button class="stab" type="button" data-ctab="posts" aria-selected="true">Posts</button><button class="stab" type="button" data-ctab="settings" aria-selected="false">Settings</button></div>
+        <div class="cpane on" data-cpane="posts">
+          <div class="composer form" id="composer" hidden>
+            <div class="chead"><h3 id="postFormTitle">New post</h3><button class="btn btn-line btn-sm" type="button" id="postClose">Close</button></div>
+            <form id="postForm" novalidate>
+              <input type="hidden" id="pId">
+              <div class="csec"><h4>Basics</h4>
+                <div class="frow frow-3">
+                  <div class="field"><label for="pKind">Kind</label><select id="pKind"><option value="news">News</option><option value="story">Story (blog post)</option><option value="photo">Photo</option><option value="video">Video</option><option value="social">Social post</option><option value="testimonial">Testimonial</option><option value="popup">Pop-up announcement</option></select></div>
+                  <div class="field"><label for="pTags">Tags (comma separated)</label><input type="text" id="pTags" placeholder="sewa, sector 45"></div>
+                  <div class="field"><label for="pSource">Source or handle</label><input type="text" id="pSource" maxlength="120" placeholder="MCG notice, @handle"></div>
+                </div>
+              </div>
+              <div class="csec aibox"><div class="aihead"><svg class="i" aria-hidden="true"><use href="#i-chat"/></svg><div><h4>Draft with AI</h4><p class="small muted">Describe what happened in a few lines; the draft fills the fields below for you to edit before publishing. Free Gemini or Groq key first; Claude only as a paid fallback.</p></div></div>
+                <textarea id="draftBrief" style="min-height:64px" placeholder="e.g. Sewa drive in Sector 45 park on Sunday: 40 volunteers, 2 tonnes of waste cleared with MCG's truck, next drive 20 October"></textarea>
+                <p class="acts-inline" style="display:flex;align-items:center;margin:.5rem 0 0"><button class="btn btn-line btn-sm" type="button" id="draftBtn">Draft with AI</button><button class="btn btn-line btn-sm" type="button" id="trBtn">Translate English ↔ Hindi</button><label class="check" style="display:inline-flex;margin:0"><input type="checkbox" id="trAuto" checked><span>Fill the other language when I leave a field</span></label><span class="small muted" id="draftMsg"></span><span class="small muted" id="trMsg"></span></p>
+              </div>
+              <div class="csec"><h4>Write</h4><div class="langcols"><span class="langh">English</span><span class="langh" lang="hi">हिंदी</span></div>
+                <div class="frow">
+                  <div class="field"><label for="pTitle">Title</label><input type="text" id="pTitle" required maxlength="200"></div>
+                  <div class="field"><label for="pTitleHi">Title (Hindi)</label><input type="text" id="pTitleHi" maxlength="200"></div>
+                </div>
+                <div class="frow">
+                  <div class="field"><label for="pSummary">Summary</label><textarea id="pSummary" style="min-height:70px" maxlength="500"></textarea></div>
+                  <div class="field"><label for="pSummaryHi">Summary (Hindi)</label><textarea id="pSummaryHi" style="min-height:70px" maxlength="500"></textarea></div>
+                </div>
+                <div class="frow">
+                  <div class="field"><label for="pBody">Body (plain text or simple HTML: p, b, i, ul, li, h2, a)</label><textarea id="pBody" style="min-height:160px"></textarea></div>
+                  <div class="field"><label for="pBodyHi">Body (Hindi)</label><textarea id="pBodyHi" style="min-height:160px"></textarea></div>
+                </div>
+              </div>
+              <div class="csec"><h4>Media and links</h4>
+                <div class="frow frow-3">
+                  <div class="field"><label for="pMedia">Photo, video or PDF (up to 20 MB)</label><input type="file" id="pMedia" accept="image/*,video/mp4,video/webm,application/pdf"><p class="hint" id="pMediaStatus"></p><input type="hidden" id="pMediaPath"><input type="hidden" id="pMediaType"></div>
+                  <div class="field"><label for="pLink">Link (news article, event page)</label><input type="url" id="pLink" placeholder="https://"></div>
+                  <div class="field"><label for="pEmbed">Social post URL (x.com, facebook.com, instagram.com, youtube.com)</label><input type="url" id="pEmbed" placeholder="https://"></div>
+                </div>
+                <div class="frow"><div class="field"><label for="pAuthor">Author / quoted by</label><input type="text" id="pAuthor" maxlength="120"></div><div class="field"><label for="pStarts">Pop-up shows from / until</label><div class="frow"><input type="datetime-local" id="pStarts"><input type="datetime-local" id="pEnds"></div></div></div>
+              </div>
+              <div class="csec cpub"><h4>Publish</h4>
+                <div class="frow"><div class="field"><label class="check"><input type="checkbox" id="pPublished"><span>Published (visible on the site)</span></label></div><div class="field"><label class="check"><input type="checkbox" id="pPinned"><span>Pinned to the top</span></label></div></div>
+                <p class="err" id="pErr"></p>
+                <div class="acts-inline" style="display:flex"><button class="btn btn-primary" type="submit" id="pSave">Save post</button> <button class="btn btn-line" type="button" id="pReset">Clear</button></div>
+              </div>
+            </form>
+          </div>
+          <div class="mtools"><div class="chips" id="postKinds"></div><input type="search" id="postQ" class="qsearch" placeholder="Search posts" aria-label="Search posts" autocomplete="off"></div>
+          <ul class="rows prows" id="postList"></ul>
+          <div class="empty" id="postEmpty" hidden>No posts yet. Press New post to write the first one, or let the weekly round-up draft itself.</div>
         </div>
-        <div class="form" style="max-width:none;margin-bottom:1rem">
-          <h3 style="margin-bottom:.5rem">Social accounts</h3>
-          <p class="small muted">Links appear in the footer and on the Updates page once set.</p>
-          <form id="socialForm" novalidate>
-            <div class="frow"><div class="field"><label for="sX">X (Twitter)</label><input type="url" id="sX" placeholder="https://x.com/..."></div><div class="field"><label for="sFacebook">Facebook</label><input type="url" id="sFacebook" placeholder="https://facebook.com/..."></div></div>
-            <div class="frow"><div class="field"><label for="sInstagram">Instagram</label><input type="url" id="sInstagram" placeholder="https://instagram.com/..."></div><div class="field"><label for="sYoutube">YouTube</label><input type="url" id="sYoutube" placeholder="https://youtube.com/@..."></div></div>
-            <div class="field"><label for="sWhatsapp">WhatsApp channel or community</label><input type="url" id="sWhatsapp" placeholder="https://whatsapp.com/channel/..."></div>
-            <p class="err" id="sErr"></p>
-            <button class="btn btn-ink btn-sm" type="submit">Save links</button>
-          </form>
+        <div class="cpane" data-cpane="settings">
+          <div class="form">
+            <h3>Social accounts</h3>
+            <p class="small muted">Links appear in the footer and on the Updates page once set.</p>
+            <form id="socialForm" novalidate>
+              <div class="frow"><div class="field"><label for="sX">X (Twitter)</label><input type="url" id="sX" placeholder="https://x.com/..."></div><div class="field"><label for="sFacebook">Facebook</label><input type="url" id="sFacebook" placeholder="https://facebook.com/..."></div></div>
+              <div class="frow"><div class="field"><label for="sInstagram">Instagram</label><input type="url" id="sInstagram" placeholder="https://instagram.com/..."></div><div class="field"><label for="sYoutube">YouTube</label><input type="url" id="sYoutube" placeholder="https://youtube.com/@..."></div></div>
+              <div class="field"><label for="sWhatsapp">WhatsApp channel or community</label><input type="url" id="sWhatsapp" placeholder="https://whatsapp.com/channel/..."></div>
+              <p class="err" id="sLinksErr"></p>
+              <button class="btn btn-ink btn-sm" type="submit">Save links</button>
+            </form>
+          </div>
+          <div class="form">
+            <h3>Weekly round-up and search engines</h3>
+            <p class="small muted">The cron drafts a weekly civic round-up as a story with source "auto:weekly:…". It waits in the posts list for the review window, then publishes itself unless someone holds it.</p>
+            <form id="autoForm" novalidate>
+              <div class="frow frow-3">
+                <div class="field"><label class="check"><input type="checkbox" id="apEnabled" checked><span>Weekly round-up enabled</span></label></div>
+                <div class="field"><label for="apWeekday">Weekday it is drafted</label><select id="apWeekday"><option value="0">Sunday</option><option value="1" selected>Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option></select></div>
+                <div class="field"><label for="apHours">Review window (hours)</label><input type="number" id="apHours" value="48" min="-1" step="1" inputmode="numeric"><p class="hint">0 publishes immediately; -1 never auto-publishes.</p></div>
+              </div>
+              <div class="field"><label class="check"><input type="checkbox" id="seoIndexnow" checked><span>Search engines: ping IndexNow on publish</span></label></div>
+              <p class="err" id="apErr"></p>
+              <button class="btn btn-ink btn-sm" type="submit" id="apSave">Save settings</button>
+            </form>
+          </div>
         </div>
-        <div class="form" style="max-width:none;margin-bottom:1rem">
-          <h3 style="margin-bottom:.5rem">Weekly round-up and search engines</h3>
-          <p class="small muted">The cron drafts a weekly civic round-up as a story with source "auto:weekly:…". It waits in the list below for the review window, then publishes itself unless someone holds it.</p>
-          <form id="autoForm" novalidate>
-            <div class="frow">
-              <div class="field"><label class="check"><input type="checkbox" id="apEnabled" checked><span>Weekly round-up enabled</span></label></div>
-              <div class="field"><label for="apWeekday">Weekday it is drafted</label><select id="apWeekday"><option value="0">Sunday</option><option value="1" selected>Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option></select></div>
-              <div class="field"><label for="apHours">Review window (hours)</label><input type="number" id="apHours" value="48" min="-1" step="1" inputmode="numeric"><p class="hint">0 publishes immediately; -1 never auto-publishes.</p></div>
-            </div>
-            <div class="field"><label class="check"><input type="checkbox" id="seoIndexnow" checked><span>Search engines: ping IndexNow on publish</span></label></div>
-            <p class="err" id="apErr"></p>
-            <button class="btn btn-ink btn-sm" type="submit" id="apSave">Save settings</button>
-          </form>
-        </div>
-        <div class="chips" id="postKinds"></div>
-        <ul class="rows" id="postList"></ul>
-      
       </div>
       <div id="tNewsletter" class="dpanel" hidden>
-        <div class="dhead"><div><h2>Newsletter</h2><p>Written and sent from here to every confirmed subscriber. Plain text: a blank line starts a paragraph, "## " a heading, "- " a list item; web addresses become links. Every mail carries a stop link.</p></div></div>
-                <div class="rbox" id="nlChannel" aria-live="polite"></div>
-        <div class="form" style="max-width:none;margin-bottom:1rem">
-          <h3 style="margin-bottom:.5rem" id="nlFormTitle">New newsletter</h3>
-          <form id="nlForm" novalidate>
-            <input type="hidden" id="nlId">
-            <div class="frow">
-              <div class="field"><label for="nlFrom">Start from a published post</label><select id="nlFrom"><option value="">(blank)</option></select></div>
-              <div class="field acts-inline" style="align-self:end"><button class="btn btn-line btn-sm" type="button" id="nlTranslate">Translate English ↔ Hindi</button> <span class="small muted" id="nlTrMsg"></span></div>
-            </div>
-            <div class="frow">
-              <div class="field"><label for="nlSubject">Subject</label><input type="text" id="nlSubject" maxlength="200" required></div>
-              <div class="field"><label for="nlSubjectHi">Subject (Hindi)</label><input type="text" id="nlSubjectHi" maxlength="200"></div>
-            </div>
-            <div class="frow">
-              <div class="field"><label for="nlBody">Body</label><textarea id="nlBody" style="min-height:220px" maxlength="20000"></textarea></div>
-              <div class="field"><label for="nlBodyHi">Body (Hindi)</label><textarea id="nlBodyHi" style="min-height:220px" maxlength="20000"></textarea></div>
-            </div>
-            <p class="acts-inline" style="flex-wrap:wrap;gap:.5rem"><button class="btn btn-primary" type="submit" id="nlSave">Save draft</button> <button class="btn btn-line" type="button" id="nlPreview">Preview</button> <button class="btn btn-line" type="button" id="nlTest" disabled>Send me a test</button> <button class="btn btn-ink" type="button" id="nlSend" disabled>Send to subscribers</button> <button class="btn btn-line btn-sm" type="button" id="nlNew">New</button> <span class="small muted" id="nlMsg" aria-live="polite"></span></p>
-          </form>
+        <div class="dhead"><div><h2>Newsletter</h2><p>Written and sent from here to every confirmed subscriber. Plain text: a blank line starts a paragraph, "## " a heading, "- " a list item; web addresses become links. Every mail carries a stop link.</p></div><div class="dact"><button class="btn btn-primary btn-sm" type="button" id="nlNew"><svg class="i i-s" aria-hidden="true"><use href="#i-mail"/></svg>New newsletter</button></div></div>
+        <div class="jcounts jcounts-4" id="nlCounts" aria-live="polite"></div>
+        <div class="mail nlmail">
+          <div class="mlist">
+            <h3 class="mlh">Campaigns</h3>
+            <ul class="rows mrows" id="nlList"></ul>
+            <div class="empty" id="nlEmpty" hidden>No newsletters yet. Write one, send yourself a test, then send it to the subscribers.</div>
+          </div>
+          <div class="mread nlcomp">
+            <div class="chead"><h3 id="nlFormTitle">New newsletter</h3><span class="small muted" id="nlMsg" aria-live="polite"></span></div>
+            <div class="rbox" id="nlChannel" aria-live="polite"></div>
+            <form id="nlForm" novalidate>
+              <input type="hidden" id="nlId">
+              <div class="frow">
+                <div class="field"><label for="nlFrom">Start from a published post</label><select id="nlFrom"><option value="">(blank)</option></select></div>
+                <div class="field acts-inline" style="align-self:end"><button class="btn btn-line btn-sm" type="button" id="nlTranslate">Translate English ↔ Hindi</button> <span class="small muted" id="nlTrMsg"></span></div>
+              </div>
+              <div class="langcols"><span class="langh">English</span><span class="langh" lang="hi">हिंदी</span></div>
+              <div class="frow">
+                <div class="field"><label for="nlSubject">Subject</label><input type="text" id="nlSubject" maxlength="200" required></div>
+                <div class="field"><label for="nlSubjectHi">Subject (Hindi)</label><input type="text" id="nlSubjectHi" maxlength="200"></div>
+              </div>
+              <div class="frow">
+                <div class="field"><label for="nlBody">Body</label><textarea id="nlBody" style="min-height:260px" maxlength="20000"></textarea></div>
+                <div class="field"><label for="nlBodyHi">Body (Hindi)</label><textarea id="nlBodyHi" style="min-height:260px" maxlength="20000"></textarea></div>
+              </div>
+              <div id="nlPreviewBox" class="rbox" hidden><b>Preview</b> <span class="small muted" id="nlPreviewSubject"></span><div class="nl-preview" id="nlPreviewBody"></div><div class="nl-preview" id="nlPreviewBodyHi" lang="hi" hidden></div></div>
+              <div class="cfoot"><button class="btn btn-primary" type="submit" id="nlSave">Save draft</button> <button class="btn btn-line" type="button" id="nlPreview">Preview</button> <button class="btn btn-line" type="button" id="nlTest" disabled>Send me a test</button> <button class="btn btn-ink" type="button" id="nlSend" disabled>Send to subscribers</button></div>
+            </form>
+          </div>
         </div>
-        <div id="nlPreviewBox" class="rbox" hidden><b>Preview</b> <span class="small muted" id="nlPreviewSubject"></span><div class="nl-preview" id="nlPreviewBody"></div><div class="nl-preview" id="nlPreviewBodyHi" lang="hi" hidden></div></div>
-        <h3>Drafts and sent newsletters</h3>
-        <ul class="rows" id="nlList"></ul>
-        <div class="empty" id="nlEmpty" hidden>No newsletters yet. Write one above, send yourself a test, then send it to the subscribers.</div>
-      
       </div>
       <div id="tVisitors" class="dpanel" hidden>
         <div class="dhead"><div><h2>Visitors</h2><p>Everyone who registered on the site or sent a report, with first-party usage counts. For the Forum's own use only, as promised in the privacy notice.</p></div></div>

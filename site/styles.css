@@ -796,3 +796,68 @@ body.triage .fnote{margin-top:0; padding-top:0; border-top:0}
   .mail:not(.reading) .mread{display:none}
   .mread .mback{display:inline-flex}
 }
+
+/* ---------- desk v2b: publishing workspace (Content, Newsletter), Team and Ward assignments ---------- */
+.jcounts-4{grid-template-columns:repeat(2,1fr)}
+@media (min-width:640px){ .jcounts-4{grid-template-columns:repeat(4,1fr)} }
+.ctabs{margin:0 0 1rem}
+.ctabs .stab{min-height:42px; padding:.5rem .9rem; font-size:.95rem}
+.cpane{display:none}
+.cpane.on{display:block; animation:fadein .2s ease-out}
+.composer{padding:0; overflow:hidden; border-color:var(--blue-100); box-shadow:0 10px 30px -22px rgba(11,37,69,.4)}
+.chead{display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:.85rem 1.1rem; border-bottom:1px solid var(--line); background:var(--surface-2)}
+.chead h3{margin:0; font-size:1.1rem}
+.composer form{padding:0}
+.csec{padding:1rem 1.1rem; border-bottom:1px solid var(--line-2)}
+.csec:last-child{border-bottom:0}
+.csec>h4{margin:0 0 .7rem; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.csec .field{margin-bottom:.8rem}
+.csec .field label{font-size:.92rem}
+.csec input[type=text],.csec input[type=url],.csec input[type=email],.csec input[type=tel],.csec input[type=number],.csec select,.csec textarea{font-size:.98rem}
+.frow-3{grid-template-columns:1fr}
+@media (min-width:900px){ .frow-3{grid-template-columns:1fr 1fr 1fr} }
+.aibox{background:var(--blue-50); border-bottom-color:var(--blue-100)}
+.aihead{display:flex; gap:.7rem; align-items:flex-start; margin-bottom:.5rem}
+.aihead .i{color:var(--blue); flex:none; margin-top:.15rem}
+.aihead h4{margin:0 0 .15rem; font-size:1rem; text-transform:none; letter-spacing:0; color:var(--ink)}
+.aihead p{margin:0}
+.aibox textarea{background:var(--surface)}
+.langcols{display:none; gap:1rem; margin:0 0 .4rem}
+@media (min-width:640px){ .langcols{display:grid; grid-template-columns:1fr 1fr} }
+.langh{font-family:var(--head); font-weight:700; font-size:.8rem; color:var(--blue); letter-spacing:.06em; text-transform:uppercase; padding:.2rem .5rem; border-radius:4px; background:var(--blue-50); justify-self:start}
+.cpub{background:var(--surface-2)}
+.cfoot{display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; padding:.9rem 0 0; border-top:1px solid var(--line); margin-top:.5rem}
+.qsearch{min-height:40px; max-width:260px; font-size:.95rem; padding:.4rem .7rem}
+.prows .row{grid-template-columns:auto 1fr; align-items:start}
+@media (min-width:900px){ .prows .row{grid-template-columns:auto 1fr auto; align-items:center} }
+.prows .thumb{width:56px; height:56px; border-radius:8px; background:var(--surface-2); display:inline-flex; align-items:center; justify-content:center; overflow:hidden; flex:none}
+.prows .thumb img{width:100%; height:100%; object-fit:cover; display:block}
+.prows .thumb .i{width:24px; height:24px; color:var(--blue); margin:0}
+.prows .ptitle{font-family:var(--head); font-weight:700; color:var(--ink); font-size:1rem; display:block}
+.prows .ptags{display:inline-flex; gap:.3rem; flex-wrap:wrap; margin:.2rem 0 0}
+.prows .ptags .tag{font-size:.75rem; padding:.2rem .45rem}
+.prows .meta{margin-top:.2rem}
+.prows .acts{display:flex; gap:.35rem; flex-wrap:wrap; justify-content:flex-end}
+.prows .acts .btn{min-height:34px; padding:.3rem .6rem; font-size:.88rem}
+.mlh{margin:0 0 .6rem; font-size:1rem}
+.nlmail{grid-template-columns:1fr}
+@media (min-width:1024px){ .nlmail{grid-template-columns:minmax(260px,1fr) minmax(0,2.2fr)} }
+.nlcomp{position:static; max-height:none}
+.nlcomp .chead{margin:-1.1rem -1.25rem 1rem; border-radius:var(--r-card) var(--r-card) 0 0}
+.nlcomp .rbox{margin:0 0 1rem}
+.mrows .row.nlrow{cursor:pointer}
+.mrows .row.nlrow .acts{display:flex; gap:.3rem; align-items:center}
+.mrows .row.nlrow .acts .btn{min-height:32px; padding:.2rem .5rem; font-size:.82rem}
+.roster .person{display:flex; align-items:center; gap:.6rem; min-width:220px}
+.roster .person .av{width:36px; height:36px; border-radius:50%; background:var(--blue-50); color:var(--blue); display:inline-flex; align-items:center; justify-content:center; font-family:var(--head); font-weight:700; font-size:.9rem; flex:none}
+.roster .person .pemail{display:block; font-size:.82rem; color:var(--muted); overflow-wrap:anywhere}
+.roster .person input{min-width:160px; font-weight:600}
+.roster td.wards{font-size:.9rem}
+.roster td.wards a{display:block; font-size:.82rem; margin-top:.3rem}
+.cover select{min-height:40px; font-size:.9rem; padding:.3rem 2rem .3rem .5rem; width:auto; max-width:220px}
+.cover .who{display:block; font-family:var(--head); font-weight:600; color:var(--ink)}
+.cover .who a{display:block; font-weight:400; font-size:.82rem; color:var(--muted); text-decoration:none}
+.cover td.empty-slot .who{color:var(--muted); font-weight:400}
+.cover tr.gap td{background:var(--warn-50)}
+.assign td.wards{min-width:220px}
+@media (max-width:639px){ .roster .person{min-width:0} }
