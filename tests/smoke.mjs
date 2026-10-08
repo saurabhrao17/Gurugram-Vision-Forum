@@ -764,7 +764,14 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
 
   const contentCalls = [];
   const deskPosts = [{ id: "p9", kind: "news", slug: "x", title: "Existing draft", published: false, pinned: false, created_at: "2026-10-07T10:00:00Z", created_by: "Coordinator" },
-    { id: "p8", kind: "story", slug: "weekly-round-up-week-41", title: "Weekly round-up: week 41", source: "auto:weekly:2026-W41", published: false, pinned: false, tags: ["weekly"], created_at: "2026-10-07T10:00:00Z", created_by: "cron" }];
+    { id: "p8", kind: "story", slug: "weekly-round-up-week-41", title: "Weekly round-up: week 41", source: "auto:weekly:2026-W41", published: false, pinned: false, tags: ["weekly"], created_at: "2026-10-07T10:00:00Z", created_by: "cron" },
+    { id: "p7", kind: "news", slug: "camp-on-sunday", title: "Camp on Sunday", summary: "Property tax camp at the community centre.", published: true, published_at: "2026-10-06T10:00:00Z", pinned: false, tags: ["camp"], created_at: "2026-10-06T09:00:00Z", created_by: "Owner" }];
+  // Social publishing: Telegram and Bluesky connected, Facebook, Instagram and X not; one earlier share of p7 to Telegram
+  const socialCalls = [], socialShares = [{ id: 1, post_id: "p7", platform: "telegram", status: "sent", external_url: "https://t.me/gvf/5", attempts: 1, created_at: "2026-10-06T10:01:00Z", sent_at: "2026-10-06T10:01:00Z" }];
+  const socialChannels = [{ platform: "facebook", label: "Facebook Page", configured: false, image: "optional", needs: ["META_PAGE_ID", "META_PAGE_TOKEN"] }, { platform: "instagram", label: "Instagram", configured: false, image: "required", needs: ["META_IG_USER_ID", "META_PAGE_TOKEN"] }, { platform: "telegram", label: "Telegram channel", configured: true, image: "optional", needs: [] }, { platform: "bluesky", label: "Bluesky", configured: true, image: "optional", needs: [] }, { platform: "x", label: "X (Twitter)", configured: false, image: "none", needs: ["X_API_KEY"] }];
+  await page.route("**/api/triage/social", (route) => { if (route.request().method() === "GET") return json(route, 200, { ok: true, channels: socialChannels, shares: socialShares });
+    const b = JSON.parse(route.request().postData() || "{}"); socialCalls.push(b); const results = (b.platforms || []).map((pl) => { const row = { id: socialShares.length + 1, post_id: b.post_id, platform: pl, status: "sent", external_url: pl === "bluesky" ? "https://bsky.app/profile/gvf/post/abc" : "https://t.me/gvf/9", attempts: 1, created_at: "2026-10-08T10:00:00Z", sent_at: "2026-10-08T10:00:00Z" }; socialShares.unshift(row); return { platform: pl, status: "sent", url: row.external_url }; });
+    return json(route, 200, { ok: true, results, sent: results.length, failed: 0, skipped: 0 }); });
   await page.route("**/api/triage/content", (route) => { const mth = route.request().method(); if (mth === "GET") return json(route, 200, { ok: true, posts: deskPosts, settings: { social: { x: "https://x.com/gvf" }, autopost: { enabled: true, weekday: 0, review_hours: 24 } } }); const b = JSON.parse(route.request().postData() || "{}"); contentCalls.push({ method: mth, body: b });
     if (mth === "PATCH" && Array.isArray(b.tags)) { const dp = deskPosts.find((x) => x.id === b.id); if (dp) dp.tags = b.tags; }
     if (mth === "PUT") return json(route, 200, { ok: true, settings: b.settings });
@@ -799,6 +806,14 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click('[data-tab="content"]');
   await page.waitForTimeout(250);
   check((await page.locator("#postList").innerText()).includes("Existing draft") && (await page.locator("#sX").inputValue()) === "https://x.com/gvf", "content tab lists posts and loads the social links");
+  check((await page.locator("#composer").isHidden()) && (await page.locator("#contentCounts").innerText()).replace(/\s+/g, " ").includes("2 Drafts"), "the composer stays closed until New post; counts strip reads the posts");
+  await shot("desk-content");
+  check((await page.locator('#postList li[data-pid="p7"] .pshares .tag-green').innerText()).includes("TG") && (await page.locator('#postList li[data-pid="p7"] [data-pshare]').count()) === 1 && (await page.locator('#postList li[data-pid="p9"] [data-pshare]').count()) === 0, "a published post shows its share chips and a Share button; a draft does not");
+  await page.click("#postNew");
+  check(!(await page.locator("#composer").isHidden()), "New post opens the composer");
+  check((await page.locator('#pShare input[data-share="new"]').count()) === 2 && (await page.locator('#pShare input[value="telegram"]').count()) === 1 && (await page.locator('#pShare input[value="facebook"]').count()) === 0, "the composer offers only the connected accounts");
+  await page.check('#pShare input[value="telegram"]');
+  await shot("desk-content-composer");
   await page.click("#draftBtn");
   await page.waitForTimeout(60);
   await page.fill("#draftBrief", "Sewa drive in Sector 45 park with forty volunteers on Sunday");
@@ -813,6 +828,13 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#pSave");
   await page.waitForTimeout(250);
   check(contentCalls.length === 1 && contentCalls[0].method === "POST" && contentCalls[0].body.kind === "story" && contentCalls[0].body.title === "Sewa drive cleans Sector 45 park" && contentCalls[0].body.published === true, "saving a post sends it to the content API");
+  check(socialCalls.length === 1 && socialCalls[0].post_id === "p10" && JSON.stringify(socialCalls[0].platforms) === JSON.stringify(["telegram"]), "saving a published post with a ticked account POSTs the share (" + JSON.stringify(socialCalls) + ")");
+  await page.click('#postList li[data-pid="p7"] [data-pshare]');
+  check(!(await page.locator("#share_p7").isHidden()) && (await page.locator('#share_p7 input[value="telegram"]').isDisabled()) && !(await page.locator('#share_p7 input[value="bluesky"]').isDisabled()), "Share opens the chooser with the already-shared account disabled");
+  await page.check('#share_p7 input[value="bluesky"]');
+  await page.click('#share_p7 [data-sharego="p7"]');
+  await page.waitForTimeout(300);
+  check(socialCalls.length === 2 && socialCalls[1].post_id === "p7" && JSON.stringify(socialCalls[1].platforms) === JSON.stringify(["bluesky"]) && (await page.locator('#postList li[data-pid="p7"] .pshares a[href="https://bsky.app/profile/gvf/post/abc"]').count()) === 1, "Share now POSTs the chosen account and the new chip links to the live post");
   await page.click('#postList [data-ppub="p9"]');
   await page.waitForTimeout(150);
   check(contentCalls.length === 2 && contentCalls[1].method === "PATCH" && contentCalls[1].body.id === "p9" && contentCalls[1].body.published === true, "publish toggles through a PATCH");
@@ -826,6 +848,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.route("**/api/triage/insights**", (route) => json(route, 200, { ok: true, insights: [{ id: 1, generated_at: "2026-10-07T03:30:00Z", period_start: "2026-09-30T00:00:00Z", period_end: "2026-10-07T00:00:00Z", data: { period: { from: "2026-09-30T00:00:00Z", to: "2026-10-07T00:00:00Z" }, headline_en: "Garbage tops the week", summary_en: "Mostly garbage.", topics: [{ issue_type: "waste", count: 18, by_source: { reddit: 10, news: 5, reports: 3 }, trend: "up", areas: [{ area: "Sector 45", n: 4 }] }], actions: [{ issue_type: "waste", title: "Sector cleaning drive", why: "18 mentions" }] } }], signals: [{ title: "Garbage piling up near Sector 45 market", url: "https://www.reddit.com/r/gurgaon/x", source: "reddit", issue_type: "waste", area: "Sector 45", posted_at: "2026-10-06T10:00:00Z", score: 44 }] }));
   await page.click('[data-tab="content"]');
   await page.waitForTimeout(100);
+  await page.click("#postNew");
   await page.fill("#pTitle", "Sewa drive cleans the park");
   await page.locator("#pTitle").dispatchEvent("change");
   await page.waitForTimeout(200);
@@ -858,6 +881,10 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   last = contentCalls[contentCalls.length - 1];
   check(last.method === "PATCH" && last.body.id === "p8" && JSON.stringify(last.body.tags) === JSON.stringify(["weekly"]), "Release removes the hold tag");
   check((await autoRow.locator('[data-phold="p8"]').count()) === 1, "a released draft offers Hold again");
+  await page.click('#tContent [data-ctab="settings"]');
+  check(!(await page.locator("#autoForm").isHidden()) && (await page.locator("#postList").isHidden()), "the Settings view shows the round-up form in place of the posts");
+  check((await page.locator("#socialChannels .tag-green").count()) === 2 && (await page.locator("#socialChannels").innerText()).includes("META_PAGE_ID") && (await page.locator("#socialLog .row").count()) >= 2, "Social publishing lists connected accounts, what the others need, and the recent shares");
+  await shot("desk-content-settings");
   await page.selectOption("#apWeekday", "5");
   await page.fill("#apHours", "72");
   await page.uncheck("#seoIndexnow");
@@ -870,6 +897,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#apSave");
   await page.waitForTimeout(100);
   check(await page.locator("#apErr.show").isVisible() && contentCalls[contentCalls.length - 1] === last, "an invalid review window is refused locally");
+  await page.click('#tContent [data-ctab="posts"]');
   await page.click('[data-tab="reports"]');
   await page.waitForTimeout(100);
   const pwCalls = [];
@@ -889,30 +917,47 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   // Roles tab: one roster with ward chips per person, an Assign control that stages wards and one Save per row, inline name/mobile, the derived cover matrix
   await page.click('[data-tab="roles"]');
   await page.waitForTimeout(250);
-  check((await page.locator("#rosterBody tr").count()) === 3, "roles tab lists the three accounts");
+  check((await page.locator("#rosterBody tr").count()) === 3, "Team page lists the three accounts");
+  check((await page.locator("#teamCounts").innerText()).replace(/\s+/g, " ").includes("3 Active people"), "Team counts strip reads the roster");
   check((await page.locator("#rosterBody [data-remove]").count()) === 0, "coordinator cannot remove accounts");
   const coordChips = (await page.locator('#rosterBody tr[data-person="u1"] .wchip').allInnerTexts()).map((t) => t.replace(/\s*×\s*$/, "").trim());
   check(coordChips.length === 2 && coordChips[0] === "C 1–6" && coordChips[1] === "Lead 7", "coordinator's Wards cell compresses wards 1-6 into a C 1–6 chip plus Lead 7" + (coordChips.length ? " (" + coordChips.join(", ") + ")" : ""));
   check((await page.locator('#rosterBody tr[data-person="u1"] .tag').innerText()) === "coordinator" && (await page.locator('#rosterBody tr[data-person="u2"] .tag').innerText()) === "ward volunteer", "desk role tags name the role");
   check((await page.locator('#rosterBody input[data-pphone="u1"]').inputValue()) === "+919800000001", "mobile is shown in an editable field");
-  check((await page.locator("#coverBody tr").count()) === 36, "cover matrix has 36 ward rows");
-  const ward3 = await page.locator("#coverBody tr").nth(2).innerText();
-  check(/^3\b/.test(ward3.trim()) && ward3.includes("Coordinator") && ward3.includes("+919800000001") && (await page.locator("#coverBody tr").nth(9).innerText()).includes("Vol One"), "ward 3 names the coordinator with mobile and ward 10 names its lead");
-  check((await page.locator('#rosterBody [data-asave="u2"]').isDisabled()), "Save is disabled until wards change");
-  await page.fill('#rosterBody input[data-aw="u2"]', "8-9, 12");
-  await page.selectOption('#rosterBody select[data-ar="u2"]', "lead");
-  await page.click('#rosterBody [data-aadd="u2"]');
+  await page.click('#rosterBody tr[data-person="u2"] [data-goassign]');
+  await page.waitForTimeout(150);
+  check(!(await page.locator("#tAssign").isHidden()) && (await page.locator('#tAssign .cpane[data-cpane="byperson"].on').count()) === 1, "Change on Ward assignments opens that page on the By person view");
+  await page.click('#tAssign [data-ctab="byward"]');
+  await shot("desk-assign");
+  check((await page.locator("#coverBody tr").count()) === 36, "By ward has 36 ward rows");
+  const ward3 = (await page.locator("#coverBody tr").nth(2).locator(".who").allInnerTexts()).join(" | ");
+  check(ward3.includes("Coordinator") && ward3.includes("+919800000001") && (await page.locator("#coverBody tr").nth(9).locator(".who").allInnerTexts()).join(" ").includes("Vol One") && (await page.locator("#coverBody tr").nth(2).locator("td.empty-slot").count()) === 2, "ward 3 names the coordinator with mobile, ward 10 names its lead, an empty role reads Nobody yet");
+  check((await page.locator("#assignCounts").innerText()).replace(/\s+/g, " ").includes("6 / 36 Wards with a coordinator"), "assignment counts strip reads the cover");
+  await page.selectOption('#coverBody select[data-wsel="7"][data-wrole="support"]', "u2");
+  await page.waitForTimeout(300);
+  check(teamPuts.length === 1 && teamPuts[0].user_id === "u2" && JSON.stringify(teamPuts[0].wards) === JSON.stringify([{ ward: 10, role: "lead" }, { ward: 7, role: "support" }]), "choosing a person for a ward's role PUTs that person's wards with the new ward (" + JSON.stringify(teamPuts[0]) + ")");
+  await page.selectOption('#coverBody select[data-wsel="7"][data-wrole="lead"]', "u2");
+  await page.waitForTimeout(300);
+  check(teamPuts.length === 3 && teamPuts[1].user_id === "u1" && !teamPuts[1].wards.some((w) => w.ward === 7 && w.role === "lead") && teamPuts[2].user_id === "u2" && teamPuts[2].wards.some((w) => w.ward === 7 && w.role === "lead"), "moving a held role PUTs the old holder without it and the new holder with it");
+  teamPuts.length = 0;
+  await page.click('#tAssign [data-ctab="byperson"]');
+  check((await page.locator('#assignBody [data-asave="u2"]').isDisabled()), "Save is disabled until wards change");
+  await page.fill('#assignBody input[data-aw="u2"]', "8-9, 12");
+  await page.selectOption('#assignBody select[data-ar="u2"]', "lead");
+  await page.click('#assignBody [data-aadd="u2"]');
   await page.waitForTimeout(100);
-  const volChips = (await page.locator('#rosterBody tr[data-person="u2"] .wchip').allInnerTexts()).map((t) => t.replace(/\s*×\s*$/, "").trim());
-  check(volChips.join("|") === "Lead 8–10|Lead 12" && teamPuts.length === 0, "Add parses 8-9, 12 into staged chips without saving yet (" + volChips.join(", ") + ")");
-  await page.click('#rosterBody [data-asave="u2"]');
+  const volChips = (await page.locator('#assignBody tr[data-person="u2"] .wchip').allInnerTexts()).map((t) => t.replace(/\s*×\s*$/, "").trim());
+  check(volChips.join("|") === "Lead 7–10|Lead 12|Support 7" && teamPuts.length === 0, "Add parses 8-9, 12 into staged chips without saving yet (" + volChips.join(", ") + ")");
+  await page.click('#assignBody [data-asave="u2"]');
   await page.waitForTimeout(300);
   const wardsPut = teamPuts[0] || {};
-  check(teamPuts.length === 1 && wardsPut.user_id === "u2" && !("name" in wardsPut) && !("phone" in wardsPut) && JSON.stringify(wardsPut.wards) === JSON.stringify([{ ward: 8, role: "lead" }, { ward: 9, role: "lead" }, { ward: 10, role: "lead" }, { ward: 12, role: "lead" }]), "Save PUTs the full ward list: 8, 9, 12 as lead plus the existing 10");
-  check((await page.locator("#coverBody tr").nth(11).innerText()).includes("Vol One"), "cover matrix refreshes after the save (ward 12 now names Vol One)");
-  await page.click('#rosterBody tr[data-person="u2"] .wchip button[data-wfrom="12"]');
+  check(teamPuts.length === 1 && wardsPut.user_id === "u2" && !("name" in wardsPut) && !("phone" in wardsPut) && JSON.stringify(wardsPut.wards) === JSON.stringify([{ ward: 7, role: "lead" }, { ward: 7, role: "support" }, { ward: 8, role: "lead" }, { ward: 9, role: "lead" }, { ward: 10, role: "lead" }, { ward: 12, role: "lead" }]), "Save PUTs the whole ward list for that person only (" + JSON.stringify(wardsPut) + ")");
+  check((await page.locator("#coverBody tr").nth(11).locator(".who").allInnerTexts()).join(" ").includes("Vol One"), "By ward refreshes after the save (ward 12 now names Vol One)");
+  await page.click('#assignBody tr[data-person="u2"] .wchip button[data-wfrom="12"]');
   await page.waitForTimeout(100);
-  check(!(await page.locator('#rosterBody [data-asave="u2"]').isDisabled()) && (await page.locator('#rosterBody tr[data-person="u2"] .wchip').count()) === 1, "the chip's × removes that ward and re-enables Save");
+  check(!(await page.locator('#assignBody [data-asave="u2"]').isDisabled()) && (await page.locator('#assignBody tr[data-person="u2"] .wchip').count()) === 2, "the chip's × removes that ward and re-enables Save");
+  await page.click('[data-tab="roles"]');
+  await page.waitForTimeout(150);
   await page.fill('#rosterBody input[data-pphone="u2"]', "+919811100000");
   await page.press('#rosterBody input[data-pphone="u2"]', "Tab");
   await page.waitForTimeout(250);
@@ -922,6 +967,9 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(250);
   check(teamPuts.length === 3 && teamPuts[2].user_id === "u1" && teamPuts[2].name === "Coordinator Two", "leaving the name field PUTs {user_id, name}");
   check(await page.evaluate(() => document.getElementById("sRoleCoord").hidden), "coordinator cannot create coordinators");
+  await shot("desk-team");
+  check((await page.locator("#staffComposer").isHidden()), "the Add a person form stays closed until asked");
+  await page.click("#staffNew");
   await page.fill("#sName", "New Vol");
   await page.fill("#sEmail", "newvol@example.org");
   await page.fill("#sPhone", "+919811199999");
@@ -1056,8 +1104,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click("#lBtn");
   await page.waitForSelector("#deskMain:not([hidden])");
   await page.waitForTimeout(250);
-  for (const t of ["reports", "inbox", "map", "roles", "joins", "performance", "content", "newsletter", "visitors", "subscribers", "insights", "health"]) check(!(await page.locator("#" + t + "Tab").isHidden()), "owner sees the " + t + " tab");
-  check((await page.locator("#tTabs .tab:not([hidden])").allInnerTexts()).map((t) => t.replace(/\s*·.*$/, "").trim()).join("|") === "Reports|Inbox|Map|Roles|Join requests|Performance|Content|Newsletter|Visitors|Subscribers|Pulse|Health", "owner's tabs run Reports, Inbox, Map, Roles, Join requests, Performance, Content, Newsletter, Visitors, Subscribers, Pulse, Health");
+  for (const t of ["reports", "inbox", "map", "roles", "assign", "joins", "performance", "content", "newsletter", "visitors", "subscribers", "insights", "health"]) check(!(await page.locator("#" + t + "Tab").isHidden()), "owner sees the " + t + " tab");
+  check((await page.locator("#tTabs .tab:not([hidden])").allInnerTexts()).map((t) => t.replace(/\s*·.*$/, "").trim()).join("|") === "Reports|Inbox|Map|Team|Ward assignments|Join requests|Performance|Content|Newsletter|Visitors|Subscribers|Pulse|Health", "owner's tabs run Reports, Inbox, Map, Roles, Join requests, Performance, Content, Newsletter, Visitors, Subscribers, Pulse, Health");
   await page.click('[data-tab="roles"]');
   await page.waitForTimeout(250);
   const ownerRoles = await page.evaluate(() => ({ removes: document.querySelectorAll("#rosterBody [data-remove]").length, coordHidden: document.getElementById("sRoleCoord").hidden }));
@@ -1082,6 +1130,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(250);
   check(subscriberPosts.length === 1 && subscriberPosts[0].email === "new@example.org" && subscriberPosts[0].lang === "hi", "adding an address from the desk POSTs email and language for a confirmation mail (" + JSON.stringify(subscriberPosts) + ")");
   await page.click('[data-tab="newsletter"]');
+  await page.waitForTimeout(300); await shot("desk-newsletter");
   await page.waitForTimeout(300);
   check((await page.locator("#nlChannel").innerText()).includes("one mail per subscriber") && (await page.locator("#nlChannel").innerText()).includes("4 confirmed subscribers"), "newsletter tab explains the outbox channel and the subscriber count");
   check((await page.locator("#nlList .row").count()) === 2 && (await page.locator("#nlList").innerText()).includes("Sent to 120") && (await page.locator('#nlList [data-nldel]').count()) === 1, "newsletter list shows the sent campaign and one deletable draft");

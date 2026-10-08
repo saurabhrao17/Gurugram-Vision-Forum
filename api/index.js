@@ -38,6 +38,7 @@ import triageSubscribers from "../lib/handlers/triage/subscribers.js";
 import triageNewsletter from "../lib/handlers/triage/newsletter.js";
 import triageAsk from "../lib/handlers/triage/ask.js";
 import triageExtract from "../lib/handlers/triage/extract.js";
+import triageSocial from "../lib/handlers/triage/social.js";
 import hookEmail from "../lib/handlers/hooks/email.js";
 import triageTranslate from "../lib/handlers/triage/translate.js";
 import pulse from "../lib/handlers/pulse.js";
@@ -56,7 +57,7 @@ const ROUTES = {
   "cron/daily": cron,
   "hooks/whatsapp": hooksWhatsapp, "hooks/exotel": hooksExotel,
   "content": content, "triage/content": triageContent, "triage/content/upload-url": triageContentUpload, "triage/draft": triageDraft,
-  "visitor": visitor, "news": news, "health": health, "triage/visitors": triageVisitors, "triage/joins": triageJoins, "triage/team": triageTeam, "triage/metrics": triageMetrics, "triage/inbox": triageInbox, "triage/subscribers": triageSubscribers, "triage/newsletter": triageNewsletter, "hooks/email": hookEmail, "triage/translate": triageTranslate, "pulse": pulse, "triage/insights": triageInsights,
+  "visitor": visitor, "news": news, "health": health, "triage/visitors": triageVisitors, "triage/joins": triageJoins, "triage/team": triageTeam, "triage/metrics": triageMetrics, "triage/inbox": triageInbox, "triage/subscribers": triageSubscribers, "triage/newsletter": triageNewsletter, "hooks/email": hookEmail, "triage/translate": triageTranslate, "triage/social": triageSocial, "pulse": pulse, "triage/insights": triageInsights,
   "sitemap": sitemap, "indexnow": indexnowKey, "gsc": gsc, "subscribe": subscribe
 };
 
