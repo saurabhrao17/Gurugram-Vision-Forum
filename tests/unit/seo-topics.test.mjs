@@ -49,9 +49,10 @@ test("topicFacts and the template post: public posts, the guide's official facts
   assert.ok(f.agency && f.ladder.length);
   const post = await buildTopicPost("waste", { signals, news, now: NOW });
   assert.equal(post.ai, false);
-  assert.equal(post.title, "Garbage in Gurugram, October 2026: what residents raised");
+  assert.equal(post.title, "Garbage in Gurugram: October 2026 update");
   assert.ok(post.title.length <= 70);
-  assert.match(post.title_hi, /गुरुग्राम में .+, अक्टूबर 2026/);
+  assert.match(post.title_hi, /गुरुग्राम में .+: अक्टूबर 2026 अपडेट/);
+  assert.match(post.body, /^<p>In the last 14 days there were 6 posts by residents and 3 news reports on garbage in Gurugram/, "says who raised it: residents (Reddit) or the news");
   assert.deepEqual(post.tags, ["auto", "topic", "waste"]);
   assert.equal(post.slug, "waste-gurugram-2026-10");
   assert.equal(post.source, `${SOURCE_PREFIX}waste:2026-10-08`);
@@ -90,7 +91,7 @@ test("the model writes only the opening paragraph, and only from the facts", asy
   const bad = async () => ({ ok: true, status: 200, json: async () => ({ candidates: [{ finishReason: "STOP", content: { parts: [{ text: JSON.stringify({ intro_en: ok.replace("5 times", "77 times"), intro_hi: hi }) }] } }] }) });
   const fallback = await buildTopicPost("traffic", { signals, news: [], env: { GEMINI_API_KEY: "k" }, fetchImpl: bad, now: NOW });
   assert.equal(fallback.ai, false, "a checked-out intro falls back to the template");
-  assert.match(fallback.body, /^<p>In the last 14 days Gurugram residents wrote 5 public posts/);
+  assert.match(fallback.body, /^<p>In the last 14 days there were 5 posts by residents on traffic in Gurugram/);
 });
 
 test("pipelineState: what the desk shows per cluster", () => {
@@ -153,4 +154,21 @@ test("desk settings: topics.enabled is a boolean and per_week 1 to 5", async () 
   assert.deepEqual(validateTopics({ enabled: false, per_week: 2 }), { value: { enabled: false, per_week: 2 }, errors: [] });
   assert.deepEqual(validateTopics({ enabled: "yes", per_week: 9 }).errors, ["enabled", "per_week"]);
   assert.deepEqual(validateTopics({}), { value: {}, errors: [] });
+});
+
+test("links are used whole (a cut URL is a broken link), publishers come off the headline, sentences end", async () => {
+  const long = "https://news.google.com/rss/articles/" + "A".repeat(600) + "?oc=5";
+  const signals = [
+    { issue_type: "traffic", title: "Gurugram tops Haryana traffic challans: Over 7 lakh violations booked - The Tribune", url: long, source: "news", area: null, posted_at: new Date(NOW - DAY).toISOString() },
+    { issue_type: "traffic", title: "Jam at Rajiv Chowk every evening, who fixes the signal?", url: "https://www.reddit.com/r/gurgaon/comments/t1/", source: "reddit", area: "Rajiv Chowk", posted_at: new Date(NOW - 2 * DAY).toISOString() },
+    { issue_type: "traffic", title: "Too long a link", url: "https://x.example/" + "b".repeat(2100), source: "news", posted_at: new Date(NOW - DAY).toISOString() }
+  ];
+  const post = await buildTopicPost("traffic", { signals, news: [], now: NOW });
+  assert.ok(post.body.includes(`href="${long}"`), "the whole URL, not 500 characters of it");
+  assert.match(post.body, /Over 7 lakh violations booked<\/a> \(The Tribune\)/);
+  assert.match(post.body, /\(Reddit, Rajiv Chowk\)/);
+  assert.doesNotMatch(post.body, /b{2000}/, "a link too long to store is left out");
+  assert.match(post.body, /In the last 14 days there were 1 post by residents and 2 news reports on traffic/);
+  assert.match(post.body, /<h2>Who is responsible<\/h2><p><strong>[^<]+\.<\/strong> /, "the agency is its own sentence");
+  assert.match(post.body, /<p>Where: <a [^>]+><strong>[^<]+<\/strong><\/a>\./);
 });
