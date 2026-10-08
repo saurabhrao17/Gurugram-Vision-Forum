@@ -9,6 +9,8 @@ import { makeHandler as makeJoins, validateJoinPatch, STATUSES } from "../../lib
 import { joinMail } from "../../lib/handlers/join.js";
 import { makeHandler as makeReports } from "../../lib/handlers/triage/reports.js";
 import { makeHandler as makeReport } from "../../lib/handlers/triage/report.js";
+import { makeHandler as makeAsk } from "../../lib/handlers/triage/ask.js";
+import { makeHandler as makeExtract } from "../../lib/handlers/triage/extract.js";
 import { makeHandler as makeDraft } from "../../lib/handlers/triage/draft.js";
 import { CREATABLE_ROLES, COORDINATOR_CREATABLE } from "../../lib/handlers/triage/staff.js";
 import { makeHandler as makeTranslate, detectLang, buildTranslatePrompt, readFields, cleanTranslation, SYSTEM_PROMPT } from "../../lib/handlers/triage/translate.js";
@@ -98,6 +100,20 @@ test("draft handler accepts the content team", async () => {
   const no = fakeRes();
   await makeDraft({ env: { GEMINI_API_KEY: "k" }, auth: authAs("triage") })({ method: "POST", body: { brief: "x" } }, no);
   assert.equal(no.statusCode, 403);
+});
+
+test("ask and extract on a report follow the report roles: content refused, owner, coordinator and triage allowed", async () => {
+  for (const make of [makeAsk, makeExtract]) {
+    const denied = fakeRes();
+    await make({ auth: authAs("content"), sb: fakeSb(), env: {} })({ method: "POST", query: { ref: "GVF-2026-ABCDE" }, body: {} }, denied);
+    assert.equal(denied.statusCode, 403);
+    assert.deepEqual(denied.body, { ok: false, error: "forbidden" });
+    for (const role of ["owner", "coordinator", "triage"]) {
+      const res = fakeRes();
+      await make({ auth: authAs(role), sb: fakeSb(), env: {} })({ method: "POST", query: { ref: "bad ref" }, body: {} }, res);
+      assert.equal(res.statusCode, 400, role + " passes the role gate and fails on the reference");
+    }
+  }
 });
 
 test("visitors is owner only: a coordinator is refused", async () => {
