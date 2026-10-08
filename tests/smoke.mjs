@@ -224,6 +224,52 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check(errors.length === 0, "zero console or page errors" + (errors.length ? ": " + errors.join(" | ") : ""));
   await ctx.close();
 }
+// ---- Early paint: the home view paints before app.js arrives (boot.js), and nothing else does ----
+{
+  console.log("\nEarly paint (app.js held back, 390x844)");
+  const visitor = () => { try { if (!localStorage.getItem("gvf_visitor")) localStorage.setItem("gvf_visitor", JSON.stringify({ token: "smoke_visitor_token_0001", done: true, views: 9 })); } catch {} };
+  const open = async (suffix, { lang, theme, hold } = {}) => {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await ctx.addInitScript(visitor);
+    if (lang || theme) await ctx.addInitScript(([l, t]) => { try { if (l) localStorage.setItem("gvf_lang", JSON.stringify(l)); if (t) localStorage.setItem("gvf_theme", JSON.stringify(t)); } catch {} }, [lang || null, theme || null]);
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
+    let release = null;
+    if (hold) { const held = new Promise((r) => { release = r; }); await page.route("**/app.js", async (route) => { await held; await route.continue(); }); }
+    else await page.route("**/app.js", (route) => route.abort());
+    await page.goto(httpUrl + suffix, { waitUntil: "commit" });
+    await page.waitForSelector("header.hdr", { state: "attached" });
+    await page.waitForTimeout(400);
+    return { ctx, page, errors, release };
+  };
+  {
+    const { ctx, page, errors, release } = await open("", { hold: true });
+    check(await page.locator("#v-home h1").isVisible(), "home heading paints before app.js has loaded");
+    check((await page.evaluate(() => document.documentElement.getAttribute("data-boot"))) === "home", "boot.js marks the home URL for the early paint");
+    check((await page.evaluate(() => { const t = document.getElementById("tiles"); return t.children.length === 0 && t.getBoundingClientRect().height >= 550; })), "the empty tile grid holds its final height (no jump when the tiles arrive)");
+    check((await page.evaluate(() => !document.querySelector('link[rel="stylesheet"][href*="fonts.googleapis"]:not([media])') || [...document.querySelectorAll('link[href*="fonts.googleapis"]')].every((l) => l.parentElement.tagName === "HEAD"))) && (await page.evaluate(() => !!document.querySelector('head link[href*="fonts.googleapis"]'))), "Google Fonts are requested by boot.js, not as a blocking link");
+    release();
+    await page.waitForFunction(() => window.__booted, null, { timeout: 15000 });
+    await page.waitForTimeout(300);
+    check((await page.evaluate(() => document.documentElement.hasAttribute("data-boot"))) === false && (await page.locator("#tiles .tile").count()) >= 17 && (await page.locator("#v-home").isVisible()), "after boot the flag is gone, the tiles are in and home stays visible");
+    await page.evaluate(() => { location.hash = "#/directory"; });
+    await page.waitForTimeout(300);
+    check(await page.locator("#v-home").isHidden(), "navigating away hides home (the boot flag no longer forces it)");
+    check(!errors.length, "no page errors in the early-paint pass" + (errors.length ? ": " + errors.join(" | ") : ""));
+    await ctx.close();
+  }
+  for (const [suffix, opts, what] of [["#/report", {}, "a #/report link"], ["report", {}, "the /report address"], ["", { lang: "hi" }, "a visitor who chose Hindi"]]) {
+    const { ctx, page } = await open(suffix, opts);
+    check(await page.locator("#v-home").isHidden(), "home does not flash for " + what + " while app.js loads");
+    await ctx.close();
+  }
+  {
+    const { ctx, page } = await open("", { theme: "dark" });
+    check((await page.evaluate(() => document.documentElement.getAttribute("data-theme"))) === "dark", "a saved dark theme applies before app.js (no light flash)");
+    await ctx.close();
+  }
+}
 // ---- API wiring over http with mocked endpoints ----
 {
   console.log("\nAPI wiring (mocked /api over http, 390x844)");
