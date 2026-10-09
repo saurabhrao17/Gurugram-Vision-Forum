@@ -115,7 +115,7 @@ Links that still work outside this bundle:
 | Swachhata app | India | Garbage, dumping, public toilets | Geo-tagged photo, routed to the ward | https://swachhbharaturban.gov.in/ |
 | Sameer app (CPCB) | India | Air quality readings and complaints | Photo complaint to the state board | https://cpcb.nic.in/ |
 | RTI Online | India | Information from central bodies, 30 days | 10 rupee fee; first appeal online | https://rtionline.gov.in/ |
-| National Consumer Helpline and e-Daakhil | India | Sellers, services, e-commerce disputes | File before the District Commission on e-Daakhil · 1915 | https://consumerhelpline.gov.in/ |
+| National Consumer Helpline and e-Jagriti | India | Sellers, services, e-commerce disputes | File before the District Commission on e-Jagriti · 1915 | https://consumerhelpline.gov.in/ |
 | National Cybercrime Reporting Portal | India | Online and UPI fraud, harassment | Report within the first hour · 1930 | https://cybercrime.gov.in/ |
 | NHAI | India | NH-48, expressways, tolls | Helpline for highway issues · 1033 | https://nhai.gov.in/ |
 | Voter registration (ECI) | India | Register or shift your vote here | Form 6 new, Form 8 shift · 1950 | https://voters.eci.gov.in/ |

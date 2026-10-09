@@ -94,4 +94,4 @@ Decided 7 October 2026: the site runs on Vercel (static files plus API functions
 
 1. Load the ward boundary file into `ward_boundaries`; volunteers spot-check `area_wards` (seeded from `supabase/seed_area_wards.sql`, see `docs/area-wards-notes.md`).
 2. Stage-change notifications on WhatsApp once Meta verification is done (email is live through the outbox).
-3. Portal filing requirements: review `GVF.FILING` against each portal's live form every quarter (the GMDA portal, DHBVN, HRERA, e-Daakhil and CM Window change their forms), and add the Hindi labels for the fields.
+3. Portal filing requirements: review `GVF.FILING` against each portal's live form every quarter (the GMDA portal, DHBVN, HRERA, e-Jagriti and CM Window change their forms), and add the Hindi labels for the fields.
