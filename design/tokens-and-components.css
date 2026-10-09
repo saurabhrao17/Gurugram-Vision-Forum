@@ -120,6 +120,8 @@ body{padding-bottom:calc(var(--bbar) + env(safe-area-inset-bottom,0px))}
 .view.on{display:block}
 /* boot.js sets data-boot=home on the English home URL so the home view paints before app.js arrives; route() removes it */
 html[data-boot="home"] #v-home{display:block}
+/* Until route() shows a view (app.js is deferred), keep the footer below the fold, so it is not pushed down the screen when the view appears (layout shift on every view but the early-painted home) */
+html:not([data-boot]) #main:not(:has(.view.on)){min-height:100vh}
 .sec{padding:clamp(3rem,6vw,5rem) 0}
 .sec-tight{padding:clamp(2rem,4vw,3rem) 0}
 .head{margin-bottom:1.5rem; max-width:64ch}
