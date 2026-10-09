@@ -65,9 +65,11 @@ test("GET /api/shell answers HTML with a CDN cache, 404 for anything else", asyn
 });
 
 test("fitTitle: a long title keeps its lead or is cut at a word", () => {
-  assert.equal(fitTitle("Segregate at source: what the 2016 rules ask of every household and society"), "Segregate at source");
+  // A lead that drops most of the title's words is not used: the title is cut at a word instead
+  assert.equal(fitTitle("Segregate at source: what the 2016 rules ask of every household and society"), "Segregate at source: what the 2016 rules ask of every household…");
+  assert.equal(fitTitle("Ward committees in Gurugram explained: the members, the meetings, the minutes"), "Ward committees in Gurugram explained");
   assert.equal(fitTitle("Short title"), "Short title");
   const long = "A very long headline without any colon that keeps going on and on about the city";
   assert.ok(fitTitle(long).length <= 70 && fitTitle(long).endsWith("…"));
-  assert.equal(withBrand(fitTitle("Segregate at source: what the 2016 rules ask of every household and society"), "en"), "Segregate at source | Gurugram Vision Forum");
+  assert.equal(withBrand(fitTitle("Ward committees in Gurugram explained: the members, the meetings, the minutes"), "en"), "Ward committees in Gurugram explained | Gurugram Vision Forum");
 });
