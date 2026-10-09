@@ -25,7 +25,7 @@
     "cpcb": "https://cpcb.nic.in/",
     "rti": "https://rtionline.gov.in/",
     "consumer": "https://consumerhelpline.gov.in/",
-    "edaakhil": "https://edaakhil.nic.in/",
+    "ejagriti": "https://e-jagriti.gov.in/",
     "cyber": "https://cybercrime.gov.in/",
     "nhai": "https://nhai.gov.in/",
     "mygov": "https://www.mygov.in/",
@@ -698,15 +698,15 @@
         },
         {
           "k": "File online",
-          "v": "e-Daakhil",
-          "href": "https://edaakhil.nic.in/",
+          "v": "e-Jagriti",
+          "href": "https://e-jagriti.gov.in/",
           "ic": "link"
         }
       ],
       "ladder": [
         "Written complaint to the seller; keep the record.",
         "No resolution: 1915 mediation with the company.",
-        "Still unresolved: District Commission, Gurugram, on e-Daakhil.",
+        "Still unresolved: District Commission, Gurugram, on e-Jagriti.",
         "Appeal to the State Commission, Panchkula."
       ],
       "roles": [
@@ -980,11 +980,11 @@
       ]
     },
     {
-      "n": "National Consumer Helpline and e-Daakhil",
+      "n": "National Consumer Helpline and e-Jagriti",
       "h": "https://consumerhelpline.gov.in/",
       "l": "central",
       "f": "Sellers, services, e-commerce disputes",
-      "how": "File before the District Commission on e-Daakhil",
+      "how": "File before the District Commission on e-Jagriti",
       "ph": "1915",
       "t": [
         "consumer"
@@ -1209,7 +1209,7 @@
       "how": [
         "Written complaint to the seller; keep the record.",
         "Helpline 1915 mediates with the company.",
-        "File on e-Daakhil before the District Commission, Gurugram."
+        "File on e-Jagriti before the District Commission, Gurugram."
       ],
       "why": "Covers builders, hospitals, schools and online platforms. The State Commission hears claims up to 2 crore.",
       "src": [
@@ -1218,8 +1218,8 @@
           "https://consumerhelpline.gov.in/"
         ],
         [
-          "e-Daakhil",
-          "https://edaakhil.nic.in/"
+          "e-Jagriti",
+          "https://e-jagriti.gov.in/"
         ]
       ]
     },
@@ -1536,8 +1536,8 @@
       "owns": "Consumer disputes; registration and disputes of RWAs and societies.",
       "links": [
         [
-          "e-Daakhil",
-          "https://edaakhil.nic.in/"
+          "e-Jagriti",
+          "https://e-jagriti.gov.in/"
         ],
         [
           "District administration",
