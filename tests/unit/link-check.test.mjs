@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { checkLink, BOT_LIMITED } from "../../lib/link-check.js";
+import { checkLink, BOT_LIMITED, storeLinkStatus, isBroken, BROKEN_AFTER } from "../../lib/link-check.js";
 
 const answer = (status) => ({ status, ok: status >= 200 && status < 300 });
 
@@ -36,4 +36,22 @@ test("a host that gives no answer is retried once with a longer timeout", async 
   assert.equal(dead.status, 0);
   assert.equal(dead.error, "timeout");
   assert.equal(m, 3, "three attempts at most");
+});
+
+test("a link counts as broken only after failing two nights in a row; a good check resets it", async () => {
+  assert.equal(BROKEN_AFTER, 2);
+  assert.equal(isBroken({ ok: false, fails: 1 }), false, "one bad night is not broken");
+  assert.equal(isBroken({ ok: false, fails: 2 }), true);
+  assert.equal(isBroken({ ok: true, fails: 0 }), false);
+  assert.equal(isBroken({ ok: false }), false, "a row without a count has not failed twice");
+  let rows = null;
+  const sb = { from: () => ({ upsert: async (r) => { rows = r; return { error: null }; } }) };
+  const at = "2026-10-09T18:30:00Z";
+  await storeLinkStatus(sb, [
+    { url: "https://a.gov.in/", ok: false, status: 0, checked_at: at },
+    { url: "https://b.gov.in/", ok: false, status: 0, checked_at: at },
+    { url: "https://c.gov.in/", ok: true, status: 200, checked_at: at }
+  ], new Map([["https://b.gov.in/", 1], ["https://c.gov.in/", 3]]));
+  assert.deepEqual(rows.map((r) => [r.url, r.fails]), [["https://a.gov.in/", 1], ["https://b.gov.in/", 2], ["https://c.gov.in/", 0]]);
+  assert.deepEqual(rows.map(isBroken), [false, true, false]);
 });
