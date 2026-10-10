@@ -243,7 +243,7 @@ test("GET /api/triage/seo: content team and coordinators allowed, ward volunteer
     seo_vitals: [{ url: `${SITE}/`, performance: 90, lcp_ms: 1500, checked_at: "2026-10-08T00:00:00Z" }, { url: `${SITE}/`, performance: 70, lcp_ms: 2500, checked_at: "2026-10-01T00:00:00Z" }],
     seo_mentions: [{ url: "https://news/x", title: "Forum", source: "HT", published_at: "2026-10-07T00:00:00Z" }],
     cron_runs: [{ started_at: "2026-10-08T00:00:00Z", finished_at: "2026-10-08T00:01:00Z", ok: true, result: { seo: { checked: 2, total: 2, avg_score: 96, errors: 0 } } }],
-    link_status: [{ ok: true, checked_at: "2026-10-08T00:00:00Z" }, { ok: false, checked_at: "2026-10-08T00:00:00Z" }],
+    link_status: [{ ok: true, fails: 0, checked_at: "2026-10-08T00:00:00Z" }, { ok: false, fails: 2, checked_at: "2026-10-08T00:00:00Z" }],
     site_settings: [{ key: "seo", value: { indexnow: true, gsc_verified: true } }]
   });
   const ok = res();

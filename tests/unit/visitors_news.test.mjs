@@ -34,6 +34,7 @@ function fakeSb({ rpc = {}, tables = {}, counts = {}, errors = {}, storageOk = t
       eq(k, v) { q.filters.push(["eq", k, v]); return chain; },
       lt(k, v) { q.filters.push(["lt", k, v]); return chain; },
       gte(k, v) { q.filters.push(["gte", k, v]); return chain; },
+      in(k, v) { q.filters.push(["in", k, v]); return chain; },
       not(k, op, v) { q.filters.push(["not", k, op, v]); return chain; },
       order(k, o) { q.order = [k, o]; return chain; },
       limit(n) { q.limit = n; return chain; },
@@ -544,6 +545,19 @@ test("runDaily records a cron_runs row, fetches news and checks links with the i
   assert.equal(fin.row.ok, true);
   assert.ok(fin.row.finished_at);
   assert.deepEqual(fin.row.result.news, r.news);
+});
+
+test("the link step removes rows for links the site no longer uses and carries the failure count", async () => {
+  const sb = fakeSb({ rpc: { sla_digest: emptyDigest, retention_sweep: emptySweep }, tables: { link_status: [{ url: "https://edaakhil.nic.in/", checked_at: "2026-10-08T18:30:00Z", fails: 3 }, { url: "https://services.gmda.gov.in/", checked_at: "2026-10-08T18:30:00Z", fails: 1 }] } });
+  const r = await runDaily(sb, {}, { fetch: async (url) => ({ status: url.includes("gmda") ? 503 : 200, body: null }) });
+  assert.equal(r.links.removed, 1);
+  const del = sb.calls.queries.find((q) => q.table === "link_status" && q.op === "delete");
+  assert.deepEqual(del.filters, [["in", "url", ["https://edaakhil.nic.in/"]]]);
+  const stored = sb.calls.queries.find((q) => q.table === "link_status" && q.op === "upsert");
+  const gmda = stored.row.find((x) => x.url === "https://services.gmda.gov.in/");
+  assert.equal(gmda.ok, false);
+  assert.equal(gmda.fails, 2, "a second failed night in a row");
+  assert.ok(stored.row.filter((x) => x.ok).every((x) => x.fails === 0));
 });
 
 test("runDaily seeds news_sources from the data file when the table is empty and skips the network without a fetch", async () => {

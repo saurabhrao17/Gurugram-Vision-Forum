@@ -27,6 +27,7 @@ function fakeSb({ rpc = {}, tables = {}, objects = {}, counts = {} } = {}) {
       delete() { q.op = "delete"; return chain; },
       eq(k, v) { q.filters.push(["eq", k, v]); return chain; },
       lt(k, v) { q.filters.push(["lt", k, v]); return chain; },
+      gte(k, v) { q.filters.push(["gte", k, v]); return chain; },
       order() { return chain; },
       limit(n) { q.limit = n; return chain; },
       maybeSingle() { q.single = true; return chain; },
