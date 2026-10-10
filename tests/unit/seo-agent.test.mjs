@@ -42,7 +42,7 @@ test("findings: every problem in the state, with who acts and what happens", () 
   assert.equal(by["speed:/"].owner, "code");
   assert.equal(by["index:unknown"].owner, "auto"); assert.deepEqual(by["index:unknown"].data.urls, [`${SITE}/guides`]);
   assert.equal(by["index:not_indexed"].owner, "wait");
-  assert.equal(by["geo:error"].owner, "wait", "a quota error waits");
+  assert.equal(by["geo:error"].owner, "person", "a quota error needs Google billing switched on, which only the owner can do");
   assert.equal(by["geo:not_cited"].owner, "auto");
   assert.equal(by["cluster:waste"].owner, "auto"); assert.equal(by["cluster:traffic"].owner, "person"); assert.equal(by["cluster:roads"], undefined);
   assert.equal(by["ops:gsc"].owner, "auto", "a failed SEO step is re-run"); assert.equal(by["ops:brief"].owner, "code", "a mail step is never re-run by the agent");
@@ -194,5 +194,6 @@ test("the AI answer task quotes the newest failure, not an old one", () => {
   ] };
   const t = findings({ ...STATE, geo }, NOW).find((x) => x.key === "geo:error");
   assert.equal(t.detail, "http_429_RESOURCE_EXHAUSTED: Quota exceeded");
-  assert.equal(t.owner, "wait");
+  assert.equal(t.owner, "person");
+  assert.match(t.action, /billing/);
 });

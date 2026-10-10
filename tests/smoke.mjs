@@ -912,12 +912,13 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     geo: { pages: 2, avg: 93, missing: [{ key: "dated", count: 1, label: "Dated, so freshness is visible" }], asked: 2, cited: 1,
       questions: [{ key: "issue:roads", question: "Who is responsible for roads, footpaths problems in Gurugram, and how do I file a complaint that gets acted on?", cited: true, position: 2, sources: [{ title: "mcg.gov.in" }, { title: "gurugramvisionforum.org" }], checked_at: "2026-10-08T21:45:00Z" },
         { key: "issue:waste", question: "Who is responsible for garbage problems in Gurugram, and how do I file a complaint that gets acted on?", cited: false, sources: [{ title: "hindustantimes.com" }], checked_at: "2026-10-08T21:45:00Z" },
-        { key: "issue:water", question: "Who is responsible for water, sewer problems in Gurugram, and how do I file a complaint that gets acted on?", cited: null, sources: [] }] },
+        { key: "issue:water", question: "Who is responsible for water, sewer problems in Gurugram, and how do I file a complaint that gets acted on?", cited: null, sources: [] },
+        { key: "issue:drains", question: "Who is responsible for drains, flooding problems in Gurugram, and how do I file a complaint that gets acted on?", cited: null, sources: [], error: "http_429_RESOURCE_EXHAUSTED: You exceeded your current quota", checked_at: "2026-10-09T21:45:00Z" }] },
     search: { google: { queries: [{ key: "who fixes potholes gurugram", clicks: 3, impressions: 140, ctr: 0.0214, position: 7.4 }], pages: [{ key: "/guide/roads", clicks: 3, impressions: 160, ctr: 0.0188, position: 6.9 }], period: { start: "2026-09-09", end: "2026-10-06" }, totals: { clicks: 3, impressions: 160 } }, bing: null },
     index: { total: 2, indexed: 1, rows: [{ url: "https://gurugramvisionforum.org/ward/9", verdict: "NEUTRAL", coverage: "Discovered - currently not indexed" }, { url: "https://gurugramvisionforum.org/guide/roads", verdict: "PASS", coverage: "Submitted and indexed", last_crawl: "2026-10-07T01:00:00Z" }] },
     crawl: { broken: [{ url: "/guide/old", status: 404, sources: ["/guide/roads"] }], orphans: [], complete: false },
     sitechecks: [{ key: "llms", ok: true, detail: "64 links for AI engines", checked_at: "2026-10-08T21:40:00Z" }, { key: "headers", ok: false, detail: "Missing: csp", checked_at: "2026-10-08T21:40:00Z" }],
-    connections: { gsc: true, bing: false, gemini: true, pagespeed: true }
+    connections: { gsc: true, bing: false, gemini: true, groq: true, pagespeed: true }
   });
   await page.route("**/api/triage/seo", (route) => json(route, 200, seoFixture));
   await page.click('[data-tab="seo"]');
@@ -927,7 +928,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#seoTabs .stab").allInnerTexts()).join("|") === "Overview|Agent|Pages|Clusters|GEO|Search data|Speed" && !(await page.locator('#seoBody [data-cpane="overview"]').isHidden()) && (await page.locator('#seoBody [data-cpane="pages"]').isHidden()), "six sub-tabs, Overview open first");
   check((await page.locator("#seoChecklist tbody tr").count()) === 17 && (await page.locator("#seoBody [data-seo-manual]").count()) === 2 && (await page.locator("#seoChecklist .tag-danger").count()) === 1 && (await page.locator("#seoChecklist .tag-warn").count()) === 2, "checklist lists the checks, one in red, the two manual ones as To do with a checkbox");
   check((await page.locator('#seoBody [data-cpane="overview"] .seolog .row').count()) === 2 && (await page.locator('#seoBody [data-cpane="overview"]').innerText()).includes("Audited 40 of 131 pages, average score 97"), "activity log shows what the cron did");
-  check((await page.locator("#seoConn .row").count()) === 4 && (await page.locator("#seoConn").innerText()).includes("Add BING_WEBMASTER_API_KEY in Vercel") && (await page.locator("#seoConn .tag-green").count()) === 3, "connections show what is set up and what to add");
+  check((await page.locator("#seoConn .row").count()) === 5 && (await page.locator("#seoConn").innerText()).includes("Add BING_WEBMASTER_API_KEY in Vercel") && (await page.locator("#seoConn").innerText()).includes("AI writing backup (Groq)") && (await page.locator("#seoConn .tag-green").count()) === 4, "connections show what is set up and what to add");
   await page.click('#seoTabs [data-ctab="pages"]');
   await page.waitForTimeout(150);
   check((await page.locator('#seoBody [data-cpane="overview"]').isHidden()) && !(await page.locator('#seoBody [data-cpane="pages"]').isHidden()), "a sub-tab shows its own pane and hides the Overview");
@@ -941,7 +942,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check(await page.evaluate(() => getComputedStyle(document.querySelector("#seoClusters td.n"), "::before").content) !== '"Ward "', "SEO tables never borrow the wards table's phone label");
   await page.click('#seoTabs [data-ctab="geo"]');
   await page.waitForTimeout(150);
-  check((await page.locator("#seoGeo tbody tr").count()) === 3 && (await page.locator("#seoGeo").innerText()).includes("Cited #2") && (await page.locator("#seoGeo").innerText()).includes("Not cited") && (await page.locator("#seoGeo").innerText()).includes("Not asked yet") && (await page.locator('#seoBody [data-cpane="geo"] .geoavg').innerText()) === "93" && (await page.locator('#seoBody [data-cpane="geo"] a[href="https://gurugramvisionforum.org/llms.txt"]').count()) === 1, "GEO tab: readiness, the llms.txt link and each AI answer cited or not");
+  check((await page.locator("#seoGeo tbody tr").count()) === 4 && (await page.locator("#seoGeo").innerText()).includes("Needs Google billing") && !(await page.locator("#seoGeo").innerText()).includes("RESOURCE_EXHAUSTED") && (await page.locator("#seoGeoBilling").count()) === 1 && (await page.locator("#seoGeo").innerText()).includes("Cited #2") && (await page.locator("#seoGeo").innerText()).includes("Not cited") && (await page.locator("#seoGeo").innerText()).includes("Not asked yet") && (await page.locator('#seoBody [data-cpane="geo"] .geoavg').innerText()) === "93" && (await page.locator('#seoBody [data-cpane="geo"] a[href="https://gurugramvisionforum.org/llms.txt"]').count()) === 1, "GEO tab: readiness, the llms.txt link and each AI answer cited or not");
   await page.click('#seoTabs [data-ctab="search"]');
   await page.waitForTimeout(150);
   const searchTxt = await page.locator('#seoBody [data-cpane="search"]').innerText();

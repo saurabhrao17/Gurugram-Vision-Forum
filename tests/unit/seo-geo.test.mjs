@@ -428,7 +428,7 @@ test("GET /api/triage/seo carries clusters, GEO, search, index, crawl, site chec
   assert.equal(j.geo.questions.length, CATS.length + 3);
   assert.equal(j.search.bing.queries[0].key, "q");
   assert.deepEqual(j.crawl.broken, [{ url: "/gone", status: 404, sources: [] }]);
-  assert.deepEqual(j.connections, { gsc: true, bing: true, gemini: true, pagespeed: false });
+  assert.deepEqual(j.connections, { gsc: true, bing: true, gemini: true, groq: false, pagespeed: false });
   assert.equal(j.sitechecks[0].key, "llms");
   assert.equal(j.site, SITE, "the origin is not overwritten by the checks");
   assert.ok(!r.body.includes("PRIVATE KEY") && !r.body.includes("BK\"") && !r.body.includes('"G"'), "no secret reaches the desk");
