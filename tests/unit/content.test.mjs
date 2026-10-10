@@ -242,7 +242,7 @@ test("draft provider: free keys are preferred and DRAFT_PROVIDER can force one",
   assert.equal(pickProvider({}), null);
   assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a" }), "anthropic");
   assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a", GROQ_API_KEY: "g" }), "groq");
-  assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a", GROQ_API_KEY: "g", GEMINI_API_KEY: "x" }), "gemini");
+  assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a", GROQ_API_KEY: "g", GEMINI_API_KEY: "x" }), "groq", "Groq first (owner, 10 Oct 2026)");
   assert.equal(pickProvider({ GEMINI_API_KEY: "x", GROQ_API_KEY: "g", DRAFT_PROVIDER: "groq" }), "groq");
   assert.equal(pickProvider({ GEMINI_API_KEY: "x", DRAFT_PROVIDER: "groq" }), "gemini");
   assert.equal(PROVIDERS.gemini.model, "gemini-flash-latest");

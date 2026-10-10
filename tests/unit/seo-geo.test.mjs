@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { generateKeyPairSync, createVerify } from "node:crypto";
-import { buildLlms, buildLlmsFull, geoQuestions, parseGrounded, askGemini, geoStep, AI_BOTS } from "../../lib/seo/geo.js";
+import { buildLlms, buildLlmsFull, geoQuestions, parseGrounded, askGemini, geoStep, parseBrowsed, googlePerWeek, AI_BOTS } from "../../lib/seo/geo.js";
 import { handle as llmsHandle } from "../../lib/handlers/llms.js";
 import { clustersOf, relatedFor, clusterHealth, membersOf } from "../../lib/seo/clusters.js";
 import { geoChecks, schemaProblems, internalPaths, unknownTargets, linkGraph, judgeSite, checklist, auditHtml } from "../../lib/seo/audit.js";
@@ -223,7 +223,7 @@ test("geoStep asks the questions not asked longest, stores each answer, and skip
   const texts = [];
   const fetchImpl = async (url, init) => { texts.push(JSON.parse(init.body).contents[0].parts[0].text); return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: "See gurugramvisionforum.org" }] }, groundingMetadata: { groundingChunks: [{ web: { uri: "u", title: "gurugramvisionforum.org" } }] } }] }) }; };
   const out = await geoStep(sb, { ...ENV, GEMINI_API_KEY: "K" }, { fetch: fetchImpl, now: Date.UTC(2026, 9, 8), limit: 2 });
-  assert.deepEqual(out, { asked: 2, cited: 2, failed: 0 });
+  assert.deepEqual(out, { asked: 2, cited: 2, failed: 0, engine: "gemini-search" });
   assert.equal(texts[0], qs[0].text, "the never-asked question goes first");
   const ins = sb.writes.filter((w) => w.op === "insert");
   assert.equal(ins.length, 2);
@@ -235,6 +235,46 @@ test("geoStep asks the questions not asked longest, stores each answer, and skip
   const out2 = await geoStep(sb2, { ...ENV, GEMINI_API_KEY: "K" }, { fetch: async () => { n++; return { ok: false, status: 429, json: async () => ({ error: { status: "RESOURCE_EXHAUSTED", message: "Quota exceeded" } }) }; }, now: Date.UTC(2026, 9, 8), limit: 3 });
   assert.deepEqual([out2.failed, out2.stopped, n], [1, "quota", 1]);
   assert.match(sb2.writes.find((w) => w.op === "insert").data.error, /^http_429_RESOURCE_EXHAUSTED: Quota exceeded$/);
+});
+
+test("Groq answers every night; Google's AI gets one question a run within its weekly allowance", async () => {
+  const groqReply = { model: "openai/gpt-oss-120b", choices: [{ message: { role: "assistant",
+    content: "Snippets…\n\nRoads are fixed by MCG; file on the MCG portal 【1†L2-L4】. See https://gurugramvisionforum.org/guide/roads for the steps.",
+    executed_tools: [{ type: "browser.search", output: "[0] MCG https://mcg.gov.in/ [1] Guide https://gurugramvisionforum.org/guide/roads" }] } }] };
+  const geminiOk = { candidates: [{ content: { parts: [{ text: "MCG fixes roads." }] }, groundingMetadata: { groundingChunks: [{ web: { uri: "u", title: "mcg.gov.in" } }] } }] };
+  const make = (googleStatus) => { const calls = []; return { calls, fetch: async (url, init) => {
+    calls.push(url);
+    if (/generativelanguage/.test(url)) return googleStatus === 200 ? { ok: true, status: 200, json: async () => geminiOk } : { ok: false, status: googleStatus, json: async () => ({ error: { status: "RESOURCE_EXHAUSTED", message: "Quota exceeded" } }) };
+    const b = JSON.parse(init.body);
+    assert.deepEqual(b.tools, [{ type: "browser_search" }]); assert.equal(b.reasoning_effort, "low"); assert.equal(init.headers.authorization, "Bearer Q");
+    return { ok: true, status: 200, json: async () => groqReply };
+  } }; };
+  const env = { ...ENV, GEMINI_API_KEY: "K", GROQ_API_KEY: "Q" };
+  // Google answers: one Google row and three Groq rows.
+  let f = make(200), sb = fakeSb();
+  let out = await geoStep(sb, env, { fetch: f.fetch, now: Date.UTC(2026, 9, 10), limit: 3 });
+  assert.deepEqual([out.asked, out.cited, out.failed, out.engine, out.google], [4, 3, 0, "groq-browser", 1]);
+  let ins = sb.writes.filter((w) => w.op === "insert").map((w) => w.data);
+  assert.deepEqual(ins.map((r) => r.engine), ["gemini-search", "groq-browser", "groq-browser", "groq-browser"]);
+  assert.equal(ins[1].cited, true); assert.equal(ins[1].position, 2);
+  assert.deepEqual(ins[1].sources.map((x) => x.title), ["mcg.gov.in", "gurugramvisionforum.org"]);
+  assert.ok(!/【/.test(ins[1].answer), "citation markers are stripped");
+  // The week's allowance is spent: Google is not asked at all.
+  const week = [0, 1, 2].map((i) => ({ question_key: `issue:x${i}`, engine: "gemini-search", error: null, checked_at: new Date(Date.UTC(2026, 9, 8 + i % 2)).toISOString() }));
+  f = make(200); sb = fakeSb({ seo_geo: week });
+  out = await geoStep(sb, env, { fetch: f.fetch, now: Date.UTC(2026, 9, 10), limit: 3 });
+  assert.equal(f.calls.filter((u) => /generativelanguage/.test(u)).length, 0); assert.equal(out.google, undefined);
+  assert.equal((await geoStep(fakeSb({ seo_geo: week }), { ...env, GEO_GOOGLE_PER_WEEK: "5" }, { fetch: make(200).fetch, now: Date.UTC(2026, 9, 10), limit: 1 })).google, 1, "the allowance can be raised");
+  assert.equal(googlePerWeek({ GEO_GOOGLE_PER_WEEK: "0" }), 0); assert.equal(googlePerWeek({ GEO_GOOGLE_PER_WEEK: "lots" }), 3);
+  // Google refuses (no billing): its row says so and Groq still answers.
+  f = make(429); sb = fakeSb();
+  out = await geoStep(sb, env, { fetch: f.fetch, now: Date.UTC(2026, 9, 10), limit: 3 });
+  assert.deepEqual([out.asked, out.failed, out.google_error, out.stopped], [3, 1, "quota", undefined]);
+  // Groq alone (no Gemini key) and a budget that stops the run in time.
+  let t = 0;
+  const out2 = await geoStep(fakeSb(), { ...ENV, GROQ_API_KEY: "Q" }, { fetch: make(200).fetch, now: Date.UTC(2026, 9, 10), limit: 3, budgetMs: 10, clock: () => (t += 20) });
+  assert.deepEqual([out2.asked, out2.deferred], [1, 2]);
+  assert.equal(parseBrowsed({ choices: [{ message: { content: "Nothing relevant." } }] }, "gurugramvisionforum.org").cited, false);
 });
 
 // ---------------------------------------------------------------- clusters
@@ -394,6 +434,13 @@ test("searchView, geoView and indexView shape the desk's data", () => {
   assert.deepEqual([gv.pages, gv.avg, gv.asked, gv.cited], [2, 80, 2, 1]);
   assert.equal(gv.missing[0].label, "Dated, so freshness is visible");
   assert.equal(gv.questions.find((q) => q.key === "issue:roads").cited, true, "the newest answer per question counts");
+  const both = geoView([], [
+    { question_key: "issue:roads", engine: "gemini-search", cited: false, position: null, error: null, checked_at: new Date(now - DAY / 2).toISOString() },
+    { question_key: "issue:roads", engine: "groq-browser", cited: true, position: 2, checked_at: new Date(now - DAY).toISOString() },
+    { question_key: "issue:waste", engine: "gemini-search", cited: null, error: "http_429_RESOURCE_EXHAUSTED", checked_at: new Date(now - DAY).toISOString() }], { now });
+  const roads = both.questions.find((q) => q.key === "issue:roads"), waste = both.questions.find((q) => q.key === "issue:waste");
+  assert.deepEqual([roads.engine, roads.cited, roads.google.cited], ["groq-browser", true, false], "Groq's nightly answer and Google's apart, even when Google's is newer");
+  assert.deepEqual([waste.engine, waste.google.error], ["gemini-search", "http_429_RESOURCE_EXHAUSTED"], "a question only Google was asked still shows");
   const iv = indexView([{ url: "a", verdict: "PASS" }, { url: "b", verdict: "NEUTRAL", coverage: "Discovered - currently not indexed" }]);
   assert.deepEqual([iv.total, iv.indexed, iv.rows[0].url], [2, 1, "b"]);
 });
@@ -428,7 +475,7 @@ test("GET /api/triage/seo carries clusters, GEO, search, index, crawl, site chec
   assert.equal(j.geo.questions.length, CATS.length + 3);
   assert.equal(j.search.bing.queries[0].key, "q");
   assert.deepEqual(j.crawl.broken, [{ url: "/gone", status: 404, sources: [] }]);
-  assert.deepEqual(j.connections, { gsc: true, bing: true, gemini: true, pagespeed: false });
+  assert.deepEqual(j.connections, { gsc: true, bing: true, gemini: true, groq: false, pagespeed: false });
   assert.equal(j.sitechecks[0].key, "llms");
   assert.equal(j.site, SITE, "the origin is not overwritten by the checks");
   assert.ok(!r.body.includes("PRIVATE KEY") && !r.body.includes("BK\"") && !r.body.includes('"G"'), "no secret reaches the desk");

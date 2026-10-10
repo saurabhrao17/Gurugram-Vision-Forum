@@ -22,6 +22,10 @@ on:
         description: "Site origin"
         required: false
         default: "https://gurugramvisionforum.org"
+      steps:
+        description: "Steps to call, in order (blank = the nightly list). A step may repeat, e.g. \"geo geo geo\" asks nine AI-answer questions."
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -35,6 +39,7 @@ jobs:
         env:
           TOKEN: ${{ secrets.CRON_SECRET }}
           BASE_URL: ${{ github.event.inputs.base_url || 'https://gurugramvisionforum.org' }}
+          ASKED: ${{ github.event.inputs.steps || '' }}
         run: |
           if [ -z "$TOKEN" ]; then echo "CRON_SECRET repository secret is not set"; exit 1; fi
           echo "::add-mask::$TOKEN"
@@ -48,6 +53,11 @@ jobs:
           if [ "$llms" != "200" ]; then
             steps="seo vitals mentions"
             echo "::notice::$BASE_URL/llms.txt answered $llms, so the live deploy predates the GEO and search-data steps; running seo, vitals and mentions only."
+          fi
+          # A manual run may name its own steps (known names only).
+          if [ -n "$ASKED" ]; then
+            steps=$(echo "$ASKED" | tr -c 'a-z \n' ' ')
+            echo "::notice::Manual run: $steps"
           fi
           for step in $steps; do
             code=$(curl -sS -m 90 -o out.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/cron/daily?steps=$step")
