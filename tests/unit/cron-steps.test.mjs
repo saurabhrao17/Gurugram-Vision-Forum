@@ -58,3 +58,15 @@ test("the cron refuses a request that names only unknown steps instead of runnin
   assert.equal(res.body.error, "unknown_steps");
   assert.ok(res.body.known.includes("geo"));
 });
+
+test("runDaily stops starting steps once the run has used its time, and names the ones left out", async () => {
+  let t = 0;
+  const clock = () => (t += 50000);
+  const r = await runDaily(fakeSb(), {}, { clock }, { only: ["sla", "retention"] });
+  assert.ok(!r.sla.skipped, "the first step always runs, so a one-step call is never cut");
+  assert.equal(r.retention.skipped, "out_of_time");
+  assert.equal(r.ok, false);
+  assert.match(r.errors.join("\n"), /retention: not run, the run used its 48 s/);
+  const fast = await runDaily(fakeSb(), {}, {}, { only: ["sla", "retention"] });
+  assert.ok(!fast.retention.skipped && !fast.errors, "a quick run does every step");
+});
