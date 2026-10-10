@@ -15,7 +15,7 @@ import { renderWard, wardById } from "../../lib/seo/wards.js";
 import { staticPosts } from "../../lib/seo/data.js";
 import { gvf } from "../../lib/site-data.js";
 import { HttpError } from "../../lib/auth.js";
-import { aiComplete, bestGeminiModel, resetGeminiDiscovery } from "../../lib/ai.js";
+import { aiComplete, bestGeminiModel, resetGeminiDiscovery, AI_TIMEOUT_MS } from "../../lib/ai.js";
 
 const SITE = "https://gurugramvisionforum.org";
 const ENV = { SITE_URL: SITE };
@@ -203,6 +203,16 @@ test("aiComplete retries a retired Gemini model once with the discovered one", a
   const r = await aiComplete({ GEMINI_API_KEY: "K" }, { system: "s", user: "u" }, fetchImpl);
   assert.equal(r.ok, true); assert.equal(r.model, "gemini-3-flash"); assert.equal(urls.length, 3);
   resetGeminiDiscovery();
+});
+
+test("aiComplete gives up after its time limit instead of holding the cron", async () => {
+  let aborted = false;
+  const fetchImpl = (url, init) => new Promise((_, reject) => { init.signal.addEventListener("abort", () => { aborted = true; reject(Object.assign(new Error("aborted"), { name: "AbortError" })); }); });
+  const t0 = Date.now();
+  const r = await aiComplete({ GEMINI_API_KEY: "K" }, { system: "s", user: "u", timeoutMs: 40 }, fetchImpl);
+  assert.equal(r.ok, false); assert.equal(r.error, "timeout"); assert.ok(aborted, "the request is aborted, not left running");
+  assert.ok(Date.now() - t0 < 1000);
+  assert.equal(AI_TIMEOUT_MS, 20000);
 });
 
 test("geoStep asks the questions not asked longest, stores each answer, and skips without a key", async () => {
