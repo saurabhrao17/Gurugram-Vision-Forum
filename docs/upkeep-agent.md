@@ -29,8 +29,9 @@ may not change it, nor `scripts/upkeep-guard.mjs`, without the owner.
    code change" and "Needs a person".
 4. The previous upkeep log on the same branch (`upkeep/DATE-am.md` or
    `-pm.md`): decisions still waiting for the owner, and the owner's answers.
-5. Open issues titled **"Nightly checks failed"** and **"Site down"**.
-6. The last runs of the workflows QA, Uptime, Nightly SEO audit and SEO
+5. Open issues titled **"Nightly checks failed"** and, if one exists, **"Site down"**
+   (nothing in the repository opens that one any more; see the note under 3).
+6. The last runs of the workflows QA, Nightly SEO audit and SEO
    agent, and the Vercel status on the newest commit of `main` (commit
    statuses through the GitHub tools). The sandbox may not reach the live site
    directly; these runs are the eyes on production.
@@ -78,8 +79,18 @@ problem already fixed and waiting for the next audit. Say so in one line.
    re-audits the pages and closes the task.
 
 **Safety net.** If after a merge the Vercel deploy fails, QA on `main` fails
-or Uptime opens "Site down", revert that pull request at once (a revert is
+or the owner's outside uptime monitor reports the site down, revert that pull request at once (a revert is
 always allowed), confirm the site recovers, and tell the owner.
+
+**Uptime.** The 30-minute GitHub Actions probe (`uptime.yml`) was removed on
+10 Oct 2026. An outside monitor (UptimeRobot, free plan, email alerts to the
+owner) replaces it; the nightly `scripts/check-health.mjs` in `qa.yml` stays.
+
+**Actions minutes (once a week, on the first run of the week).** Read, never change, this month's
+GitHub Actions minutes used for the repository (GitHub MCP or API, read-only).
+When 80% of the included 3,000 minutes is reached, tell the Super EA at once
+with `send_message` (what is used, what is left, what runs the most). The
+owner sets the GitHub spending cap himself; the agent never touches billing.
 
 Never: push to `main` directly; merge with a red check; skip, disable or
 weaken a test; change the guard or this document; read, export or show any
