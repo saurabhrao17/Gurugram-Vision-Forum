@@ -243,28 +243,29 @@ test("draft provider: free keys are preferred and DRAFT_PROVIDER can force one",
   assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a" }), "anthropic");
   assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a", GROQ_API_KEY: "g" }), "groq");
   assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a", GROQ_API_KEY: "g", GEMINI_API_KEY: "x" }), "groq", "Groq first (owner, 10 Oct 2026)");
-  assert.equal(pickProvider({ GEMINI_API_KEY: "x", GROQ_API_KEY: "g", DRAFT_PROVIDER: "groq" }), "groq");
-  assert.equal(pickProvider({ GEMINI_API_KEY: "x", DRAFT_PROVIDER: "groq" }), "gemini");
-  assert.equal(PROVIDERS.gemini.model, "gemini-flash-latest");
+  assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a", GROQ_API_KEY: "g", DRAFT_PROVIDER: "groq" }), "groq");
+  assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a", DRAFT_PROVIDER: "groq" }), "anthropic", "a forced provider without a key is ignored");
+  assert.equal(pickProvider({ GEMINI_API_KEY: "x" }), null, "Gemini was dropped (10 Oct 2026)");
+  assert.equal(PROVIDERS.groq.model, "openai/gpt-oss-120b");
 });
 
-test("draft handler talks to Gemini's free API and reads its reply", async () => {
+test("draft handler talks to Groq's free API and reads its reply", async () => {
   let captured;
   const reply = JSON.stringify({ title: "Park cleaned", summary: "Forty volunteers.", body: "<p>Done.</p>", title_hi: "पार्क साफ़", summary_hi: "चालीस स्वयंसेवक।" });
-  const fetchImpl = async (url, init) => { captured = { url, body: JSON.parse(init.body), headers: init.headers }; return { ok: true, status: 200, json: async () => ({ candidates: [{ finishReason: "STOP", content: { parts: [{ text: reply }] } }] }) }; };
-  const handler = makeHandler({ env: { GEMINI_API_KEY: "free-key" }, auth: okAuth, fetchImpl });
+  const fetchImpl = async (url, init) => { captured = { url, body: JSON.parse(init.body), headers: init.headers }; return { ok: true, status: 200, json: async () => ({ choices: [{ finish_reason: "stop", message: { content: reply } }] }) }; };
+  const handler = makeHandler({ env: { GROQ_API_KEY: "free-key" }, auth: okAuth, fetchImpl });
   const res = fakeRes();
   await handler({ method: "POST", body: { brief: "Sewa drive in Sector 45 park with forty volunteers", kind: "news" } }, res);
   assert.equal(res.statusCode, 200, JSON.stringify(res.body));
-  assert.equal(res.body.provider, "gemini");
-  assert.equal(res.body.model, "gemini-flash-latest");
+  assert.equal(res.body.provider, "groq");
+  assert.equal(res.body.model, "openai/gpt-oss-120b");
   assert.equal(res.body.draft.title, "Park cleaned");
   assert.equal(res.body.draft.title_hi, "पार्क साफ़");
-  assert.match(captured.url, /generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-flash-latest:generateContent\?key=free-key$/);
-  assert.equal(captured.headers.authorization, undefined);
-  assert.match(captured.body.systemInstruction.parts[0].text, /non-partisan/);
-  assert.equal(captured.body.generationConfig.responseMimeType, "application/json");
-  assert.match(captured.body.contents[0].parts[0].text, /Sector 45/);
+  assert.equal(captured.url, "https://api.groq.com/openai/v1/chat/completions");
+  assert.equal(captured.headers.authorization, "Bearer free-key");
+  assert.match(captured.body.messages[0].content, /non-partisan/);
+  assert.deepEqual(captured.body.response_format, { type: "json_object" });
+  assert.match(captured.body.messages[1].content, /Sector 45/);
 });
 
 test("draft handler talks to Groq's free API with the OpenAI-style shape", async () => {

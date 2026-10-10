@@ -217,7 +217,7 @@ test("the report-count section appears only from 50 public reports and the thin 
 // ---------------------------------------------------------------------------
 // buildWeeklyPost: the AI path
 // ---------------------------------------------------------------------------
-const gemini = (text) => ({ ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text }] }, finishReason: "STOP" }] }) });
+const groq = (text) => ({ ok: true, status: 200, json: async () => ({ choices: [{ finish_reason: "stop", message: { content: text } }] }) });
 
 // A compliant model reply: prose from the templates (every link and number
 // is from the facts) with its own headlines and summaries.
@@ -234,26 +234,26 @@ function modelReply(overrides = {}) {
   });
 }
 
-test("with a provider key one Gemini call writes both languages; links and numbers are checked against the facts", async () => {
+test("with a provider key one Groq call writes both languages; links and numbers are checked against the facts", async () => {
   const calls = [];
-  const fetchImpl = async (url, init) => { calls.push({ url, init }); return gemini(modelReply()); };
-  const p = await buildWeeklyPost({ ...INPUT, env: { GEMINI_API_KEY: "g-key" }, fetchImpl });
+  const fetchImpl = async (url, init) => { calls.push({ url, init }); return groq(modelReply()); };
+  const p = await buildWeeklyPost({ ...INPUT, env: { GROQ_API_KEY: "g-key" }, fetchImpl });
   assert.equal(calls.length, 1, "one call");
-  assert.ok(calls[0].url.startsWith("https://generativelanguage.googleapis.com/v1beta/models/gemini-"), calls[0].url);
-  assert.ok(calls[0].url.endsWith("key=g-key"));
+  assert.equal(calls[0].url, "https://api.groq.com/openai/v1/chat/completions");
+  assert.equal(calls[0].init.headers.authorization, "Bearer g-key");
   const body = JSON.parse(calls[0].init.body);
-  assert.equal(body.generationConfig.responseMimeType, "application/json");
-  assert.match(body.systemInstruction.parts[0].text, /non-partisan citizens' forum/);
-  assert.match(body.systemInstruction.parts[0].text, /GMDA, MCG, DHBVN, HRERA/);
-  assert.match(body.systemInstruction.parts[0].text, /Do not invent anything/);
-  const facts = JSON.parse(body.contents[0].parts[0].text);
+  assert.deepEqual(body.response_format, { type: "json_object" });
+  assert.match(body.messages[0].content, /non-partisan citizens' forum/);
+  assert.match(body.messages[0].content, /GMDA, MCG, DHBVN, HRERA/);
+  assert.match(body.messages[0].content, /Do not invent anything/);
+  const facts = JSON.parse(body.messages[1].content);
   assert.equal(facts.total_mentions, 14);
   assert.deepEqual(facts.topics.map((t) => t.issue_type), ["waste", "drains", "roads"]);
   assert.equal(facts.official_notices.length, 2);
   assert.equal(facts.forum_reports.total_so_far, 50);
   assert.ok(!JSON.stringify(facts).includes("javascript:"));
   assert.equal(p.ai, true);
-  assert.equal(p.provider, "gemini");
+  assert.equal(p.provider, "groq");
   assert.equal(p.title, "Gurugram civic week, 28 September–4 October 2026: Waste complaints rise in Sector 45");
   assert.equal(p.title_hi, "गुरुग्राम नागरिक सप्ताह, 28 सितंबर–4 अक्टूबर 2026: सेक्टर 45 में कचरे की शिकायतें बढ़ीं");
   assert.equal(p.summary, "Residents talked most about waste this week, with 7 mentions. Two official notices came in.");
@@ -265,12 +265,12 @@ test("with a provider key one Gemini call writes both languages; links and numbe
 
 test("a bad model reply, a foreign link or an invented number falls back to the templates", async () => {
   const cases = [
-    ["not json", async () => gemini("Sure! Here is the post you asked for.")],
-    ["foreign link", async () => gemini(modelReply({ body_en: templateBodyEn(collectFacts(INPUT)) + '<p>Also see <a href="https://evil.example/buy">this</a>.</p>' }))],
-    ["invented number", async () => gemini(modelReply({ body_hi: templateBodyHi(collectFacts(INPUT)) + "<p>कुल 999 शिकायतें।</p>" }))],
-    ["too short", async () => gemini(modelReply({ body_en: "<p>Short.</p>" }))],
-    ["english where hindi was asked", async () => gemini(modelReply({ body_hi: templateBodyEn(collectFacts(INPUT)) }))],
-    ["number in the headline", async () => gemini(modelReply({ headline_en: "Waste up 300 percent" }))],
+    ["not json", async () => groq("Sure! Here is the post you asked for.")],
+    ["foreign link", async () => groq(modelReply({ body_en: templateBodyEn(collectFacts(INPUT)) + '<p>Also see <a href="https://evil.example/buy">this</a>.</p>' }))],
+    ["invented number", async () => groq(modelReply({ body_hi: templateBodyHi(collectFacts(INPUT)) + "<p>कुल 999 शिकायतें।</p>" }))],
+    ["too short", async () => groq(modelReply({ body_en: "<p>Short.</p>" }))],
+    ["english where hindi was asked", async () => groq(modelReply({ body_hi: templateBodyEn(collectFacts(INPUT)) }))],
+    ["number in the headline", async () => groq(modelReply({ headline_en: "Waste up 300 percent" }))],
     ["upstream error", async () => ({ ok: false, status: 503, json: async () => ({ error: { message: "busy" } }) })],
     ["network error", async () => { throw new Error("ECONNRESET"); }]
   ];
@@ -283,7 +283,7 @@ test("a bad model reply, a foreign link or an invented number falls back to the 
   }
   // No key: no call at all.
   let called = 0;
-  const p = await buildWeeklyPost({ ...INPUT, env: {}, fetchImpl: async () => { called++; return gemini(modelReply()); } });
+  const p = await buildWeeklyPost({ ...INPUT, env: {}, fetchImpl: async () => { called++; return groq(modelReply()); } });
   assert.equal(called, 0);
   assert.equal(p.ai, false);
 });
