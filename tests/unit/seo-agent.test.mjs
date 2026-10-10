@@ -186,3 +186,13 @@ test("seoStep only: re-audits just the given paths and never drops other pages",
   assert.ok(urls.includes(`${SITE}/about`) && urls.includes(`${SITE}/join`));
   assert.ok(!sb.writes.some((w) => w.table === "seo_pages" && w.op === "delete"), "the blog page outside this run is kept");
 });
+
+test("the AI answer task quotes the newest failure, not an old one", () => {
+  const geo = { asked: 0, cited: 0, questions: [
+    { key: "issue:roads", issue: "roads", cited: null, error: "model_gemini-2.0-flash_not_found", checked_at: "2026-10-08T01:19:00Z" },
+    { key: "issue:drains", issue: "drains", cited: null, error: "http_429_RESOURCE_EXHAUSTED: Quota exceeded", checked_at: "2026-10-09T01:19:00Z" }
+  ] };
+  const t = findings({ ...STATE, geo }, NOW).find((x) => x.key === "geo:error");
+  assert.equal(t.detail, "http_429_RESOURCE_EXHAUSTED: Quota exceeded");
+  assert.equal(t.owner, "wait");
+});
