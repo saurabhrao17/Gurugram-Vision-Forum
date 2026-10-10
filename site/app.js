@@ -985,10 +985,10 @@ function topicAuto(a){if(!a)return "";var t=SEOD&&SEOD.topics||{},pw=t.per_week|
   if(a.state==="guide")return 'Covered by the guide. A post is drafted automatically once residents discuss it (2 or more public posts in a fortnight).';
   return ""}
 /* An AI answer check that failed, in plain words; the raw error stays in the tooltip. */
-var GEO_QUOTA=/429|RESOURCE_EXHAUSTED|quota/i;
+var GEO_QUOTA=/^(?!groq_).*(429|RESOURCE_EXHAUSTED|quota)/i;
 function geoBy(q){return q.engine==="groq-browser"?' <span class="small muted">Groq web search</span>':q.engine==="gemini-search"?' <span class="small muted">Gemini + Google</span>':''}
 function geoGoogle(g){if(!g)return '<span class="small muted">Not asked yet</span>';return (g.cited===true?'<span class="tag tag-green">Cited'+(g.position?' #'+g.position:'')+'</span>':g.cited===false?'<span class="tag tag-warn">Not cited</span>':geoErr(g.error))+' <span class="small muted">'+esc(fmtDate(g.checked_at))+'</span>'}
-function geoErr(e){e=String(e||"");if(GEO_QUOTA.test(e))return '<span class="tag tag-warn" title="'+esc(e)+'">Needs Google billing</span>';if(/not_found|\b404\b/i.test(e))return '<span class="tag" title="'+esc(e)+'">Old model name; asked again tonight</span>';return '<span class="tag tag-danger" title="'+esc(e)+'">'+esc(e.length>60?e.slice(0,57)+"…":e)+'</span>'}
+function geoErr(e){e=String(e||"");if(/^groq_http_429/.test(e))return '<span class="tag" title="'+esc(e)+'">Groq busy; asked again next run</span>';if(GEO_QUOTA.test(e))return '<span class="tag tag-warn" title="'+esc(e)+'">Needs Google billing</span>';if(/not_found|\b404\b/i.test(e))return '<span class="tag" title="'+esc(e)+'">Old model name; asked again tonight</span>';return '<span class="tag tag-danger" title="'+esc(e)+'">'+esc(e.length>60?e.slice(0,57)+"…":e)+'</span>'}
 function seoPane(key,html){return '<div class="cpane'+(SEO_TAB===key?' on':'')+'" data-cpane="'+key+'">'+html+'</div>'}
 function seoNum(n){return n==null?'–':Number(n).toLocaleString("en-IN")}
 function seoPct(x){return x==null?'–':(Math.round(x*1000)/10)+'%'}

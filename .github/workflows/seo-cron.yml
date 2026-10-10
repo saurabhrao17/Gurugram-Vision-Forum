@@ -33,7 +33,7 @@ permissions:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: Call the SEO steps one by one
         env:
@@ -44,7 +44,9 @@ jobs:
           if [ -z "$TOKEN" ]; then echo "CRON_SECRET repository secret is not set"; exit 1; fi
           echo "::add-mask::$TOKEN"
           ok=1
-          steps="seo vitals mentions geo gsc bing topics"
+          # geo three times, a minute apart: Groq's free plan allows about
+          # one web-search answer a minute, so each call answers one or two.
+          steps="seo vitals mentions geo geo geo gsc bing topics"
           # The GEO and search-data steps exist only once the live site runs
           # the code that serves /llms.txt; until a deploy lands, ask only for
           # the steps every version knows (an older deploy treated unknown
@@ -59,7 +61,10 @@ jobs:
             steps=$(echo "$ASKED" | tr -c 'a-z \n' ' ')
             echo "::notice::Manual run: $steps"
           fi
+          prev=""
           for step in $steps; do
+            if [ "$step" = "geo" ] && [ "$prev" = "geo" ]; then sleep 65; fi
+            prev="$step"
             code=$(curl -sS -m 90 -o out.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/cron/daily?steps=$step")
             echo "$step: HTTP $code"
             if command -v jq >/dev/null && jq . out.json >/dev/null 2>&1; then jq ".$step, .errors" out.json; else cat out.json; echo; fi

@@ -270,6 +270,25 @@ test("Groq answers every night; Google's AI gets one question a run within its w
   f = make(429); sb = fakeSb();
   out = await geoStep(sb, env, { fetch: f.fetch, now: Date.UTC(2026, 9, 10), limit: 3 });
   assert.deepEqual([out.asked, out.failed, out.google_error, out.stopped], [3, 1, "quota", undefined]);
+  // A refusal in the last day: Google is not asked again until tomorrow.
+  const refused = [{ question_key: "issue:roads", engine: "gemini-search", error: "http_429_RESOURCE_EXHAUSTED: Quota", checked_at: new Date(Date.UTC(2026, 9, 10) - 3600000).toISOString() }];
+  f = make(200);
+  await geoStep(fakeSb({ seo_geo: refused }), env, { fetch: f.fetch, now: Date.UTC(2026, 9, 10), limit: 1 });
+  assert.equal(f.calls.filter((u) => /generativelanguage/.test(u)).length, 0, "no second Google call within a day of a refusal");
+  // Groq's per-minute limit: nothing stored, the rest wait for the next call;
+  // a question that failed before is asked first.
+  let groqCalls = 0;
+  const busy = async (url, init) => {
+    if (/generativelanguage/.test(url)) return { ok: false, status: 429, json: async () => ({ error: { status: "RESOURCE_EXHAUSTED" } }) };
+    groqCalls++;
+    if (groqCalls === 1) assert.match(JSON.parse(init.body).messages[0].content, /drains/, "the question that failed last time goes first");
+    return groqCalls === 1 ? { ok: true, status: 200, json: async () => groqReply } : { ok: false, status: 429, json: async () => ({ error: { code: "rate_limit_exceeded", message: "Rate limit reached for model on tokens per minute (TPM)" } }) };
+  };
+  const history = geoQuestions().map((q, i) => ({ question_key: q.key, engine: "groq-browser", error: q.key === "issue:drains" ? "groq_http_429_rate_limit_exceeded" : null, checked_at: new Date(Date.UTC(2026, 9, 1) + i * 60000).toISOString() }));
+  sb = fakeSb({ seo_geo: history });
+  out = await geoStep(sb, { ...ENV, GROQ_API_KEY: "Q" }, { fetch: busy, now: Date.UTC(2026, 9, 10), limit: 3 });
+  assert.deepEqual([out.asked, out.failed, out.stopped, out.deferred], [1, 0, "groq_rate_limit", 1]);
+  assert.equal(sb.writes.filter((w) => w.op === "insert").length, 1, "the rate-limited question leaves no failure row");
   // Groq alone (no Gemini key) and a budget that stops the run in time.
   let t = 0;
   const out2 = await geoStep(fakeSb(), { ...ENV, GROQ_API_KEY: "Q" }, { fetch: make(200).fetch, now: Date.UTC(2026, 9, 10), limit: 3, budgetMs: 10, clock: () => (t += 20) });
