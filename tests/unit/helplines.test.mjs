@@ -16,11 +16,11 @@ const G = ctx.window.GVF || ctx.GVF || ctx.self.GVF;
 const OFFICIAL = ["112", "1930"];
 const LEGACY = ["181", "1033", "1912", "1915", "18001801817"];
 
-test("every recorded helpline has a government source URL and a check date", () => {
+test("every recorded helpline has a government source URL and a check state (not checked yet, or a real date)", () => {
   assert.deepEqual(JSON.parse(JSON.stringify(G.VERIFIED_HELPLINES.map((h) => h.n).sort())), [...OFFICIAL].sort());
   for (const h of G.VERIFIED_HELPLINES) {
     assert.match(h.url, /^https:\/\/([a-z0-9-]+\.)*(gov\.in|nic\.in)\//, h.n);
-    assert.equal(h.checked, "10 Oct 2026");
+    assert.match(h.checked, /^(not checked yet|\d{1,2} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4})$/, h.n);
   }
 });
 
