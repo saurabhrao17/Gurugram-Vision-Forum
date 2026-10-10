@@ -104,7 +104,7 @@ Links that still work outside this bundle:
 | CM Window, Haryana | Haryana | Grievance against any Haryana department | Online or at any DC or SDM office | https://cmharyanacell.nic.in/ |
 | Auto Appeal System, Right to Service | Haryana | Late notified services escalate automatically | Up to the Right to Service Commission | https://aas.saralharyana.nic.in/ |
 | Saral Haryana | Haryana | Notified state services with time limits | Apply, track, keep the number | https://saralharyana.gov.in/ |
-| Haryana ULB services and property tax | Haryana | Property tax and no-dues certificate | Search your property ID | https://ulbhryndc.org/ |
+| Haryana ULB services and property tax | Haryana | Property tax and no-dues certificate | Search your property ID | https://ulbharyana.gov.in/ |
 | HRERA Gurugram | Haryana | Builder delays, defects, refunds | Online complaint; hearings in Gurugram | https://haryanarera.gov.in/ |
 | Town and Country Planning (DTCP) | Haryana | Licensed colonies, handover, violations | District Town Planner, Gurugram | https://tcpharyana.gov.in/ |
 | HSVP | Haryana | HSVP sectors, plots, internal services | Estate Officer, Gurugram | https://hsvphry.org.in/ |

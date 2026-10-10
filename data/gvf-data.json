@@ -34,7 +34,7 @@
     "sansad": "https://sansad.in/ls/members",
     "mospi": "https://mospi.gov.in/sites/default/files/profileHonMin/Minister_Profile_28062024.pdf",
     "eci": "https://voters.eci.gov.in/",
-    "ulbtax": "https://ulbhryndc.org/",
+    "ulbtax": "https://ulbharyana.gov.in/",
     "wa": "https://wa.me/917840001817"
   },
   "CATS": [
@@ -560,7 +560,7 @@
         {
           "k": "Portal",
           "v": "ULB property tax and services",
-          "href": "https://ulbhryndc.org/",
+          "href": "https://ulbharyana.gov.in/",
           "ic": "link"
         },
         {
@@ -867,7 +867,7 @@
     },
     {
       "n": "Haryana ULB services and property tax",
-      "h": "https://ulbhryndc.org/",
+      "h": "https://ulbharyana.gov.in/",
       "l": "state",
       "f": "Property tax and no-dues certificate",
       "how": "Search your property ID",
