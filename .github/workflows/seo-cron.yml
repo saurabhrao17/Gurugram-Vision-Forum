@@ -26,6 +26,11 @@ on:
         description: "Steps to call, in order (blank = the nightly list). A step may repeat, e.g. \"geo geo geo\" asks nine AI-answer questions."
         required: false
         default: ""
+      google_now:
+        description: "Ask Google's AI one question now, even if it refused within the last day (after switching billing on)"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -40,6 +45,7 @@ jobs:
           TOKEN: ${{ secrets.CRON_SECRET }}
           BASE_URL: ${{ github.event.inputs.base_url || 'https://gurugramvisionforum.org' }}
           ASKED: ${{ github.event.inputs.steps || '' }}
+          GOOGLE_NOW: ${{ github.event.inputs.google_now || 'false' }}
         run: |
           if [ -z "$TOKEN" ]; then echo "CRON_SECRET repository secret is not set"; exit 1; fi
           echo "::add-mask::$TOKEN"
@@ -65,7 +71,9 @@ jobs:
           for step in $steps; do
             if [ "$step" = "geo" ] && [ "$prev" = "geo" ]; then sleep 65; fi
             prev="$step"
-            code=$(curl -sS -m 90 -o out.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/cron/daily?steps=$step")
+            extra=""
+            if [ "$step" = "geo" ] && [ "$GOOGLE_NOW" = "true" ]; then extra="&google=now"; GOOGLE_NOW=done; fi
+            code=$(curl -sS -m 90 -o out.json -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "$BASE_URL/api/cron/daily?steps=$step$extra")
             echo "$step: HTTP $code"
             if command -v jq >/dev/null && jq . out.json >/dev/null 2>&1; then jq ".$step, .errors" out.json; else cat out.json; echo; fi
             { echo "## SEO step: $step"; echo; echo "HTTP $code"; echo; echo '```json'; cat out.json; echo; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

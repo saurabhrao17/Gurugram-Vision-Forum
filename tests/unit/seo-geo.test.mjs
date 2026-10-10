@@ -275,6 +275,9 @@ test("Groq answers every night; Google's AI gets one question a run within its w
   f = make(200);
   await geoStep(fakeSb({ seo_geo: refused }), env, { fetch: f.fetch, now: Date.UTC(2026, 9, 10), limit: 1 });
   assert.equal(f.calls.filter((u) => /generativelanguage/.test(u)).length, 0, "no second Google call within a day of a refusal");
+  f = make(200);
+  const forced = await geoStep(fakeSb({ seo_geo: refused }), env, { fetch: f.fetch, now: Date.UTC(2026, 9, 10), limit: 1, googleNow: true });
+  assert.equal(forced.google, 1, "a manual run with google=now asks Google at once (after billing is switched on)");
   // Groq's per-minute limit: nothing stored, the rest wait for the next call;
   // a question that failed before is asked first.
   let groqCalls = 0;
