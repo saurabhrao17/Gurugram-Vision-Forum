@@ -325,7 +325,7 @@ test("blog post: static, live news with auto disclosure, Hindi fallback, 404", a
   res = await render("blog/monsoon-drains-2026", sb);
   h = res.body;
   cleanOutput(h, "live post");
-  assert.ok(h.includes("Compiled automatically from public posts, official notices and the Forum"));
+  assert.ok(h.includes("Compiled automatically from public sources and official notices."));
   assert.ok(!h.includes("<script>alert"), "body sanitised");
   assert.ok(h.includes("<p>Body text</p>"));
   const news = lds(h).find((x) => x["@type"] === "NewsArticle");
