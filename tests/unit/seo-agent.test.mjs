@@ -21,10 +21,10 @@ const STATE = {
   sitechecks: [{ key: "robots", ok: true }, { key: "gsc_sitemap", ok: false, detail: "0 URLs submitted" }, { key: "bing_crawl", ok: null, detail: "not yet" }, { key: "headers", ok: false, detail: "No HSTS" }],
   vitals: { latest: [{ url: `${SITE}/`, performance: 77, lcp_ms: 4100, cls: 0.01, tbt_ms: 90 }] },
   index: { total: 3, indexed: 1, rows: [{ url: `${SITE}/`, verdict: "PASS", coverage: "Submitted and indexed" }, { url: `${SITE}/guides`, verdict: "NEUTRAL", coverage: "URL is unknown to Google" }, { url: `${SITE}/guide/roads`, verdict: "NEUTRAL", coverage: "Crawled - currently not indexed" }] },
-  geo: { asked: 2, cited: 0, questions: [{ key: "issue:roads", issue: "roads", cited: false }, { key: "issue:drains", issue: "drains", cited: null, error: "http_429_RESOURCE_EXHAUSTED: Quota exceeded" }] },
+  geo: { asked: 2, cited: 0, questions: [{ key: "issue:roads", issue: "roads", cited: false }, { key: "issue:drains", issue: "drains", cited: null, error: "groq_http_500_server_error: Groq had a problem" }] },
   clusters: [{ id: "waste", label: "Garbage", demand: 27, auto: { state: "queued", position: 1, eta_days: 0 } }, { id: "traffic", label: "Traffic", demand: 8, auto: { state: "held", slug: "traffic-gurugram-2026-10" } }, { id: "roads", label: "Roads", demand: 0, auto: { state: "covered" } }],
   run_errors: { gsc: { at: "2026-10-08T21:41:00Z", error: "FUNCTION_INVOCATION_TIMEOUT" }, brief: { at: "x", error: "boom" } },
-  connections: { gsc: true, bing: true, gemini: true, pagespeed: false },
+  connections: { gsc: true, bing: true, pagespeed: false },
   search: { google: { queries: [{ key: "who fixes potholes gurugram", clicks: 1, impressions: 40, ctr: 0.025, position: 11.2 }], pages: [{ key: "/guide/roads", clicks: 0, impressions: 120, ctr: 0, position: 4 }], totals: { clicks: 1, impressions: 160 } } },
   checklist: [{ key: "mentions", title: "Off-page: the Forum in the news", ok: false, detail: "None found yet" }, { key: "titles", title: "Unique titles", ok: false }],
   topics: { per_week: 3 }
@@ -42,7 +42,7 @@ test("findings: every problem in the state, with who acts and what happens", () 
   assert.equal(by["speed:/"].owner, "code");
   assert.equal(by["index:unknown"].owner, "auto"); assert.deepEqual(by["index:unknown"].data.urls, [`${SITE}/guides`]);
   assert.equal(by["index:not_indexed"].owner, "wait");
-  assert.equal(by["geo:error"].owner, "person", "a quota error needs Google billing switched on, which only the owner can do");
+  assert.equal(by["geo:error"].owner, "code", "an AI answer failure is a code matter now that only Groq answers");
   assert.equal(by["geo:not_cited"].owner, "auto");
   assert.equal(by["cluster:waste"].owner, "auto"); assert.equal(by["cluster:traffic"].owner, "person"); assert.equal(by["cluster:roads"], undefined);
   assert.equal(by["ops:gsc"].owner, "auto", "a failed SEO step is re-run"); assert.equal(by["ops:brief"].owner, "code", "a mail step is never re-run by the agent");
@@ -189,11 +189,10 @@ test("seoStep only: re-audits just the given paths and never drops other pages",
 
 test("the AI answer task quotes the newest failure, not an old one", () => {
   const geo = { asked: 0, cited: 0, questions: [
-    { key: "issue:roads", issue: "roads", cited: null, error: "model_gemini-2.0-flash_not_found", checked_at: "2026-10-08T01:19:00Z" },
-    { key: "issue:drains", issue: "drains", cited: null, error: "http_429_RESOURCE_EXHAUSTED: Quota exceeded", checked_at: "2026-10-09T01:19:00Z" }
+    { key: "issue:roads", issue: "roads", cited: null, error: "groq_http_404_model_not_found", checked_at: "2026-10-08T01:19:00Z" },
+    { key: "issue:drains", issue: "drains", cited: null, error: "groq_http_500_server_error: Groq had a problem", checked_at: "2026-10-09T01:19:00Z" }
   ] };
   const t = findings({ ...STATE, geo }, NOW).find((x) => x.key === "geo:error");
-  assert.equal(t.detail, "http_429_RESOURCE_EXHAUSTED: Quota exceeded");
-  assert.equal(t.owner, "person");
-  assert.match(t.action, /billing/);
+  assert.equal(t.detail, "groq_http_500_server_error: Groq had a problem");
+  assert.equal(t.owner, "code");
 });

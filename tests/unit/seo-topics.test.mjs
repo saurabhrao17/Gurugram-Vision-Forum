@@ -84,12 +84,12 @@ test("the model writes only the opening paragraph, and only from the facts", asy
   assert.equal(checkIntro(ok, f, "hi"), null, "Hindi must be Hindi");
   const hi = "पिछले 14 दिनों में निवासियों ने गोल्फ़ कोर्स रोड पर ट्रैफ़िक के बारे में 5 पोस्ट लिखीं: व्यस्त समय में जाम, लंबे समय तक लाल रहने वाले सिग्नल और गलत दिशा में गाड़ी चलाना। लोग पूछ रहे हैं कि ज़िम्मेदार कौन है।";
   let calls = 0;
-  const fetchImpl = async () => { calls++; return { ok: true, status: 200, json: async () => ({ candidates: [{ finishReason: "STOP", content: { parts: [{ text: JSON.stringify({ intro_en: ok, intro_hi: hi }) }] } }] }) }; };
-  const post = await buildTopicPost("traffic", { signals, news: [], env: { GEMINI_API_KEY: "k" }, fetchImpl, now: NOW });
+  const fetchImpl = async () => { calls++; return { ok: true, status: 200, json: async () => ({ choices: [{ finish_reason: "stop", message: { content: JSON.stringify({ intro_en: ok, intro_hi: hi }) } }] }) }; };
+  const post = await buildTopicPost("traffic", { signals, news: [], env: { GROQ_API_KEY: "k" }, fetchImpl, now: NOW });
   assert.equal(post.ai, true); assert.equal(calls, 1);
   assert.ok(post.body.startsWith("<p>Residents posted 5 times"));
-  const bad = async () => ({ ok: true, status: 200, json: async () => ({ candidates: [{ finishReason: "STOP", content: { parts: [{ text: JSON.stringify({ intro_en: ok.replace("5 times", "77 times"), intro_hi: hi }) }] } }] }) });
-  const fallback = await buildTopicPost("traffic", { signals, news: [], env: { GEMINI_API_KEY: "k" }, fetchImpl: bad, now: NOW });
+  const bad = async () => ({ ok: true, status: 200, json: async () => ({ choices: [{ finish_reason: "stop", message: { content: JSON.stringify({ intro_en: ok.replace("5 times", "77 times"), intro_hi: hi }) } }] }) });
+  const fallback = await buildTopicPost("traffic", { signals, news: [], env: { GROQ_API_KEY: "k" }, fetchImpl: bad, now: NOW });
   assert.equal(fallback.ai, false, "a checked-out intro falls back to the template");
   assert.match(fallback.body, /^<p>In the last 14 days there were 5 posts by residents on traffic in Gurugram/);
 });

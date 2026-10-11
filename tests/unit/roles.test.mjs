@@ -98,7 +98,7 @@ test("draft handler accepts the content team", async () => {
   assert.equal(res.statusCode, 503);
   assert.equal(res.body.error, "draft_unavailable");
   const no = fakeRes();
-  await makeDraft({ env: { GEMINI_API_KEY: "k" }, auth: authAs("triage") })({ method: "POST", body: { brief: "x" } }, no);
+  await makeDraft({ env: { GROQ_API_KEY: "k" }, auth: authAs("triage") })({ method: "POST", body: { brief: "x" } }, no);
   assert.equal(no.statusCode, 403);
 });
 
@@ -198,33 +198,33 @@ test("readFields and cleanTranslation cap lengths and sanitise the body", () => 
   assert.equal(cleanTranslation(null, { title: "T" }), null);
 });
 
-test("translate handler sends the Gemini shape and returns the parsed reply", async () => {
+test("translate handler sends the Groq shape and returns the parsed reply", async () => {
   let captured;
   const reply = JSON.stringify({ title: "सेक्टर 29 में नाला साफ", summary: "GMDA ने 3 दिन में काम किया।", body: "<p>निवासियों ने <b>MCG</b> को 1 अक्टूबर 2026 को सूचित किया।</p>" });
-  const fetchImpl = async (url, init) => { captured = { url, body: JSON.parse(init.body), headers: init.headers }; return { ok: true, status: 200, json: async () => ({ candidates: [{ finishReason: "STOP", content: { parts: [{ text: reply }] } }] }) }; };
-  const handler = makeTranslate({ env: { GEMINI_API_KEY: "free-key" }, auth: authAs("content"), fetchImpl });
+  const fetchImpl = async (url, init) => { captured = { url, body: JSON.parse(init.body), headers: init.headers }; return { ok: true, status: 200, json: async () => ({ choices: [{ finish_reason: "stop", message: { content: reply } }] }) }; };
+  const handler = makeTranslate({ env: { GROQ_API_KEY: "free-key" }, auth: authAs("content"), fetchImpl });
   const res = fakeRes();
   await handler({ method: "POST", body: { fields: { title: "Drain cleaned in Sector 29", summary: "GMDA did it in 3 days.", body: "<p>Residents told <b>MCG</b> on 1 October 2026.</p>" } } }, res);
   assert.equal(res.statusCode, 200, JSON.stringify(res.body));
   assert.equal(res.body.ok, true);
   assert.equal(res.body.from, "en");
   assert.equal(res.body.to, "hi");
-  assert.equal(res.body.provider, "gemini");
-  assert.equal(res.body.model, "gemini-flash-latest");
+  assert.equal(res.body.provider, "groq");
+  assert.equal(res.body.model, "openai/gpt-oss-120b");
   assert.deepEqual(Object.keys(res.body.fields).sort(), ["body", "summary", "title"]);
   assert.equal(res.body.fields.title, "सेक्टर 29 में नाला साफ");
   assert.equal(res.body.fields.body, "<p>निवासियों ने <b>MCG</b> को 1 अक्टूबर 2026 को सूचित किया।</p>");
-  assert.match(captured.url, /generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-flash-latest:generateContent\?key=free-key$/);
-  assert.equal(captured.headers.authorization, undefined);
-  assert.match(captured.body.systemInstruction.parts[0].text, /Gurugram Vision Forum/);
-  assert.equal(captured.body.generationConfig.responseMimeType, "application/json");
-  assert.match(captured.body.contents[0].parts[0].text, /from English to Hindi/);
-  assert.match(captured.body.contents[0].parts[0].text, /Drain cleaned in Sector 29/);
+  assert.equal(captured.url, "https://api.groq.com/openai/v1/chat/completions");
+  assert.equal(captured.headers.authorization, "Bearer free-key");
+  assert.match(captured.body.messages[0].content, /Gurugram Vision Forum/);
+  assert.deepEqual(captured.body.response_format, { type: "json_object" });
+  assert.match(captured.body.messages[1].content, /from English to Hindi/);
+  assert.match(captured.body.messages[1].content, /Drain cleaned in Sector 29/);
 
   // Hindi in, English out, with an explicit `from`.
   const back = fakeRes();
-  const fetchBack = async () => ({ ok: true, status: 200, json: async () => ({ candidates: [{ finishReason: "STOP", content: { parts: [{ text: "```json\n{\"title\":\"Drain cleaned\"}\n```" }] } }] }) });
-  await makeTranslate({ env: { GEMINI_API_KEY: "k" }, auth: authAs("owner"), fetchImpl: fetchBack })({ method: "POST", body: { fields: { title: "नाला साफ" }, from: "hi" } }, back);
+  const fetchBack = async () => ({ ok: true, status: 200, json: async () => ({ choices: [{ finish_reason: "stop", message: { content: "```json\n{\"title\":\"Drain cleaned\"}\n```" } }] }) });
+  await makeTranslate({ env: { GROQ_API_KEY: "k" }, auth: authAs("owner"), fetchImpl: fetchBack })({ method: "POST", body: { fields: { title: "नाला साफ" }, from: "hi" } }, back);
   assert.equal(back.statusCode, 200);
   assert.equal(back.body.from, "hi");
   assert.equal(back.body.to, "en");
@@ -237,7 +237,7 @@ test("translate handler: 503 without keys, 400 on bad input, 403 for triage, 502
   assert.equal(none.statusCode, 503);
   assert.deepEqual(none.body, { ok: false, error: "translate_unavailable" });
 
-  const withKey = (auth = authAs("content")) => makeTranslate({ env: { GEMINI_API_KEY: "k" }, auth, fetchImpl: async () => { throw new Error("must not be called"); } });
+  const withKey = (auth = authAs("content")) => makeTranslate({ env: { GROQ_API_KEY: "k" }, auth, fetchImpl: async () => { throw new Error("must not be called"); } });
   const empty = fakeRes();
   await withKey()({ method: "POST", body: { fields: { title: "  ", body: "" } } }, empty);
   assert.equal(empty.statusCode, 400);
