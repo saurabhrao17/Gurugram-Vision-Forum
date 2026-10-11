@@ -305,3 +305,6 @@ CATS.forEach(function(c){c.filing=FILING[c.id]||{portal:"",fields:[],docs:[]}});
 var VERIFIED_HELPLINES=[{n:"112",what:"Single emergency number (police, fire, health), ERSS",url:"https://112.gov.in/",checked:"confirmed by Saurabh, 10 Oct 2026"},{n:"1930",what:"National cybercrime helpline for financial fraud, with the portal at cybercrime.gov.in",url:"https://i4c.mha.gov.in/FAQ.aspx",checked:"confirmed by Saurabh, 10 Oct 2026"}];
 return {GATE:GATE,L:L,CATS:CATS,FILING:FILING,PORTALS:PORTALS,FILTERS:FILTERS,CHARTERS:CHARTERS,ROLES:ROLES,TIERS:TIERS,WARDS:WARDS,AREAS:AREAS,CIVIC:CIVIC,BLOG:BLOG,MEDIA:MEDIA,STATS:STATS,FUNDING:FUNDING,HI:HI,HS:HS,VERIFIED:"8 Oct 2026",VERIFIED_HELPLINES:VERIFIED_HELPLINES};
 })();
+/* Councillor names come from press reports of the 12 March 2025 results and are not yet checked against the official MCG list (owner, 11 Oct 2026). While true, every place that shows a councillor name adds the line below (server ward pages, Wards table, report-form hint). Set to false once the names are verified; nothing else needs to change. */
+window.GVF.COUNCILLOR_PENDING=true;
+window.GVF.HS["Name from news reports; official check pending"]="नाम समाचार रिपोर्टों से; आधिकारिक जाँच बाकी";
