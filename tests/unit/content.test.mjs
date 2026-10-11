@@ -166,12 +166,14 @@ test("upload validator rejects a 25 MB file and an exe, accepts a 2 MB jpeg", ()
 // --- draft handler ------------------------------------------------------------
 const okAuth = async () => ({ user: { id: "u" }, staff: { user_id: "u", name: "A", role: "owner", email: "a@b.co" } });
 
-test("draft handler returns 503 without ANTHROPIC_API_KEY", async () => {
-  const handler = makeHandler({ env: {}, auth: okAuth, fetchImpl: async () => { throw new Error("must not be called"); } });
-  const res = fakeRes();
-  await handler({ method: "POST", body: { brief: "Drain cleaned in sector 29 after residents' petition", kind: "news" } }, res);
-  assert.equal(res.statusCode, 503);
-  assert.deepEqual(res.body, { ok: false, error: "draft_unavailable" });
+test("draft handler returns 503 without GROQ_API_KEY, even with an Anthropic key", async () => {
+  for (const env of [{}, { ANTHROPIC_API_KEY: "sk-test" }]) {
+    const handler = makeHandler({ env, auth: okAuth, fetchImpl: async () => { throw new Error("must not be called"); } });
+    const res = fakeRes();
+    await handler({ method: "POST", body: { brief: "Drain cleaned in sector 29 after residents' petition", kind: "news" } }, res);
+    assert.equal(res.statusCode, 503);
+    assert.deepEqual(res.body, { ok: false, error: "draft_unavailable" });
+  }
 });
 
 test("draft handler parses a fenced JSON reply from an injected fetch", async () => {
@@ -183,9 +185,9 @@ test("draft handler parses a fenced JSON reply from an injected fetch", async ()
   }) + "\n```";
   const fetchImpl = async (url, init) => {
     captured = { url, init, body: JSON.parse(init.body) };
-    return { ok: true, status: 200, json: async () => ({ model: MODEL, stop_reason: "end_turn", content: [{ type: "text", text: reply }] }) };
+    return { ok: true, status: 200, json: async () => ({ model: MODEL, choices: [{ finish_reason: "stop", message: { content: reply } }] }) };
   };
-  const handler = makeHandler({ env: { ANTHROPIC_API_KEY: "sk-test" }, auth: okAuth, fetchImpl });
+  const handler = makeHandler({ env: { GROQ_API_KEY: "sk-test" }, auth: okAuth, fetchImpl });
   const res = fakeRes();
   await handler({ method: "POST", body: { brief: "Drain in sector 29 cleaned after petition", kind: "news", lang: "en" } }, res);
   assert.equal(res.statusCode, 200, JSON.stringify(res.body));
@@ -195,19 +197,18 @@ test("draft handler parses a fenced JSON reply from an injected fetch", async ()
   assert.equal(res.body.draft.title_hi, "सेक्टर 29 में नाला साफ");
   assert.deepEqual(Object.keys(res.body.draft).sort(), ["body", "summary", "summary_hi", "title", "title_hi"]);
   assert.equal(res.body.truncated, false);
-  assert.equal(captured.url, "https://api.anthropic.com/v1/messages");
-  assert.equal(captured.init.headers["x-api-key"], "sk-test");
-  assert.ok(captured.init.headers["anthropic-version"]);
+  assert.equal(captured.url, "https://api.groq.com/openai/v1/chat/completions");
+  assert.equal(captured.init.headers.authorization, "Bearer sk-test");
   assert.equal(captured.body.model, MODEL);
   assert.equal(captured.body.max_tokens, 1500);
-  assert.match(captured.body.system, /non-partisan/);
-  assert.match(captured.body.system, /\[verify\]/);
-  assert.equal(captured.body.messages.length, 1);
-  assert.match(captured.body.messages[0].content, /Drain in sector 29/);
+  assert.equal(captured.body.messages.length, 2);
+  assert.match(captured.body.messages[0].content, /non-partisan/);
+  assert.match(captured.body.messages[0].content, /\[verify\]/);
+  assert.match(captured.body.messages[1].content, /Drain in sector 29/);
 });
 
 test("draft handler validates input and reports upstream failures", async () => {
-  const handler = makeHandler({ env: { ANTHROPIC_API_KEY: "k" }, auth: okAuth, fetchImpl: async () => ({ ok: false, status: 429, json: async () => ({ error: { type: "rate_limit_error" } }) }) });
+  const handler = makeHandler({ env: { GROQ_API_KEY: "k" }, auth: okAuth, fetchImpl: async () => ({ ok: false, status: 429, json: async () => ({ error: { type: "rate_limit_error" } }) }) });
   let res = fakeRes();
   await handler({ method: "POST", body: { brief: "short", kind: "advert" } }, res);
   assert.equal(res.statusCode, 400);
@@ -219,7 +220,7 @@ test("draft handler validates input and reports upstream failures", async () => 
   res = fakeRes();
   await handler({ method: "GET" }, res);
   assert.equal(res.statusCode, 405);
-  const denied = makeHandler({ env: { ANTHROPIC_API_KEY: "k" }, auth: async () => { const { HttpError } = await import("../../lib/auth.js"); throw new HttpError(403, "forbidden"); } });
+  const denied = makeHandler({ env: { GROQ_API_KEY: "k" }, auth: async () => { const { HttpError } = await import("../../lib/auth.js"); throw new HttpError(403, "forbidden"); } });
   res = fakeRes();
   await denied({ method: "POST", body: {} }, res);
   assert.equal(res.statusCode, 403);
@@ -238,13 +239,12 @@ test("parseDraft is defensive", () => {
   assert.match(req.messages[0].content, /pop-up/i);
 });
 
-test("draft provider: free keys are preferred and DRAFT_PROVIDER can force one", () => {
+test("draft provider: Groq is the only one; other keys are ignored", () => {
   assert.equal(pickProvider({}), null);
-  assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a" }), "anthropic");
+  assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a" }), null, "no paid fallback (owner, 11 Oct 2026)");
   assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a", GROQ_API_KEY: "g" }), "groq");
-  assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a", GROQ_API_KEY: "g", GEMINI_API_KEY: "x" }), "groq", "Groq first (owner, 10 Oct 2026)");
-  assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a", GROQ_API_KEY: "g", DRAFT_PROVIDER: "groq" }), "groq");
-  assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a", DRAFT_PROVIDER: "groq" }), "anthropic", "a forced provider without a key is ignored");
+  assert.equal(pickProvider({ GROQ_API_KEY: "g", GEMINI_API_KEY: "x" }), "groq");
+  assert.equal(pickProvider({ ANTHROPIC_API_KEY: "a", DRAFT_PROVIDER: "anthropic" }), null, "a forced Anthropic provider is ignored");
   assert.equal(pickProvider({ GEMINI_API_KEY: "x" }), null, "Gemini was dropped (10 Oct 2026)");
   assert.equal(PROVIDERS.groq.model, "openai/gpt-oss-120b");
 });
