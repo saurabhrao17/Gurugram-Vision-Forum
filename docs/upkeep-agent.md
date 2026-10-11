@@ -3,15 +3,27 @@
 The owner's ask (8 Oct 2026): an agent that takes every problem the SEO agent
 and the site's own checks find which needs a code change or a person, fixes on
 its own whatever is safe, and brings the rest to the owner in plain language
-twice a day, so that the website keeps working from every angle without
+once a week, so that the website keeps working from every angle without
 anyone having to watch it.
 
-The agent lives in one Claude Code session, **"Website upkeep agent"**, which
-has this repository attached (a routine cannot attach a repository to the
-sessions it starts, so the routine wakes this session instead). The routine
-"Website upkeep agent" sends it a run message at **08:56 and 20:56 IST** every
-day; the whole history of runs is that session, in Claude Code. The owner
-reads the result and answers in the same session at **10:00 and 22:00 IST**.
+Since 10 Oct 2026 this is the Development team's **weekly upkeep**, run by
+the team's engineer (the Development team's note session), not by the
+twice-daily routine. It runs **once a week**, and **once more whenever a
+"Site down" alert arrives** (an extra run: it looks at the site first, fixes
+or reverts, and reports). The alert is the owner's outside monitor
+(UptimeRobot) emailing that the site is down; the **Super EA** reads that
+email and then asks for the extra run (the owner's decision, 10 Oct 2026). No
+GitHub issue is involved. The old 08:56 and 20:56 IST runs and the owner's
+10:00 and 22:00 IST answer times no longer apply: the **Super EA** relays
+what needs the owner and brings his answers back (`NEEDS YOU` messages,
+`team/rules.md` section 5); a relayed answer counts as the owner's.
+Every safety rule below is unchanged.
+
+The weekly session has this repository attached. Its branches are named
+`upkeep/note-YYYY-MM-DD-short-name`; QA's "Upkeep guard" job selects any
+branch that starts with `upkeep/`, so these team branches go through the same
+guard as the old `upkeep/YYYY-MM-DD-short-name` ones, with the same protected
+paths and forbidden additions.
 The session's git access can push branches but not delete them; finished
 `upkeep/` branches stay until GitHub's "Automatically delete head branches"
 setting (repository Settings, General) or a person removes them.
@@ -27,10 +39,12 @@ may not change it, nor `scripts/upkeep-guard.mjs`, without the owner.
 3. The newest daily report and weekly plan on the **`seo-agent-log`** branch
    (`daily/YYYY/MM/DATE.md`, `weekly/YYYY-Www.md`): read the sections "Needs a
    code change" and "Needs a person".
-4. The previous upkeep log on the same branch (`upkeep/DATE-am.md` or
-   `-pm.md`): decisions still waiting for the owner, and the owner's answers.
-5. Open issues titled **"Nightly checks failed"** and, if one exists, **"Site down"**
-   (nothing in the repository opens that one any more; see the note under 3).
+4. The previous upkeep log on the same branch (`upkeep/DATE-weekly.md`, or
+   `upkeep/DATE-am.md` / `-pm.md` from the twice-daily period): decisions
+   still waiting for the owner, and the owner's answers.
+5. Open issues titled **"Nightly checks failed"**. Nothing in the repository
+   opens a "Site down" issue any more (see **Uptime** below); a down site
+   reaches the agent as the Super EA's request for an extra run.
 6. The last runs of the workflows QA, Nightly SEO audit and SEO
    agent, and the Vercel status on the newest commit of `main` (commit
    statuses through the GitHub tools). The sandbox may not reach the live site
@@ -65,7 +79,8 @@ problem already fixed and waiting for the next audit. Say so in one line.
 
 ## 3. How to fix (A)
 
-1. One problem per branch: `upkeep/YYYY-MM-DD-short-name` from `origin/main`.
+1. One problem per branch: `upkeep/note-YYYY-MM-DD-short-name` (or the older
+   `upkeep/YYYY-MM-DD-short-name`) from `origin/main`.
 2. The smallest change that fixes it. Follow the code around it.
 3. Run `npm test`, `node tests/smoke.mjs` and `node scripts/upkeep-guard.mjs`.
    If any fails and the fix is not obvious, stop and make it a B item.
@@ -84,7 +99,8 @@ always allowed), confirm the site recovers, and tell the owner.
 
 **Uptime.** The 30-minute GitHub Actions probe (`uptime.yml`) was removed on
 10 Oct 2026. An outside monitor (UptimeRobot, free plan, email alerts to the
-owner) replaces it; the nightly `scripts/check-health.mjs` in `qa.yml` stays.
+owner) replaces it. When it emails a "down" alert, the Super EA reads the
+email and asks for the extra run; the agent does not wait for an issue. The nightly `scripts/check-health.mjs` in `qa.yml` stays.
 
 **Actions minutes (once a week, on the first run of the week).** Read, never change, this month's
 GitHub Actions minutes used for the repository (GitHub MCP or API, read-only).
@@ -113,10 +129,10 @@ something only the owner can do (a key in Vercel, a call, a decision), give
 the exact steps.
 
 End the session's final message with a ready-to-paste reply the owner can
-edit and send back at 10:00 or 22:00, for example:
+edit and send back (the Super EA relays it), for example:
 
 ```
-Decisions (9 Oct, 10:00)
+Decisions (week of 12 Oct)
 1. Approve
 2. Not now
 3. Change: use the shorter title
@@ -129,8 +145,8 @@ request, make it and show it again.
 
 ## 5. Every run ends with
 
-1. A log file on the `seo-agent-log` branch, `upkeep/YYYY-MM-DD-am.md` (the
-   08:56 run) or `-pm.md` (20:56): what was checked, what was fixed (pull
+1. A log file on the `seo-agent-log` branch, `upkeep/YYYY-MM-DD-weekly.md`
+   (`-site-down.md` for an extra run): what was checked, what was fixed (pull
    request links), what was reverted, what waits for the owner. Commit and
    push it to that branch only.
 2. The session's final message, in this order:
@@ -138,3 +154,5 @@ request, make it and show it again.
    - **Done on my own**: each fix with its pull request link.
    - **Needs you** (numbered, plain language, as in 4).
    - **Your reply**: the ready-to-paste block.
+3. The same text sent to the Super EA with `send_message`, starting with
+   `NEEDS YOU` when anything waits for the owner.
