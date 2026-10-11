@@ -235,6 +235,26 @@ test("unknown guide and bad paths are 404 pages with the shell", async () => {
   assert.equal(res.statusCode, 405);
 });
 
+test("ward page: councillor name carries the 'news reports' line in English and Hindi; the flag removes it", async () => {
+  const sb = fakeSb({ tables: { area_wards: [] }, rpc: { ward_counts: () => null } });
+  const EN = "Name from news reports; official check pending";
+  const HI = "नाम समाचार रिपोर्टों से; आधिकारिक जाँच बाकी";
+  const G = gvf();
+  assert.equal(G.COUNCILLOR_PENDING, true);
+  assert.equal(G.HS[EN], HI, "in-app Hindi (GVF.HS)");
+  const en = await render("ward/5", sb);
+  const hi = await render("hi/ward/5", sb);
+  assert.ok(en.body.includes(EN) && !en.body.includes(HI));
+  assert.ok(hi.body.includes(HI) && !hi.body.includes(EN));
+  cleanOutput(hi.body, "hi/ward/5");
+  G.COUNCILLOR_PENDING = false;
+  try {
+    const off = await render("ward/5", sb);
+    const offHi = await render("hi/ward/5", sb);
+    assert.ok(!off.body.includes(EN) && !offHi.body.includes(HI));
+  } finally { G.COUNCILLOR_PENDING = true; }
+});
+
 test("ward page: councillor, party, areas and report counts; never one report", async () => {
   const counts = { ward: 5, total: 3, site_total: 12, by_stage: [1, 0, 1, 0, 1],
     by_issue: [{ issue_type: "waste", label: "Garbage", total: 1, resolved: 0 }, { issue_type: "roads", label: "Roads", total: 2, resolved: 1 }, { issue_type: "water", label: "Water", total: 0, resolved: 0 }] };
