@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { judge, addedLines, MAX_FILES, MAX_LINES } from "../../scripts/upkeep-guard.mjs";
 
 test("upkeep guard: an ordinary SEO template fix may go live without the owner", () => {
@@ -41,4 +42,12 @@ test("upkeep guard: size limits, and the diff parser", () => {
   assert.equal(judge(["lib/seo/a.js"], { "lib/seo/a.js": Array(MAX_LINES + 1).fill("x") }).verdict, "owner");
   const diff = ["diff --git a/lib/seo/a.js b/lib/seo/a.js", "--- a/lib/seo/a.js", "+++ b/lib/seo/a.js", "@@ -1 +1,2 @@", "-old", "+new one", "+new two", "diff --git a/x b/x", "--- a/x", "+++ /dev/null", "-gone"].join("\n");
   assert.deepEqual(addedLines(diff), { "lib/seo/a.js": ["new one", "new two"] });
+});
+
+test("upkeep guard: QA runs it for every upkeep/ branch, including the team's upkeep/note- branches", () => {
+  const qa = readFileSync(new URL("../../.github/workflows/qa.yml", import.meta.url), "utf8");
+  const m = /startsWith\(github\.head_ref, '([^']+)'\)/.exec(qa);
+  assert.ok(m, "the Upkeep guard job selects branches by prefix");
+  for (const b of ["upkeep/note-2026-10-10-weekly-upkeep", "upkeep/2026-10-09-fix-title"]) assert.ok(b.startsWith(m[1]), b);
+  assert.ok(!"feature/x".startsWith(m[1]));
 });
