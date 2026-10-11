@@ -190,26 +190,26 @@ test("extract: prompt lists only the missing fields, proposal is cleaned, handle
   assert.equal(noKey.body.error, "extract_unavailable");
 
   const denied = fakeRes();
-  await makeExtract({ auth: authAs("content"), sb: fakeSb(), env: { GEMINI_API_KEY: "g" } })({ method: "POST", query: { ref: "GVF-2026-ABCDE" }, body: { text: "x" } }, denied);
+  await makeExtract({ auth: authAs("content"), sb: fakeSb(), env: { GROQ_API_KEY: "g" } })({ method: "POST", query: { ref: "GVF-2026-ABCDE" }, body: { text: "x" } }, denied);
   assert.equal(denied.statusCode, 403);
 
   const empty = fakeRes();
-  await makeExtract({ auth: authAs("owner"), sb: fakeSb(), env: { GEMINI_API_KEY: "g" } })({ method: "POST", query: { ref: "GVF-2026-ABCDE" }, body: {} }, empty);
+  await makeExtract({ auth: authAs("owner"), sb: fakeSb(), env: { GROQ_API_KEY: "g" } })({ method: "POST", query: { ref: "GVF-2026-ABCDE" }, body: {} }, empty);
   assert.equal(empty.statusCode, 400);
 
   // From an inbox row that belongs to the report; the model answers JSON with one stray key.
   const inbox = [{ id: "11111111-1111-4111-8111-111111111111", report_id: "r-1", body_text: "The landmark is the Sector 29 gate, since 2 October.\n\n> On Mon you wrote: we still need" }];
   const asked = [];
-  const fetchImpl = async (url, init) => { asked.push({ url, body: JSON.parse(init.body) }); return { ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: '```json\n{"landmark":"Sector 29 gate","since":"2026-10-02","where":"Park"}\n```' }] } }] }) }; };
+  const fetchImpl = async (url, init) => { asked.push({ url, body: JSON.parse(init.body) }); return { ok: true, status: 200, json: async () => ({ choices: [{ finish_reason: "stop", message: { content: '```json\n{"landmark":"Sector 29 gate","since":"2026-10-02","where":"Park"}\n```' } }] }) }; };
   const ok = fakeRes();
-  await makeExtract({ auth: authAs("owner"), sb: fakeSb({ inbox }), env: { GEMINI_API_KEY: "g" }, fetchImpl })({ method: "POST", query: { ref: "GVF-2026-ABCDE" }, body: { inbox_id: inbox[0].id } }, ok);
+  await makeExtract({ auth: authAs("owner"), sb: fakeSb({ inbox }), env: { GROQ_API_KEY: "g" }, fetchImpl })({ method: "POST", query: { ref: "GVF-2026-ABCDE" }, body: { inbox_id: inbox[0].id } }, ok);
   assert.equal(ok.statusCode, 200, JSON.stringify(ok.body));
-  assert.equal(ok.body.provider, "gemini");
+  assert.equal(ok.body.provider, "groq");
   assert.deepEqual(ok.body.fields, { landmark: "Sector 29 gate", since: "2026-10-02" }, "where is already filled, so it is not proposed");
   assert.equal(asked.length, 1);
   assert.ok(JSON.stringify(asked[0].body).includes("Sector 29 gate"));
 
   const other = fakeRes();
-  await makeExtract({ auth: authAs("owner"), sb: fakeSb({ inbox: [{ id: inbox[0].id, report_id: "r-2", body_text: "x" }] }), env: { GEMINI_API_KEY: "g" }, fetchImpl })({ method: "POST", query: { ref: "GVF-2026-ABCDE" }, body: { inbox_id: inbox[0].id } }, other);
+  await makeExtract({ auth: authAs("owner"), sb: fakeSb({ inbox: [{ id: inbox[0].id, report_id: "r-2", body_text: "x" }] }), env: { GROQ_API_KEY: "g" }, fetchImpl })({ method: "POST", query: { ref: "GVF-2026-ABCDE" }, body: { inbox_id: inbox[0].id } }, other);
   assert.equal(other.statusCode, 404, "a reply from another report is not read");
 });
