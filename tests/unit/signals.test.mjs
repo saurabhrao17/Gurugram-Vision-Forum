@@ -3,12 +3,12 @@ import assert from "node:assert/strict";
 import {
   KEYWORDS, classify, extractArea, fetchReddit, fetchGoogleNews, computePulse, suggestActions,
   narrate, fallbackBrief, insightData, taxonomy, trendOf, newsSearchUrl, REDDIT_URLS, NEWS_QUERIES, sha1,
-  resolveGoogleNewsUrl, decodeLegacyToken, parseBatchExecute, isPublicLink, resolveItems, GN_MAX_LOOKUPS
+  resolveGoogleNewsUrl, decodeLegacyToken, parseBatchExecute, isPublicLink, resolveItems, GN_MAX_LOOKUPS, GN_BUDGET_MS, GN_MAX_BODY
 } from "../../lib/signals.js";
 import pulse from "../../lib/handlers/pulse.js";
 import { makeHandler as makeInsights, clampLimit, ROLES } from "../../lib/handlers/triage/insights.js";
 import { HttpError } from "../../lib/auth.js";
-import { runDaily } from "../../lib/handlers/cron.js";
+import { runDaily, RUN_BUDGET_MS } from "../../lib/handlers/cron.js";
 
 // ---------------------------------------------------------------------------
 // Fakes: a Vercel-style response and a Supabase client that records every
@@ -608,4 +608,32 @@ test("computePulse never puts a Google link in the public examples", () => {
   assert.equal(ex.length, 3);
   assert.equal(ex.find((e) => e.title === "Garbage piles up").url, null);
   assert.ok(ex.every((e) => !e.url || !/google\.com/.test(e.url)));
+});
+
+test("an oversized Google response is ignored, and the resolved address is parsed but never fetched", async () => {
+  const id = "CBMiAU_yqLbig";
+  const big = articlePage + " ".repeat(GN_MAX_BODY + 1);
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), async () => ({ ok: true, text: async () => big })), null, "oversized page body");
+  const fetched = [];
+  const answer = "https://www.hindustantimes.com/cities/gurugram/story-2.html";
+  const fetchImpl = async (url) => {
+    fetched.push(url);
+    if (url.includes("batchexecute")) return { ok: true, text: async () => batchAnswer(answer) };
+    return { ok: true, text: async () => articlePage };
+  };
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), fetchImpl), answer);
+  assert.ok(!fetched.includes(answer), "the publisher address is never requested");
+  assert.ok(fetched.every((u) => new URL(u).hostname === "news.google.com"));
+  const oversizedAnswer = async (url) => (url.includes("batchexecute") ? { ok: true, text: async () => batchAnswer(answer) + " ".repeat(GN_MAX_BODY) } : { ok: true, text: async () => articlePage });
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), oversizedAnswer), null, "oversized answer");
+  const declared = async () => ({ ok: true, headers: { get: () => String(GN_MAX_BODY + 1) }, text: async () => { throw new Error("must not be read"); } });
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), declared), null, "a declared size over the cap is not read");
+});
+
+test("the resolver's time budget sits well inside the cron run budget, and unresolved items keep their title", async () => {
+  assert.ok(GN_BUDGET_MS * 2 < RUN_BUDGET_MS, "15 s of lookups cannot take the 48 s run past its limit");
+  const items = [{ title: "Garbage piles up", url: gnUrl("CBMiAU_yqLnone") }];
+  await resolveItems(items, async () => ({ ok: false }));
+  assert.equal(items[0].title, "Garbage piles up");
+  assert.equal(items[0].url, gnUrl("CBMiAU_yqLnone"), "stored as it came; public pages then show the title only");
 });
