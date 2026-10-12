@@ -99,3 +99,9 @@ test("app links in the shell are real addresses, not # links", () => {
   const boot = readFileSync(new URL("../../site/boot.js", import.meta.url), "utf8");
   assert.match(boot, /location\.replace\("\/" \+ old\[1\]/, "old #/ links are forwarded in the browser");
 });
+
+test("/track, /r and /map are sent with a noindex header, so a reference in the address is never indexed", () => {
+  const vercel = JSON.parse(readFileSync(new URL("../../vercel.json", import.meta.url), "utf8"));
+  const hit = vercel.headers.filter((h) => h.headers.some((x) => x.key === "X-Robots-Tag" && /noindex/.test(x.value)));
+  assert.ok(hit.some((h) => h.source === "/:p(track|r|map)") && hit.some((h) => h.source === "/:p(track|r|map)/:rest*"));
+});
