@@ -156,7 +156,7 @@ function route(){document.documentElement.removeAttribute("data-boot");var ssr=d
   closeMenu();gateTick(v);track("page_view");
 }
 window.addEventListener("popstate",route);
-window.addEventListener("hashchange",function(){if(!HASHMODE){var m=location.hash.match(/^#\/(.*)$/);if(m&&history.replaceState)history.replaceState(null,"","/"+m[1])}route()});
+window.addEventListener("hashchange",function(){if(!HASHMODE){var m=location.hash.match(/^#\/(.*)$/);if(!m)return;history.replaceState(null,"","/"+m[1].replace(/^home$/,""))}route()});
 document.addEventListener("click",function(e){if(e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;var a=e.target.closest&&e.target.closest("a[href^='/']");if(!a||a.target||a.hasAttribute("download"))return;var u=a.getAttribute("href");if(u.indexOf("//")===0)return;var path=u.split(/[?#]/)[0];if(!(path==="/"||APPSEG.test(path.slice(1).split("/")[0])))return;e.preventDefault();go(path)});
 
 /* tiles + panel */
@@ -1047,7 +1047,7 @@ $("seoBody").addEventListener("change",function(e){var c=e.target.closest("[data
 
 /* boot */
 renderTiles(); renderWhoFilter(); renderCatSelect();
-if(!HASHMODE){var lm=location.hash.match(/^#\/(.*)$/);if(lm&&history.replaceState)history.replaceState(null,"","/"+lm[1])}
+if(!HASHMODE){var lm=location.hash.match(/^#\/(.*)$/);if(lm&&history.replaceState)history.replaceState(null,"","/"+lm[1].replace(/^home$/,""))}
 renderSubscribe();
 window.__booted=true;if(lang==="hi")applyLang("hi");loadContent();
 route();

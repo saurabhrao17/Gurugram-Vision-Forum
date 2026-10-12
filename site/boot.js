@@ -17,8 +17,8 @@
   if (t === "dark" || t === "light") d.setAttribute("data-theme", t);
   // 0. Old "#/rights" style links: forward to the real address "/rights" (the server never sees the part after "#", so this runs here). file:// keeps the hash.
   var old = /^#\/(.*)$/.exec(location.hash);
-  if (old && location.protocol !== "file:" && /^((report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix|news|pulse)(\/[^\/?#]*)?)?$/.test(old[1])) {
-    location.replace("/" + old[1] + location.search);
+  if (old && location.protocol !== "file:" && /^((report|track|directory|rights|who|wards|charter|dashboard|updates|join|about|accessibility|privacy|map|desk|r|fix|news|pulse|home)(\/[^\/?#]*)?)?$/.test(old[1])) {
+    location.replace("/" + old[1].replace(/^home$/, "") + location.search);
     return;
   }
   var h = location.hash.replace(/^#\/?/, ""), p = location.pathname;
