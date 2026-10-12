@@ -284,3 +284,13 @@ test("draft handler talks to Groq's free API with the OpenAI-style shape", async
   assert.deepEqual(captured.body.response_format, { type: "json_object" });
   assert.equal(res.body.truncated, false);
 });
+
+test("publicPost never exposes the cron's internal auto: source; it sends a flag instead", () => {
+  const out = publicPost({ id: "1", kind: "story", title: "t", source: "auto:topic:construction:2026-10-10", tags: ["auto"] }, "https://p.co");
+  assert.equal(out.source, "");
+  assert.equal(out.auto, true);
+  assert.ok(!JSON.stringify(out).includes("auto:"));
+  const human = publicPost({ id: "2", kind: "news", title: "t", source: "Forum team" }, "https://p.co");
+  assert.equal(human.source, "Forum team");
+  assert.ok(!("auto" in human));
+});

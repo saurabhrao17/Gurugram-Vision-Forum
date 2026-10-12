@@ -2,12 +2,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   KEYWORDS, classify, extractArea, fetchReddit, fetchGoogleNews, computePulse, suggestActions,
-  narrate, fallbackBrief, insightData, taxonomy, trendOf, newsSearchUrl, REDDIT_URLS, NEWS_QUERIES, sha1
+  narrate, fallbackBrief, insightData, taxonomy, trendOf, newsSearchUrl, REDDIT_URLS, NEWS_QUERIES, sha1,
+  resolveGoogleNewsUrl, decodeLegacyToken, parseBatchExecute, isPublicLink, resolveItems, GN_MAX_LOOKUPS, GN_BUDGET_MS, GN_MAX_BODY
 } from "../../lib/signals.js";
 import pulse from "../../lib/handlers/pulse.js";
 import { makeHandler as makeInsights, clampLimit, ROLES } from "../../lib/handlers/triage/insights.js";
 import { HttpError } from "../../lib/auth.js";
-import { runDaily } from "../../lib/handlers/cron.js";
+import { runDaily, RUN_BUDGET_MS } from "../../lib/handlers/cron.js";
 
 // ---------------------------------------------------------------------------
 // Fakes: a Vercel-style response and a Supabase client that records every
@@ -193,7 +194,7 @@ test("fetchGoogleNews queries each search feed and dedupes by url", async () => 
     return { ok: false, status: 503, text: async () => "" };
   };
   const out = await fetchGoogleNews(fetchImpl, { areas: AREAS });
-  assert.equal(urls.length, NEWS_QUERIES.length);
+  assert.equal(urls.filter((u) => u.includes("/rss/search")).length, NEWS_QUERIES.length, "one search per query (article lookups are separate)");
   assert.ok(urls[0].includes("hl=en-IN&gl=IN&ceid=IN:en"));
   assert.equal(out.length, 2);
   assert.equal(out[0].source, "news");
@@ -447,7 +448,9 @@ test("runDaily scans reddit, news and reports into signals, cleans up and stores
   };
   // The signals the insights step reads back are the ones the signals step wrote.
   const origThen = sb.from;
-  const r = await runDaily(sb, {}, { fetch: fetchImpl });
+  // A Wednesday: on the round-up's weekday (Monday) the autopost step reads report counts, which is not what this test is about.
+  const wednesday = Date.now() + ((3 - new Date().getUTCDay() + 7) % 7) * 86400000;
+  const r = await runDaily(sb, {}, { fetch: fetchImpl, now: wednesday });
   assert.equal(r.ok, true, JSON.stringify(r.errors));
   assert.deepEqual(r.signals, { reddit: 1, news: 1, new: 2 });
   const up = sb.calls.queries.find((q) => q.table === "signals" && q.op === "upsert");
@@ -495,4 +498,142 @@ test("the unclassified bucket ranks last and stays out of the headline and actio
   assert.ok(!brief.actions.some((a) => a.issue_type === "other"), "no action for the unclassified bucket while named topics exist");
   const onlyOther = computePulse(mk("other", 3), { days: 7, prev: 7, now });
   assert.equal(fallbackBrief(onlyOther).actions.length, 1);
+});
+
+// ---------------------------------------------------------------------------
+// Google News links: the newspaper's own address, or no link. Every response
+// below is canned: nothing here reaches Google (live resolution is untested).
+// ---------------------------------------------------------------------------
+const legacyToken = (url) => Buffer.concat([Buffer.from([0x08, 0x13, 0x22, url.length]), Buffer.from(url, "latin1"), Buffer.from([0xd2, 0x01, 0x00])]).toString("base64url");
+const gnUrl = (id) => `https://news.google.com/rss/articles/${id}?oc=5`;
+const batchAnswer = (url) => ")]}'\n\n" + JSON.stringify([["wrb.fr", "Fbv4je", JSON.stringify(["garturlres", url, 1]), null, null, null, "generic"]]);
+const articlePage = `<html><c-wiz><div data-n-a-sg="SIG123" data-n-a-ts="1760000000"></div></c-wiz></html>`;
+
+test("resolveGoogleNewsUrl decodes the legacy token without any request", async () => {
+  const real = "https://www.tribuneindia.com/news/gurugram/waterlogging-sector-29";
+  let calls = 0;
+  const out = await resolveGoogleNewsUrl(gnUrl(legacyToken(real)), async () => { calls++; return { ok: false }; });
+  assert.equal(out, real);
+  assert.equal(calls, 0);
+  assert.equal(decodeLegacyToken(legacyToken("http://insecure.example/x")), null, "only https");
+  assert.equal(decodeLegacyToken(legacyToken("https://news.google.com/foo")), null, "never a google.com address");
+});
+
+test("resolveGoogleNewsUrl: new-style token goes through the article page and batchexecute (canned)", async () => {
+  const id = "CBMiAU_yqLabcdefg";
+  const seen = [];
+  const fetchImpl = async (url, init = {}) => {
+    seen.push([init.method || "GET", url, init.body]);
+    if (url === `https://news.google.com/rss/articles/${id}`) return { ok: true, status: 200, text: async () => articlePage };
+    if (url === "https://news.google.com/_/DotsSplashUi/data/batchexecute") return { ok: true, status: 200, text: async () => batchAnswer("https://www.hindustantimes.com/cities/gurugram/story-1.html") };
+    return { ok: false, status: 404, text: async () => "" };
+  };
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), fetchImpl), "https://www.hindustantimes.com/cities/gurugram/story-1.html");
+  assert.equal(seen[1][0], "POST");
+  const body = decodeURIComponent(seen[1][2].replace(/^f\.req=/, ""));
+  assert.match(body, /Fbv4je/);
+  assert.match(body, /SIG123/);
+  assert.match(body, /1760000000/);
+  assert.match(body, new RegExp(id));
+});
+
+test("resolveGoogleNewsUrl never throws, rejects google answers and non-https, and gives up on errors", async () => {
+  const id = "CBMiAU_yqLzzz";
+  const page = { ok: true, text: async () => articlePage };
+  const withAnswer = (u) => async (url) => (url.includes("batchexecute") ? { ok: true, text: async () => batchAnswer(u) } : page);
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), withAnswer("https://news.google.com/articles/x")), null, "still on google.com");
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), withAnswer("https://consent.google.com/x")), null);
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), withAnswer("http://paper.example/a")), null, "http is refused");
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), withAnswer("javascript:alert(1)")), null);
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), async () => { throw new Error("network down"); }), null);
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), async () => ({ ok: true, text: async () => "<html>no tokens</html>" })), null);
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), async () => ({ ok: false, status: 429, text: async () => "" })), null);
+  assert.equal(await resolveGoogleNewsUrl("https://www.reddit.com/r/x", async () => { throw new Error("must not be called"); }), null, "only Google News links are looked up");
+  assert.equal(await resolveGoogleNewsUrl(null, null), null);
+  assert.equal(parseBatchExecute("garbage"), null);
+  assert.equal(isPublicLink("https://www.google.com/x"), false);
+  assert.equal(isPublicLink("https://news.google.com/x"), false);
+  assert.equal(isPublicLink("https://notgoogle.com/x"), true);
+  assert.equal(isPublicLink("http://paper.example/x"), false);
+});
+
+test("a stalled Google request is cut off by the timeout", async () => {
+  const hang = (url, init) => new Promise((_, reject) => init.signal.addEventListener("abort", () => reject(new Error("aborted"))));
+  const t0 = Date.now();
+  assert.equal(await resolveGoogleNewsUrl(gnUrl("CBMiAU_yqLhang"), hang, { timeoutMs: 30 }), null);
+  assert.ok(Date.now() - t0 < 2000);
+});
+
+test("resolveItems stops at the lookup cap and at the time budget", async () => {
+  const items = Array.from({ length: 10 }, (_, i) => ({ url: gnUrl(legacyToken(`https://paper.example/a${i}`)) }));
+  const stats = await resolveItems(items, async () => ({ ok: false }), { maxLookups: 3 });
+  assert.equal(stats.tried, 3);
+  assert.equal(stats.resolved, 3);
+  assert.equal(items.filter((i) => i.url.startsWith("https://paper.example/")).length, 3);
+  assert.equal(GN_MAX_LOOKUPS, 40);
+  let t = 0;
+  const more = Array.from({ length: 10 }, (_, i) => ({ url: gnUrl(legacyToken(`https://paper.example/b${i}`)) }));
+  const s2 = await resolveItems(more, async () => ({ ok: false }), { budgetMs: 100, now: () => (t += 60) });
+  assert.ok(s2.tried < 10, "the budget ends the run early");
+});
+
+test("fetchGoogleNews stores the resolved address, keeps external_id from Google's URL and dedupes on the resolved one", async () => {
+  const real = "https://www.tribuneindia.com/news/gurugram/waterlogging";
+  const a = gnUrl(legacyToken(real)), b = gnUrl(legacyToken(real)) + "&hl=en-IN", c = gnUrl("CBMiAU_yqLunresolvable");
+  const fetchImpl = async (url) => {
+    if (url === newsSearchUrl("Gurugram civic")) return { ok: true, status: 200, text: async () => RSS([
+      { title: "Waterlogging chokes Sector 29 after night rain - Tribune", link: a },
+      { title: "Waterlogging chokes Sector 29 (same story, other feed) - Tribune", link: b },
+      { title: "Garbage piles up in Sector 45 - Example", link: c }
+    ]) };
+    return { ok: false, status: 503, text: async () => "" };
+  };
+  const out = await fetchGoogleNews(fetchImpl, { areas: AREAS });
+  assert.equal(out.length, 2, "two Google links, one article");
+  assert.equal(out[0].url, real);
+  assert.equal(out[0].external_id, sha1(a), "the id still comes from Google's original URL");
+  assert.equal(out[1].url, c, "an unresolved link is stored as it came");
+  assert.equal(out[1].external_id, sha1(c));
+});
+
+test("computePulse never puts a Google link in the public examples", () => {
+  const now = Date.now();
+  const rows = [
+    { source: "news", title: "Garbage piles up", url: gnUrl("CBMiAU_yqLx"), posted_at: hoursAgo(2, now), issue_type: "waste", score: 5 },
+    { source: "news", title: "Garbage drive begins", url: "https://www.tribuneindia.com/a", posted_at: hoursAgo(3, now), issue_type: "waste", score: 5 },
+    { source: "reddit", title: "Kachra everywhere", url: "https://www.reddit.com/r/gurgaon/comments/z/", posted_at: hoursAgo(4, now), issue_type: "waste", score: 9 }
+  ];
+  const p = computePulse(rows, { now });
+  const ex = p.topics[0].examples;
+  assert.equal(ex.length, 3);
+  assert.equal(ex.find((e) => e.title === "Garbage piles up").url, null);
+  assert.ok(ex.every((e) => !e.url || !/google\.com/.test(e.url)));
+});
+
+test("an oversized Google response is ignored, and the resolved address is parsed but never fetched", async () => {
+  const id = "CBMiAU_yqLbig";
+  const big = articlePage + " ".repeat(GN_MAX_BODY + 1);
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), async () => ({ ok: true, text: async () => big })), null, "oversized page body");
+  const fetched = [];
+  const answer = "https://www.hindustantimes.com/cities/gurugram/story-2.html";
+  const fetchImpl = async (url) => {
+    fetched.push(url);
+    if (url.includes("batchexecute")) return { ok: true, text: async () => batchAnswer(answer) };
+    return { ok: true, text: async () => articlePage };
+  };
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), fetchImpl), answer);
+  assert.ok(!fetched.includes(answer), "the publisher address is never requested");
+  assert.ok(fetched.every((u) => new URL(u).hostname === "news.google.com"));
+  const oversizedAnswer = async (url) => (url.includes("batchexecute") ? { ok: true, text: async () => batchAnswer(answer) + " ".repeat(GN_MAX_BODY) } : { ok: true, text: async () => articlePage });
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), oversizedAnswer), null, "oversized answer");
+  const declared = async () => ({ ok: true, headers: { get: () => String(GN_MAX_BODY + 1) }, text: async () => { throw new Error("must not be read"); } });
+  assert.equal(await resolveGoogleNewsUrl(gnUrl(id), declared), null, "a declared size over the cap is not read");
+});
+
+test("the resolver's time budget sits well inside the cron run budget, and unresolved items keep their title", async () => {
+  assert.ok(GN_BUDGET_MS * 2 < RUN_BUDGET_MS, "15 s of lookups cannot take the 48 s run past its limit");
+  const items = [{ title: "Garbage piles up", url: gnUrl("CBMiAU_yqLnone") }];
+  await resolveItems(items, async () => ({ ok: false }));
+  assert.equal(items[0].title, "Garbage piles up");
+  assert.equal(items[0].url, gnUrl("CBMiAU_yqLnone"), "stored as it came; public pages then show the title only");
 });
