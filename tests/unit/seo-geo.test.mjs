@@ -428,3 +428,12 @@ test("GET /api/triage/seo carries clusters, GEO, search, index, crawl, site chec
   assert.equal(j.site, SITE, "the origin is not overwritten by the checks");
   assert.ok(!r.body.includes("PRIVATE KEY") && !r.body.includes("BK\"") && !r.body.includes('"G"'), "no secret reaches the desk");
 });
+
+test("the raw auto: source tag never reaches a rendered blog page or its structured data", () => {
+  const post = { ...staticPosts()[3], source: "auto:topic:construction:2026-10-10" };
+  for (const lang of ["en", "hi"]) {
+    const html = renderBlogPost(post, { lang });
+    assert.ok(!html.includes("auto:topic"), `${lang}: no raw source in the page`);
+    assert.ok(html.includes(lang === "hi" ? "सार्वजनिक स्रोतों" : "Compiled automatically"), `${lang}: the disclosure line is there`);
+  }
+});

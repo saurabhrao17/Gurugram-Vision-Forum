@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { pickTopic, eligible, topicFacts, buildTopicPost, titleFor, checkIntro, pipelineState, topicsStep, topicSettings, isTopicPost, topicOf, MIN_DEMAND, PER_WEEK_DEFAULT, SOURCE_PREFIX, DISCLOSURE_EN } from "../../lib/seo/topics.js";
+import { isThin, pickTopic, eligible, topicFacts, buildTopicPost, titleFor, checkIntro, pipelineState, topicsStep, topicSettings, isTopicPost, topicOf, MIN_DEMAND, PER_WEEK_DEFAULT, SOURCE_PREFIX, DISCLOSURE_EN } from "../../lib/seo/topics.js";
 import { clusterHealth } from "../../lib/seo/clusters.js";
 import { validatePost } from "../../lib/content.js";
 
@@ -42,8 +42,9 @@ test("topicFacts and the template post: public posts, the guide's official facts
   const news = [{ title: "MCG starts door-to-door garbage collection drive in sectors", url: "https://mcg.gov.in/notice/1", published_at: iso(3), source: "MCG" }, { title: "Power cut schedule", url: "https://dhbvn.org.in/n", published_at: iso(2), source: "DHBVN" }];
   const f = topicFacts("waste", { signals, news, now: NOW });
   assert.equal(f.count, 9, "the http post counts as discussion but is never linked; the old one is outside the window");
-  assert.deepEqual(f.areas[0], { area: "Sector 45", n: 6 });
+  assert.deepEqual(f.areas[0], { area: "Sector 45", n: 3 }, "areas are counted over the listed examples");
   assert.equal(f.examples.length, 5);
+  assert.equal(f.listed, 5);
   assert.ok(f.examples.every((e) => e.url.startsWith("https://")));
   assert.equal(f.notices.length, 1, "only notices about the topic");
   assert.ok(f.agency && f.ladder.length);
@@ -52,7 +53,7 @@ test("topicFacts and the template post: public posts, the guide's official facts
   assert.equal(post.title, "Garbage in Gurugram: October 2026 update");
   assert.ok(post.title.length <= 70);
   assert.match(post.title_hi, /गुरुग्राम में .+: अक्टूबर 2026 अपडेट/);
-  assert.match(post.body, /^<p>In the last 14 days there were 6 posts by residents and 3 news reports on garbage in Gurugram/, "says who raised it: residents (Reddit) or the news");
+  assert.match(post.body, /^<p>In the last 14 days there were 3 posts by residents and 2 news reports on garbage in Gurugram/, "says who raised it: residents (Reddit) or the news");
   assert.deepEqual(post.tags, ["auto", "topic", "waste"]);
   assert.equal(post.slug, "waste-gurugram-2026-10");
   assert.equal(post.source, `${SOURCE_PREFIX}waste:2026-10-08`);
@@ -157,7 +158,7 @@ test("desk settings: topics.enabled is a boolean and per_week 1 to 5", async () 
 });
 
 test("links are used whole (a cut URL is a broken link), publishers come off the headline, sentences end", async () => {
-  const long = "https://news.google.com/rss/articles/" + "A".repeat(600) + "?oc=5";
+  const long = "https://www.example-paper.in/news/" + "A".repeat(600) + "?oc=5";
   const signals = [
     { issue_type: "traffic", title: "Gurugram tops Haryana traffic challans: Over 7 lakh violations booked - The Tribune", url: long, source: "news", area: null, posted_at: new Date(NOW - DAY).toISOString() },
     { issue_type: "traffic", title: "Jam at Rajiv Chowk every evening, who fixes the signal?", url: "https://www.reddit.com/r/gurgaon/comments/t1/", source: "reddit", area: "Rajiv Chowk", posted_at: new Date(NOW - 2 * DAY).toISOString() },
@@ -171,4 +172,45 @@ test("links are used whole (a cut URL is a broken link), publishers come off the
   assert.match(post.body, /In the last 14 days there were 1 post by residents and 2 news reports on traffic/);
   assert.match(post.body, /<h2>Who is responsible<\/h2><p><strong>[^<]+\.<\/strong> /, "the agency is its own sentence");
   assert.match(post.body, /<p>Where: <a [^>]+><strong>[^<]+<\/strong><\/a>\./);
+});
+
+test("every number the post prints matches what it lists (8 mentions, 5 listed -> 5), while eligibility still uses the real demand", async () => {
+  const signals = [...sig("waste", 5, "Sector 45", "news"), ...sig("waste", 4, "Sector 45", "reddit")];
+  const f = topicFacts("waste", { signals, now: NOW });
+  assert.equal(f.count, 9, "real demand is kept for the threshold");
+  assert.equal(f.examples.length, 5);
+  assert.equal(f.residents + f.news, f.examples.length);
+  assert.equal(f.areas.reduce((n, a) => n + a.n, 0), f.examples.length);
+  assert.equal(isThin(f), false);
+  assert.equal(isThin(topicFacts("waste", { signals: sig("waste", 2, "Sector 45", "reddit").map((x) => ({ ...x, url: "http://not-https" })), now: NOW })), true, "demand 2 but nothing listable is still thin");
+  const post = await buildTopicPost("waste", { signals, now: NOW });
+  for (const b of [post.body, post.body_hi]) {
+    const li = (b.match(/<li>/g) || []).length;
+    assert.ok(li >= 5);
+  }
+  const listed = (post.body.split("<h2>What was raised</h2>")[1].split("</ul>")[0].match(/<li>/g) || []).length;
+  const said = /there were (\d+) (?:posts? by residents|news reports?)(?: and (\d+) news reports?)?/.exec(post.body);
+  assert.equal(Number(said[1]) + Number(said[2] || 0), listed, "the printed total equals the list");
+  assert.equal(post.count, 9, "the desk still sees the real demand");
+  assert.doesNotMatch(post.summary, /\b9\b/);
+});
+
+test("an unresolved Google News link is shown as a title with no link, in examples and in notices", async () => {
+  const g = "https://news.google.com/rss/articles/CBMiAAAA?oc=5";
+  const signals = [
+    { issue_type: "traffic", title: "Jam at Rajiv Chowk every evening - The Tribune", url: g, source: "news", area: null, posted_at: new Date(NOW - DAY).toISOString() },
+    { issue_type: "traffic", title: "Signals out at Hero Honda Chowk", url: "https://www.hindustantimes.com/cities/gurugram/signals-out", source: "news", area: null, posted_at: new Date(NOW - 2 * DAY).toISOString() }
+  ];
+  const news = [{ title: "Traffic police challan drive begins", url: "https://news.google.com/rss/articles/xyz", published_at: new Date(NOW - DAY).toISOString(), source: "X" }];
+  const f = topicFacts("traffic", { signals, news, now: NOW });
+  assert.equal(f.examples[0].url, null);
+  assert.equal(f.notices[0].url, null);
+  const post = await buildTopicPost("traffic", { signals, news, now: NOW });
+  for (const b of [post.body, post.body_hi]) {
+    assert.doesNotMatch(b, /google\.com/);
+    assert.match(b, /Jam at Rajiv Chowk every evening/);
+    assert.match(b, /href="https:\/\/www\.hindustantimes\.com\/cities\/gurugram\/signals-out"/);
+  }
+  assert.match(post.body, /<li>Jam at Rajiv Chowk every evening \(The Tribune\)<\/li>/);
+  assert.deepEqual(validatePost(post).errors, []);
 });

@@ -126,7 +126,7 @@ test("isoWeek, weekTag and formatRange follow ISO 8601 and the calendar", () => 
 test("collectFacts keeps only public links, caps lists and withholds report numbers under 50", () => {
   const f = collectFacts(INPUT);
   assert.equal(f.topics.length, 3);
-  assert.deepEqual(f.topics[0].examples.map((e) => e.url), ["https://www.reddit.com/r/gurgaon/comments/r1/x/", "https://news.google.com/rss/articles/g1"], "two examples at most");
+  assert.deepEqual(f.topics[0].examples.map((e) => e.url), ["https://www.reddit.com/r/gurgaon/comments/r1/x/", null], "two examples at most; a Google News link is never kept");
   assert.deepEqual(f.topics[2].examples, [], "a javascript: link is not a public link");
   assert.equal(f.news.length, 2, "the non-https notice is dropped");
   assert.deepEqual(f.reports, { total: 50, week: 12, by_stage: { 0: 5, 2: 7 }, by_issue: { waste: 8, drains: 4 } });
@@ -642,4 +642,20 @@ test("PUT settings merges autopost and seo into site_settings and rejects bad va
   await makeContent({ auth: async () => { throw new HttpError(403, "forbidden"); }, sb: sb2 })({ method: "PUT", body: { settings: { seo: { indexnow: true } } } }, res);
   assert.equal(res.statusCode, 403);
   assert.deepEqual(res.json(), { ok: false, error: "forbidden" });
+});
+
+test("the round-up shows an unresolved Google News example as a title with no link, and never a google.com href", () => {
+  const pulse = { total: 3, previous_total: 1, topics: [{ issue_type: "waste", count: 3, previous: 1, trend: "up", areas: [], examples: [
+    { title: "Garbage piles up in Sector 45", url: null, source: "news" },
+    { title: "Kachra drive", url: "https://news.google.com/rss/articles/CBMiAU_yqLx?oc=5", source: "news" }
+  ] }] };
+  const f = collectFacts({ ...INPUT, pulse, news: [{ title: "MCG notice", url: "https://news.google.com/rss/articles/zz", source: "MCG" }, ...NEWS] });
+  assert.deepEqual(f.topics[0].examples.map((e) => e.url), [null, null]);
+  assert.equal(f.news[0].url, null);
+  for (const body of [templateBodyEn(f), templateBodyHi(f)]) {
+    assert.doesNotMatch(body, /google\.com/);
+    assert.match(body, /Garbage piles up in Sector 45/);
+    assert.doesNotMatch(body, /href="null"|href=""/);
+  }
+  assert.ok(!allowedLinks(f).has(null) && !allowedLinks(f).has("null"));
 });

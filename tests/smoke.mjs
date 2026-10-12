@@ -329,6 +329,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     { id: "p1", kind: "story", slug: "sewa-drive-sector-45-ab12c", title: "Sewa drive cleans Sector 45 park", title_hi: "सेक्टर 45 पार्क की सफ़ाई", summary: "Forty volunteers, two tonnes of waste.", body: "<p>Forty volunteers joined on Sunday.</p>", source: "Forum team", published: true, published_at: "2026-10-07T06:00:00Z", pinned: false, tags: ["sewa"] },
     { id: "p2", kind: "popup", slug: "townhall-ab12d", title: "First townhall on 20 October", summary: "Sector 29 community centre, 6 pm.", link_url: "https://example.org/townhall", published: true, published_at: "2026-10-07T06:00:00Z", pinned: true, starts_at: null, ends_at: null },
     { id: "p3", kind: "social", slug: "x-post-ab12e", title: "Our first post on X", summary: "Follow along.", embed_url: "https://x.com/gvf/status/1", published: true, published_at: "2026-10-06T06:00:00Z" },
+    { id: "p5", kind: "story", slug: "construction-gurugram-2026-10", title: "Illegal construction in Gurugram: October 2026 update", summary: "What residents raised.", body: "<p>Residents raised five reports.</p>", source: "auto:topic:construction:2026-10-10", published: true, published_at: "2026-10-10T06:00:00Z", pinned: false, tags: ["auto", "topic", "construction"] },
     { id: "p4", kind: "testimonial", slug: "voice-ab12f", title: "Resident voice", summary: "The pothole was fixed in a week.", quote_by: "Resident, Sector 10", published: true, published_at: "2026-10-05T06:00:00Z" }
   ];
   await page.route("**/api/content**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, posts: samplePosts, settings: { social: { x: "https://x.com/gvf", facebook: "", instagram: "", youtube: "", whatsapp: "" } } }) }));
@@ -507,6 +508,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.goto(httpUrl + "#/updates");
   await page.waitForTimeout(250);
   check((await page.locator("#uBody").innerText()).includes("Sewa drive cleans Sector 45 park") && (await page.locator("#uBody").innerText()).includes("The pothole was fixed in a week."), "updates show the team's story and a testimonial");
+  check(!(await page.locator("#uBody").innerText()).includes("auto:") && (await page.locator("#uBody").innerText()).includes("Illegal construction in Gurugram"), "an auto post's internal source tag is never printed on the Updates cards");
   check((await page.locator("#uBody h3 a[href='/blog/sewa-drive-sector-45-ab12c']").count()) === 1 && (await page.locator("#uBody a.btn[href='/blog/sewa-drive-sector-45-ab12c']").count()) === 1, "post card title and Read link go to the server page /blog/{slug}");
   check((await page.locator("#uBody .card .share [data-copy='https://gurugramvisionforum.org/blog/sewa-drive-sector-45-ab12c']").count()) === 1 && (await page.locator("#uBody .card .share a[href^='https://wa.me/?text=']").first().getAttribute("href")).includes(encodeURIComponent("/blog/sewa-drive-sector-45-ab12c")), "post card shares the canonical post URL");
   // Weekly digest: subscribe from the Updates page, then the error branch and the footer form
@@ -531,6 +533,10 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.goto(httpUrl + "#/updates/sewa-drive-sector-45-ab12c");
   await page.waitForTimeout(150);
   check((await page.locator("#postBody").innerText()).includes("Forty volunteers joined on Sunday."), "a story page renders the published body");
+  await page.goto(httpUrl + "#/updates/construction-gurugram-2026-10");
+  await page.waitForTimeout(150);
+  { const tx = await page.locator("#postBody").innerText();
+    check(!tx.includes("auto:") && !tx.includes("construction:2026") && tx.includes("Compiled automatically from public sources and official notices.") && tx.includes("Oct"), "an auto post page hides the internal source tag, shows the date and carries the disclosure"); }
   await page.goto(httpUrl + "#/news");
   await page.waitForTimeout(250);
   check((await page.locator("#newsBody a[href='https://www.gmda.gov.in/notice/1']").count()) === 1 && (await page.locator("#newsBody").innerText()).includes("GMDA"), "official news page lists collected notices with their source");

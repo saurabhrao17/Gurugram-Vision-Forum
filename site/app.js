@@ -357,7 +357,11 @@ function mediaHtml(p){if(!p.media_url)return '';if(/^video\//.test(p.media_type|
 function socialName(u){if(/x\.com|twitter\.com/.test(u))return "X";if(/facebook\.com/.test(u))return "Facebook";if(/instagram\.com/.test(u))return "Instagram";if(/youtu/.test(u))return "YouTube";if(/whatsapp\.com/.test(u))return "WhatsApp";return hs("the source")}
 /* A published post with its own page lives at /blog/{slug} (server-rendered; /hi/blog/{slug} in Hindi); link-only items point at their source. */
 function postUrl(p){if(p.slug&&(p.kind==="story"||(p.body&&!p.link_url)))return srv("/blog/"+p.slug);return p.link_url||""}
-function postCard(p){var t=postText(p,"title"),sm=postText(p,"summary"),meta=esc(hs(p.source||""))+(p.published_at?(p.source?', ':'')+esc(fmtDate(p.published_at)):'');
+/* "auto:topic:…" and "auto:weekly:…" are internal tags for the cron's drafts: never shown. An auto post says so in its disclosure line instead. */
+function pubSource(p){var s=p.source||"";return /^auto:/i.test(s)?"":s}
+function isAutoPost(p){return /^auto:/i.test(p.source||"")||p.auto===true}
+var AUTO_NOTE="Compiled automatically from public sources and official notices.";
+function postCard(p){var t=postText(p,"title"),sm=postText(p,"summary"),src=pubSource(p),meta=esc(hs(src))+(p.published_at?(src?', ':'')+esc(fmtDate(p.published_at)):'');
   if(p.kind==="social")return '<article class="card">'+mediaHtml(p)+'<div class="meta">'+meta+'</div><h3>'+esc(t)+'</h3><p>'+esc(sm)+'</p>'+(p.embed_url?'<p><a class="btn btn-line btn-sm" href="'+esc(p.embed_url)+'" target="_blank" rel="noopener">'+fmt(hs("Open on {s}"),{s:socialName(p.embed_url)})+'</a></p>'+shareRow(t,p.embed_url):'')+'</article>';
   if(p.kind==="testimonial")return '<article class="card"><p style="font-size:1.1rem">“'+esc(postText(p,"summary")||postText(p,"body").replace(/<[^>]+>/g,""))+'”</p><div class="meta">'+esc(p.quote_by||p.author||"")+'</div></article>';
   var link=postUrl(p),page=!!link&&link.charAt(0)==="/";
@@ -399,7 +403,8 @@ function renderUpdates(){var tabs=[["stories","Stories"],["photos","Photos"],["v
 $("uTabs").addEventListener("click",function(e){var b=e.target.closest("[data-utab]");if(!b)return;uTab=b.getAttribute("data-utab");renderUpdates()});
 renderUpdates();
 function renderPost(slug){var cp=null;(CONTENT&&CONTENT.posts||[]).forEach(function(x){if(x.slug===slug)cp=x});
-  if(cp){$("postBody").innerHTML='<p class="small muted">'+esc(hs(cp.source||""))+(cp.published_at?(cp.source?', ':'')+esc(fmtDate(cp.published_at)):'')+'</p><h1>'+esc(postText(cp,"title"))+'</h1>'+mediaHtml(cp)+(postText(cp,"summary")?'<p class="lead">'+esc(postText(cp,"summary"))+'</p>':'')+(lang==="hi"&&cp.body_hi?cp.body_hi:cp.body||'')+(cp.link_url?'<p><a href="'+esc(cp.link_url)+'" target="_blank" rel="noopener" class="ext">'+hs("Read more")+'</a></p>':'')+(cp.author?'<p class="small muted">'+esc(cp.author)+'</p>':'');return}
+  if(cp){var csrc=pubSource(cp),cbody=(lang==="hi"&&cp.body_hi?cp.body_hi:cp.body||''),cnote=isAutoPost(cp)&&cbody.indexOf(AUTO_NOTE)<0&&cbody.indexOf(hs(AUTO_NOTE))<0?'<p class="small muted"><em>'+esc(hs(AUTO_NOTE))+'</em></p>':'';
+    $("postBody").innerHTML='<p class="small muted">'+esc(hs(csrc))+(cp.published_at?(csrc?', ':'')+esc(fmtDate(cp.published_at)):'')+'</p><h1>'+esc(postText(cp,"title"))+'</h1>'+mediaHtml(cp)+(postText(cp,"summary")?'<p class="lead">'+esc(postText(cp,"summary"))+'</p>':'')+cbody+cnote+(cp.link_url?'<p><a href="'+esc(cp.link_url)+'" target="_blank" rel="noopener" class="ext">'+hs("Read more")+'</a></p>':'')+(cp.author?'<p class="small muted">'+esc(cp.author)+'</p>':'');return}
   var p=null;D.BLOG.forEach(function(x){if(x.slug===slug)p=x});$("postBody").innerHTML=p?'<p class="small muted">'+esc(hs(p.tag))+', '+esc(hs(p.d))+'</p><h1>'+esc(hs(p.t))+'</h1>'+(lang==="hi"&&p.hb?p.hb:p.b):'<p>'+hs("That post does not exist.")+' <a href="#/updates">'+hs("All updates")+'</a></p>'}
 
 /* join */
