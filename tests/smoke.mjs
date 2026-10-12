@@ -149,9 +149,9 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     await page.goto(url + "#/" + r);
     await page.waitForTimeout(80);
     const txt = await page.locator("#v-private").innerText();
-    check((await page.locator("#v-private.on").isVisible()) && txt.includes("Reports are private") && !txt.includes("GVF-2026") && (await page.locator("#v-private a[href='#/track']").count()) === 1 && (await page.locator("#v-private a[href='#/wards']").count()) === 1, `#/${r} shows the private notice with track and wards links`);
+    check((await page.locator("#v-private.on").isVisible()) && txt.includes("Reports are private") && !txt.includes("GVF-2026") && (await page.locator("#v-private a[href='/track']").count()) === 1 && (await page.locator("#v-private a[href='/wards']").count()) === 1, `#/${r} shows the private notice with track and wards links`);
   }
-  check((await page.locator("a[href='#/map'], a[href^='#/r/'], [data-copy*='/r/GVF']").count()) === 0, "nothing links to a public map or a public report page");
+  check((await page.locator("a[href='/map'], a[href^='/r/'], [data-copy*='/r/GVF']").count()) === 0, "nothing links to a public map or a public report page");
 
   // Search
   await page.keyboard.press("Control+k");
@@ -345,7 +345,8 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
 
   let linkDay = "";
   const fillReport = async (withFile) => {
-    await page.goto(httpUrl + "#/report");
+    // Move inside the page (history + popstate), as a click on a link does, so the install prompt event stays.
+    await page.evaluate(() => { history.pushState(null, "", "/report"); window.dispatchEvent(new PopStateEvent("popstate")); });
     await page.waitForTimeout(100);
     if (!linkDay) {
       linkDay = await page.evaluate(() => new Date("2026-10-08T18:30:00Z").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }));
@@ -375,7 +376,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   };
 
   // The test server is http, not https: the service worker must stay unregistered.
-  await page.goto(httpUrl + "#/");
+  await page.goto(httpUrl);
   await page.waitForTimeout(200);
   check((await page.evaluate(() => "serviceWorker" in navigator ? navigator.serviceWorker.getRegistrations().then((r) => r.length) : 0)) === 0, "service worker is not registered on the http test server");
   check((await page.evaluate(() => fetch("/manifest.webmanifest").then((r) => r.ok ? r.json() : null).then((m) => m && m.short_name + "|" + m.display + "|" + m.icons.length))) === "GVF|standalone|2", "manifest is served and names the app, display mode and icons");
@@ -411,11 +412,11 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
 
   // Hindi mode sends English values to the API
   reportMode = "ok";
-  await page.goto(httpUrl + "#/");
+  await page.goto(httpUrl);
   await page.evaluate(() => localStorage.setItem("gvf_lang", JSON.stringify("hi")));
   await page.reload();
   await page.waitForTimeout(150);
-  await page.goto(httpUrl + "#/report");
+  await page.goto(httpUrl + "report");
   await page.waitForTimeout(100);
   await page.selectOption("#fCat", "waste");
   await page.selectOption("#fScope", { index: 1 });
@@ -443,7 +444,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   const confirmTxt = await page.locator("#confirm").innerText();
   check(DEVANAGARI.test(confirmTxt) && latinWords(confirmTxt).length === 0, "confirmation reads in Hindi" + (latinWords(confirmTxt).length ? " (English left: " + [...new Set(latinWords(confirmTxt))].slice(0, 10).join(", ") + ")" : ""));
   // Hindi mode: post cards point at /hi/blog/…, and the digest form confirms in Hindi
-  await page.goto(httpUrl + "#/updates");
+  await page.goto(httpUrl + "updates");
   await page.waitForTimeout(250);
   check((await page.locator("#uBody a[href='/hi/blog/sewa-drive-sector-45-ab12c']").count()) >= 1 && (await page.locator("footer a[href='/hi/blog']").count()) === 1, "Hindi mode links post cards and the footer to /hi/blog");
   check(await page.locator("#subUpdates input[value='hi']").isChecked(), "digest form preselects Hindi in Hindi mode");
@@ -458,18 +459,17 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   // Visitor gate: a fresh device sees the registration form on its second page view, and the report registers the reporter
   check(visitorCalls.some((c) => c.event === "report_submit") && visitorCalls.some((c) => c.name === "Test Reporter" && c.email === "test@example.org" && c.pincode === "122001" && c.consent === true), "a submitted report registers the visitor and logs the event");
   await page.evaluate(() => localStorage.setItem("gvf_visitor", JSON.stringify({ token: "smoke_fresh_device_00001", done: false, views: 0 })));
-  await page.goto(httpUrl + "#/rights");
-  await page.reload();
+  await page.goto(httpUrl + "rights");
   await page.waitForTimeout(200);
   check(!(await page.locator("#gate.open").isVisible()), "first page view shows no gate");
-  await page.goto(httpUrl + "#/directory");
+  await page.goto(httpUrl + "directory");
   await page.waitForTimeout(150);
   check((await page.locator("#dVerified").innerText()).startsWith("Links and numbers verified " + linkDay + "."), "Directory line prefers the live link-check date over the static one");
   check(await page.locator("#gate.open").isVisible(), "second page view opens the visitor gate");
   await page.click("#gateSkip");
   await page.waitForTimeout(80);
   check(!(await page.locator("#gate.open").isVisible()) && visitorCalls.some((c) => c.event === "gate_skipped"), "Not now closes the soft gate and logs the skip");
-  await page.goto(httpUrl + "#/who");
+  await page.goto(httpUrl + "who");
   await page.waitForTimeout(150);
   check(!(await page.locator("#gate.open").isVisible()), "a snoozed device is not asked again for a week");
   await page.evaluate(() => { const v = JSON.parse(localStorage.getItem("gvf_visitor")); delete v.snoozed_until; localStorage.setItem("gvf_visitor", JSON.stringify(v)); });
@@ -486,7 +486,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.waitForTimeout(250);
   const gateCall = visitorCalls.find((c) => c.name === "Gate Person");
   check(!(await page.locator("#gate.open").isVisible()) && gateCall && gateCall.phone === "9811111111" && gateCall.city === "Gurugram" && gateCall.consent === true && gateCall.notice_version && !gateCall.email, "name, mobile and consent are enough to register");
-  await page.goto(httpUrl + "#/wards");
+  await page.goto(httpUrl + "wards");
   await page.waitForTimeout(120);
   check(!(await page.locator("#gate.open").isVisible()), "a registered device is not asked again");
   // Wards: per-ward counts from /api/dashboard (by_ward), counts only
@@ -498,14 +498,14 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#wardCounts").innerText()).includes("Counts only") && !(await page.locator("#v-wards").innerText()).includes("GVF-2026"), "wards page explains the counts and names no report");
 
   // Team-published content: pop-up, social links, updates feed, story page, official news
-  await page.goto(httpUrl + "#/");
+  await page.goto(httpUrl);
   await page.waitForTimeout(300);
   check(!(await page.locator("#popups").isHidden()) && (await page.locator("#popups").innerText()).includes("First townhall"), "a published pop-up shows on the home page");
   await page.click("#popups [data-dismiss]");
   await page.waitForTimeout(60);
   check(await page.locator("#popups").isHidden(), "a dismissed pop-up stays hidden");
   check(!(await page.locator("#ftSocial").isHidden()) && (await page.locator("#ftSocial a[href='https://x.com/gvf']").count()) === 1, "footer shows the social links set from the desk");
-  await page.goto(httpUrl + "#/updates");
+  await page.goto(httpUrl + "updates");
   await page.waitForTimeout(250);
   check((await page.locator("#uBody").innerText()).includes("Sewa drive cleans Sector 45 park") && (await page.locator("#uBody").innerText()).includes("The pothole was fixed in a week."), "updates show the team's story and a testimonial");
   check(!(await page.locator("#uBody").innerText()).includes("auto:") && (await page.locator("#uBody").innerText()).includes("Illegal construction in Gurugram"), "an auto post's internal source tag is never printed on the Updates cards");
@@ -530,17 +530,17 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   await page.click('[data-utab="social"]');
   await page.waitForTimeout(80);
   check((await page.locator("#uBody a[href='https://x.com/gvf/status/1']").count()) === 1, "social tab links to the post");
-  await page.goto(httpUrl + "#/updates/sewa-drive-sector-45-ab12c");
+  await page.goto(httpUrl + "updates/sewa-drive-sector-45-ab12c");
   await page.waitForTimeout(150);
   check((await page.locator("#postBody").innerText()).includes("Forty volunteers joined on Sunday."), "a story page renders the published body");
-  await page.goto(httpUrl + "#/updates/construction-gurugram-2026-10");
+  await page.goto(httpUrl + "updates/construction-gurugram-2026-10");
   await page.waitForTimeout(150);
   { const tx = await page.locator("#postBody").innerText();
     check(!tx.includes("auto:") && !tx.includes("construction:2026") && tx.includes("Compiled automatically from public sources and official notices.") && tx.includes("Oct"), "an auto post page hides the internal source tag, shows the date and carries the disclosure"); }
-  await page.goto(httpUrl + "#/news");
+  await page.goto(httpUrl + "news");
   await page.waitForTimeout(250);
   check((await page.locator("#newsBody a[href='https://www.gmda.gov.in/notice/1']").count()) === 1 && (await page.locator("#newsBody").innerText()).includes("GMDA"), "official news page lists collected notices with their source");
-  await page.goto(httpUrl + "#/pulse");
+  await page.goto(httpUrl + "pulse");
   // The pulse view renders after its API call; wait for the content, not a fixed delay (a slow runner raced the 250 ms).
   await page.waitForSelector("#pulseBody a[href='https://www.reddit.com/r/gurgaon/x']", { timeout: 5000 }).catch(() => null);
   const pulseTxt = await page.locator("#pulseBody").innerText();
@@ -557,22 +557,47 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#pulseBody .share [data-copy]").innerText()).includes("Copy link"), "Copied label returns to Copy link after two seconds");
 
   // Reports are private: #/r/REF and #/map show the notice, name no report and call no public endpoint
-  await page.goto(httpUrl + "#/r/GVF-2026-T4DG5");
+  await page.goto(httpUrl + "r/GVF-2026-T4DG5");
   await page.waitForTimeout(250);
   const privTxt = await page.locator("#v-private").innerText();
   check((await page.locator("#v-private.on").isVisible()) && privTxt.includes("Reports are private") && !privTxt.includes("GVF-2026") && !privTxt.includes("Garbage"), "#/r/REF shows the private notice and nothing about the report");
-  check((await page.locator("#v-private a[href='#/track']").count()) === 1 && (await page.locator("#v-private a[href='#/wards']").count()) === 1, "private notice offers Track and the ward counts");
+  check((await page.locator("#v-private a[href='/track']").count()) === 1 && (await page.locator("#v-private a[href='/wards']").count()) === 1, "private notice offers Track and the ward counts");
   await page.goto(httpUrl + "r/GVF-2026-T4DG5");
   await page.waitForTimeout(300);
-  check((await page.evaluate(() => location.hash)) === "#/r/GVF-2026-T4DG5" && (await page.locator("#v-private.on").isVisible()), "a real URL like /r/REF still opens, on the private notice");
+  check((await page.evaluate(() => location.pathname)) === "/r/GVF-2026-T4DG5" && (await page.locator("#v-private.on").isVisible()), "a real URL like /r/REF still opens, on the private notice");
   await page.goto(httpUrl + "map");
   await page.waitForTimeout(300);
-  check((await page.evaluate(() => location.hash)) === "#/map" && (await page.locator("#v-private.on").isVisible()) && (await page.locator("#v-private .mapbox").count()) === 0, "/map opens the private notice, not a map");
+  check((await page.evaluate(() => location.pathname)) === "/map" && (await page.locator("#v-private.on").isVisible()) && (await page.locator("#v-private .mapbox").count()) === 0, "/map opens the private notice, not a map");
+
+  // Real addresses: old #/ links forward to them in the browser, links are real paths, back and forward work
+  console.log("\nReal addresses (http)");
+  for (const [old, now, view] of [["#/rights", "/rights", "v-rights"], ["#/wards", "/wards", "v-wards"], ["#/rights/rti", "/rights/rti", "v-rights"], ["#/fix/waste", "/fix/waste", "v-home"], ["#/join", "/join", "v-join"], ["#/", "/", "v-home"]]) {
+    await page.goto(httpUrl + old);
+    await page.waitForSelector("#" + view + ".on");
+    check((await page.evaluate(() => location.pathname + location.hash)) === now, `old ${old} forwards to ${now} and drops the #`);
+  }
+  await page.goto(httpUrl);
+  check((await page.locator('a[href^="#/"]').count()) === 0, "no link in the page uses a #/ address");
+  check((await page.locator('#nav a[href="/rights"]').count()) === 1 && (await page.locator('.foot a[href="/privacy"], footer a[href="/privacy"]').count()) >= 1, "menu and footer links are real addresses");
+  {
+    await page.evaluate(() => document.querySelector('#nav a[href="/directory"]').click());
+    await page.waitForSelector("#v-directory.on");
+    check((await page.evaluate(() => location.pathname)) === "/directory", "a menu click moves to /directory without a reload");
+    await page.evaluate(() => document.querySelector('#nav a[href="/wards"]').click());
+    await page.waitForSelector("#v-wards.on");
+    await page.goBack();
+    await page.waitForSelector("#v-directory.on");
+    check((await page.evaluate(() => location.pathname)) === "/directory", "Back returns to the previous section");
+  }
+  await page.goto(httpUrl + "track");
+  check((await page.locator('meta[name="robots"][content^="noindex"]').count()) === 1, "the track page asks not to be indexed");
+  await page.goto(httpUrl + "rights");
+  check((await page.locator('meta[name="robots"]').count()) === 0, "the rights page does not ask for noindex");
   check(gone.length === 0, "no request goes to /api/public/* or /api/follow" + (gone.length ? ": " + gone.join(", ") : ""));
 
 
   // Track: server record wins and shows dates
-  await page.goto(httpUrl + "#/track");
+  await page.goto(httpUrl + "track");
   await page.fill("#trRef", "gvf-2026-srv01");
   await page.fill("#trLast4", "9999");
   await page.click("#trGo");
@@ -590,7 +615,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#trOut").innerText()).includes("last 4 digits"), "track asks for the last 4 when missing");
 
   // Dashboard: counts render whenever the API answers (no 50-report threshold)
-  await page.goto(httpUrl + "#/dashboard");
+  await page.goto(httpUrl + "dashboard");
   await page.waitForTimeout(250);
   check((await page.locator("#kpis .kpi b").first().innerText()) === "61", "dashboard shows live KPIs");
   check((await page.locator("#dashBody").innerText()).includes("92% on time"), "dashboard shows commitment actuals");
@@ -610,7 +635,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.evaluate(() => !!document.querySelector(".gvf-embed").shadowRoot)) && (await page.locator("iframe").count()) === 0, "embed uses a shadow root and no iframe");
 
   // Join posts to the API
-  await page.goto(httpUrl + "#/join");
+  await page.goto(httpUrl + "join");
   await page.fill("#jName", "Test Volunteer");
   await page.fill("#jPhone", "9899999999");
   await page.fill("#jEmail", "t@example.org");
@@ -739,7 +764,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     if (route.request().method() === "PATCH") { const b = JSON.parse(route.request().postData() || "{}"); joinPatches.push({ id, body: b }); if (b.status) r.status = b.status; if (typeof b.notes === "string") r.notes = b.notes; r.handled_by = "Coordinator"; r.updated_at = "2026-10-08T07:00:00Z"; }
     return json(route, 200, { ok: true, join: r }); });
 
-  await page.goto(httpUrl + "#/desk");
+  await page.goto(httpUrl + "desk");
   await page.waitForTimeout(150);
   check(await page.locator("#v-desk.on").isVisible() && !(await page.locator("#deskLogin").isHidden()), "desk route starts on the sign-in form");
   check(await page.locator("#navDesk").isHidden(), "Desk nav item is hidden before sign-in");
@@ -1129,7 +1154,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check((await page.locator("#inboxCounts").innerText()).replace(/\s+/g, " ").includes("1 Emails new 1 Join requests new 1 Reports unmapped") && (await page.locator("#inboxTab").innerText()).replace(/\s+/g, " ").includes("Inbox · 3"), "Inbox count strip shows the three streams and the badge follows the fresh counts");
   const inboxTags = await page.locator("#inboxList .row .mfrom > span.tag:first-of-type").allInnerTexts();
   check(inboxTags.join("|") === "Join request|Email|Email|Report", "rows are tagged by type and sorted newest first (" + inboxTags.join(", ") + ")");
-  check((await page.locator('#inboxList a[href="#/desk/GVF-2026-OLD02"]').count()) === 1 && (await page.locator("#inboxList .row").last().locator(".tag-danger").count()) === 1 && (await page.locator("#inboxList .row.unread").count()) === 3, "report rows link to the desk ticket with their flags; new items read as unread");
+  check((await page.locator('#inboxList a[href="/desk/GVF-2026-OLD02"]').count()) === 1 && (await page.locator("#inboxList .row").last().locator(".tag-danger").count()) === 1 && (await page.locator("#inboxList .row.unread").count()) === 3, "report rows link to the desk ticket with their flags; new items read as unread");
   check((await page.locator("#mail.reading").count()) === 0 && (await page.locator("#inboxRead .mread-empty").count()) === 1, "the reading pane starts empty");
   await page.click('#inboxList li[data-iid="e2"]');
   check((await page.locator('#inboxRead a[data-open="GVF-2026-SRV01"]').innerText()).includes("Reply on GVF-2026-SRV01") && (await page.locator('#inboxList li[data-iid="e2"].sel').count()) === 1 && (await page.locator('#inboxList li[data-iid="e2"] .mfrom').innerText()).includes("GVF-2026-SRV01") && !(await page.locator('#inboxList li[data-iid="e1"] .mfrom').innerText()).includes("GVF-"), "an email linked to a report carries its reference and the reading pane opens the ticket");

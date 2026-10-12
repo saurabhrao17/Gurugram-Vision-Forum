@@ -73,3 +73,35 @@ test("fitTitle: a long title keeps its lead or is cut at a word", () => {
   assert.ok(fitTitle(long).length <= 70 && fitTitle(long).endsWith("…"));
   assert.equal(withBrand(fitTitle("Ward committees in Gurugram explained: the members, the meetings, the minutes"), "en"), "Ward committees in Gurugram explained | Gurugram Vision Forum");
 });
+
+test("real addresses: the page carries its own words for crawlers, with no councillor names, phones or emails", async () => {
+  const { snapshotFor } = await import("../../lib/seo/snapshot.js");
+  const { gvf } = await import("../../lib/site-data.js");
+  for (const v of ["directory", "rights", "who", "wards", "charter"]) {
+    const html = shellFor(loadShell(), v, SITE);
+    assert.match(html, /<main id="main">\n<div class="sec" data-ssr>/, `${v} has a server-written block`);
+    const block = html.match(/<div class="sec" data-ssr>[\s\S]*?<\/ul>/)[0];
+    assert.ok(block.length > 250, `${v} block has real content`);
+    assert.doesNotMatch(block, /@|\+91|\b\d{5} ?\d{5}\b|\b\d{10}\b/, `${v}: no contact details`);
+  }
+  const wards = snapshotFor("wards", "t", "d");
+  for (const w of gvf().WARDS) assert.ok(!wards.includes(w[1]), `councillor ${w[1]} is not named`);
+  assert.equal((wards.match(/href="\/ward\/\d+"/g) || []).length, 36);
+  assert.equal(snapshotFor("report", "t", "d"), "", "pages whose own markup has the text get no extra block");
+  assert.ok(APP_ROUTES.includes("/who") && VIEWS.includes("who"), "Who is responsible is in the sitemap and has a head");
+});
+
+test("app links in the shell are real addresses, not # links", () => {
+  const html = readFileSync(new URL("../../site/index.html", import.meta.url), "utf8");
+  assert.equal((html.match(/href="#\//g) || []).length, 0);
+  const js = readFileSync(new URL("../../site/app.js", import.meta.url), "utf8");
+  assert.equal((js.match(/href="#\//g) || []).length, 0);
+  const boot = readFileSync(new URL("../../site/boot.js", import.meta.url), "utf8");
+  assert.match(boot, /location\.replace\("\/" \+ old\[1\]/, "old #/ links are forwarded in the browser");
+});
+
+test("/track, /r and /map are sent with a noindex header, so a reference in the address is never indexed", () => {
+  const vercel = JSON.parse(readFileSync(new URL("../../vercel.json", import.meta.url), "utf8"));
+  const hit = vercel.headers.filter((h) => h.headers.some((x) => x.key === "X-Robots-Tag" && /noindex/.test(x.value)));
+  assert.ok(hit.some((h) => h.source === "/:p(track|r|map)") && hit.some((h) => h.source === "/:p(track|r|map)/:rest*"));
+});

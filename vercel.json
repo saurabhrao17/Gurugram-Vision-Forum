@@ -79,7 +79,7 @@
       "destination": "/:file"
     },
     {
-      "source": "/:view(report|directory|rights|wards|charter|dashboard|updates|join|about|privacy|news|pulse)",
+      "source": "/:view(report|directory|rights|who|wards|charter|dashboard|updates|join|about|privacy|news|pulse)",
       "destination": "/api/index?path=shell&view=:view"
     },
     {
@@ -102,6 +102,24 @@
         {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
+        }
+      ]
+    },
+    {
+      "source": "/:p(track|r|map)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
+    },
+    {
+      "source": "/:p(track|r|map)/:rest*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
         }
       ]
     },
