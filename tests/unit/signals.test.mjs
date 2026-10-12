@@ -447,7 +447,9 @@ test("runDaily scans reddit, news and reports into signals, cleans up and stores
   };
   // The signals the insights step reads back are the ones the signals step wrote.
   const origThen = sb.from;
-  const r = await runDaily(sb, {}, { fetch: fetchImpl });
+  // A Wednesday: on the round-up's weekday (Monday) the autopost step reads report counts, which is not what this test is about.
+  const wednesday = Date.now() + ((3 - new Date().getUTCDay() + 7) % 7) * 86400000;
+  const r = await runDaily(sb, {}, { fetch: fetchImpl, now: wednesday });
   assert.equal(r.ok, true, JSON.stringify(r.errors));
   assert.deepEqual(r.signals, { reddit: 1, news: 1, new: 2 });
   const up = sb.calls.queries.find((q) => q.table === "signals" && q.op === "upsert");
