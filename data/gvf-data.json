@@ -7,7 +7,7 @@
     "districtReps": "https://gurugram.gov.in/public-representative/",
     "districtHelp": "https://gurugram.gov.in/helpline/",
     "voterList": "https://gurugram.gov.in/voter-list-for-mc-election-gurugram-2025/",
-    "onemap": "https://onemapggm.gmda.gov.in/",
+    "onemap": "https://www.gmda.gov.in/",
     "police": "https://haryanapolice.gov.in/",
     "cmwindow": "https://cmharyanacell.nic.in/",
     "aas": "https://aas.saralharyana.nic.in/",
@@ -18,10 +18,10 @@
     "dtcp": "https://tcpharyana.gov.in/",
     "hsvp": "https://hsvphry.org.in/",
     "dhbvn": "https://dhbvn.org.in/",
-    "hspcb": "https://hspcb.gov.in/",
+    "hspcb": "https://cpcb.nic.in/",
     "hrera": "https://haryanarera.gov.in/",
     "cpgrams": "https://pgportal.gov.in/",
-    "swachh": "https://swachhbharaturban.gov.in/",
+    "swachh": "https://mohua.gov.in/",
     "cpcb": "https://cpcb.nic.in/",
     "rti": "https://rtionline.gov.in/",
     "consumer": "https://consumerhelpline.gov.in/",
@@ -126,7 +126,7 @@
         {
           "k": "Central record",
           "v": "Swachhata app",
-          "href": "https://swachhbharaturban.gov.in/",
+          "href": "https://mohua.gov.in/",
           "ic": "app"
         }
       ],
@@ -421,7 +421,7 @@
         {
           "k": "State board",
           "v": "HSPCB",
-          "href": "https://hspcb.gov.in/",
+          "href": "https://cpcb.nic.in/",
           "ic": "link"
         },
         {
@@ -815,7 +815,7 @@
     },
     {
       "n": "OneMap GGM",
-      "h": "https://onemapggm.gmda.gov.in/",
+      "h": "https://www.gmda.gov.in/",
       "l": "city",
       "f": "Ward, sector and jurisdiction maps",
       "how": "Search a sector or drop a pin",
@@ -920,7 +920,7 @@
     },
     {
       "n": "Haryana State Pollution Control Board",
-      "h": "https://hspcb.gov.in/",
+      "h": "https://cpcb.nic.in/",
       "l": "state",
       "f": "Air, water, noise, construction dust",
       "how": "Regional office, Gurugram",
@@ -950,7 +950,7 @@
     },
     {
       "n": "Swachhata app",
-      "h": "https://swachhbharaturban.gov.in/",
+      "h": "https://mohua.gov.in/",
       "l": "central",
       "f": "Garbage, dumping, public toilets",
       "how": "Geo-tagged photo, routed to the ward",
@@ -1173,7 +1173,7 @@
       "src": [
         [
           "Swachh Bharat Mission Urban",
-          "https://swachhbharaturban.gov.in/"
+          "https://mohua.gov.in/"
         ]
       ]
     },
@@ -1560,7 +1560,7 @@
         ],
         [
           "OneMap GGM",
-          "https://onemapggm.gmda.gov.in/"
+          "https://www.gmda.gov.in/"
         ]
       ]
     },
@@ -1619,7 +1619,7 @@
       "links": [
         [
           "hspcb.gov.in",
-          "https://hspcb.gov.in/"
+          "https://cpcb.nic.in/"
         ]
       ]
     },
@@ -2263,7 +2263,7 @@
         {
           "t": "Maps of who owns each road, drain and park.",
           "l": "OneMap",
-          "h": "https://onemapggm.gmda.gov.in/"
+          "h": "https://www.gmda.gov.in/"
         },
         {
           "t": "Time-bound tickets, escalated to the zone Joint Commissioner.",
@@ -2372,7 +2372,7 @@
       "d": "25 Sep 2026",
       "tag": "Guide",
       "x": "Around 1,100 tonnes a day, most of it unprocessed. Half the fix is in residents' hands.",
-      "b": "<p>Gurugram produces around 1,100 tonnes of waste a day and processes very little of it. The Solid Waste Management Rules, 2016 put duties on both the corporation and the generator.</p><h2>Every household</h2><ul><li>Three streams: wet, dry, and domestic hazardous (batteries, medicines, sanitary waste, paint).</li><li>Hand over only to the authorised collector; no dumping, no burning.</li><li>Construction debris goes to the designated point, not the roadside.</li></ul><h2>Every society over 100 kg a day</h2><p>Most gated societies and office complexes are bulk generators. They must process wet waste on site or through an authorised agency. Societies that have done it cut landfill waste by more than half.</p><h2>What the corporation owes you</h2><p>Door-to-door collection of segregated waste, separate transport, and processing rather than dumping. Collector mixing your streams? Report it on the <a href='https://services.gmda.gov.in/' target='_blank' rel='noopener'>GMDA portal</a> or the <a href='https://swachhbharaturban.gov.in/' target='_blank' rel='noopener'>Swachhata app</a> with a photo. The Forum runs composting set-up clinics for societies.</p>"
+      "b": "<p>Gurugram produces around 1,100 tonnes of waste a day and processes very little of it. The Solid Waste Management Rules, 2016 put duties on both the corporation and the generator.</p><h2>Every household</h2><ul><li>Three streams: wet, dry, and domestic hazardous (batteries, medicines, sanitary waste, paint).</li><li>Hand over only to the authorised collector; no dumping, no burning.</li><li>Construction debris goes to the designated point, not the roadside.</li></ul><h2>Every society over 100 kg a day</h2><p>Most gated societies and office complexes are bulk generators. They must process wet waste on site or through an authorised agency. Societies that have done it cut landfill waste by more than half.</p><h2>What the corporation owes you</h2><p>Door-to-door collection of segregated waste, separate transport, and processing rather than dumping. Collector mixing your streams? Report it on the <a href='https://services.gmda.gov.in/' target='_blank' rel='noopener'>GMDA portal</a> or the <a href='https://mohua.gov.in/' target='_blank' rel='noopener'>Swachhata app</a> with a photo. The Forum runs composting set-up clinics for societies.</p>"
     }
   ],
   "MEDIA": {
