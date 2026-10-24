@@ -18,10 +18,10 @@ test("traffic: the link is the Gurugram Police site on the Haryana Police domain
   assert.ok(f.portal.startsWith("Gurugram Traffic Police"));
 });
 
-test("pollution: the label is the HSPCB regional office; Sameer moves to the note", () => {
+test("pollution: the label names CPCB while the HSPCB site is offline; Sameer moves to the note", () => {
   const f = G.FILING.pollution;
-  assert.equal(f.portal, "Haryana State Pollution Control Board (HSPCB), Gurugram regional office");
-  assert.equal(host(f.url), "hspcb.gov.in");
+  assert.equal(f.portal, "Central Pollution Control Board (CPCB); the HSPCB site is offline");
+  assert.equal(host(f.url), "cpcb.nic.in");
   assert.ok(!/Sameer/.test(f.portal));
   assert.ok(f.note.endsWith("For air, the CPCB Sameer app also takes complaints."));
 });
@@ -39,7 +39,8 @@ test("VERIFIED stays the 8 Oct pass; the later checks are recorded honestly, the
   const byId = Object.fromEntries(G.VERIFIED_NOTES.map((n) => [n.id, n]));
   assert.equal(byId.construction.state, "opened");
   assert.equal(byId.construction.url, G.FILING.construction.url);
-  assert.equal(byId.pollution.state, "opened");
+  assert.equal(byId.pollution.state, "link check ok");
+  assert.equal(byId.pollution.url, G.FILING.pollution.url);
   assert.equal(byId.traffic.state, "not opened");
   assert.equal(byId.traffic.url, G.FILING.traffic.url);
   assert.match(byId.traffic.note, /not checked/);
