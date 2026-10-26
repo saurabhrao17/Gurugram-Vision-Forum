@@ -17,7 +17,7 @@ const GOOD = (over = {}) => {
 test("pageList mirrors the sitemap: app routes, guides, wards and posts in both languages", () => {
   const list = pageList([{ slug: "monsoon" }, { slug: null }], SITE);
   const cats = (gvf().CATS || []).length;
-  assert.equal(list.length, 13 + 2 + cats * 2 + 36 * 2 + 2 + 2);
+  assert.equal(list.length, 14 + 2 + cats * 2 + 36 * 2 + 2 + 2);
   assert.deepEqual(list[0], { url: `${SITE}/`, path: "/", kind: "app", lang: "en" });
   assert.ok(list.some((p) => p.url === `${SITE}/hi/guide/roads` && p.kind === "guide" && p.lang === "hi"));
   assert.ok(list.some((p) => p.url === `${SITE}/ward/36` && p.kind === "ward"));

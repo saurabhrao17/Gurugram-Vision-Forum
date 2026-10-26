@@ -388,7 +388,7 @@ test("sitemap lists every page pair with alternates and is well formed", async (
   assert.ok(!x.includes("draft-only"));
   const opens = (x.match(/<url>/g) || []).length, closes = (x.match(/<\/url>/g) || []).length;
   assert.equal(opens, closes);
-  assert.equal(opens, 13 + 2 * (1 + gvf().CATS.length + 36 + 1 + gvf().BLOG.length + 1));
+  assert.equal(opens, 14 + 2 * (1 + gvf().CATS.length + 36 + 1 + gvf().BLOG.length + 1));
   // without a database: static posts only
   const plain = buildSitemap(mergePosts([]));
   assert.ok(plain.includes("/blog/segregate-at-source</loc>"));
