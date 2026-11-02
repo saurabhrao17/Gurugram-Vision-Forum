@@ -24,7 +24,7 @@
   var h = location.hash.replace(/^#\/?/, ""), p = location.pathname;
   var home = (p === "" || p === "/" || /\/index\.html$/.test(p)) && /^(home|fix)?(\/|$)/.test(h);
   if (home && get("gvf_lang") !== "hi") d.setAttribute("data-boot", "home");
-  // 4. Hindi visitors: start the Hindi word lists (data-hi.js, split out of data.js) now, in parallel with data.js and app.js, which wait for it. English visitors never download it.
+  // 4. Hindi visitors: start the Hindi word lists (data-hi.js, split out of data.js) now, in parallel with data.js and app.js, which wait for it. English visitors only download it if they switch to Hindi.
   if (get("gvf_lang") === "hi" && location.protocol !== "file:") {
     var hs = document.createElement("script");
     hs.id = "hiData"; hs.src = "/data-hi.js"; hs.async = true;

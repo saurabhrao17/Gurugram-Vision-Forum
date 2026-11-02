@@ -1,4 +1,4 @@
-/* data-hi.js: the Hindi word lists (GVF.HI interface strings, GVF.HS data strings). Split out of data.js so English visitors do not download them (about 40% of data.js); boot.js and app.js load this file only for Hindi. Loaded after data.js, it fills the empty GVF.HI and GVF.HS objects. */
+/* data-hi.js: the Hindi word lists (GVF.HI interface strings, GVF.HS data strings). Split out of data.js so English visitors do not download them unless they switch to Hindi (about 70% of data.js); boot.js and app.js load this file only for Hindi. Loaded after data.js, it fills the empty GVF.HI and GVF.HS objects. */
 (function(){
 function fill(){
 var HI={"n.fix":"समस्या का हल","n.dir":"निर्देशिका","n.rights":"आपके अधिकार","n.who":"कौन ज़िम्मेदार","n.wards":"वार्ड","n.dash":"डैशबोर्ड","n.charter":"नागरिक चार्टर","n.report":"समस्या दर्ज करें","n.track":"रिपोर्ट ट्रैक करें","n.updates":"अपडेट","n.join":"जुड़ें","n.about":"परिचय","n.access":"सुगम्यता वक्तव्य",

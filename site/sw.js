@@ -5,7 +5,7 @@
    Nothing under /api/ and nothing cross-origin is ever cached: the API carries reporter data and
    must always be live. Bump CACHE when the shell changes so old copies are dropped. */
 var CACHE = "gvf-shell-v23";
-var SHELL = ["/", "/index.html", "/styles.css", "/app.js", "/data.js", "/data-hi.js", "/boot.js", "/favicon.svg"];
+var SHELL = ["/", "/index.html", "/styles.css", "/app.js", "/data.js", "/boot.js", "/favicon.svg"];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));

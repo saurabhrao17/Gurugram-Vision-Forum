@@ -1,6 +1,6 @@
 (function(){
 "use strict";
-/* The Hindi word lists (GVF.HI, GVF.HS) live in data-hi.js, loaded only for Hindi (boot.js starts the download early when the saved language is Hindi; the toggle loads it on demand). English visitors never download them. */
+/* The Hindi word lists (GVF.HI, GVF.HS) live in data-hi.js, loaded only for Hindi (boot.js starts the download early when the saved language is Hindi; the toggle loads it on demand). English visitors do not download them unless they switch to Hindi. */
 function ensureHi(cb){var G=window.GVF;
   if(window.__gvfHiPending){var f=window.__gvfHiPending;window.__gvfHiPending=null;f()}
   if(G.HI_READY){cb();return}
