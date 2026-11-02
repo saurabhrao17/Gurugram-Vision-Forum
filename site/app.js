@@ -1,5 +1,15 @@
 (function(){
 "use strict";
+/* The Hindi word lists (GVF.HI, GVF.HS) live in data-hi.js, loaded only for Hindi (boot.js starts the download early when the saved language is Hindi; the toggle loads it on demand). English visitors do not download them unless they switch to Hindi. */
+function ensureHi(cb){var G=window.GVF;
+  if(window.__gvfHiPending){var f=window.__gvfHiPending;window.__gvfHiPending=null;f()}
+  if(G.HI_READY){cb();return}
+  var done=false,tm;function fin(){if(done)return;done=true;clearTimeout(tm);window.__gvfHi=null;cb()}
+  window.__gvfHi=fin;tm=setTimeout(fin,8000);
+  var s=document.getElementById("hiData");
+  if(!s){s=document.createElement("script");s.id="hiData";s.src=(location.protocol==="file:"?"":"/")+"data-hi.js";document.head.appendChild(s)}
+  s.addEventListener("error",fin)}
+function gvfStart(){
 var D=window.GVF, L=D.L;
 function $(id){return document.getElementById(id)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -85,7 +95,7 @@ function rerender(){renderTiles();renderWhoFilter();renderCatSelect();if(selecte
   if(curView==="news")renderNews();if(curView==="pulse")renderPulse();renderPopups();renderSocial();
   if(curView)document.title=hs("Gurugram Vision Forum")+" — "+hs(TITLES[curView]);
   if($("trRef").value.trim()&&$("trOut").innerHTML)showTrack()}
-function toggleLang(){applyLang(lang==="hi"?"en":"hi");toast(lang==="hi"?"हिंदी में":"English")}
+function toggleLang(){var go=function(){applyLang(lang==="hi"?"en":"hi");toast(lang==="hi"?"हिंदी में":"English")};if(lang==="hi")go();else ensureHi(function(){HS_REV=null;wardHs();go()})}
 $("langBtn").addEventListener("click",toggleLang); $("langBtn2").addEventListener("click",toggleLang);
 
 /* sheet */
@@ -110,7 +120,8 @@ D.PORTALS.forEach(function(p){INDEX.push({t:p.n,s:p.f,h:"/directory",ic:"link",k
 D.CHARTERS.forEach(function(c){INDEX.push({t:c.t,s:c.right,h:"/rights/"+c.id,ic:"rights",k:"Right"})});
 Object.keys(D.ROLES).forEach(function(id){var r=D.ROLES[id];INDEX.push({t:r.b,s:r.who||r.owns,h:"/who/"+id,ic:"who",k:"Role"})});
 D.WARDS.forEach(function(w){INDEX.push({t:"Ward "+w[0]+": "+w[1],s:w[2],h:"/wards",ic:"wards",k:"Ward"})});
-D.WARDS.forEach(function(w){D.HS&&(D.HS["Ward "+w[0]+": "+w[1]]=(D.HS["Ward {n}"]||"Ward {n}").replace("{n}",w[0])+": "+(D.HS[w[1]]||w[1]))});
+function wardHs(){D.HS&&D.HS["Ward {n}"]&&D.WARDS.forEach(function(w){D.HS["Ward "+w[0]+": "+w[1]]=D.HS["Ward {n}"].replace("{n}",w[0])+": "+(D.HS[w[1]]||w[1])})}
+wardHs();
 function openCmd(){$("veil").classList.add("open");$("cmdk").classList.add("open");$("cmdIn").value="";renderCmd("");$("cmdIn").focus()}
 function closeCmd(){$("cmdk").classList.remove("open");if(!$("sheet").classList.contains("open"))$("veil").classList.remove("open")}
 function renderCmd(q){q=q.trim().toLowerCase();var hits=q?INDEX.filter(function(x){return (x.t+" "+x.s+" "+hs(x.t)+" "+hs(x.s)).toLowerCase().indexOf(q)>-1}).slice(0,12):INDEX.slice(0,8);
@@ -1057,4 +1068,7 @@ renderSubscribe();
 window.__booted=true;if(lang==="hi")applyLang("hi");loadContent();
 route();
 loadDash().then(function(j){if(j&&j.ok&&j.links)LINKS=j.links;paintLinks()});
+}
+var wantHi=false;try{wantHi=JSON.parse(localStorage.getItem("gvf_lang")||"null")==="hi"}catch(e){}
+if(wantHi)ensureHi(gvfStart);else gvfStart();
 })();
