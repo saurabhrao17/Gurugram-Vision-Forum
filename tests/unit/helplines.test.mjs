@@ -11,6 +11,7 @@ const src = fs.readFileSync(new URL("../../site/data.js", import.meta.url), "utf
 const ctx = { window: {}, self: {} };
 vm.createContext(ctx);
 vm.runInContext(src, ctx);
+vm.runInContext(fs.readFileSync(new URL("../../site/data-hi.js", import.meta.url), "utf8"), ctx);
 const G = ctx.window.GVF || ctx.GVF || ctx.self.GVF;
 
 const OFFICIAL = ["112", "1930"];
