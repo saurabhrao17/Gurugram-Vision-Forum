@@ -228,7 +228,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check(errors.length === 0, "zero console or page errors" + (errors.length ? ": " + errors.join(" | ") : ""));
   await ctx.close();
 }
-// ---- Early paint: the home view paints before app.js arrives (boot.js), and nothing else does ----
+// ---- Early paint: the home view and the English /report form paint before app.js arrives (boot.js), and nothing else does ----
 {
   console.log("\nEarly paint (app.js held back, 390x844)");
   const visitor = () => { try { if (!localStorage.getItem("gvf_visitor")) localStorage.setItem("gvf_visitor", JSON.stringify({ token: "smoke_visitor_token_0001", done: true, views: 9 })); } catch {} };
@@ -261,6 +261,52 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
     await page.waitForTimeout(300);
     check(await page.locator("#v-home").isHidden(), "navigating away hides home (the boot flag no longer forces it)");
     check(!errors.length, "no page errors in the early-paint pass" + (errors.length ? ": " + errors.join(" | ") : ""));
+    await ctx.close();
+  }
+  // /report in English paints its heading and step 1 before app.js, like home; the footer is already where it will stay.
+  {
+    const { ctx, page, errors, release } = await open("report", { hold: true });
+    page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) errors.push("console: " + m.text()); });
+    check((await page.evaluate(() => document.documentElement.getAttribute("data-boot"))) === "report", "boot.js marks the English /report address for the early paint");
+    check((await page.locator("#v-report h1").isVisible()) && (await page.locator("#v-report h1").innerText()).trim() === "Report an issue", "the /report heading paints before app.js has loaded");
+    check((await page.locator('#v-report .fstep[data-step="1"]').isVisible()) && (await page.locator("#fCat").isVisible()) && (await page.locator("#fScope").isVisible()) && (await page.locator('#v-report .fstep[data-step="2"]').isHidden()), "step 1 of the form is visible before app.js, the later steps are not");
+    check((await page.locator("#fCat option").allInnerTexts()).join("|") === "Choose the closest match", "the issue select already shows its first option, so the box keeps its size");
+    const box = () => page.evaluate(() => { const r = (id) => { const b = document.querySelector(id).getBoundingClientRect(); return [Math.round(b.top), Math.round(b.height)]; }; return JSON.stringify([r("#v-report h1"), r("#fCat"), r("#fScope"), r("#v-report .fstep.on .fnav"), r("footer.ftr")[0]]); });
+    const before = await box();
+    release();
+    await page.waitForFunction(() => window.__booted, null, { timeout: 15000 });
+    await page.waitForTimeout(300);
+    check((await page.evaluate(() => document.documentElement.hasAttribute("data-boot"))) === false && (await page.locator("#v-report.on h1").isVisible()), "after boot the flag is gone and the report view stays visible");
+    const opts = await page.locator("#fCat option").allInnerTexts();
+    check(opts.length >= 18 && opts.filter((t) => t === "Choose the closest match").length === 1 && opts[0] === "Choose the closest match", "app.js fills the issue select without repeating the first option");
+    const after = await box();
+    check(before === after, "nothing in step 1 moves or changes size when app.js arrives, and the footer stays where it was (" + before + " -> " + after + ")");
+    // The whole 4-step flow still works from the early-painted form (no API here: the local reference).
+    await page.selectOption("#fCat", "waste");
+    await page.selectOption("#fScope", { index: 1 });
+    await page.click('[data-go="2"]');
+    await page.fill("#fWhere", "Sector 29");
+    await page.fill("#fSpot", "Near the main gate");
+    await page.click('[data-go="3"]');
+    await page.selectOption("#filingFields select[data-x=where]", "Street or lane");
+    await page.fill("#fDesc", "Garbage not collected for four days.");
+    await page.fill("#fName", "Test Reporter");
+    await page.fill("#fPhone", "9999999999");
+    await page.fill("#fEmail", "test@example.org");
+    await page.fill("#fPincode", "122001");
+    await page.check("#fConsent");
+    await page.click('[data-go="4"]');
+    check((await page.locator("#summary").innerText()).includes("Sector 29"), "early-painted form: step 4 shows the summary");
+    await page.click("#reportForm button[type=submit]");
+    await page.waitForSelector("#confirm.show", { timeout: 15000 });
+    const ref = (await page.locator("#confirm .ref").innerText()).trim();
+    check(/^GVF-\d{4}-[A-Z2-9]{5}$/.test(ref), `early-painted form: the 4-step flow ends in a reference (${ref})`);
+    check(!errors.length, "zero console or page errors on the early-painted /report" + (errors.length ? ": " + errors.join(" | ") : ""));
+    await ctx.close();
+  }
+  for (const [suffix, opts, what] of [["report", { lang: "hi" }, "/report for a visitor who chose Hindi"], ["report/roads", {}, "/report/roads (opens on a chosen issue)"], ["rights", {}, "/rights"]]) {
+    const { ctx, page } = await open(suffix, opts);
+    check((await page.evaluate(() => document.documentElement.hasAttribute("data-boot"))) === false && (await page.locator("#v-report").isHidden()) && (await page.locator("#v-home").isHidden()) && (await page.locator("main h1:visible").count()) === 0, "nothing paints early for " + what + " while app.js loads");
     await ctx.close();
   }
   for (const [suffix, opts, what] of [["#/report", {}, "a #/report link"], ["report", {}, "the /report address"], ["", { lang: "hi" }, "a visitor who chose Hindi"]]) {

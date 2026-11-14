@@ -5,7 +5,7 @@
    Nothing under /api/ and nothing cross-origin is ever cached: the API carries reporter data and
    must always be live. The private /mission page and its files are never touched (no cache, no
    offline copy, never the home page); the network answers or fails by itself. Bump CACHE when the shell changes so old copies are dropped. */
-var CACHE = "gvf-shell-v23";
+var CACHE = "gvf-shell-v24";
 var SHELL = ["/", "/index.html", "/styles.css", "/app.js", "/data.js", "/boot.js", "/favicon.svg"];
 
 self.addEventListener("install", function (e) {

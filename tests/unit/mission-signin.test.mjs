@@ -266,10 +266,10 @@ test("the stylesheet keeps the Forum's rules: 44 px targets, visible focus, redu
 });
 
 // ---- brief 10: service worker
-test("brief 10: sw.js skips /mission and /mission/*, and CACHE went from v22 to v23; no Mission file is pre-cached", () => {
+test("brief 10: sw.js skips /mission and /mission/*, and CACHE went from v22 to v23 (v24 since the /report early paint); no Mission file is pre-cached", () => {
   const sw = read("site/sw.js");
-  assert.match(sw, /var CACHE = "gvf-shell-v23";/);
-  assert.doesNotMatch(sw, /gvf-shell-v22/);
+  assert.match(sw, /var CACHE = "gvf-shell-v24";/);
+  assert.doesNotMatch(sw, /gvf-shell-v2[23]/);
   assert.match(sw, /url\.pathname === "\/mission" \|\| url\.pathname\.indexOf\("\/mission\/"\) === 0\) return;/);
   // the skip comes before the first respondWith, so no branch can cache or answer it
   assert.ok(sw.indexOf('"/mission/"') < sw.indexOf("respondWith"));
