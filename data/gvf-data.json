@@ -18,11 +18,9 @@
     "dtcp": "https://tcpharyana.gov.in/",
     "hsvp": "https://hsvphry.org.in/",
     "dhbvn": "https://dhbvn.org.in/",
-    "hspcb": "https://cpcb.nic.in/",
     "hrera": "https://haryanarera.gov.in/",
     "cpgrams": "https://pgportal.gov.in/",
     "swachh": "https://mohua.gov.in/",
-    "cpcb": "https://cpcb.nic.in/",
     "rti": "https://rtionline.gov.in/",
     "consumer": "https://consumerhelpline.gov.in/",
     "ejagriti": "https://e-jagriti.gov.in/",
@@ -413,21 +411,15 @@
       "owns": "Construction dust, industrial emissions, noise and waste burning. Burning on public land is also MCG. Under GRAP, the Commission for Air Quality Management sets NCR-wide restrictions.",
       "channels": [
         {
-          "k": "Central app",
-          "v": "Sameer (CPCB)",
-          "href": "https://cpcb.nic.in/",
-          "ic": "app"
-        },
-        {
-          "k": "State board",
-          "v": "HSPCB",
-          "href": "https://cpcb.nic.in/",
+          "k": "Portal",
+          "v": "GMDA integrated grievance portal (air, noise, water)",
+          "href": "https://services.gmda.gov.in/",
           "ic": "link"
         },
         {
-          "k": "Portal",
-          "v": "GMDA portal, air-monitoring cell",
-          "href": "https://services.gmda.gov.in/",
+          "k": "Air rules (GRAP)",
+          "v": "Commission for Air Quality Management (CAQM)",
+          "href": "https://caqm.nic.in/",
           "ic": "link"
         },
         {
@@ -919,11 +911,11 @@
       ]
     },
     {
-      "n": "Haryana State Pollution Control Board",
-      "h": "https://cpcb.nic.in/",
-      "l": "state",
-      "f": "Air, water, noise, construction dust",
-      "how": "Regional office, Gurugram",
+      "n": "GMDA integrated grievance portal: noise and water pollution",
+      "h": "https://services.gmda.gov.in/",
+      "l": "city",
+      "f": "Noise, water discharge or dumping",
+      "how": "The same portal as for civic complaints",
       "t": [
         "environment"
       ]
@@ -960,11 +952,11 @@
       ]
     },
     {
-      "n": "Sameer app (CPCB)",
-      "h": "https://cpcb.nic.in/",
+      "n": "Commission for Air Quality Management (CAQM)",
+      "h": "https://caqm.nic.in/",
       "l": "central",
-      "f": "Air quality readings and complaints",
-      "how": "Photo complaint to the state board",
+      "f": "Air quality: GRAP restrictions across the NCR",
+      "how": "Central body; grievances through CPGRAMS",
       "t": [
         "environment"
       ]
@@ -1281,10 +1273,6 @@
         [
           "CAQM",
           "https://caqm.nic.in/"
-        ],
-        [
-          "CPCB and Sameer",
-          "https://cpcb.nic.in/"
         ]
       ]
     },
@@ -1367,10 +1355,6 @@
         [
           "caqm.nic.in",
           "https://caqm.nic.in/"
-        ],
-        [
-          "Sameer app (CPCB)",
-          "https://cpcb.nic.in/"
         ]
       ]
     },
@@ -1618,8 +1602,8 @@
       "owns": "Pollution enforcement.",
       "links": [
         [
-          "hspcb.gov.in",
-          "https://cpcb.nic.in/"
+          "Complaints: GMDA integrated grievance portal",
+          "https://services.gmda.gov.in/"
         ]
       ]
     },
@@ -2319,9 +2303,9 @@
           "h": "https://cmharyanacell.nic.in/"
         },
         {
-          "t": "Clean-air action under GRAP; a channel to report.",
-          "l": "Sameer",
-          "h": "https://cpcb.nic.in/"
+          "t": "Clean-air action under GRAP.",
+          "l": "CAQM",
+          "h": "https://caqm.nic.in/"
         },
         {
           "t": "Information from any public authority in 30 days.",
