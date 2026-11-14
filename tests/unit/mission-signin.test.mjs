@@ -318,3 +318,18 @@ test("the owner's doc: placeholders only, 'Create new user', never 'Send invitat
   assert.match(d, /not "Send invitation"/);
   assert.doesNotMatch(d, /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
 });
+
+test("accessibility: a failed submit marks the field at fault (aria-invalid + aria-describedby the error) and clears it on the next try; the withdraw text names the data request", () => {
+  const js = read("site/mission/mission.js"); const S = loadStrings();
+  assert.match(js, /setAttribute\("aria-invalid", "true"\)/); assert.match(js, /setAttribute\("aria-describedby", "err"\)/);
+  assert.match(js, /removeAttribute\("aria-invalid"\)/);
+  assert.match(js, /invalid\(\[\]\);\n\s+if \(!email \|\| !pw\)/);
+  for (const l of ["en", "hi"]) assert.match(S[l].confirmBody, /erase|मिटव/);
+  assert.match(S.en.confirmBody, /“data request”/); assert.match(S.hi.confirmBody, /“डेटा अनुरोध”/);
+  assert.match(read("site/mission/index.html"), /write only “data request” in the note/);
+  assert.match(S.hi.emptyNote, /टीम के टूल बाद में इसी पेज पर आएँगे/);
+  const css = read("site/mission/mission.css");
+  assert.match(css, /--body:"Noto Sans Devanagari","Noto Sans"/); assert.doesNotMatch(css, /@font-face|@import|googleapis/);
+  assert.match(read("docs/mission-step2-owner-steps.md"), /First open the Forum's home page once and reload it/);
+  assert.match(read("docs/mission-step2-owner-steps.md"), /does not erase the account or the membership record/);
+});

@@ -21,7 +21,11 @@ insert into public.mission_member (user_id, role) values ('<your-user-id>', 'adm
 commit;
 ```
 
+First open the Forum's home page once and reload it, so your browser picks up the new offline helper; then open the private page.
+
 Then open the Mission page and sign in. You should see "You are signed in" and the role "Admin".
+Withdraw switches access off; it does not erase the account or the membership record. Erasing them is a delete that only you can approve.
+
 Nobody else can sign in until you add them the same way in a later step.
 
 ## Switching someone back on after they withdraw

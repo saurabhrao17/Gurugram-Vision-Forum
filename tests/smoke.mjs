@@ -1348,9 +1348,10 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "no sideways scrolling");
   await page.click("#go");
   check((await page.locator("#err").innerText()) === "Enter your email and password.", "empty form shows the error");
+  check((await page.locator("#email").getAttribute("aria-invalid")) === "true" && (await page.locator("#email").getAttribute("aria-describedby")) === "err" && (await page.locator("#password").getAttribute("aria-invalid")) === null, "empty submit marks the field at fault with aria-invalid and aria-describedby");
   await page.fill("#email", "someone@example.test"); await page.fill("#password", "wrong"); await page.click("#go");
   await page.waitForFunction(() => document.getElementById("err").textContent.includes("not right"));
-  check(true, "wrong password shows the error");
+  check((await page.locator("#password").getAttribute("aria-invalid")) === "true" && (await page.locator("#email").getAttribute("aria-describedby")) === "err", "wrong password marks both fields invalid");
   await page.fill("#email", "stranger@example.test"); await page.fill("#password", "pw"); await page.click("#go");
   await page.waitForFunction(() => document.getElementById("err").textContent.includes("does not have access"));
   check(await page.locator("#signed").isHidden(), "a non-member sees the refusal and stays on the sign-in");
@@ -1366,7 +1367,7 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check(latinWords(await page.locator("body").innerText()).length === 0 && DEVANAGARI.test(await page.locator("#role").innerText()), "signed-in state has no English word in Hindi mode");
   await page.click("#lang");
   await page.click("#wd");
-  check(await page.locator("#confirm").isVisible() && (await page.locator("#dConfirm").innerText()).includes("switches off your own access"), "Withdraw asks for confirmation and says what it does");
+  check(await page.locator("#confirm").isVisible() && (await page.locator("#dConfirm").innerText()).includes("switches off your own access") && (await page.locator("#dConfirm").innerText()).includes("data request"), "Withdraw asks for confirmation and says what it does");
   await page.click("#wdNo");
   check(withdraws.length === 0 && await page.locator("#confirm").isHidden(), "Cancel changes nothing");
   await page.click("#wd"); await page.click("#wdYes");

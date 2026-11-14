@@ -54,23 +54,30 @@
       clear(); showErr("err", r.status === 0 ? "" : errKey(r)); view(false); render(); return false;
     }, function () { return false; });
   }
+  function invalid(ids) {
+    ["email", "password"].forEach(function (id) {
+      if (ids.indexOf(id) >= 0) { $(id).setAttribute("aria-invalid", "true"); $(id).setAttribute("aria-describedby", "err"); }
+      else { $(id).removeAttribute("aria-invalid"); $(id).removeAttribute("aria-describedby"); }
+    });
+  }
   function busy(btn, on, key) { btn.disabled = on; if (on) btn.textContent = t(key); else btn.textContent = t(btn.getAttribute("data-m")); }
 
   $("form").addEventListener("submit", function (e) {
     e.preventDefault();
     var email = $("email").value.trim(), pw = $("password").value;
-    if (!email || !pw) { showErr("err", "errInvalid"); (email ? $("password") : $("email")).focus(); return; }
+    invalid([]);
+    if (!email || !pw) { invalid(!email ? ["email"] : ["password"]); showErr("err", "errInvalid"); (email ? $("password") : $("email")).focus(); return; }
     showErr("err", ""); busy($("go"), true, "signingIn");
     api("login", { email: email, password: pw }).then(function (r) {
       busy($("go"), false);
       if (r.status === 200 && r.body.ok) {
         $("password").value = ""; keep(r.body); showErr("err", ""); $("msg").textContent = "";
         view(true); render();
-      } else { showErr("err", errKey(r)); $("password").value = ""; $("password").focus(); }
+      } else { invalid(["email", "password"]); showErr("err", errKey(r)); $("password").value = ""; $("password").focus(); }
     }, function () { busy($("go"), false); showErr("err", "errNetwork"); });
   });
   function out(key) {
-    clear(); showErr("err2", ""); $("email").value = ""; $("password").value = ""; $("msg").textContent = "";
+    clear(); invalid([]); showErr("err2", ""); $("email").value = ""; $("password").value = ""; $("msg").textContent = "";
     view(false); showErr("err", key);
   }
   $("out").addEventListener("click", function () { out(""); render(); });

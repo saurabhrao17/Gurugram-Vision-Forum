@@ -1,7 +1,7 @@
 /* Private Mission page: the Forum's navy-led tokens, saffron as ring only (never saffron text on white). */
 :root{--navy:#0B2545;--ink:#0B2545;--blue:#0A4A8C;--saffron:#FF9933;--danger:#B42318;--danger-50:#FCECEA;--green:#0F6B3A;
   --text:#1B2430;--muted:#4B5563;--line:#D9DEE5;--paper:#FAFAF7;--surface:#FFFFFF;--ring:0 0 0 3px var(--ink),0 0 0 6px var(--saffron);
-  --body:"Noto Sans","Noto Sans Devanagari","Segoe UI",Arial,sans-serif;--head:"Anek Latin","Anek Devanagari","Segoe UI",Arial,sans-serif}
+  --body:"Noto Sans Devanagari","Noto Sans","Anek Devanagari","Anek Latin","Segoe UI","Nirmala UI",Mangal,Arial,sans-serif;--head:"Anek Devanagari","Anek Latin","Noto Sans Devanagari","Segoe UI","Nirmala UI",Arial,sans-serif}
 @media (prefers-color-scheme:dark){:root{--ink:#E6EAF0;--blue:#7FB2F0;--danger:#F28B82;--danger-50:#3A1512;--green:#4ADE80;
   --text:#E6EAF0;--muted:#A7B1BE;--line:#26303B;--paper:#0F1419;--surface:#161C24}}
 *{box-sizing:border-box}
