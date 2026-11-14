@@ -163,4 +163,57 @@ do $$ begin
   if not exists (select 1 from public.mission_history where table_name='mission_holder' and action='update' and new_value::text like '%Sample Person%') then raise exception 'young line lost its content'; end if;
   if (select count(*) from public.mission_history where table_name='mission_holder') <> 2 then raise exception 'history line was deleted'; end if;
 end $$;
+-- 13. step 2: the owner's own-admin lines, and "Withdraw my consent" (mission_withdraw_self). Fake ids only.
+insert into auth.users(id) values ('55555555-5555-5555-5555-555555555555'),('66666666-6666-6666-6666-666666666666');
+-- (the three lines the owner runs himself in the SQL editor, as written in docs/mission-step2-owner-steps.md)
+begin;
+select set_config('mission.actor', '55555555-5555-5555-5555-555555555555', true);
+insert into public.mission_member (user_id, role) values ('55555555-5555-5555-5555-555555555555', 'admin');
+commit;
+do $$ begin
+  if not exists (select 1 from public.mission_history where table_name='mission_member' and action='insert' and row_id='55555555-5555-5555-5555-555555555555' and actor='55555555-5555-5555-5555-555555555555') then raise exception 'owner admin row left no history line'; end if;
+end $$;
+-- the function is not callable by anon, authenticated or public; only service_role may run it
+do $$ begin
+  if has_function_privilege('anon','public.mission_withdraw_self(uuid)','execute') or has_function_privilege('authenticated','public.mission_withdraw_self(uuid)','execute') or has_function_privilege('public','public.mission_withdraw_self(uuid)','execute') then raise exception 'withdraw routine callable by anon/authenticated/public'; end if;
+  if not has_function_privilege('service_role','public.mission_withdraw_self(uuid)','execute') then raise exception 'service_role cannot run the withdraw routine'; end if;
+end $$;
+set role anon;
+select public.test_expect_fail($$select public.mission_withdraw_self('44444444-4444-4444-4444-444444444444')$$, 'anon withdraw', 'permission denied');
+reset role;
+set role authenticated;
+select public.test_expect_fail($$select public.mission_withdraw_self('44444444-4444-4444-4444-444444444444')$$, 'authenticated withdraw', 'permission denied');
+reset role;
+-- a plain write as service_role with no named actor is still refused
+set role service_role;
+select public.test_expect_fail($$update public.mission_member set active=false where user_id='44444444-4444-4444-4444-444444444444'$$, 'service update with no actor', 'no acting member named');
+-- withdraw works for the named member only, and writes a history line naming that member
+do $$ begin
+  if public.mission_withdraw_self('44444444-4444-4444-4444-444444444444') is not true then raise exception 'withdraw did not report a change'; end if;
+end $$;
+reset role;
+do $$ begin
+  if (select active from public.mission_member where user_id='44444444-4444-4444-4444-444444444444') is not false then raise exception 'member not switched off'; end if;
+  if (select active from public.mission_member where user_id='55555555-5555-5555-5555-555555555555') is not true then raise exception 'withdraw switched off someone else'; end if;
+  if (select count(*) from public.mission_history where table_name='mission_member' and action='update' and row_id='44444444-4444-4444-4444-444444444444' and actor='44444444-4444-4444-4444-444444444444') <> 1 then raise exception 'withdraw left no history line naming the member'; end if;
+end $$;
+-- withdrawing again changes nothing and adds no line; an unknown id changes nothing; a null id is refused
+set role service_role;
+do $$ begin
+  if public.mission_withdraw_self('44444444-4444-4444-4444-444444444444') is not false then raise exception 'second withdraw should report no change'; end if;
+  if public.mission_withdraw_self('66666666-6666-6666-6666-666666666666') is not false then raise exception 'non-member withdraw should report no change'; end if;
+end $$;
+select public.test_expect_fail($$select public.mission_withdraw_self(null)$$, 'null member', 'no member named');
+reset role;
+do $$ begin
+  if (select count(*) from public.mission_history where table_name='mission_member' and action='update' and row_id='44444444-4444-4444-4444-444444444444') <> 1 then raise exception 'a repeat withdraw wrote a line'; end if;
+  if (select count(*) from public.mission_member where active) <> 1 then raise exception 'expected only the admin to stay active'; end if;
+end $$;
+-- the owner can switch a member back on with the other snippet in the doc
+begin;
+select set_config('mission.actor', '55555555-5555-5555-5555-555555555555', true);
+update public.mission_member set active = true where user_id = '44444444-4444-4444-4444-444444444444';
+commit;
+do $$ begin if (select active from public.mission_member where user_id='44444444-4444-4444-4444-444444444444') is not true then raise exception 'switch back on failed'; end if; end $$;
+
 select 'mission db checks passed' as result;

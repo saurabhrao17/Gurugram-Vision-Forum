@@ -23,6 +23,10 @@ const EMBED_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>RWA 
 <script src="/embed.js" data-lang="hi" async></script></body></html>`;
 const server = http.createServer(async (req, res) => {
   let p = req.url.split("?")[0] === "/" ? "/index.html" : req.url.split("?")[0];
+  if (p === "/mission" || p.startsWith("/mission/")) { // the private page is a directory index, like Vercel's static hosting
+    const f = p === "/mission" || p === "/mission/" ? "/mission/index.html" : p;
+    try { const body = await readFile(resolve("site" + f)); res.writeHead(200, { "Content-Type": MIME[extname(f)] || "application/octet-stream" }); return res.end(body); } catch { res.writeHead(404); return res.end(); }
+  }
   if (p === "/embed-test.html") { res.writeHead(200, { "Content-Type": "text/html" }); return res.end(EMBED_PAGE); }
   if (!extname(p) && !p.startsWith("/api/")) p = "/index.html"; else if (extname(p)) p = "/" + p.split("/").pop();
   try {
@@ -1317,6 +1321,59 @@ for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
   check(newsletterActions.length === 2 && newsletterActions[1].body.action === "send" && (await page.locator("#nlMsg").innerText()).includes("4 sent now"), "Send to subscribers confirms, POSTs action send and reports the outcome");
 
   check(errors.length === 0, "zero console or page errors" + (errors.length ? ": " + errors.join(" | ") : ""));
+  await ctx.close();
+}
+
+// Mission page (private, step 2): its own page, no visitor gate, sign-in errors, Hindi, withdraw. Mocked API, fake data.
+for (const vp of [{ w: 390, h: 844 }, { w: 1366, h: 860 }]) {
+  console.log(`\nMission page ${vp.w}x${vp.h}`);
+  const ctx = await browser.newContext({ viewport: { width: vp.w, height: vp.h } });
+  const page = await ctx.newPage();
+  const errors = [], requested = [], withdraws = [];
+  page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
+  page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) errors.push("console: " + m.text()); });
+  page.on("request", (r) => requested.push(new URL(r.url()).pathname));
+  const json = (route, status, body) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
+  await page.route("**/api/mission/login", (route) => {
+    const b = JSON.parse(route.request().postData() || "{}");
+    if (b.email === "member@example.test" && b.password === "pw") return json(route, 200, { ok: true, session: { access_token: "tok-member", refresh_token: "r-member", expires_at: 9999999999 }, member: { role: "viewer" } });
+    if (b.email === "stranger@example.test") return json(route, 403, { ok: false, error: "not_member" });
+    return json(route, 401, { ok: false, error: "bad_credentials" });
+  });
+  await page.route("**/api/mission/withdraw", (route) => { withdraws.push(route.request().headers().authorization); return json(route, 200, { ok: true, withdrawn: true }); });
+  await page.goto(httpUrl + "mission");
+  check((await page.title()) === "Private page | Gurugram Vision Forum" && (await page.locator("meta[name=robots]").getAttribute("content")) === "noindex, nofollow", "mission page opens at /mission with its own title and noindex");
+  check(await page.locator("#hSignin").isVisible() && (await page.locator("#signed").isHidden()), "only the sign-in shows");
+  check(!requested.some((p) => /\/(app|data|boot|sw)\.js$|\/api\/visitor/.test(p)) && (await page.locator("#gate, .gate, [data-gate]").count()) === 0, "no site script and no visitor registration screen on the mission page");
+  check(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "no sideways scrolling");
+  await page.click("#go");
+  check((await page.locator("#err").innerText()) === "Enter your email and password.", "empty form shows the error");
+  check((await page.locator("#email").getAttribute("aria-invalid")) === "true" && (await page.locator("#email").getAttribute("aria-describedby")) === "err" && (await page.locator("#password").getAttribute("aria-invalid")) === null, "empty submit marks the field at fault with aria-invalid and aria-describedby");
+  await page.fill("#email", "someone@example.test"); await page.fill("#password", "wrong"); await page.click("#go");
+  await page.waitForFunction(() => document.getElementById("err").textContent.includes("not right"));
+  check((await page.locator("#password").getAttribute("aria-invalid")) === "true" && (await page.locator("#email").getAttribute("aria-describedby")) === "err", "wrong password marks both fields invalid");
+  await page.fill("#email", "stranger@example.test"); await page.fill("#password", "pw"); await page.click("#go");
+  await page.waitForFunction(() => document.getElementById("err").textContent.includes("does not have access"));
+  check(await page.locator("#signed").isHidden(), "a non-member sees the refusal and stays on the sign-in");
+  await page.click("#lang");
+  const hiErr = await page.locator("#err").innerText();
+  check(DEVANAGARI.test(hiErr) && (await page.locator("html").getAttribute("lang")) === "hi" && DEVANAGARI.test(await page.title()), "Hindi toggle translates the error, the page and the title");
+  check(latinWords(await page.locator("body").innerText()).length === 0, "Hindi mode leaves no English word on the sign-in" + (latinWords(await page.locator("body").innerText()).join(",")));
+  await page.click("#lang");
+  await page.fill("#email", "member@example.test"); await page.fill("#password", "pw"); await page.click("#go");
+  await page.waitForSelector("#signed:not([hidden])");
+  check((await page.locator("#hSigned").innerText()) === "You are signed in" && (await page.locator("#role").innerText()) === "View only", "a member is signed in and sees the role label");
+  await page.click("#lang");
+  check(latinWords(await page.locator("body").innerText()).length === 0 && DEVANAGARI.test(await page.locator("#role").innerText()), "signed-in state has no English word in Hindi mode");
+  await page.click("#lang");
+  await page.click("#wd");
+  check(await page.locator("#confirm").isVisible() && (await page.locator("#dConfirm").innerText()).includes("switches off your own access") && (await page.locator("#dConfirm").innerText()).includes("data request"), "Withdraw asks for confirmation and says what it does");
+  await page.click("#wdNo");
+  check(withdraws.length === 0 && await page.locator("#confirm").isHidden(), "Cancel changes nothing");
+  await page.click("#wd"); await page.click("#wdYes");
+  await page.waitForSelector("#signin:not([hidden])");
+  check(withdraws.length === 1 && withdraws[0] === "Bearer tok-member" && (await page.locator("#err").innerText()).includes("switched off"), "Withdraw calls the server once with the member's own token, then signs out");
+  check(errors.length === 0, "zero console or page errors on the mission page" + (errors.length ? ": " + errors.join(" | ") : ""));
   await ctx.close();
 }
 

@@ -3,8 +3,9 @@
    index.html; scripts and styles also go network-first (cache only when offline); images and
    fonts are served stale-while-revalidate.
    Nothing under /api/ and nothing cross-origin is ever cached: the API carries reporter data and
-   must always be live. Bump CACHE when the shell changes so old copies are dropped. */
-var CACHE = "gvf-shell-v22";
+   must always be live. The private /mission page and its files are never touched (no cache, no
+   offline copy, never the home page); the network answers or fails by itself. Bump CACHE when the shell changes so old copies are dropped. */
+var CACHE = "gvf-shell-v23";
 var SHELL = ["/", "/index.html", "/styles.css", "/app.js", "/data.js", "/boot.js", "/favicon.svg"];
 
 self.addEventListener("install", function (e) {
@@ -34,6 +35,7 @@ self.addEventListener("fetch", function (e) {
   try { url = new URL(req.url); } catch (err) { return; }
   if (url.origin !== self.location.origin) return;           // never touch cross-origin requests
   if (url.pathname.indexOf("/api/") === 0) return;           // never cache the API
+  if (url.pathname === "/mission" || url.pathname.indexOf("/mission/") === 0) return;  // private page: leave it to the network
 
   if (req.mode === "navigate") {
     e.respondWith(fetch(req).then(function (r) {
