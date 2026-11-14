@@ -10,6 +10,8 @@ import { siteUrl, BUILD_DATE } from "../../lib/seo/site.js";
 import { describe, esc, jsonLd } from "../../lib/seo/layout.js";
 import { parseDate, mergePosts, normalisePost } from "../../lib/seo/data.js";
 import { chartersFor, faqFor } from "../../lib/seo/guides.js";
+import { renderWard, wardById, wardMeta, orderAreas } from "../../lib/seo/wards.js";
+import { auditHtml } from "../../lib/seo/audit.js";
 
 const ENV = { SUPABASE_URL: "https://proj.supabase.co" };
 
@@ -71,6 +73,10 @@ async function render(path, sb, env = ENV) {
 
 const lds = (html) => [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
 const titleOf = (html) => /<title>([^<]*)<\/title>/.exec(html)[1];
+const unesc = (x) => x.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+const descOf = (html) => unesc(/<meta name="description" content="([^"]*)">/.exec(html)[1]);
+const h1Of = (html) => unesc(/<h1>([^<]*)<\/h1>/.exec(html)[1]);
+const ogTitleOf = (html) => unesc(/<meta property="og:title" content="([^"]*)">/.exec(html)[1]);
 const canonicalOf = (html) => /<link rel="canonical" href="([^"]+)">/.exec(html)[1];
 const alternates = (html) => Object.fromEntries([...html.matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">/g)].map((m) => [m[1], m[2]]));
 const DEVANAGARI = /[ऀ-ॿ]/;
@@ -266,7 +272,8 @@ test("ward page: councillor, party, areas and report counts; never one report", 
   assert.equal(res.statusCode, 200);
   const h = res.body;
   cleanOutput(h, "ward/5");
-  assert.equal(titleOf(h), "Ward 5, Gurugram: councillor, sectors and report counts");
+  assert.equal(titleOf(h), "Ward 5, Gurugram: Sector 45 and Sector 46 | Gurugram Vision Forum");
+  assert.equal(descOf(h), "MCG Ward 5 in Gurugram covers Sector 45 and Sector 46. See the councillor and how to report a problem there.");
   assert.equal(canonicalOf(h), "https://gurugramvisionforum.org/ward/5");
   assert.equal(alternates(h)["hi-IN"], "https://gurugramvisionforum.org/hi/ward/5");
   assert.deepEqual(lds(h).map((x) => x["@type"]), ["Organization", "WebSite", "BreadcrumbList", "WebPage"]);
@@ -291,6 +298,92 @@ test("ward page: councillor, party, areas and report counts; never one report", 
   assert.ok(hi.body.includes("आधिकारिक रूप से दर्ज"));
   assert.ok(hi.body.includes("अब तक रिपोर्टें"));
   assert.equal(canonicalOf(hi.body), "https://gurugramvisionforum.org/hi/ward/5");
+});
+
+// Ward 9's areas as they are in area_wards (data/area-wards.csv), in table order.
+const WARD9 = ["Sector 10", "Krishna Nagar", "Vikas Nagar", "Basai Enclave", "Kadipur Enclave", "Kadipur Industrial Area", "Saraswati Enclave", "Pace City 2", "Udyog Vihar Phase 6", "Khandsa"];
+const BRAND = { en: " | Gurugram Vision Forum", hi: " | " + "गुरुग्राम विज़न फ़ोरम" };
+// Every ward's areas from the export of area_wards.
+const AREAS_BY_WARD = (() => {
+  const out = {};
+  for (const line of readFileSync(new URL("../../data/area-wards.csv", import.meta.url), "utf8").split("\n").slice(1)) {
+    const m = /^("([^"]*)"|[^,]*),(\d+),/.exec(line);
+    if (m) (out[m[3]] = out[m[3]] || []).push(m[2] || m[1]);
+  }
+  return out;
+})();
+
+test("ward areas are named sectors first by number, then the rest A to Z", () => {
+  assert.deepEqual(orderAreas(["Khandsa", "Sector 37", "Basai Enclave", "Sector 9", "Sector 10A", "Sector 10", "", null, "Khandsa"]),
+    ["Sector 9", "Sector 10", "Sector 10A", "Sector 37", "Basai Enclave", "Khandsa"]);
+});
+
+test("ward 9: the exact title and description, English and Hindi", async () => {
+  const sb = fakeSb({ tables: { area_wards: WARD9.map((area) => ({ area, ward: 9, note: null })) }, rpc: { ward_counts: () => null } });
+  const EN_T = "Ward 9, Gurugram: Sector 10, Basai Enclave, Kadipur Enclave and more";
+  const EN_D = "MCG Ward 9 in Gurugram covers Sector 10, Basai Enclave, Kadipur Enclave and 7 more areas. See the full area list, the councillor and how to report a problem.";
+  const HI_T = "वार्ड 9, गुरुग्राम: सेक्टर 10, बसई एन्क्लेव, कादीपुर एन्क्लेव और अन्य";
+  const HI_D = "गुरुग्राम नगर निगम के वार्ड 9 में सेक्टर 10, बसई एन्क्लेव, कादीपुर एन्क्लेव और 7 अन्य क्षेत्र आते हैं। पूरी सूची, पार्षद और समस्या दर्ज करने का तरीका।";
+  assert.deepEqual([EN_T.length, EN_D.length, HI_T.length, HI_D.length], [68, 157, 69, 150]);
+  for (const [p, T, D] of [["ward/9", EN_T, EN_D], ["hi/ward/9", HI_T, HI_D]]) {
+    const h = (await render(p, sb)).body;
+    assert.equal(titleOf(h), T, p);
+    assert.equal(descOf(h), D, p);
+    assert.equal(h1Of(h), T, `${p}: H1 equals the title`);
+    assert.equal(ogTitleOf(h), T, `${p}: og:title`);
+    assert.equal(lds(h).find((x) => x["@type"] === "WebPage").name, T, `${p}: JSON-LD name`);
+    assert.equal(lds(h).find((x) => x["@type"] === "WebPage").description, D);
+  }
+  assert.ok(!/[A-Za-z]/.test(HI_T + HI_D), "Hindi never mixes scripts");
+});
+
+test("a ward with no areas yet: the plain title and description", () => {
+  assert.deepEqual(wardMeta(36, [], "en"), {
+    title: "Ward 36, Gurugram: areas, councillor and how to report a problem",
+    description: "Ward 36 of the Municipal Corporation of Gurugram: the areas it covers, its councillor, and how to report a road, water, waste or streetlight problem there." });
+  assert.deepEqual(wardMeta(36, [], "hi"), {
+    title: "वार्ड 36, गुरुग्राम: क्षेत्र, पार्षद और समस्या दर्ज करने का तरीका",
+    description: "गुरुग्राम नगर निगम का वार्ड 36: इसमें आने वाले क्षेत्र, इसके पार्षद, और वहाँ सड़क, पानी, कचरे या स्ट्रीटलाइट की समस्या दर्ज करने का तरीका।" });
+});
+
+test("ward titles: fewer areas are named when three do not fit; 'more' only when there are more", () => {
+  const long = ["Sector 1", "A very long colony name indeed", "Another very long colony name", "Zed"];
+  assert.equal(wardMeta(3, long, "en").title, "Ward 3, Gurugram: Sector 1, A very long colony name indeed and more");
+  assert.equal(wardMeta(3, ["A colony whose name alone is far too long for any title to hold it at all"], "en").title, "Ward 3, Gurugram: areas, councillor and how to report a problem");
+  assert.equal(wardMeta(3, ["Sector 3"], "en").title, "Ward 3, Gurugram: Sector 3");
+  assert.equal(wardMeta(3, ["Sector 3", "Sector 2", "Khandsa"], "en").title, "Ward 3, Gurugram: Sector 2, Sector 3 and Khandsa");
+  assert.match(wardMeta(3, ["Sector 3", "Sector 2", "Khandsa", "Sector 1"], "en").description, /covers Sector 1, Sector 2, Sector 3 and 1 more area\. /);
+  // Hindi names only the areas that have a Hindi name, and counts the others as "more".
+  assert.equal(wardMeta(3, ["Sector 3", "No Hindi Name Colony"], "hi").title, "वार्ड 3, गुरुग्राम: सेक्टर 3 और अन्य");
+  assert.match(wardMeta(3, ["Sector 3", "No Hindi Name Colony"], "hi").description, /में सेक्टर 3 और 1 अन्य क्षेत्र आते हैं।/);
+  assert.equal(wardMeta(3, ["No Hindi Name Colony"], "hi").title, wardMeta(3, [], "hi").title);
+});
+
+test("all 36 wards, both languages, with and without areas: lengths, no cut text, no councillor name, no audit issue", () => {
+  const seen = { en: new Map(), hi: new Map() };
+  for (let n = 1; n <= 36; n++) {
+    const w = wardById(n);
+    for (const lang of ["en", "hi"]) {
+      for (const names of [AREAS_BY_WARD[n] || [], []]) {
+        const label = `ward ${n} ${lang} ${names.length ? "with" : "without"} areas`;
+        const h = renderWard(w, { lang, live: { areas: names.map((area) => ({ area })), counts: null } });
+        const title = titleOf(h), desc = descOf(h), h1 = h1Of(h);
+        assert.ok(title.length >= 15 && title.length <= 70, `${label}: title length ${title.length}`);
+        assert.ok(desc.length >= 50 && desc.length <= 160, `${label}: description length ${desc.length}`);
+        assert.ok(h1.length <= 70 && (title === h1 || title === h1 + BRAND[lang]), `${label}: <title> is the H1, with the brand only when it fits`);
+        assert.equal(ogTitleOf(h), h1, label);
+        for (const name of [w.name, hs(w.name, "hi")]) assert.ok(!title.includes(name) && !desc.includes(name) && !h1.includes(name), `${label}: no councillor name in the title or description`);
+        assert.ok(!/…|\.\.\./.test(title + desc), `${label}: nothing cut short`);
+        if (lang === "hi") assert.ok(!/[A-Za-z]/.test(title + desc), `${label}: Hindi never mixes scripts`);
+        assert.deepEqual(auditHtml(h, { url: `https://gurugramvisionforum.org${lang === "hi" ? "/hi" : ""}/ward/${n}`, lang, kind: "ward" }).issues, [], label);
+        if (names.length) {
+          assert.ok(!seen[lang].has(title), `${label}: same title as ward ${seen[lang].get(title)}`);
+          seen[lang].set(title, n);
+        }
+      }
+    }
+  }
+  assert.ok(Object.keys(AREAS_BY_WARD).length >= 35, "the export lists the wards' areas");
 });
 
 test("ward 99, ward 0 and a database failure", async () => {

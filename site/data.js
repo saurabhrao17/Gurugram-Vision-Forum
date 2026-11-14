@@ -310,3 +310,5 @@ return {GATE:GATE,L:L,CATS:CATS,FILING:FILING,PORTALS:PORTALS,FILTERS:FILTERS,CH
 /* Councillor names come from press reports of the 12 March 2025 results and are not yet checked against the official MCG list (owner, 11 Oct 2026). While true, every place that shows a councillor name adds the line below (server ward pages, Wards table, report-form hint). Set to false once the names are verified; nothing else needs to change. */
 window.GVF.COUNCILLOR_PENDING=true;
 window.GVF.HS["Name from news reports; official check pending"]="नाम समाचार रिपोर्टों से; आधिकारिक जाँच बाकी";
+/* Hindi names of ward areas named in the ward pages' titles (ward 9; add a ward's areas here as their Hindi is checked). */
+Object.assign(window.GVF.HS,{"Basai Enclave":"बसई एन्क्लेव","Kadipur Enclave":"कादीपुर एन्क्लेव","Kadipur Industrial Area":"कादीपुर औद्योगिक क्षेत्र","Krishna Nagar":"कृष्णा नगर","Pace City 2":"पेस सिटी 2","Saraswati Enclave":"सरस्वती एन्क्लेव","Udyog Vihar Phase 6":"उद्योग विहार फेज़ 6","Vikas Nagar":"विकास नगर"});
