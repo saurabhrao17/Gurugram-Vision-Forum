@@ -4,7 +4,10 @@
 # Usage: scripts/mission-db-test.sh   (needs the postgres 16 server binaries; skips if missing)
 set -euo pipefail
 BIN="$(ls -d /usr/lib/postgresql/*/bin 2>/dev/null | tail -1 || true)"
-if [ -z "$BIN" ] || [ ! -x "$BIN/postgres" ]; then echo "SKIP: no local postgres server found"; exit 0; fi
+if [ -z "$BIN" ] || [ ! -x "$BIN/postgres" ]; then
+  if [ "${MISSION_DB_REQUIRED:-0}" = "1" ]; then echo "FAIL: no local postgres server found (MISSION_DB_REQUIRED=1)"; exit 1; fi
+  echo "SKIP: no local postgres server found"; exit 0
+fi
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TMP="$(mktemp -d)"; chmod 755 "$TMP"
 RUNAS=""; if [ "$(id -u)" = "0" ]; then
@@ -18,7 +21,7 @@ trap '$RUNAS "$BIN/pg_ctl" -D "$DATA" -m immediate stop >/dev/null 2>&1; rm -rf 
 psqlq() { $RUNAS "$BIN/psql" -h "$TMP" -p "$PORT" -U postgres -v ON_ERROR_STOP=1 -q -X "$@"; }
 # Stand-ins for what Supabase provides: roles and auth.users.
 psqlq -d postgres <<'SQL'
-create role anon nologin; create role authenticated nologin; create role service_role nologin;
+create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
 create schema auth; create table auth.users (id uuid primary key default gen_random_uuid());
 grant usage on schema public, auth to anon, authenticated, service_role;
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;

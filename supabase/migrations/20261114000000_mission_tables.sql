@@ -25,6 +25,22 @@
 --   6. puts in the level names and the body kinds, each with an English and a Hindi name. The party
 --      ladder tables are created EMPTY and stay empty until step 8; no party or tier name is here.
 --
+-- Decisions written down on purpose (found in review, 14 Nov 2026):
+--   * Account deletion: the "entered by / checked by / updated by / loaded by / reviewed by" columns are plain
+--     uuids with NO foreign key to auth.users (like mission_history.actor), so deleting a sign-in account never
+--     fails because of them. Only mission_member keeps a foreign key (so a member is a real account). To remove
+--     a member: set the actor, delete or deactivate the member row (set active = false is the normal way), then
+--     delete the account. Deleting an account that still has a member row is refused, on purpose.
+--   * The API uses the service role, which bypasses row level security, so it could in principle write a
+--     history line directly, and mission.actor is not checked against mission_member. That is accepted for an
+--     API-only design; it is why every write must go through the small routines of later steps, and why the
+--     service role cannot change or remove a line once written.
+--   * The history copies a changed row EXCEPT three things that can hold a phone number or email: the value of a
+--     contact detail, the notes of a team link and the payload of a proposal (it records that they changed).
+--   * Not here, by design: the retention months setting (step 9) and the party ladder label (step 8). Body kinds
+--     carry usual_posts as typing suggestions in English only; they are not shown as labels, so they are exempt
+--     from translation.
+--
 -- ROLLBACK (needs the owner's yes: it drops tables; run as one transaction):
 --   begin;
 --   drop table if exists public.mission_history, public.mission_contact_detail,
@@ -34,16 +50,26 @@
 --     public.mission_unit, public.mission_unit_kind, public.mission_setting,
 --     public.mission_member cascade;
 --   drop function if exists public.mission_audit(), public.mission_history_guard(),
---     public.mission_scrub_history(text, text);
+--     public.mission_refuse_truncate(), public.mission_scrub_history(text, text);
 --   commit;
 
 begin;
 
 -- ------------------------------------------------------------------ members
 create table public.mission_member (
-  user_id    uuid primary key references auth.users(id) on delete cascade,
+  user_id    uuid primary key references auth.users(id) on delete restrict,
   role       text not null check (role in ('viewer', 'contributor', 'admin')),
   active     boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create table public.mission_import_batch (
+  id         uuid primary key default gen_random_uuid(),
+  pack_name  text not null,
+  file_name  text,
+  row_count  integer not null default 0,
+  loaded_by  uuid,
+  status     text not null default 'loaded' check (status in ('loaded', 'retired')),
   created_at timestamptz not null default now()
 );
 
@@ -68,7 +94,7 @@ create table public.mission_unit (
   source_url    text check (source_url is null or source_url ~ '^https?://'),
   source_date   date,
   confidence    text not null default 'needs_check' check (confidence in ('confirmed', 'inferred', 'needs_check')),
-  pack_id       uuid,
+  pack_id       uuid references public.mission_import_batch(id),
   retired       boolean not null default false,
   aliases       jsonb not null default '[]'::jsonb,
   created_at    timestamptz not null default now()
@@ -114,17 +140,18 @@ create table public.mission_body (
   name           text not null,
   website        text check (website is null or website ~ '^https?://'),
   office_address text,
+  kind_note      text,
   source_url     text not null check (source_url ~ '^https?://'),
   source_date    date not null,
   state          text not null default 'proposed' check (state in ('proposed', 'checked', 'rejected')),
   auto_placed    boolean not null default false,
-  entered_by     uuid references auth.users(id),
-  checked_by     uuid references auth.users(id),
+  entered_by     uuid not null,
+  checked_by     uuid,
   checked_at     timestamptz,
-  pack_id        uuid,
+  pack_id        uuid references public.mission_import_batch(id),
   retired        boolean not null default false,
   created_at     timestamptz not null default now(),
-  constraint mission_body_checked_by_other check (checked_by is null or entered_by is null or checked_by <> entered_by)
+  constraint mission_body_checked_ok check (state <> 'checked' or (checked_by is not null and checked_at is not null and checked_by <> entered_by))
 );
 create index mission_body_unit_idx on public.mission_body(unit_id);
 
@@ -139,13 +166,13 @@ create table public.mission_holder (
   source_date date not null,
   state       text not null default 'proposed' check (state in ('proposed', 'checked', 'rejected')),
   former      boolean not null default false,
-  entered_by  uuid references auth.users(id),
-  checked_by  uuid references auth.users(id),
+  entered_by  uuid not null,
+  checked_by  uuid,
   checked_at  timestamptz,
-  pack_id     uuid,
+  pack_id     uuid references public.mission_import_batch(id),
   created_at  timestamptz not null default now(),
   constraint mission_holder_one_parent check ((body_id is null) <> (unit_id is null)),
-  constraint mission_holder_checked_by_other check (checked_by is null or entered_by is null or checked_by <> entered_by)
+  constraint mission_holder_checked_ok check (state <> 'checked' or (checked_by is not null and checked_at is not null and checked_by <> entered_by))
 );
 create index mission_holder_body_idx on public.mission_holder(body_id);
 create index mission_holder_unit_idx on public.mission_holder(unit_id);
@@ -161,7 +188,7 @@ create table public.mission_team_link (
   status      text not null default 'unknown' check (status in ('yes', 'progress', 'no', 'unknown')),
   owner_id    uuid references public.mission_member(user_id),
   notes       text,
-  updated_by  uuid references auth.users(id),
+  updated_by  uuid,
   updated_at  timestamptz not null default now(),
   created_at  timestamptz not null default now()
 );
@@ -173,7 +200,7 @@ create table public.mission_contact_detail (
   body_id      uuid references public.mission_body(id),
   kind         text not null check (kind in ('phone', 'email')),
   value        text not null,
-  entered_by   uuid references auth.users(id),
+  entered_by   uuid,
   created_at   timestamptz not null default now(),
   constraint mission_contact_one_parent check ((team_link_id is null) <> (body_id is null))
 );
@@ -187,21 +214,12 @@ create table public.mission_proposal (
   source_date date not null,
   found_by    text not null check (found_by in ('hand', 'import', 'scheduled_run')),
   status      text not null default 'pending' check (status in ('pending', 'accepted', 'rejected')),
-  reviewed_by uuid references auth.users(id),
+  reviewed_by uuid,
   reviewed_at timestamptz,
   note        text,
   created_at  timestamptz not null default now()
 );
 
-create table public.mission_import_batch (
-  id         uuid primary key default gen_random_uuid(),
-  pack_name  text not null,
-  file_name  text,
-  row_count  integer not null default 0,
-  loaded_by  uuid references auth.users(id),
-  status     text not null default 'loaded' check (status in ('loaded', 'retired')),
-  created_at timestamptz not null default now()
-);
 
 create table public.mission_setting (
   key      text primary key,
@@ -238,11 +256,22 @@ begin
   if tg_op in ('UPDATE', 'DELETE') then o := to_jsonb(old); end if;
   if tg_op in ('INSERT', 'UPDATE') then n := to_jsonb(new); end if;
   -- Phone and email are never copied into the history.
+  -- Also not copied: team notes and proposal payloads (they could hold a number typed in by mistake).
   if tg_table_name = 'mission_contact_detail' then
     o := case when o is null then null else o - 'value' end;
     n := case when n is null then null else n - 'value' end;
+  elsif tg_table_name = 'mission_team_link' then
+    o := case when o is null then null else o - 'notes' end;
+    n := case when n is null then null else n - 'notes' end;
+  elsif tg_table_name = 'mission_proposal' then
+    o := case when o is null then null else o - 'payload' end;
+    n := case when n is null then null else n - 'payload' end;
   end if;
-  rid := coalesce(n ->> coalesce(tg_argv[0], 'id'), o ->> coalesce(tg_argv[0], 'id'));
+  if tg_table_name = 'mission_unit_party' then
+    rid := coalesce(n ->> 'unit_id', o ->> 'unit_id') || ':' || coalesce(n ->> 'party_unit_id', o ->> 'party_unit_id');
+  else
+    rid := coalesce(n ->> coalesce(tg_argv[0], 'id'), o ->> coalesce(tg_argv[0], 'id'));
+  end if;
   insert into public.mission_history(actor, action, table_name, row_id, old_value, new_value)
   values (actor_text::uuid, lower(tg_op), tg_table_name, rid, o, n);
   if tg_op = 'DELETE' then return old; end if;
@@ -262,6 +291,8 @@ create trigger mission_audit after insert or update or delete on public.mission_
   for each row execute function public.mission_audit();
 create trigger mission_audit after insert or update or delete on public.mission_party_unit
   for each row execute function public.mission_audit();
+create trigger mission_audit after insert or update or delete on public.mission_unit_party
+  for each row execute function public.mission_audit();
 create trigger mission_audit after insert or update or delete on public.mission_team_link
   for each row execute function public.mission_audit();
 create trigger mission_audit after insert or update or delete on public.mission_contact_detail
@@ -278,8 +309,8 @@ begin
   if coalesce(current_setting('mission.scrub', true), '') <> 'on' then
     raise exception 'mission: history lines cannot be changed or deleted';
   end if;
-  if tg_op = 'DELETE' then
-    raise exception 'mission: history lines are never deleted, only scrubbed';
+  if tg_op <> 'UPDATE' then
+    raise exception 'mission: history lines are never deleted or truncated, only scrubbed';
   end if;
   return new;
 end $$;
@@ -310,6 +341,28 @@ revoke execute on function public.mission_scrub_history(text, text) from public,
 grant execute on function public.mission_scrub_history(text, text) to service_role;
 revoke execute on function public.mission_audit(), public.mission_history_guard() from public, anon, authenticated;
 
+-- Nothing may truncate a mission table (a truncate would skip the row-level history).
+create function public.mission_refuse_truncate() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  raise exception 'mission: tables cannot be truncated';
+end $$;
+create trigger mission_no_truncate before truncate on public.mission_member for each statement execute function public.mission_refuse_truncate();
+create trigger mission_no_truncate before truncate on public.mission_unit_kind for each statement execute function public.mission_refuse_truncate();
+create trigger mission_no_truncate before truncate on public.mission_unit for each statement execute function public.mission_refuse_truncate();
+create trigger mission_no_truncate before truncate on public.mission_geometry for each statement execute function public.mission_refuse_truncate();
+create trigger mission_no_truncate before truncate on public.mission_party_unit for each statement execute function public.mission_refuse_truncate();
+create trigger mission_no_truncate before truncate on public.mission_unit_party for each statement execute function public.mission_refuse_truncate();
+create trigger mission_no_truncate before truncate on public.mission_body_kind for each statement execute function public.mission_refuse_truncate();
+create trigger mission_no_truncate before truncate on public.mission_body for each statement execute function public.mission_refuse_truncate();
+create trigger mission_no_truncate before truncate on public.mission_holder for each statement execute function public.mission_refuse_truncate();
+create trigger mission_no_truncate before truncate on public.mission_team_link for each statement execute function public.mission_refuse_truncate();
+create trigger mission_no_truncate before truncate on public.mission_contact_detail for each statement execute function public.mission_refuse_truncate();
+create trigger mission_no_truncate before truncate on public.mission_proposal for each statement execute function public.mission_refuse_truncate();
+create trigger mission_no_truncate before truncate on public.mission_import_batch for each statement execute function public.mission_refuse_truncate();
+create trigger mission_no_truncate before truncate on public.mission_setting for each statement execute function public.mission_refuse_truncate();
+revoke execute on function public.mission_refuse_truncate() from public, anon, authenticated;
+
 -- ------------------------------------------------------------------ locks
 alter table public.mission_member         enable row level security;
 alter table public.mission_unit_kind      enable row level security;
@@ -334,6 +387,12 @@ revoke all on public.mission_member, public.mission_unit_kind, public.mission_un
   public.mission_import_batch, public.mission_setting, public.mission_history
   from anon, authenticated;
 
+-- (Supabase grants every right on new tables to service_role by default, so take them all back, then give only what is needed.)
+revoke all on public.mission_member, public.mission_unit_kind, public.mission_unit,
+  public.mission_geometry, public.mission_party_unit, public.mission_unit_party,
+  public.mission_body_kind, public.mission_body, public.mission_holder,
+  public.mission_team_link, public.mission_contact_detail, public.mission_proposal,
+  public.mission_import_batch, public.mission_setting from service_role;
 grant select, insert, update, delete on public.mission_member, public.mission_unit_kind,
   public.mission_unit, public.mission_geometry, public.mission_party_unit,
   public.mission_unit_party, public.mission_body_kind, public.mission_body,
@@ -371,7 +430,7 @@ insert into public.mission_body_kind (code, label_en, label_hi, usual_posts) val
   ('mandi_arhtiya',    'Arhtiya or mandi body',             'आढ़ती या मंडी संगठन',               '["President","Secretary"]'),
   ('trade_other',      'Other trade body',                  'अन्य व्यापार संगठन',                '["President","Secretary"]'),
   ('industrial',       'Industrial association',            'औद्योगिक संघ',                      '["President","Secretary","Treasurer"]'),
-  ('industrial_area',  'Industrial-area owners'' or residents'' association', 'औद्योगिक क्षेत्र संघ', '["President","Secretary"]'),
+  ('industrial_area',  'Industrial-area owners'' or residents'' association', 'औद्योगिक क्षेत्र मालिक या निवासी संघ', '["President","Secretary"]'),
   ('chamber',          'Business chamber',                  'व्यापार मंडल',                      '["President","Secretary"]'),
   ('bni',              'BNI chapter',                       'बीएनआई चैप्टर',                     '["President","Secretary"]'),
   ('service_club',     'Lions, Rotary, Bharat Vikas Parishad and similar clubs', 'लायंस, रोटरी, भारत विकास परिषद जैसे क्लब', '["President","Secretary"]'),
@@ -386,7 +445,7 @@ insert into public.mission_body_kind (code, label_en, label_hi, usual_posts) val
   ('civic_ngo',        'Civic NGO',                         'नागरिक एनजीओ',                     '["President","Secretary"]'),
   ('farmer',           'Farmer union or cooperative',       'किसान यूनियन या सहकारी समिति',       '["President","Secretary"]'),
   ('ex_servicemen',    'Ex-servicemen body',                'पूर्व सैनिक संगठन',                 '["President","Secretary"]'),
-  ('other',            'Other (name the kind in the notes)', 'अन्य (प्रकार नोट में लिखें)',       '[]');
+  ('other',            'Other (name the kind in the kind note)', 'अन्य (प्रकार का नाम "प्रकार नोट" में लिखें)',       '[]');
 
 insert into public.mission_setting (key, value_en, value_hi) values
   ('us_label',        'GVF Election Team', 'जीवीएफ चुनाव टीम'),

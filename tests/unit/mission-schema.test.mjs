@@ -54,3 +54,29 @@ test("the history never stores a phone or email", () => {
   assert.match(flat, /tg_table_name = 'mission_contact_detail'/i);
   assert.match(flat, /- 'value'/);
 });
+
+test("every data table has the history trigger and the truncate refusal", () => {
+  for (const t of created.filter((x) => x !== "mission_history")) {
+    assert.match(flat, new RegExp(`create trigger mission_audit after insert or update or delete on public\\.${t} `, "i"), `audit ${t}`);
+    assert.match(flat, new RegExp(`create trigger mission_no_truncate before truncate on public\\.${t} `, "i"), `truncate ${t}`);
+  }
+});
+
+test("the service role loses every right first, then gets only what it needs", () => {
+  assert.match(flat, /revoke all on [^;]* from service_role; grant select, insert, update, delete on/i);
+});
+
+test("actor columns do not reference auth.users (so an account can be deleted); only the member table does", () => {
+  const refs = [...flat.matchAll(/(\w+)\s+uuid[^,]*references auth\.users/gi)].map((m) => m[1]);
+  assert.deepEqual(refs, ["user_id"]);
+});
+
+test("notes, payloads and contact values are kept out of the history", () => {
+  assert.match(flat, /o - 'value'/);
+  assert.match(flat, /o - 'notes'/);
+  assert.match(flat, /o - 'payload'/);
+});
+
+test("checked needs a checker, a time and a different member", () => {
+  assert.match(flat, /state <> 'checked' or \(checked_by is not null and checked_at is not null and checked_by <> entered_by\)/i);
+});
