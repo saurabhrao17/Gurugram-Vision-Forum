@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co https://tile.openstreetmap.org; worker-src 'self' blob:; child-src 'self' blob:; frame-src https://www.youtube.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; manifest-src 'self'">
+<meta name="color-scheme" content="light dark">
+<title>Private page | Gurugram Vision Forum</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/mission/mission.css">
+</head>
+<body>
+<header class="band">
+  <p class="brand" data-m="brand">Gurugram Vision Forum</p>
+  <button type="button" id="lang" class="langbtn" lang="hi">हिं</button>
+</header>
+<main id="main">
+  <noscript><p class="note">This page needs JavaScript. / इस पेज के लिए जावास्क्रिप्ट चाहिए।</p></noscript>
+
+  <section id="signin" class="card" aria-labelledby="hSignin">
+    <h1 id="hSignin" tabindex="-1" data-m="signinTitle">Team sign-in</h1>
+    <p data-m="signinIntro">This page is private. Sign in with the account your administrator created for you.</p>
+    <form id="form" novalidate>
+      <label for="email" data-m="email">Email</label>
+      <input id="email" name="email" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      <label for="password" data-m="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <p id="err" class="err" role="alert" aria-live="assertive"></p>
+      <button type="submit" id="go" class="btn" data-m="signin">Sign in</button>
+    </form>
+  </section>
+
+  <section id="signed" class="card" aria-labelledby="hSigned" hidden>
+    <h1 id="hSigned" tabindex="-1" data-m="signedTitle">You are signed in</h1>
+    <p class="role"><span data-m="roleLabel">Your role</span>: <strong id="role"></strong></p>
+    <p data-m="emptyNote">Nothing is here yet. Team tools will appear on this page later.</p>
+    <p id="msg" class="ok" role="status" aria-live="polite"></p>
+    <div class="row">
+      <button type="button" id="out" class="btn" data-m="signout">Sign out</button>
+      <button type="button" id="wd" class="btn ghost" data-m="withdraw">Withdraw my consent</button>
+    </div>
+    <div id="confirm" class="confirm" role="alertdialog" aria-labelledby="hConfirm" aria-describedby="dConfirm" hidden>
+      <h2 id="hConfirm" tabindex="-1" data-m="confirmTitle">Withdraw your consent?</h2>
+      <p id="dConfirm" data-m="confirmBody">This switches off your own access to this page. It does not change anyone else's access. For a data request, use the Join form on the Forum's website. An administrator can switch your access back on if you ask.</p>
+      <p id="err2" class="err" role="alert" aria-live="assertive"></p>
+      <div class="row">
+        <button type="button" id="wdYes" class="btn danger" data-m="confirmYes">Yes, switch off my access</button>
+        <button type="button" id="wdNo" class="btn ghost" data-m="cancel">Cancel</button>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="/mission/strings.js"></script>
+<script src="/mission/mission.js"></script>
+</body>
+</html>
