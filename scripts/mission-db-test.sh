@@ -25,7 +25,10 @@ create role anon nologin; create role authenticated nologin; create role service
 create schema auth; create table auth.users (id uuid primary key default gen_random_uuid());
 grant usage on schema public, auth to anon, authenticated, service_role;
 alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+-- Supabase also grants execute on every new function to these roles by default; copy that so the tests prove the migrations revoke it.
+alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
 SQL
 psqlq -d postgres -f "$ROOT/supabase/migrations/20261114000000_mission_tables.sql"
+psqlq -d postgres -f "$ROOT/supabase/migrations/20261114010000_mission_withdraw.sql"
 psqlq -d postgres -f "$ROOT/tests/mission-db.sql"
 echo "mission-db-test: OK"
