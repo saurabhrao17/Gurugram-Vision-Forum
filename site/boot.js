@@ -6,7 +6,10 @@
       URL in English it sets html[data-boot=home], which styles.css uses to show
       #v-home; route() in app.js removes the flag on its first run. Hindi
       visitors wait for app.js, which translates the page before showing it,
-      so English never flashes. Every other view still waits for app.js.
+      so English never flashes. The same on exactly /report (not
+      /report/<issue>, which opens on a chosen issue): data-boot=report shows
+      #v-report, whose step 1 is in the markup. Every other view still waits
+      for app.js.
    3. Loads the Google Fonts stylesheet without blocking the paint: text shows
       in the fallback font first and swaps when the fonts arrive (display=swap).
       index.html keeps a <noscript> copy of the same link. */
@@ -23,7 +26,10 @@
   }
   var h = location.hash.replace(/^#\/?/, ""), p = location.pathname;
   var home = (p === "" || p === "/" || /\/index\.html$/.test(p)) && /^(home|fix)?(\/|$)/.test(h);
-  if (home && get("gvf_lang") !== "hi") d.setAttribute("data-boot", "home");
+  if (get("gvf_lang") !== "hi") {
+    if (home) d.setAttribute("data-boot", "home");
+    else if (/^\/report\/?$/.test(p)) d.setAttribute("data-boot", "report");
+  }
   var l = document.createElement("link");
   l.rel = "stylesheet";
   l.href = "https://fonts.googleapis.com/css2?family=Anek+Latin:wght@500;600;700&family=Anek+Devanagari:wght@600;700&family=Noto+Sans:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap";
