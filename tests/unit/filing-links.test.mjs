@@ -18,10 +18,11 @@ test("traffic: the link is the Gurugram Police site on the Haryana Police domain
   assert.ok(f.portal.startsWith("Gurugram Traffic Police"));
 });
 
-test("pollution: the label names CPCB while the HSPCB site is offline; Sameer moves to the note", () => {
+test("pollution: the label names CAQM for air and the GMDA portal for noise and water; the link is CAQM; Sameer stays in the note", () => {
   const f = G.FILING.pollution;
-  assert.equal(f.portal, "Central Pollution Control Board (CPCB); the HSPCB site is offline");
-  assert.equal(host(f.url), "cpcb.nic.in");
+  assert.equal(f.portal, "Commission for Air Quality Management (CAQM) for air; GMDA grievance portal for noise and water");
+  assert.equal(f.url, G.L.caqm);
+  assert.equal(host(f.url), "caqm.nic.in");
   assert.ok(!/Sameer/.test(f.portal));
   assert.ok(f.note.endsWith("For air, the CPCB Sameer app also takes complaints."));
 });
@@ -45,4 +46,14 @@ test("VERIFIED stays the 8 Oct pass; the later checks are recorded honestly, the
   assert.equal(byId.traffic.url, G.FILING.traffic.url);
   assert.match(byId.traffic.note, /not checked/);
   for (const n of G.VERIFIED_NOTES) assert.match(n.url, /^https:\/\//);
+});
+
+test("no link on the site points at cpcb.nic.in, which times out on the nightly check; air goes to CAQM, noise and water to the GMDA portal", () => {
+  const links = JSON.stringify([G.L, G.CATS, G.PORTALS, G.CHARTERS, G.ROLES, G.CIVIC, G.FILING]);
+  assert.doesNotMatch(links, /cpcb\.nic\.in/);
+  const ch = G.CATS.find((c) => c.id === "pollution").channels;
+  assert.equal(ch.find((c) => /^http/.test(c.href)).href, G.L.gmdaPortal);
+  assert.equal(ch.find((c) => c.k === "Air").href, "https://caqm.nic.in/");
+  assert.equal(ch.find((c) => c.k === "Noise, water").href, "https://services.gmda.gov.in/");
+  for (const c of ch) assert.match(G.HS[c.v] || c.v, /[ऀ-ॿ]|^[0-9 ]+$/, `Hindi for: ${c.v}`);
 });
