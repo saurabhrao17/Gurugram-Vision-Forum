@@ -12,7 +12,7 @@
 "Town and Country Planning (DTCP)","https://tcpharyana.gov.in/","state","Licensed colonies, handover, violations","District Town Planner, Gurugram","","housing"
 "HSVP","https://hsvphry.org.in/","state","HSVP sectors, plots, internal services","Estate Officer, Gurugram","","civic|housing"
 "DHBVN","https://dhbvn.org.in/","state","Electricity outages, meters, bills","Consumer portal for bills and complaints","1912","utilities"
-"GMDA grievance portal (noise and water pollution)","https://services.gmda.gov.in/","city","Noise, water discharge or dumping","The city's integrated grievance portal","","environment"
+"GMDA integrated grievance portal: noise and water pollution","https://services.gmda.gov.in/","city","Noise, water discharge or dumping","The same portal as for civic complaints","","environment"
 "Haryana Legislative Assembly","https://haryanaassembly.gov.in/","state","MLA profiles, attendance, questions","Members section","","escalation"
 "CPGRAMS","https://pgportal.gov.in/","central","Central departments, 21-day timeline","Interim reply if longer; appeal after feedback","","escalation"
 "Swachhata app","https://mohua.gov.in/","central","Garbage, dumping, public toilets","Geo-tagged photo, routed to the ward","","civic|environment"

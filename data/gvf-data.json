@@ -18,11 +18,9 @@
     "dtcp": "https://tcpharyana.gov.in/",
     "hsvp": "https://hsvphry.org.in/",
     "dhbvn": "https://dhbvn.org.in/",
-    "hspcb": "https://services.gmda.gov.in/",
     "hrera": "https://haryanarera.gov.in/",
     "cpgrams": "https://pgportal.gov.in/",
     "swachh": "https://mohua.gov.in/",
-    "cpcb": "https://caqm.nic.in/",
     "rti": "https://rtionline.gov.in/",
     "consumer": "https://consumerhelpline.gov.in/",
     "ejagriti": "https://e-jagriti.gov.in/",
@@ -414,20 +412,14 @@
       "channels": [
         {
           "k": "Portal",
-          "v": "GMDA portal, air-monitoring cell",
+          "v": "GMDA integrated grievance portal (air, noise, water)",
           "href": "https://services.gmda.gov.in/",
           "ic": "link"
         },
         {
-          "k": "Air",
+          "k": "Air rules (GRAP)",
           "v": "Commission for Air Quality Management (CAQM)",
           "href": "https://caqm.nic.in/",
-          "ic": "link"
-        },
-        {
-          "k": "Noise, water",
-          "v": "GMDA grievance portal",
-          "href": "https://services.gmda.gov.in/",
           "ic": "link"
         },
         {
@@ -919,11 +911,11 @@
       ]
     },
     {
-      "n": "GMDA grievance portal (noise and water pollution)",
+      "n": "GMDA integrated grievance portal: noise and water pollution",
       "h": "https://services.gmda.gov.in/",
       "l": "city",
       "f": "Noise, water discharge or dumping",
-      "how": "The city's integrated grievance portal",
+      "how": "The same portal as for civic complaints",
       "t": [
         "environment"
       ]
@@ -1610,11 +1602,7 @@
       "owns": "Pollution enforcement.",
       "links": [
         [
-          "Air: Commission for Air Quality Management (CAQM)",
-          "https://caqm.nic.in/"
-        ],
-        [
-          "Noise, water: GMDA grievance portal",
+          "Complaints: GMDA integrated grievance portal",
           "https://services.gmda.gov.in/"
         ]
       ]
